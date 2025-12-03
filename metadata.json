@@ -1,0 +1,7 @@
+{
+  "name": "DisinfoDesk",
+  "description": "Ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse und Faktencheck.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

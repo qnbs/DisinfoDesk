@@ -1,0 +1,23 @@
+
+import { Theory } from '../types';
+import { HISTORICAL_THEORIES_DE, HISTORICAL_THEORIES_EN } from './historical';
+import { MODERN_MYTHS_THEORIES_DE, MODERN_MYTHS_THEORIES_EN } from './modern_myths';
+import { PSEUDOSCIENCE_THEORIES_DE, PSEUDOSCIENCE_THEORIES_EN } from './pseudoscience';
+import { GEOPOLITICS_THEORIES_DE, GEOPOLITICS_THEORIES_EN } from './geopolitics';
+import { ESOTERIC_THEORIES_DE, ESOTERIC_THEORIES_EN } from './esoteric';
+
+export const THEORIES_DE: Theory[] = [
+    ...HISTORICAL_THEORIES_DE,
+    ...MODERN_MYTHS_THEORIES_DE,
+    ...PSEUDOSCIENCE_THEORIES_DE,
+    ...GEOPOLITICS_THEORIES_DE,
+    ...ESOTERIC_THEORIES_DE
+];
+
+export const THEORIES_EN: Theory[] = [
+    ...HISTORICAL_THEORIES_EN,
+    ...MODERN_MYTHS_THEORIES_EN,
+    ...PSEUDOSCIENCE_THEORIES_EN,
+    ...GEOPOLITICS_THEORIES_EN,
+    ...ESOTERIC_THEORIES_EN
+];

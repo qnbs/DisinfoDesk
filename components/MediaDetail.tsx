@@ -122,19 +122,22 @@ const MediaDetailHero: React.FC = () => {
     if (!item) return <div className="p-8 text-center text-red-500">Item not found.</div>;
 
     return (
-        <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl mb-8 min-h-[400px] flex flex-col md:flex-row">
+        <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl mb-8 min-h-[400px] flex flex-col md:flex-row group">
             {/* Backdrop / Poster Area */}
             <div className="md:w-1/3 lg:w-1/4 relative min-h-[300px] bg-black">
-                 {/* Stylized Placeholder for poster since we don't have real URLs yet */}
-                 <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="opacity-20 transform scale-150 mb-4">
-                        <MediaTypeIcon type={item.type} size={80} />
+                 {item.imageUrl ? (
+                    <img src={item.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                 ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950 flex flex-col items-center justify-center p-6 text-center">
+                        <div className="opacity-20 transform scale-150 mb-4">
+                            <MediaTypeIcon type={item.type} size={80} />
+                        </div>
+                        <div className="font-mono text-xs text-slate-600 uppercase tracking-widest border border-slate-700 px-2 py-1 rounded">No Signal</div>
                     </div>
-                    <div className="font-mono text-xs text-slate-600 uppercase tracking-widest border border-slate-700 px-2 py-1 rounded">No Signal</div>
-                 </div>
+                 )}
                  {/* Scanline Overlay */}
-                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 mix-blend-overlay"></div>
-                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:bg-gradient-to-r"></div>
+                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 mix-blend-overlay pointer-events-none"></div>
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:bg-gradient-to-r pointer-events-none"></div>
             </div>
 
             {/* Info Area */}

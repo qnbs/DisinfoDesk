@@ -1,7 +1,8 @@
 
 import { MediaItem } from '../types';
+import { generateArt } from '../utils/artEngine';
 
-export const MEDIA_ITEMS: MediaItem[] = [
+const RAW_MEDIA_ITEMS: MediaItem[] = [
   {
     id: 'm1',
     title: 'The Matrix',
@@ -81,3 +82,9 @@ export const MEDIA_ITEMS: MediaItem[] = [
     relatedTheoryTags: ['Deep State', 'Reptiloide', 'Hohle Erde', 'Mondlandung']
   },
 ];
+
+// Enrich with generated art
+export const MEDIA_ITEMS: MediaItem[] = RAW_MEDIA_ITEMS.map(item => ({
+    ...item,
+    imageUrl: generateArt(item.id, item.type, item.title)
+}));

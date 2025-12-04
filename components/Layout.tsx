@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, Suspense } from 'react';
 import { 
   LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, 
   GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, 
-  Film, Database, WifiOff, Download, User, Signal, Power, Edit3,
-  Feather, Search as SearchIcon
+  Film, Database, WifiOff, Download, Signal, Power, Edit3,
+  Feather, Search as SearchIcon, Cpu, RefreshCw, Wifi, Loader2
 } from 'lucide-react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { BeforeInstallPromptEvent, NavItem } from '../types';
@@ -12,13 +12,77 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { TechIconBox } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addLog } from '../store/slices/settingsSlice';
-import { saveScrollPosition } from '../store/slices/uiSlice';
+import { saveScrollPosition, setSearchOpen } from '../store/slices/uiSlice';
 import { OmniSearch } from './OmniSearch';
 import { OnboardingTour } from './OnboardingTour';
 
+// --- Sidebar Footer Component (Simplified) ---
+const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = ({ isOnline }) => {
+    const [latency, setLatency] = useState(24);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLatency(prev => {
+                const noise = Math.floor(Math.random() * 10) - 5;
+                return Math.max(12, Math.min(99, prev + noise));
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleReboot = () => {
+        window.location.reload();
+    };
+
+    return (
+        <div className="p-4 border-t border-slate-800/50 bg-slate-950/50 relative z-10 backdrop-blur-md pb-safe-bottom">
+            <div className="flex flex-col gap-3">
+                {/* Status Row */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-1.5 rounded-full ${isOnline ? 'bg-green-500/10 text-green-400 shadow-[0_0_8px_rgba(34,197,94,0.3)]' : 'bg-red-500/10 text-red-400'}`}>
+                            <Wifi size={14} />
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-bold font-display text-slate-300 uppercase tracking-widest leading-none">
+                                {isOnline ? 'Uplink Stable' : 'Offline Mode'}
+                            </div>
+                            <div className="text-[9px] text-slate-500 font-mono leading-none mt-1">
+                                {isOnline ? `PING ${latency}ms` : 'CACHE_ONLY'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        onClick={handleReboot}
+                        className="p-2 text-slate-600 hover:text-accent-cyan hover:bg-slate-900 rounded-lg transition-colors group relative"
+                        title="System Reboot"
+                    >
+                        <Power size={14} />
+                    </button>
+                </div>
+                
+                {/* ID Tag */}
+                <div className="flex justify-between items-center text-[9px] text-slate-700 font-mono border-t border-slate-800/50 pt-2">
+                    <span>ID: 0x{latency.toString(16).toUpperCase()}9F</span>
+                    <span className="flex items-center gap-1"><Cpu size={8}/> 2.5 GHz</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ContentLoader = () => (
+  <div className="flex h-full w-full items-center justify-center min-h-[400px]">
+    <div className="flex flex-col items-center gap-4 opacity-50">
+        <Loader2 className="animate-spin text-accent-cyan" size={32} />
+        <div className="text-xs font-mono text-accent-cyan animate-pulse">LOADING_MODULE...</div>
+    </div>
+  </div>
+);
+
 export const Layout: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isOmniSearchOpen, setOmniSearchOpen] = useState(false);
   const { t } = useLanguage();
   const dispatch = useAppDispatch();
   const location = useLocation();
@@ -27,8 +91,9 @@ export const Layout: React.FC = () => {
   // Reference to the main scrollable container
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Redux Scroll Persistence
+  // Redux Scroll Persistence & Global Search
   const savedScrollPosition = useAppSelector(state => state.ui.scrollPositions[location.pathname]);
+  const isSearchOpen = useAppSelector(state => state.ui.isSearchOpen);
   
   // PWA & Network State
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -67,12 +132,12 @@ export const Layout: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setOmniSearchOpen(true);
+        dispatch(setSearchOpen(true));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(addLog({ message: `Navigation: Route changed to [${location.pathname}]`, type: 'info' }));
@@ -170,7 +235,7 @@ export const Layout: React.FC = () => {
 
             {/* Text Content */}
             <div className="flex flex-col items-start text-left">
-              <span className={`text-xs font-bold tracking-wide uppercase ${isActive ? 'text-white' : ''}`}>
+              <span className={`text-xs font-bold font-display tracking-wider uppercase ${isActive ? 'text-white' : ''}`}>
                 {item.label}
               </span>
               <span className="text-[9px] font-mono opacity-50 tracking-widest group-hover:tracking-[0.2em] transition-all">
@@ -192,7 +257,7 @@ export const Layout: React.FC = () => {
     <div className="h-[100dvh] bg-mystic-dark text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-accent-cyan/30 selection:text-white">
       
       <OnboardingTour />
-      <OmniSearch isOpen={isOmniSearchOpen} onClose={() => setOmniSearchOpen(false)} />
+      <OmniSearch isOpen={isSearchOpen} onClose={() => dispatch(setSearchOpen(false))} />
 
       {/* Offline Banner */}
       {!isOnline && (
@@ -209,15 +274,15 @@ export const Layout: React.FC = () => {
              <GlobeLock size={18} className="text-white" />
           </div>
           <div>
-             <div className="font-bold text-sm tracking-tight leading-none">DISINFODESK</div>
-             <div className="text-[9px] text-accent-cyan font-mono leading-none mt-1">MOBILE UPLINK ACTIVE</div>
+             <div className="font-bold text-lg font-display tracking-tight leading-none text-white">DISINFODESK</div>
+             <div className="text-[9px] text-accent-cyan font-mono leading-none mt-1 tracking-widest">MOBILE UPLINK</div>
           </div>
         </div>
         
         {/* Header Actions */}
         <div className="flex items-center gap-1">
             <button 
-                onClick={() => setOmniSearchOpen(true)}
+                onClick={() => dispatch(setSearchOpen(true))}
                 aria-label="Open Search"
                 className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors active:scale-95"
             >
@@ -263,28 +328,15 @@ export const Layout: React.FC = () => {
             <TechIconBox icon={GlobeLock} className="w-12 h-12" />
 
             <div>
-              <div className="font-black text-2xl text-white tracking-tighter leading-none uppercase drop-shadow-md">DISINFODESK</div>
+              <div className="font-black font-display text-3xl text-white tracking-tighter leading-none uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">DISINFODESK</div>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
-                 <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">System Online</div>
+                 <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-[0.2em]">System Online</div>
               </div>
             </div>
           </div>
           
-          {/* OmniSearch Trigger */}
-          <button 
-            id="nav-search"
-            onClick={() => setOmniSearchOpen(true)}
-            className="w-full bg-slate-900 border border-slate-700 hover:border-accent-cyan/50 rounded-lg p-2 flex items-center gap-2 text-xs text-slate-400 mb-4 group transition-colors"
-          >
-            <SearchIcon size={14} className="group-hover:text-accent-cyan" />
-            <span className="flex-1 text-left">Quick Search...</span>
-            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-[9px] font-mono text-slate-500 group-hover:text-slate-300">
-                ⌘K
-            </kbd>
-          </button>
-
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent mb-4"></div>
         </div>
         
         <div className="md:hidden p-4 flex justify-end">
@@ -328,25 +380,7 @@ export const Layout: React.FC = () => {
           )}
         </div>
 
-        <div className="p-4 border-t border-slate-800/50 bg-slate-950/50 relative z-10 backdrop-blur-md pb-safe-bottom">
-            <div className="flex items-center gap-3">
-                <div className="relative">
-                    <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400">
-                        <User size={14} />
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-slate-950 rounded-full"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-white truncate">Agent (Guest)</div>
-                    <div className="text-[9px] text-slate-500 font-mono truncate flex items-center gap-1">
-                        <Signal size={8} /> ENCRYPTED
-                    </div>
-                </div>
-                <button className="text-slate-600 hover:text-red-400 transition-colors p-1" aria-label="Logout">
-                    <Power size={14} />
-                </button>
-            </div>
-        </div>
+        <SystemIntegrityFooter isOnline={isOnline} />
       </aside>
 
       {/* Main Content Area */}
@@ -360,7 +394,9 @@ export const Layout: React.FC = () => {
             ref={scrollContainerRef}
             className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 custom-scrollbar overscroll-contain pb-24 md:pb-0"
         >
-            <Outlet />
+            <Suspense fallback={<ContentLoader />}>
+              <Outlet />
+            </Suspense>
         </div>
       </main>
 

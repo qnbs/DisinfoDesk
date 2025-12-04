@@ -14,7 +14,7 @@ import {
 } from '../constants';
 import { 
   TrendingUp, ShieldAlert, BookOpen, Activity, 
-  Radio, Globe, Cpu, AlertOctagon, Fingerprint, Eye, Zap, Map, MousePointer2
+  Radio, Globe, Cpu, AlertOctagon, Fingerprint, Eye, Zap, Map, MousePointer2, Wifi, Power
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, PageFrame, PageHeader } from './ui/Common';
@@ -147,7 +147,7 @@ const CustomTooltipRadar: React.FC<CustomTooltipRadarProps> = ({ active, payload
     <div className="bg-slate-900/95 border border-slate-700 p-3 rounded-lg shadow-2xl backdrop-blur-md">
       <p className="text-accent-cyan font-bold text-xs mb-1 font-mono uppercase tracking-wider">{data.fullSubject}</p>
       <div className="flex justify-between items-center gap-4">
-          <span className="text-slate-400 text-xs">Total Files:</span>
+          <span className="text-slate-400 text-xs">Total:</span>
           <span className="font-mono font-bold text-white text-sm">{payload[0].value}</span>
       </div>
     </div>
@@ -170,10 +170,7 @@ const CustomTooltipScatter: React.FC<CustomTooltipScatterProps> = ({ active, pay
       <p className="text-white font-bold text-sm mb-2">{data.title}</p>
       <div className="flex justify-between items-center border-t border-slate-700/50 pt-2">
           <span className="text-xs text-accent-cyan font-mono">{data.category.split(' ')[0]}</span>
-          <span className="text-xs font-bold text-white">Virality: {data.y}%</span>
-      </div>
-      <div className="mt-2 text-[9px] text-accent-purple uppercase font-bold text-right tracking-wider">
-          Click to Access
+          <span className="text-xs font-bold text-white">Viral: {data.y}%</span>
       </div>
     </div>
   );
@@ -221,11 +218,11 @@ const DashboardHeader: React.FC = () => {
   return (
     <PageHeader 
       title={t.dashboard.title}
-      subtitle="SECURE CONNECTION ESTABLISHED"
+      subtitle={t.dashboard.subtitle}
       icon={Globe}
       actions={
          <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-accent-cyan/30 pl-3 md:pl-0 md:pr-3">
-            <div className="text-[10px] text-slate-500 font-mono uppercase">System Load</div>
+            <div className="text-[10px] text-slate-500 font-mono uppercase">{t.common.systemLoad}</div>
             <div className="text-xs text-accent-cyan font-bold font-mono flex items-center justify-end gap-2">
                 <span>{systemLoad.toFixed(1)}%</span>
                 <div className="w-12 h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -291,7 +288,7 @@ const DashboardKPIs: React.FC = () => {
        <KPICard 
          title="INTEGRITY" 
          value={`${stats.integrity}%`} 
-         sub="Reliability" 
+         sub={t.dashboard.integrity} 
          icon={<ShieldAlert size={18} />} 
          trend="down"
          color="green"
@@ -301,19 +298,15 @@ const DashboardKPIs: React.FC = () => {
 };
 
 const GeoThreatMap: React.FC = () => {
-    const { activityData } = useDashboard();
+    const { activityData, t } = useDashboard();
     return (
         <Card className="col-span-1 min-h-[400px] flex flex-col relative overflow-hidden bg-slate-950 p-0">
             <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"></div>
             <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
                 <h3 className="text-xs font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
                     <Map size={14} className="text-accent-cyan" />
-                    Global Incident Map
+                    {t.dashboard.map}
                 </h3>
-                <div className="flex gap-2">
-                    <div className="flex items-center gap-1 text-[9px] text-red-400"><div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div> HIGH</div>
-                    <div className="flex items-center gap-1 text-[9px] text-yellow-400"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div> MED</div>
-                </div>
             </div>
             
             <div className="relative flex-1 bg-[#050b14]">
@@ -379,13 +372,10 @@ const DashboardCharts: React.FC = () => {
           <div className="p-4 border-b border-white/5 flex justify-between items-center">
             <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
               <Activity size={14} className="text-accent-purple" />
-              TEMPORAL THREAT MATRIX
+              {t.dashboard.temporal}
             </h3>
             <div className="flex items-center gap-2">
               <span className="text-[9px] text-accent-purple animate-pulse flex items-center gap-1"><MousePointer2 size={10} /> INTERACTIVE</span>
-              <div className="text-[9px] text-slate-500 font-mono border border-slate-700/50 px-2 py-0.5 rounded bg-slate-900/50 hidden sm:block">
-                X: ORIGIN // Y: VIRALITY
-              </div>
             </div>
           </div>
           <div className="w-full flex-1" style={{ minHeight: '300px', width: '100%', height: '300px' }}>

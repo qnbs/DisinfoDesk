@@ -17,6 +17,7 @@ interface UIState {
   scrollPositions: {
     [path: string]: number;
   };
+  isSearchOpen: boolean;
 }
 
 const initialState: UIState = {
@@ -27,12 +28,18 @@ const initialState: UIState = {
   },
   theoryDetails: {},
   scrollPositions: {},
+  isSearchOpen: false,
 };
 
 export const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
+    // --- Global Search ---
+    setSearchOpen: (state, action: PayloadAction<boolean>) => {
+      state.isSearchOpen = action.payload;
+    },
+
     // --- Chat Logic ---
     setChatMessages: (state, action: PayloadAction<Message[]>) => {
       state.chat.messages = action.payload;
@@ -100,6 +107,7 @@ export const selectActiveTheoryTab = (id: string) => createSelector(
 );
 
 export const { 
+  setSearchOpen,
   setChatMessages, addChatMessage, updateLastChatMessage, finalizeLastChatMessage,
   setChatInput, setChatThinking, clearChat,
   setTheoryTab, saveScrollPosition 

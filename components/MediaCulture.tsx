@@ -122,25 +122,29 @@ const FilterChip: React.FC<{ label: string, active: boolean, onClick: () => void
 );
 
 const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => void, onOpen: () => void }> = React.memo(({ item, onTagClick, onOpen }) => {
-    const { language } = useMediaCulture();
+    const { language, t } = useMediaCulture();
     return (
         <div 
             onClick={onOpen}
             className="group relative h-[380px] perspective-1000 cursor-pointer"
         >
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950 rounded-xl border border-slate-800 overflow-hidden transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] group-hover:-translate-y-2 group-hover:rotate-x-2">
-                <div className="h-1/2 p-6 flex flex-col justify-between relative bg-slate-900/50">
-                     <div className="absolute inset-0 bg-slate-900/80 group-hover:bg-slate-900/40 transition-colors duration-500"></div>
-                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <div className="h-1/2 p-6 flex flex-col justify-between relative bg-slate-900">
+                     {item.imageUrl && (
+                        <img src={item.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-20 transition-all duration-500" />
+                     )}
+                     <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-900 transition-colors duration-500"></div>
+                     
+                     <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity z-10">
                         <MediaTypeIcon type={item.type} />
                      </div>
                      <div className="relative z-10 flex justify-between items-start">
-                        <Badge label={item.type} className="bg-slate-950/50 text-slate-400 border-slate-800" />
-                        <span className="font-mono text-xs text-slate-500">{item.year}</span>
+                        <Badge label={item.type} className="bg-slate-950/80 backdrop-blur text-slate-400 border-slate-700" />
+                        <span className="font-mono text-xs text-slate-400 bg-slate-950/50 px-2 py-0.5 rounded">{item.year}</span>
                      </div>
                      <div className="relative z-10">
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent-cyan transition-colors leading-tight">{item.title}</h3>
-                        <div className="text-xs text-slate-500 font-mono truncate">{item.creator}</div>
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent-cyan transition-colors leading-tight drop-shadow-md">{item.title}</h3>
+                        <div className="text-xs text-slate-400 font-mono truncate">{item.creator}</div>
                      </div>
                 </div>
                 <div className="h-1 w-full flex">
@@ -168,13 +172,13 @@ const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => vo
                 </div>
                 <div className="absolute inset-0 bg-slate-900/95 p-6 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
                     <div className="text-center mb-6">
-                        <div className="text-xs text-slate-500 uppercase tracking-widest mb-2">Reality Index</div>
+                        <div className="text-xs text-slate-500 uppercase tracking-widest mb-2">{t.mediaPage.labels.realityScore}</div>
                         <div className="text-5xl font-black text-white mb-2">{item.realityScore}</div>
                         <div className="w-16 h-1 bg-accent-cyan mx-auto rounded-full"></div>
                     </div>
                     <div className="w-full space-y-3 mb-6">
                         <div className="flex justify-between text-xs font-mono text-slate-400">
-                            <span>Complexity</span>
+                            <span>{t.mediaPage.labels.complexity}</span>
                             <span className={`font-bold text-${getComplexityColor(item.complexity)}-400`}>{item.complexity}</span>
                         </div>
                     </div>
@@ -286,7 +290,7 @@ const MediaHeader: React.FC = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                     <input 
                         type="text" 
-                        placeholder="Search movies, books, games..." 
+                        placeholder={t.authors.searchPlaceholder}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-900/50 border border-slate-700 text-white pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-all text-sm font-mono shadow-inner"
@@ -304,7 +308,7 @@ const MediaHeader: React.FC = () => {
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="mr-2 text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                        <Sliders size={12} /> Filter:
+                        <Sliders size={12} /> {t.common.filter}:
                     </div>
                     {filters.map(f => (
                         <FilterChip 
@@ -320,7 +324,7 @@ const MediaHeader: React.FC = () => {
                             onClick={handleClearFilters}
                             className="ml-auto text-xs text-red-400 hover:text-red-300 flex items-center gap-1 font-bold uppercase tracking-wide px-3 py-2 hover:bg-red-950/30 rounded transition-colors"
                         >
-                            <FilterX size={12} /> Clear
+                            <FilterX size={12} /> {t.common.clear}
                         </button>
                     )}
                 </div>
@@ -343,13 +347,13 @@ export const MediaCulture: React.FC = () => {
 };
 
 const ContentSwitcher: React.FC = () => {
-    const { viewMode, filteredMedia, onNavigateToArchive, onNavigateToDetail } = useMediaCulture();
+    const { viewMode, filteredMedia, onNavigateToArchive, onNavigateToDetail, t } = useMediaCulture();
 
     if (filteredMedia.length === 0) {
         return (
             <div className="min-h-[400px] flex items-center justify-center">
                 <EmptyState 
-                    title="ARCHIVE EMPTY" 
+                    title={t.list.noResults}
                     description="No media records found matching your query." 
                     icon={Search} 
                 />

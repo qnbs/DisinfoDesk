@@ -58,7 +58,7 @@ const useDatabaseManagerLogic = () => {
                 if (stillExists) setSelectedItem(stillExists);
                 else setSelectedItem(null);
             }
-        } catch (e) {
+        } catch (e: unknown) {
             console.error("DB Error", e);
         } finally {
             setLoading(false);
@@ -106,7 +106,7 @@ const useDatabaseManagerLogic = () => {
             setSelectedItem(null);
             showNotification(`Shredded ${ids.length} files successfully.`, 'success');
             refreshData();
-        } catch (e) {
+        } catch (e: unknown) {
             showNotification('Deletion protocol failed.', 'error');
         }
     };
@@ -134,7 +134,7 @@ const useDatabaseManagerLogic = () => {
             } else {
                 showNotification(result.message, 'error');
             }
-        } catch (err) {
+        } catch (err: unknown) {
             showNotification('Read Error: File inaccessible.', 'error');
         } finally {
             // Reset input so the same file can be selected again if needed
@@ -156,7 +156,7 @@ const useDatabaseManagerLogic = () => {
             setEditMode(false);
             showNotification('Record overwritten successfully.', 'success');
             refreshData();
-        } catch (e) {
+        } catch (e: unknown) {
             showNotification('Syntax Error: Update aborted.', 'error');
         }
     };
@@ -253,37 +253,37 @@ const CodeViewer: React.FC<{ code: string, onChange?: (val: string) => void, edi
 };
 
 const VaultHeader: React.FC = () => {
-  const { stats, formatBytes, handleExport, handleImportFile, handleBatchDelete } = useDatabase(); 
+  const { stats, formatBytes, handleExport, handleImportFile, handleBatchDelete, t } = useDatabase(); 
   return (
     <PageHeader 
-        title="VAULT MANAGER"
-        subtitle="SECURE STORAGE ACCESS"
+        title={t.vault.title}
+        subtitle={t.vault.subtitle}
         icon={Database}
         status="ENCRYPTED"
     >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex gap-6 font-mono border-r border-slate-800 pr-6">
                 <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">Used Space</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">{t.vault.usedSpace}</div>
                     <div className="text-lg text-white font-bold">{formatBytes(stats.usageBytes)}</div>
                 </div>
                 <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">Total Files</div>
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">{t.vault.totalFiles}</div>
                     <div className="text-lg text-white font-bold">{stats.totalRecords}</div>
                 </div>
             </div>
             <div className="flex gap-2 items-center flex-wrap">
                 <Button variant="secondary" size="sm" onClick={handleExport} icon={<Download size={14} />} className="text-xs border-slate-700 hover:border-accent-cyan bg-slate-900/50">
-                    Export
+                    {t.common.export}
                 </Button>
                  <label className="cursor-pointer block">
                      <input type="file" className="hidden" accept=".json" onChange={handleImportFile} />
                      <div className="bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-700 hover:border-accent-cyan px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-2 transition-all h-full justify-start font-mono uppercase tracking-wide">
-                        <Upload size={14} /> Restore
+                        <Upload size={14} /> {t.common.import}
                      </div>
                  </label>
                  <Button variant="danger" size="sm" onClick={handleBatchDelete} icon={<Trash2 size={14} />} className="text-xs opacity-70 hover:opacity-100 bg-red-950/20 border-red-900/50 ml-auto">
-                    Purge Batch
+                    {t.vault.purge}
                  </Button>
             </div>
         </div>
@@ -292,14 +292,14 @@ const VaultHeader: React.FC = () => {
 };
 
 const VaultBrowser: React.FC = () => {
-  const { activeTab, setActiveTab, setSelectedItem, setSearchTerm, searchTerm, handleBatchDelete, selectedIds, loading, filteredData, handleSelect } = useDatabase();
+  const { activeTab, setActiveTab, setSelectedItem, setSearchTerm, searchTerm, handleBatchDelete, selectedIds, loading, filteredData, handleSelect, t } = useDatabase();
   
   return (
     <Card className="w-full md:w-1/3 flex flex-col p-0 bg-slate-950/50 border-slate-800 rounded-lg overflow-hidden backdrop-blur-md">
         {/* Tab Navigation / Folder Metaphor */}
         <div className="flex flex-col bg-slate-900/50 border-b border-slate-800">
             <div className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                Directory
+                {t.vault.directory}
             </div>
             <div className="flex px-2 pb-2 gap-1 overflow-x-auto scrollbar-hide">
                 {(['ANALYSES', 'MEDIA', 'CHATS', 'SATIRES'] as Tab[]).map(tab => (
@@ -314,7 +314,7 @@ const VaultBrowser: React.FC = () => {
                         `}
                     >
                         {activeTab === tab ? <FolderOpen size={14} className="text-accent-cyan" /> : <Folder size={14} />}
-                        {tab}
+                        {t.vault.tabs[tab.toLowerCase() as keyof typeof t.vault.tabs]}
                     </button>
                 ))}
             </div>
@@ -325,7 +325,7 @@ const VaultBrowser: React.FC = () => {
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600" size={12} />
                 <input 
                     type="text"
-                    placeholder="Search ID / Title..."
+                    placeholder={t.vault.searchPlaceholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-8 pr-2 py-2 text-xs text-slate-300 focus:border-accent-cyan outline-none font-mono focus:ring-1 focus:ring-accent-cyan/50 transition-all"
@@ -347,8 +347,8 @@ const VaultBrowser: React.FC = () => {
             {!loading && filteredData.length === 0 && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
                     <EmptyState 
-                        title="FOLDER EMPTY"
-                        description={`No ${activeTab.toLowerCase()} records found.`}
+                        title={t.vault.empty}
+                        description={t.vault.emptyDesc}
                         icon={HardDrive}
                     />
                 </div>
@@ -394,7 +394,7 @@ const VaultBrowser: React.FC = () => {
 };
 
 const VaultInspector: React.FC = () => {
-  const { selectedItem, activeTab, viewMode, setViewMode, editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit } = useDatabase();
+  const { selectedItem, activeTab, viewMode, setViewMode, editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit, t } = useDatabase();
 
   if (!selectedItem) {
       return (
@@ -430,13 +430,13 @@ const VaultInspector: React.FC = () => {
                     onClick={() => { setViewMode('VISUAL'); setEditMode(false); }}
                     className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-colors ${viewMode === 'VISUAL' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                 >
-                    Visual
+                    {t.vault.visual}
                 </button>
                 <button 
                     onClick={() => { setViewMode('CODE'); setEditedContent(JSON.stringify(selectedItem, null, 2)); }}
                     className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-colors ${viewMode === 'CODE' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                 >
-                    Source
+                    {t.vault.source}
                 </button>
             </div>
         </div>
@@ -446,11 +446,11 @@ const VaultInspector: React.FC = () => {
                     <div className="absolute top-4 right-4 z-10 flex gap-2">
                         {editMode ? (
                             <>
-                                <Button variant="secondary" size="sm" onClick={() => setEditMode(false)} className="text-xs h-7 border-slate-700">Cancel</Button>
-                                <Button variant="primary" size="sm" onClick={handleSaveEdit} className="text-xs h-7" icon={<Save size={12}/>}>Commit</Button>
+                                <Button variant="secondary" size="sm" onClick={() => setEditMode(false)} className="text-xs h-7 border-slate-700">{t.common.cancel}</Button>
+                                <Button variant="primary" size="sm" onClick={handleSaveEdit} className="text-xs h-7" icon={<Save size={12}/>}>{t.vault.commit}</Button>
                             </>
                         ) : (
-                            <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="text-xs h-7 border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white" icon={<Edit3 size={12}/>}>Modify</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="text-xs h-7 border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white" icon={<Edit3 size={12}/>}>{t.vault.modify}</Button>
                         )}
                     </div>
                     <CodeViewer 

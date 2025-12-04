@@ -171,7 +171,7 @@ const ViralAnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 // --- 3. Sub-Components ---
 
 const ViralitySimulator: React.FC = React.memo(() => {
-    const { params, rValue, canUndo, canRedo, past, future, handleReset, handleUndo, handleRedo, handleJump, handleParamChange, getRColor, getStatus, applyScenario } = useViralAnalysis();
+    const { params, rValue, canUndo, canRedo, past, future, handleReset, handleUndo, handleRedo, handleJump, handleParamChange, getRColor, getStatus, applyScenario, t } = useViralAnalysis();
 
     const historyTotal = past.length + 1 + future.length;
     const currentStep = past.length;
@@ -184,7 +184,7 @@ const ViralitySimulator: React.FC = React.memo(() => {
                         <Gauge size={16} />
                     </div>
                     <div>
-                        <h3 className="font-bold font-mono text-xs uppercase tracking-widest text-white">Simulation Core</h3>
+                        <h3 className="font-bold font-mono text-xs uppercase tracking-widest text-white">{t.viralPage.sim.core}</h3>
                         <div className="text-[9px] text-slate-500">v3.5.0 (Influencer Logic)</div>
                     </div>
                 </div>
@@ -192,7 +192,7 @@ const ViralitySimulator: React.FC = React.memo(() => {
                     <Button variant="ghost" size="sm" onClick={handleUndo} disabled={!canUndo} className="h-6 w-6 p-0 border border-slate-700 bg-slate-900/50 text-slate-400 hover:text-white" icon={<Undo size={12} />} />
                     <Button variant="ghost" size="sm" onClick={handleRedo} disabled={!canRedo} className="h-6 w-6 p-0 border border-slate-700 bg-slate-900/50 text-slate-400 hover:text-white" icon={<Redo size={12} />} />
                     <Button variant="ghost" size="sm" onClick={handleReset} className="h-6 text-[10px] uppercase tracking-wide border border-slate-700 bg-slate-900/50 text-slate-400 hover:text-white hover:border-slate-500 ml-2" icon={<RefreshCw size={10} />}>
-                        Reset
+                        {t.common.reset}
                     </Button>
                 </div>
             </div>
@@ -221,25 +221,25 @@ const ViralitySimulator: React.FC = React.memo(() => {
 
             <div className="p-4 grid grid-cols-2 gap-2 border-b border-slate-800/50 bg-slate-900/20">
                 <button onClick={() => applyScenario('ECHO')} className="flex items-center gap-2 px-3 py-2 rounded bg-slate-900 border border-slate-800 hover:border-accent-purple text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-all">
-                    <Network size={12} className="text-accent-purple" /> Echo Chamber
+                    <Network size={12} className="text-accent-purple" /> {t.viralPage.sim.scenarios.echo}
                 </button>
                 <button onClick={() => applyScenario('BOTS')} className="flex items-center gap-2 px-3 py-2 rounded bg-slate-900 border border-slate-800 hover:border-red-500 text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-all">
-                    <Zap size={12} className="text-red-500" /> Bot Attack
+                    <Zap size={12} className="text-red-500" /> {t.viralPage.sim.scenarios.bot}
                 </button>
                 <button onClick={() => applyScenario('ORGANIC')} className="flex items-center gap-2 px-3 py-2 rounded bg-slate-900 border border-slate-800 hover:border-green-500 text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-all">
-                    <Users size={12} className="text-green-500" /> Organic Spread
+                    <Users size={12} className="text-green-500" /> {t.viralPage.sim.scenarios.organic}
                 </button>
                 <button onClick={() => applyScenario('LOCKDOWN')} className="flex items-center gap-2 px-3 py-2 rounded bg-slate-900 border border-slate-800 hover:border-blue-500 text-[10px] font-bold uppercase text-slate-400 hover:text-white transition-all">
-                    <Shield size={12} className="text-blue-500" /> Total Containment
+                    <Shield size={12} className="text-blue-500" /> {t.viralPage.sim.scenarios.lockdown}
                 </button>
             </div>
 
             <div className="p-6 space-y-6 flex-1 relative z-10 overflow-y-auto custom-scrollbar">
                 {[
-                    { key: 'emotionalPayload', label: 'Emotional Payload', icon: '😡', desc: 'Anger/Fear multiplier' },
-                    { key: 'novelty', label: 'Novelty / Shock', icon: '⚡', desc: 'Information freshness' },
-                    { key: 'visualProof', label: 'Visual "Evidence"', icon: '📸', desc: 'Deepfake/Context credibility' },
-                    { key: 'echoChamberDensity', label: 'Echo Chamber Density', icon: '🕸️', desc: 'Network isolation factor' },
+                    { key: 'emotionalPayload', label: t.viralPage.sim.params.emotional, icon: '😡', desc: 'Anger/Fear multiplier' },
+                    { key: 'novelty', label: t.viralPage.sim.params.novelty, icon: '⚡', desc: 'Information freshness' },
+                    { key: 'visualProof', label: t.viralPage.sim.params.visual, icon: '📸', desc: 'Deepfake/Context credibility' },
+                    { key: 'echoChamberDensity', label: t.viralPage.sim.params.echo, icon: '🕸️', desc: 'Network isolation factor' },
                 ].map((item) => (
                     <div key={item.key} className="group">
                         <div className="flex justify-between items-end mb-3">
@@ -286,7 +286,7 @@ const ViralitySimulator: React.FC = React.memo(() => {
 });
 
 const PropagationNetwork: React.FC = React.memo(() => {
-    const { params, renderMode, setRenderMode, interventionActive, triggerIntervention } = useViralAnalysis();
+    const { params, renderMode, setRenderMode, interventionActive, triggerIntervention, t } = useViralAnalysis();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<Node[]>([]);
@@ -523,8 +523,8 @@ const PropagationNetwork: React.FC = React.memo(() => {
                  </div>
                  
                  <div className="bg-slate-950/80 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-right text-slate-500">
-                    <div className="text-white font-bold">{((stats.infected / stats.total) * 100).toFixed(1)}% INFECTED</div>
-                    <div>VELOCITY: {(infectionProb * 1000).toFixed(1)} m/s</div>
+                    <div className="text-white font-bold">{((stats.infected / stats.total) * 100).toFixed(1)}% {t.viralPage.sim.infected.toUpperCase()}</div>
+                    <div>{t.viralPage.sim.velocity.toUpperCase()}: {(infectionProb * 1000).toFixed(1)} m/s</div>
                  </div>
              </div>
 
@@ -538,10 +538,10 @@ const PropagationNetwork: React.FC = React.memo(() => {
                  </button>
                  <div className="w-px h-8 bg-slate-700 mx-2"></div>
                  <button onClick={() => triggerIntervention('FACT_CHECK')} className="px-3 py-2 rounded-lg bg-green-900/50 border border-green-700 text-green-400 text-xs font-bold hover:bg-green-800 transition-all flex items-center gap-1 active:scale-95">
-                     <Shield size={14} /> FACT CHECK
+                     <Shield size={14} /> {t.viralPage.sim.actions.factCheck.toUpperCase()}
                  </button>
                  <button onClick={() => triggerIntervention('BAN')} className="px-3 py-2 rounded-lg bg-red-900/50 border border-red-700 text-red-400 text-xs font-bold hover:bg-red-800 transition-all flex items-center gap-1 active:scale-95">
-                     <Users size={14} /> BAN CLUSTER
+                     <Users size={14} /> {t.viralPage.sim.actions.ban.toUpperCase()}
                  </button>
              </div>
              

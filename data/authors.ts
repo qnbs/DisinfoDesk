@@ -387,5 +387,53 @@ export const AUTHORS_DATA: Author[] = [
       '9/11: The Big Lie (2002)'
     ],
     influenceLevel: 75
+  },
+  {
+    id: 'a27',
+    name: 'Alex Jones',
+    lifespan: '1974–Present',
+    nationality: 'American',
+    imagePlaceholder: 'AJ',
+    bioDe: 'Der Gründer von InfoWars ist bekannt für seinen aggressiven Stil und kontroverse Theorien über die "Globalisten", die das Wasser vergiften ("Gay Frogs") und False-Flag-Operationen durchführen.',
+    bioEn: 'The founder of InfoWars is known for his aggressive style and controversial theories about "Globalists" poisoning the water ("Gay Frogs") and conducting false flag operations.',
+    focusAreas: ['Globalism', 'NWO', 'Health/Supplements', 'Media'],
+    keyWorks: ['Endgame (2007)', 'The Obama Deception (2009)'],
+    influenceLevel: 92
+  },
+  {
+    id: 'a28',
+    name: 'Bob Lazar',
+    lifespan: '1959–Present',
+    nationality: 'American',
+    imagePlaceholder: 'BL',
+    bioDe: 'Behauptete 1989, in einer geheimen Anlage (S-4) nahe Area 51 an außerirdischen Raumschiffen gearbeitet zu haben, die mit Element 115 betrieben wurden. Seine Aussagen prägten das moderne UFO-Bild.',
+    bioEn: 'Claimed in 1989 to have worked at a secret facility (S-4) near Area 51 on alien spacecraft powered by Element 115. His statements shaped the modern image of UFOs.',
+    focusAreas: ['Area 51', 'Element 115', 'Reverse Engineering'],
+    keyWorks: ['Dreamland (Autobiography)', 'Joe Rogan Experience #1315'],
+    influenceLevel: 95
+  },
+  {
+    id: 'a29',
+    name: 'David Paulides',
+    lifespan: '1950s–Present',
+    nationality: 'American',
+    imagePlaceholder: 'DP',
+    bioDe: 'Ein ehemaliger Polizist, der mysteriöse Verschwindensfälle in Nationalparks dokumentiert (Missing 411). Er deutet oft paranormale Ursachen an, ohne sich festzulegen.',
+    bioEn: 'A former police officer who documents mysterious disappearances in national parks (Missing 411). He often implies paranormal causes without committing to one.',
+    focusAreas: ['Missing 411', 'National Parks', 'Cryptozoology'],
+    keyWorks: ['Missing 411 Series', 'Missing 411: The Hunted (2019)'],
+    influenceLevel: 80
+  },
+  {
+    id: 'a30',
+    name: 'Jordan Maxwell',
+    lifespan: '1940–2022',
+    nationality: 'American',
+    imagePlaceholder: 'JMx',
+    bioDe: 'Ein Pionier der Verschwörungsforschung, spezialisiert auf geheime Symbole, Wortursprünge (Etymologie) und das "Maritime Recht". Mentor vieler moderner Autoren.',
+    bioEn: 'A pioneer of conspiracy research specializing in secret symbols, etymology, and "Maritime Law". Mentor to many modern authors.',
+    focusAreas: ['Occult Symbols', 'Maritime Law', 'Religion'],
+    keyWorks: ['Matrix of Power (2000)', 'Zeitgeist (Consultant)'],
+    influenceLevel: 85
   }
 ];

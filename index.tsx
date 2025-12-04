@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
@@ -19,8 +18,11 @@ window.onerror = (msg, url, lineNo, columnNo, error) => {
 
 // Polyfill for console.error to suppress specific Recharts warnings in dev
 const originalConsoleError = console.error;
-console.error = (...args) => {
-  if (args[0]?.includes?.('ResizeObserver loop') || args[0]?.includes?.('The width(-1) and height(-1)')) {
+console.error = (...args: unknown[]) => {
+  if (
+    typeof args[0] === 'string' &&
+    (args[0].includes('ResizeObserver loop') || args[0].includes('The width(-1) and height(-1)'))
+  ) {
     return;
   }
   originalConsoleError(...args);

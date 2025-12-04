@@ -1,4 +1,3 @@
-
 import { StoredAnalysis, StoredChat, StoredSatire, VaultBackup, StoredMediaAnalysis } from '../types';
 
 const DB_NAME = 'DisinfoDesk_Vault';
@@ -222,7 +221,8 @@ class DatabaseService {
             // Estimate size
             const cursorReq = store.openCursor();
             cursorReq.onsuccess = (e) => {
-                const cursor = (e.target as IDBRequest).result;
+                // Use generic IDBRequest<IDBCursorWithValue> to avoid 'any'
+                const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
                 if (cursor) {
                     const value = cursor.value;
                     const size = JSON.stringify(value).length * 2; // Approx bytes

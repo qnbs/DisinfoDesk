@@ -70,7 +70,7 @@ const flattenToString = (val: unknown): string => {
   }
   
   if (typeof val === 'object') {
-    return Object.entries(val).map(([k, v]) => {
+    return Object.entries(val as Record<string, unknown>).map(([k, v]) => {
       // Format keys to be more readable (camelCase to Title Case approx)
       const readableKey = k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
       return `**${readableKey}**: ${flattenToString(v)}`;
@@ -108,7 +108,6 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
   try {
     const ai = getAiClient();
     // Default to Flash for speed and high token output potential, or Pro for reasoning.
-    // Given the request for "elaborate", Pro is better, but we must demand length.
     const model = configOverride?.model || 'gemini-2.5-flash'; 
 
     const promptLang = language === 'de' 
@@ -208,7 +207,7 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
       timestamp: Date.now(),
       data: result,
       language
-    }).catch(err => console.error("DB Save Error:", err));
+    }).catch((err: unknown) => console.error("DB Save Error:", err));
 
     return result;
 
@@ -234,7 +233,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
           console.log(`[Cache Hit] Loaded media analysis for ${item.id}`);
           return cached.data;
       }
-    } catch (e) {
+    } catch (e: unknown) {
         console.warn("DB Media Read Error", e);
     }
   }
@@ -280,7 +279,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
     let rawData: RawMediaAnalysisJSON = {};
     try {
         rawData = JSON.parse(cleanedText) as RawMediaAnalysisJSON;
-    } catch (e) {
+    } catch (e: unknown) {
         console.error("JSON Parse failed in Media Analysis", e);
         rawData = { plotSummary: text.substring(0, 1000) }; // Fallback
     }
@@ -300,7 +299,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
         data: result,
         language,
         mediaType: item.type
-    }).catch(err => console.error("Media Save Error:", err));
+    }).catch((err: unknown) => console.error("Media Save Error:", err));
 
     return result;
 
@@ -461,3 +460,4 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
     return { title: "Error 404", content: language === 'de' ? "Die Illuminaten haben diesen Generator blockiert." : "The Illuminati blocked this generator." };
   }
 }
+    

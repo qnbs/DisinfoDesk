@@ -26,15 +26,6 @@ const DatabaseManager = React.lazy(() => import('./components/DatabaseManager').
 const AuthorLibrary = React.lazy(() => import('./components/AuthorLibrary').then(module => ({ default: module.AuthorLibrary })));
 const AuthorDetail = React.lazy(() => import('./components/AuthorDetail').then(module => ({ default: module.AuthorDetail })));
 
-const LoadingSpinner = () => (
-  <div className="flex h-[80vh] w-full items-center justify-center">
-    <div className="flex flex-col items-center gap-4">
-      <Loader2 className="animate-spin text-accent-cyan" size={48} />
-      <Skeleton className="h-4 w-32 bg-slate-800" />
-    </div>
-  </div>
-);
-
 // Global Effect Handler Wrapper
 const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const settings = useAppSelector(state => state.settings.config);
@@ -140,9 +131,7 @@ const App: React.FC = () => {
     // Redux Provider is in index.tsx
     <SettingsProvider>
       <LanguageProvider>
-        <Suspense fallback={<LoadingSpinner />}>
-           <RouterProvider router={router} />
-        </Suspense>
+         <RouterProvider router={router} />
       </LanguageProvider>
     </SettingsProvider>
   );

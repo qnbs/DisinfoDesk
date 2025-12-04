@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, createContext, useContext, useCallback } from 'react';
 import { useLanguage } from '../contexts/LanguageContext'; 
 import { 
@@ -185,7 +186,7 @@ const SettingsContent: React.FC = () => {
                  aria-pressed={language === 'de'}
                >
                  <div className="flex items-center gap-4 relative z-10">
-                   <div className="text-3xl grayscale group-hover:grayscale-0 transition-all">🇩🇪</div>
+                   <div className="text-3xl transition-all">DE</div>
                    <div className="text-left">
                      <div className={`font-bold ${language === 'de' ? 'text-white' : 'text-slate-300'}`}>Deutsch</div>
                      <div className="text-xs text-slate-500 font-mono">GERMAN / DE-DE</div>
@@ -203,7 +204,7 @@ const SettingsContent: React.FC = () => {
                   aria-pressed={language === 'en'}
                >
                  <div className="flex items-center gap-4 relative z-10">
-                   <div className="text-3xl grayscale group-hover:grayscale-0 transition-all">🇺🇸</div>
+                   <div className="text-3xl transition-all">EN</div>
                    <div className="text-left">
                      <div className={`font-bold ${language === 'en' ? 'text-white' : 'text-slate-300'}`}>English</div>
                      <div className="text-xs text-slate-500 font-mono">US / EN-US</div>
@@ -363,7 +364,7 @@ const SettingsContent: React.FC = () => {
                 {t.settings.labels.export}
               </Button>
               <Button onClick={handleSystemPurge} variant="danger" icon={<Skull size={14} />} className="text-sm bg-red-950/20 border-red-900 hover:bg-red-900/40">
-                System Purge (Reset)
+                {t.settings.labels.purge}
               </Button>
             </div>
             
@@ -386,7 +387,7 @@ const SettingsContent: React.FC = () => {
              
              <div className="bg-slate-950/50 rounded-xl border border-slate-800 overflow-hidden backdrop-blur-sm">
                 {[
-                    { label: 'Kernel Version', val: 'v2.6.5-IDB-Enhanced' },
+                    { label: 'Kernel Version', val: 'v2.7.0-IDB-Enhanced' },
                     { label: 'State Engine', val: 'Redux + IndexedDB Persist' },
                     { label: 'API Layer', val: 'RTK Query (fakeBase)' },
                     { label: 'Environment', val: 'Production', color: 'text-green-400' },
@@ -461,9 +462,10 @@ const SettingsTerminal: React.FC = () => {
 };
 
 const SettingsHeader: React.FC = () => {
+    const { t } = useSettingsPage();
     return (
         <PageHeader 
-            title="SYSTEM CONFIGURATION"
+            title={t.settings.title}
             subtitle="CONTROL PANEL // ACCESS LEVEL 5"
             icon={SettingsIcon}
             status="CONFIG MODE"

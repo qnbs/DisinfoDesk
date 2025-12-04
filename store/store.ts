@@ -1,5 +1,5 @@
 
-import { configureStore, combineReducers, AnyAction, Reducer } from '@reduxjs/toolkit';
+import { configureStore, combineReducers, UnknownAction, Reducer } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { 
   persistStore, 
@@ -40,10 +40,11 @@ const rootPersistConfig = {
 /**
  * Strategy 2: Heavy Data
  * Separated to ensure editing one theory doesn't re-serialize the entire settings tree.
+ * VERSION BUMP (3 -> 4): Forces a purge of stale theory data (missing images) on client update.
  */
 const theoriesPersistConfig = {
   key: 'theory_data',
-  version: 1,
+  version: 4, // Bumped to force reload of new SVGs with robust generator
   storage: dbService.reduxStorage,
   whitelist: ['favorites', 'entitiesDe', 'entitiesEn'], 
   timeout: 10000,
@@ -82,7 +83,7 @@ const appReducer = combineReducers({
  * Allows completely resetting the store state to undefined (initial) 
  * when the user triggers a factory reset.
  */
-const rootReducer: Reducer = (state: ReturnType<typeof appReducer>, action: AnyAction) => {
+const rootReducer: Reducer = (state: ReturnType<typeof appReducer> | undefined, action: UnknownAction) => {
   if (action.type === 'settings/systemPurge') {
     // Clear storage is handled in the thunk/component, 
     // here we just wipe memory state.
@@ -124,3 +125,4 @@ setupListeners(store.dispatch);
 // --- Type Definitions ---
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+    

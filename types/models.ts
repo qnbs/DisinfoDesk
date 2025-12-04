@@ -69,6 +69,7 @@ export interface Author {
   keyWorks: string[];
   influenceLevel: number; // 1-100
   website?: string;
+  imageUrl?: string; // Generated art URL
 }
 
 export interface MediaItem {
@@ -83,6 +84,7 @@ export interface MediaItem {
   realityScore: number;
   complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'MINDBENDING';
   relatedTheoryTags: string[];
+  imageUrl?: string; // Generated art URL
 }
 
 export interface TheoryDetail extends Theory {

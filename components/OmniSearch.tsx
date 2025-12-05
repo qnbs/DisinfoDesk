@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, FileText, User, Film, ArrowRight, Hash, 
   Settings, Database, HelpCircle, ShieldAlert, Activity, 
-  MessageSquare, Skull, Globe, Eye, RefreshCw, Download
+  MessageSquare, Skull, Globe, Eye, RefreshCw, Download,
+  Terminal, Command, ChevronRight, Cpu
 } from 'lucide-react';
 import { THEORIES_DE_FULL as THEORIES_DE, MEDIA_ITEMS } from '../constants';
 import { AUTHORS_FULL } from '../data/enriched';
@@ -11,6 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { updateSetting, setLanguage as setReduxLanguage } from '../store/slices/settingsSlice';
 import { dbService } from '../services/dbService';
+import { Badge } from './ui/Common';
 
 interface SearchResult {
   id: string;
@@ -36,7 +38,6 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
   // Focus input on open
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure render
       setTimeout(() => {
         if (window.innerWidth >= 768) {
             inputRef.current?.focus();
@@ -75,33 +76,37 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
   };
 
   // Data Aggregation
-  const results: SearchResult[] = useMemo(() => {
+  const flatResults: SearchResult[] = useMemo(() => {
     // SYSTEM NAVIGATION
     const navItems: SearchResult[] = [
-        { id: 'nav-dash', type: 'NAV', title: t.nav.dashboard, subtitle: 'Overview', link: '/', icon: <Hash size={14}/> },
-        { id: 'nav-arch', type: 'NAV', title: t.nav.archive, subtitle: 'Database', link: '/archive', icon: <FileText size={14}/> },
-        { id: 'nav-media', type: 'NAV', title: t.nav.media, subtitle: 'Pop Culture', link: '/media', icon: <Film size={14}/> },
-        { id: 'nav-auth', type: 'NAV', title: t.nav.authors, subtitle: 'Profiles', link: '/authors', icon: <User size={14}/> },
+        { id: 'nav-dash', type: 'NAV', title: t.nav.dashboard, subtitle: 'Command Center', link: '/', icon: <Activity size={14}/> },
+        { id: 'nav-arch', type: 'NAV', title: t.nav.archive, subtitle: 'Main Database', link: '/archive', icon: <FileText size={14}/> },
         { id: 'nav-dang', type: 'NAV', title: t.nav.dangerous, subtitle: 'Threat Matrix', link: '/dangerous', icon: <ShieldAlert size={14}/> },
-        { id: 'nav-vir', type: 'NAV', title: t.nav.virality, subtitle: 'Simulation', link: '/virality', icon: <Activity size={14}/> },
-        { id: 'nav-chat', type: 'NAV', title: t.nav.chat, subtitle: 'AI Uplink', link: '/chat', icon: <MessageSquare size={14}/> },
-        { id: 'nav-sat', type: 'NAV', title: t.nav.generator, subtitle: 'Satire Gen', link: '/satire', icon: <Skull size={14}/> },
-        { id: 'nav-vault', type: 'NAV', title: t.nav.database, subtitle: 'Vault Manager', link: '/database', icon: <Database size={14}/> },
-        { id: 'nav-set', type: 'NAV', title: t.nav.settings, subtitle: 'Config', link: '/settings', icon: <Settings size={14}/> },
-        { id: 'nav-help', type: 'NAV', title: t.nav.help, subtitle: 'Manual', link: '/help', icon: <HelpCircle size={14}/> },
+        { id: 'nav-vir', type: 'NAV', title: t.nav.virality, subtitle: 'Simulation Engine', link: '/virality', icon: <Globe size={14}/> },
+        { id: 'nav-chat', type: 'NAV', title: t.nav.chat, subtitle: 'AI Interrogation', link: '/chat', icon: <MessageSquare size={14}/> },
+        { id: 'nav-vault', type: 'NAV', title: t.nav.database, subtitle: 'Secure Vault', link: '/database', icon: <Database size={14}/> },
+        { id: 'nav-set', type: 'NAV', title: t.nav.settings, subtitle: 'System Config', link: '/settings', icon: <Settings size={14}/> },
     ];
 
     // SYSTEM ACTIONS
     const actionItems: SearchResult[] = [
-        { id: 'act-lang', type: 'ACTION', title: language === 'de' ? 'Switch to English' : 'Wechsel zu Deutsch', subtitle: 'System Language', action: handleToggleLanguage, icon: <Globe size={14}/> },
-        { id: 'act-cont', type: 'ACTION', title: settings.highContrast ? 'Disable High Contrast' : 'Enable High Contrast', subtitle: 'Visual Accessibility', action: handleToggleContrast, icon: <Eye size={14}/> },
-        { id: 'act-rel', type: 'ACTION', title: 'System Reload', subtitle: 'Flush Interface', action: handleReload, icon: <RefreshCw size={14}/> },
-        { id: 'act-exp', type: 'ACTION', title: 'Quick Dump', subtitle: 'Export Vault', action: handleExport, icon: <Download size={14}/> },
+        { id: 'act-lang', type: 'ACTION', title: language === 'de' ? 'Switch Language (EN)' : 'Sprache wechseln (DE)', subtitle: 'Localization', action: handleToggleLanguage, icon: <Globe size={14}/> },
+        { id: 'act-cont', type: 'ACTION', title: settings.highContrast ? 'Disable High Contrast' : 'Enable High Contrast', subtitle: 'Visual Mode', action: handleToggleContrast, icon: <Eye size={14}/> },
+        { id: 'act-rel', type: 'ACTION', title: 'System Reboot', subtitle: 'Flush Cache', action: handleReload, icon: <RefreshCw size={14}/> },
+        { id: 'act-exp', type: 'ACTION', title: 'Data Dump', subtitle: 'Export Vault', action: handleExport, icon: <Download size={14}/> },
     ];
 
-    // Default View (Empty Query)
+    // Handle Slash Commands
+    if (query.startsWith('/')) {
+        return actionItems.filter(item => 
+            item.title.toLowerCase().includes(query.substring(1).toLowerCase()) ||
+            item.subtitle.toLowerCase().includes(query.substring(1).toLowerCase())
+        );
+    }
+
+    // Default View (Empty Query) - Show Nav
     if (!query.trim()) {
-        return [...navItems, ...actionItems];
+        return navItems;
     }
 
     const lowerQ = query.toLowerCase();
@@ -156,8 +161,25 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
       }
     });
 
-    return res.slice(0, 12); // Limit results
+    return res.slice(0, 15); // Limit results
   }, [query, t, language, settings.highContrast, handleToggleLanguage, handleToggleContrast, handleExport]);
+
+  // Group Results for Display
+  const groupedResults = useMemo((): Record<string, SearchResult[]> => {
+      if (query.startsWith('/')) {
+          return { 'COMMANDS': flatResults };
+      }
+
+      const system = flatResults.filter(r => r.type === 'NAV' || r.type === 'ACTION');
+      const database = flatResults.filter(r => r.type === 'THEORY' || r.type === 'MEDIA' || r.type === 'AUTHOR');
+
+      const groups: Record<string, SearchResult[]> = {};
+      
+      if (system.length > 0) groups['SYSTEM'] = system;
+      if (database.length > 0) groups['DATABASE'] = database;
+      
+      return groups;
+  }, [flatResults, query]);
 
   const handleSelect = (result: SearchResult) => {
     if (result.type === 'ACTION' && result.action) {
@@ -171,13 +193,13 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev + 1) % results.length);
+      setSelectedIndex(prev => (prev + 1) % flatResults.length);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
+      setSelectedIndex(prev => (prev - 1 + flatResults.length) % flatResults.length);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (results[selectedIndex]) handleSelect(results[selectedIndex]);
+      if (flatResults[selectedIndex]) handleSelect(flatResults[selectedIndex]);
     } else if (e.key === 'Escape') {
       onClose();
     }
@@ -189,7 +211,8 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
     selectedIndex,
     setSelectedIndex,
     inputRef,
-    results,
+    flatResults,
+    groupedResults,
     handleSelect,
     handleKeyDown,
     t,
@@ -218,82 +241,99 @@ const OmniSearchProvider: React.FC<{ isOpen: boolean; onClose: () => void; child
 const SearchHeader: React.FC = () => {
     const { inputRef, query, setQuery, handleKeyDown, t, onClose } = useOmniSearch();
     return (
-        <>
-            {/* Input Header - HIDDEN ON MOBILE */}
-            <div className="hidden md:flex items-center gap-3 p-4 border-b border-slate-800">
-                <Search className="text-accent-cyan" size={20} />
-                <input
-                    ref={inputRef}
-                    type="text"
-                    className="flex-1 bg-transparent text-lg text-white placeholder-slate-500 outline-none font-mono"
-                    placeholder={t.search.placeholder}
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
-                <div className="flex gap-2">
-                    <kbd className="hidden md:inline-flex items-center gap-1 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400 font-mono">
-                    ESC
-                    </kbd>
-                </div>
+        <div className="flex items-center gap-3 p-4 border-b border-slate-800 bg-slate-950/50 relative overflow-hidden">
+            <div className="absolute inset-0 bg-accent-cyan/5 animate-pulse-slow pointer-events-none"></div>
+            <div className="text-accent-cyan animate-pulse hidden md:block font-mono">{'>'}</div>
+            <input
+                ref={inputRef}
+                type="text"
+                className="flex-1 bg-transparent text-lg text-white placeholder-slate-600 outline-none font-mono tracking-wide"
+                placeholder={t.search.placeholder}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+            />
+            <div className="flex gap-2 items-center">
+                {!query && (
+                    <div className="hidden md:flex items-center gap-1 text-[10px] text-slate-500 font-mono bg-slate-900 border border-slate-700 px-2 py-1 rounded">
+                        <span>Try</span>
+                        <span className="text-accent-purple font-bold">/</span>
+                        <span>for commands</span>
+                    </div>
+                )}
+                <button onClick={onClose} className="p-1 text-slate-500 hover:text-white rounded hover:bg-slate-800 transition-colors">
+                    <span className="sr-only">Close</span>
+                    <kbd className="hidden md:inline font-mono text-[10px] border border-slate-700 rounded px-1.5 py-0.5">ESC</kbd>
+                    <span className="md:hidden"><Command size={16}/></span>
+                </button>
             </div>
-
-            {/* Mobile Header (Static) */}
-            <div className="md:hidden p-4 border-b border-slate-800 bg-slate-950 flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">System Command</span>
-                <button onClick={onClose} className="text-slate-500"><Hash size={16}/></button>
-            </div>
-        </>
+        </div>
     );
 };
 
 const SearchResults: React.FC = () => {
-    const { results, selectedIndex, setSelectedIndex, handleSelect, t } = useOmniSearch();
+    const { groupedResults, flatResults, selectedIndex, setSelectedIndex, handleSelect, t } = useOmniSearch();
+
+    let globalIndex = 0;
 
     return (
-        <div className="flex-1 overflow-y-auto p-2 bg-slate-950/50 scrollbar-thin scrollbar-thumb-slate-800">
-          {results.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 font-mono text-xs">
-              {t.search.noResults}
+        <div className="flex-1 overflow-y-auto bg-[#050b14] scrollbar-thin scrollbar-thumb-slate-800 relative">
+          {flatResults.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-slate-500 opacity-50">
+              <Search size={32} className="mb-2" />
+              <div className="font-mono text-xs uppercase tracking-widest">{t.search.noResults}</div>
             </div>
           ) : (
-            <div className="space-y-1">
-              {results.map((res, idx) => (
-                <button
-                  key={`${res.type}-${res.id}`}
-                  onClick={() => handleSelect(res)}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`
-                    w-full flex items-center justify-between p-3 rounded-lg text-left transition-all group
-                    ${idx === selectedIndex 
-                      ? 'bg-accent-cyan/10 border border-accent-cyan/30 text-white' 
-                      : 'border border-transparent text-slate-400 hover:bg-slate-900'}
-                  `}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-md ${idx === selectedIndex ? 'bg-accent-cyan text-slate-900' : 'bg-slate-800 text-slate-500'}`}>
-                      {res.icon}
+            <div className="p-2 space-y-4">
+                {Object.entries(groupedResults).map(([group, items]) => (
+                    <div key={group}>
+                        <div className="px-2 mb-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest font-mono flex items-center gap-2">
+                            {group === 'SYSTEM' && <Terminal size={10} />}
+                            {group === 'DATABASE' && <Database size={10} />}
+                            {group}
+                        </div>
+                        <div className="space-y-1">
+                            {(items as SearchResult[]).map((res) => {
+                                const currentIndex = globalIndex++;
+                                const isSelected = currentIndex === selectedIndex;
+                                
+                                return (
+                                    <button
+                                        key={`${res.type}-${res.id}`}
+                                        onClick={() => handleSelect(res)}
+                                        onMouseEnter={() => setSelectedIndex(currentIndex)}
+                                        className={`
+                                            w-full flex items-center justify-between p-3 rounded-md text-left transition-all group relative overflow-hidden font-mono
+                                            ${isSelected 
+                                                ? 'bg-slate-900 border-l-2 border-l-accent-cyan text-white shadow-lg' 
+                                                : 'border-l-2 border-l-transparent text-slate-400 hover:bg-slate-900/50'}
+                                        `}
+                                    >
+                                        {/* Highlight Scanline */}
+                                        {isSelected && <div className="absolute inset-0 bg-accent-cyan/5 pointer-events-none animate-scan"></div>}
+                                        
+                                        <div className="flex items-center gap-4 relative z-10">
+                                            <div className={`p-1.5 rounded transition-colors ${isSelected ? 'text-accent-cyan bg-accent-cyan/10' : 'text-slate-600 bg-slate-950'}`}>
+                                                {res.icon}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-xs flex items-center gap-2 tracking-wide">
+                                                    {res.title}
+                                                    {res.type === 'ACTION' && <Badge label="CMD" className="text-[8px] py-0 px-1 border-slate-700 text-slate-500"/>}
+                                                </div>
+                                                <div className={`text-[10px] ${isSelected ? 'text-cyan-200/70' : 'text-slate-600'}`}>
+                                                    {res.subtitle}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {isSelected && <ChevronRight size={14} className="text-accent-cyan animate-pulse mr-1" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                    <div>
-                      <div className="font-bold text-sm flex items-center gap-2">
-                        {res.title}
-                        {/* Type Badge */}
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono ${
-                            res.type === 'ACTION' ? 'bg-purple-900/50 border-purple-500/30 text-purple-300' :
-                            res.type === 'NAV' ? 'bg-slate-800 border-slate-700 text-slate-500' :
-                            'bg-slate-900 border-slate-700 text-slate-500'
-                        }`}>
-                            {res.type}
-                        </span>
-                      </div>
-                      <div className={`text-xs ${idx === selectedIndex ? 'text-cyan-200' : 'text-slate-600'}`}>
-                        {res.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                  {idx === selectedIndex && <ArrowRight size={16} className="text-accent-cyan animate-pulse mr-2" />}
-                </button>
-              ))}
+                ))}
             </div>
           )}
         </div>
@@ -301,11 +341,23 @@ const SearchResults: React.FC = () => {
 };
 
 const SearchFooter: React.FC = () => {
-    const { results, t } = useOmniSearch();
+    const { flatResults, t, selectedIndex } = useOmniSearch();
+    const currentItem = flatResults[selectedIndex];
+
     return (
-        <div className="p-2 border-t border-slate-800 bg-slate-900 text-[10px] text-slate-500 flex justify-between font-mono px-4">
-            <span>{t.search.footerLeft}</span>
-            <span>{results.length} NODES FOUND</span>
+        <div className="p-2 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-500 flex justify-between font-mono px-4 h-8 items-center">
+            <div className="flex gap-4">
+                <span className="flex items-center gap-1"><Cpu size={10} className="text-accent-cyan"/> {t.search.footerLeft}</span>
+                <span className="hidden md:inline opacity-50">PID: {Math.floor(Math.random() * 9000) + 1000}</span>
+            </div>
+            <div className="flex items-center gap-4">
+                {currentItem && (
+                    <span className="text-slate-400 uppercase hidden md:inline truncate max-w-[150px]">
+                        Target: {currentItem.id}
+                    </span>
+                )}
+                <span className="font-bold text-slate-300">{flatResults.length} NODES</span>
+            </div>
         </div>
     );
 };
@@ -313,9 +365,9 @@ const SearchFooter: React.FC = () => {
 const OmniSearchLayout: React.FC = () => {
     const { onClose } = useOmniSearch();
     return (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" onClick={onClose}>
             <div 
-                className="w-full max-w-2xl bg-slate-900/90 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                className="w-full max-w-2xl bg-[#0B0F19] border border-slate-700 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[70vh] ring-1 ring-white/10"
                 onClick={e => e.stopPropagation()}
             >
                 <SearchHeader />

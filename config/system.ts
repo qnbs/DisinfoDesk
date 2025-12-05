@@ -22,11 +22,16 @@ export const APP_CONFIG = {
 export const DEFAULT_SETTINGS: AppSettings = {
     aiTemperature: 0.7,
     aiModelVersion: 'gemini-2.5-flash',
+    thinkingBudget: 1024,
+    safetyLevel: 'standard',
     highContrast: false,
     reducedMotion: false,
     fontSize: 'medium',
+    accentColor: 'cyan',
+    uiDensity: 'comfortable',
     soundEnabled: true,
     incognitoMode: false,
     developerMode: false,
     hasSeenOnboarding: false,
+    autoArchive: true
 };

@@ -23,7 +23,6 @@ export const settingsSlice = createSlice({
   reducers: {
     updateSetting: <K extends keyof AppSettings>(state: SettingsState, action: PayloadAction<{ key: K; value: AppSettings[K] }>) => {
       state.config[action.payload.key] = action.payload.value;
-      // Side effect logic for DOM updates (fontSize etc) is handled in a subscriber/component
     },
     setLanguage: (state, action: PayloadAction<Language>) => {
       state.language = action.payload;

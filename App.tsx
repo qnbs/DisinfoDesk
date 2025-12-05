@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { useAppSelector } from './store/hooks';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { createHashRouter, RouterProvider, Navigate, ScrollRestoration } from 'react-router-dom';
 
 // Lazy Load Components
@@ -131,7 +132,9 @@ const App: React.FC = () => {
     // Redux Provider is in index.tsx
     <SettingsProvider>
       <LanguageProvider>
-         <RouterProvider router={router} />
+        <ToastProvider>
+           <RouterProvider router={router} />
+        </ToastProvider>
       </LanguageProvider>
     </SettingsProvider>
   );

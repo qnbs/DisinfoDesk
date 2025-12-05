@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback, createContext, useContext } from 'react';
+import React, { useState, useMemo, useCallback, createContext, useContext, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { MEDIA_ITEMS } from '../constants';
 import { MediaItem, MediaType } from '../types';
@@ -7,7 +7,8 @@ import {
   Film, Book, Gamepad2, Tv, LayoutGrid, 
   Search, ExternalLink, Zap, BarChart2,
   PieChart, Activity, Sliders, 
-  X, Clapperboard, FilterX
+  X, Clapperboard, FilterX, Star, Trophy, Clock, ArrowDownCircle,
+  Play
 } from 'lucide-react';
 import { 
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
@@ -25,20 +26,61 @@ const useMediaCultureLogic = () => {
     const [viewMode, setViewMode] = useState<'GRID' | 'ANALYTICS'>('GRID');
     const [filter, setFilter] = useState<MediaType | 'ALL'>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    
+    // Pagination
+    const [visibleCount, setVisibleCount] = useState(12);
+
+    // Debounce Effect
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Reset pagination on filter change
+    useEffect(() => {
+        setVisibleCount(12);
+    }, [filter, debouncedSearch]);
 
     const filteredMedia = useMemo(() => {
         return MEDIA_ITEMS.filter(item => {
             const matchesType = filter === 'ALL' || item.type === filter;
-            const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                  (language === 'de' ? item.descriptionDe : item.descriptionEn).toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+                                  (language === 'de' ? item.descriptionDe : item.descriptionEn).toLowerCase().includes(debouncedSearch.toLowerCase());
             return matchesType && matchesSearch;
         });
-    }, [filter, searchTerm, language]);
+    }, [filter, debouncedSearch, language]);
+
+    const displayedMedia = useMemo(() => {
+        return filteredMedia.slice(0, visibleCount);
+    }, [filteredMedia, visibleCount]);
+
+    const spotlightItem = useMemo(() => {
+        if (filteredMedia.length === 0) return null;
+        // Deterministic pseudo-random based on length to prevent jitter on re-renders, but changes on filter
+        const index = filteredMedia.length % filteredMedia.length; 
+        return filteredMedia[index];
+    }, [filteredMedia]);
+
+    const stats = useMemo(() => {
+        if (filteredMedia.length === 0) return null;
+        const total = filteredMedia.length;
+        const avgReality = Math.round(filteredMedia.reduce((acc, i) => acc + i.realityScore, 0) / total);
+        
+        // Find most common complexity
+        const complexityCounts: Record<string, number> = {};
+        filteredMedia.forEach(i => { complexityCounts[i.complexity] = (complexityCounts[i.complexity] || 0) + 1; });
+        const topComplexity = Object.entries(complexityCounts).sort((a,b) => b[1] - a[1])[0][0];
+
+        return { total, avgReality, topComplexity };
+    }, [filteredMedia]);
 
     const handleClearFilters = useCallback(() => {
         setFilter('ALL');
         setSearchTerm('');
     }, []);
+
+    const handleLoadMore = () => setVisibleCount(prev => prev + 12);
 
     const filters: { id: MediaType | 'ALL', label: string, icon: React.ReactNode }[] = [
         { id: 'ALL', label: t.mediaPage.filter.all, icon: <LayoutGrid size={14} /> },
@@ -61,6 +103,11 @@ const useMediaCultureLogic = () => {
         searchTerm,
         setSearchTerm,
         filteredMedia,
+        displayedMedia,
+        spotlightItem,
+        stats,
+        hasMore: visibleCount < filteredMedia.length,
+        handleLoadMore,
         handleClearFilters,
         filters,
         onNavigateToArchive,
@@ -109,8 +156,9 @@ const getComplexityColor = (c: MediaItem['complexity']) => {
 const FilterChip: React.FC<{ label: string, active: boolean, onClick: () => void, icon?: React.ReactNode }> = ({ label, active, onClick, icon }) => (
     <button
         onClick={onClick}
+        aria-pressed={active}
         className={`
-            flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border
+            flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan
             ${active 
                 ? 'bg-white text-slate-900 border-white shadow-[0_0_15px_rgba(255,255,255,0.3)] transform scale-105' 
                 : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-slate-200'}
@@ -121,78 +169,106 @@ const FilterChip: React.FC<{ label: string, active: boolean, onClick: () => void
     </button>
 );
 
+const SpotlightHero: React.FC = () => {
+    const { spotlightItem, language, onNavigateToDetail, t } = useMediaCulture();
+    if (!spotlightItem) return null;
+
+    return (
+        <div className="relative w-full h-[350px] md:h-[400px] rounded-2xl overflow-hidden mb-12 group border border-slate-800 shadow-2xl animate-fade-in cursor-pointer" onClick={() => onNavigateToDetail(spotlightItem.id)}>
+            <div className="absolute inset-0">
+                <img src={spotlightItem.imageUrl} alt="" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/60 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-transparent to-transparent"></div>
+            </div>
+
+            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur border border-white/10 px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest text-accent-cyan flex items-center gap-2">
+                <Star size={12} className="fill-accent-cyan" /> Featured Selection
+            </div>
+
+            <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-2/3 lg:w-1/2 z-10">
+                <div className="flex items-center gap-3 mb-3 animate-fade-in-up">
+                    <Badge label={spotlightItem.type} className="bg-accent-purple/20 text-accent-purple border-accent-purple/30" />
+                    <span className="text-slate-300 font-mono text-xs">{spotlightItem.year}</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-white mb-4 leading-none tracking-tight drop-shadow-lg animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                    {spotlightItem.title}
+                </h2>
+                <p className="text-sm text-slate-300 mb-6 line-clamp-3 leading-relaxed animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                    {language === 'de' ? spotlightItem.descriptionDe : spotlightItem.descriptionEn}
+                </p>
+                <div className="flex gap-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                    <Button variant="primary" icon={<Play size={16} fill="currentColor" />} onClick={() => onNavigateToDetail(spotlightItem.id)}>
+                        Analyze File
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => void, onOpen: () => void }> = React.memo(({ item, onTagClick, onOpen }) => {
     const { language, t } = useMediaCulture();
     return (
         <div 
             onClick={onOpen}
-            className="group relative h-[380px] perspective-1000 cursor-pointer"
+            className="group relative h-[380px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden flex flex-col"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') onOpen(); }}
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-950 rounded-xl border border-slate-800 overflow-hidden transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] group-hover:-translate-y-2 group-hover:rotate-x-2">
-                <div className="h-1/2 p-6 flex flex-col justify-between relative bg-slate-900">
-                     {item.imageUrl && (
-                        <img src={item.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-20 transition-all duration-500" />
-                     )}
-                     <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-900 transition-colors duration-500"></div>
-                     
-                     <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity z-10">
-                        <MediaTypeIcon type={item.type} />
-                     </div>
-                     <div className="relative z-10 flex justify-between items-start">
-                        <Badge label={item.type} className="bg-slate-950/80 backdrop-blur text-slate-400 border-slate-700" />
-                        <span className="font-mono text-xs text-slate-400 bg-slate-950/50 px-2 py-0.5 rounded">{item.year}</span>
-                     </div>
-                     <div className="relative z-10">
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-accent-cyan transition-colors leading-tight drop-shadow-md">{item.title}</h3>
-                        <div className="text-xs text-slate-400 font-mono truncate">{item.creator}</div>
-                     </div>
+            <div className="h-48 relative overflow-hidden shrink-0">
+                 {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
+                 )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+                 <div className="absolute top-2 right-2 p-2 bg-black/50 backdrop-blur rounded-lg border border-white/10 text-slate-300">
+                    <MediaTypeIcon type={item.type} />
+                 </div>
+                 <div className="absolute bottom-2 left-4 right-4">
+                    <h3 className="text-lg font-bold text-white leading-tight drop-shadow-md truncate">{item.title}</h3>
+                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.year} // {item.creator}</div>
+                 </div>
+            </div>
+            
+            <div className="flex-1 p-4 flex flex-col relative bg-slate-900">
+                <div className="flex justify-between items-center mb-3 text-[10px] font-mono text-slate-500 border-b border-slate-800 pb-2">
+                    <span className="flex items-center gap-1"><Activity size={12} className="text-accent-cyan"/> REALITY: {item.realityScore}%</span>
+                    <span className={`px-1.5 py-0.5 rounded border ${getComplexityColor(item.complexity)}`}>{item.complexity}</span>
                 </div>
-                <div className="h-1 w-full flex">
-                    <div className="h-full bg-red-500 opacity-50" style={{ width: '20%' }}></div>
-                    <div className="h-full bg-blue-500 opacity-50" style={{ width: '30%' }}></div>
-                    <div className="h-full bg-green-500 opacity-50" style={{ width: '10%' }}></div>
-                    <div className="h-full bg-yellow-500 opacity-50" style={{ width: '40%' }}></div>
-                </div>
-                <div className="h-1/2 p-6 flex flex-col bg-slate-950">
-                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-4 flex-1 group-hover:text-slate-300 transition-colors">
-                        {language === 'de' ? item.descriptionDe : item.descriptionEn}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                        {item.relatedTheoryTags.slice(0, 3).map(tag => (
-                            <button
-                                key={tag}
-                                onClick={(e) => { e.stopPropagation(); onTagClick(tag); }}
-                                className="text-[9px] flex items-center gap-1 bg-slate-900 hover:bg-slate-800 text-slate-500 hover:text-accent-cyan border border-slate-800 hover:border-accent-cyan/30 px-2 py-1 rounded transition-colors uppercase font-bold tracking-wider"
-                            >
-                                <ExternalLink size={8} />
-                                {tag}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="absolute inset-0 bg-slate-900/95 p-6 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-                    <div className="text-center mb-6">
-                        <div className="text-xs text-slate-500 uppercase tracking-widest mb-2">{t.mediaPage.labels.realityScore}</div>
-                        <div className="text-5xl font-black text-white mb-2">{item.realityScore}</div>
-                        <div className="w-16 h-1 bg-accent-cyan mx-auto rounded-full"></div>
-                    </div>
-                    <div className="w-full space-y-3 mb-6">
-                        <div className="flex justify-between text-xs font-mono text-slate-400">
-                            <span>{t.mediaPage.labels.complexity}</span>
-                            <span className={`font-bold text-${getComplexityColor(item.complexity)}-400`}>{item.complexity}</span>
-                        </div>
-                    </div>
-                    <Button variant="primary" size="sm" onClick={onOpen} className="w-full">
-                        Access File
-                    </Button>
+                <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-4 flex-1">
+                    {language === 'de' ? item.descriptionDe : item.descriptionEn}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {item.relatedTheoryTags.slice(0, 2).map(tag => (
+                        <button
+                            key={tag}
+                            onClick={(e) => { e.stopPropagation(); onTagClick(tag); }}
+                            className="text-[9px] flex items-center gap-1 bg-slate-800 hover:bg-accent-cyan/10 text-slate-500 hover:text-accent-cyan border border-slate-700 hover:border-accent-cyan/30 px-2 py-1 rounded transition-colors uppercase font-bold tracking-wider"
+                        >
+                            <ExternalLink size={8} />
+                            {tag}
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>
     );
 });
 
+const StatsCard: React.FC<{ label: string, value: string | number, icon: React.ReactNode, color: string }> = ({ label, value, icon, color }) => (
+    <Card className="p-4 flex items-center gap-4 bg-slate-900/50 border-slate-800">
+        <div className={`p-3 rounded-xl bg-slate-900 border border-slate-800 ${color}`}>
+            {icon}
+        </div>
+        <div>
+            <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{label}</div>
+            <div className="text-2xl font-black text-white font-display">{value}</div>
+        </div>
+    </Card>
+);
+
 const MediaAnalytics: React.FC = () => {
-    const { filteredMedia } = useMediaCulture();
+    const { filteredMedia, stats } = useMediaCulture();
     
     // Prepare Data
     const scatterData = useMemo(() => filteredMedia.map(m => ({
@@ -210,54 +286,69 @@ const MediaAnalytics: React.FC = () => {
     }, [filteredMedia]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-            <Card className="min-h-[400px] flex flex-col">
-                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                    <Activity size={16} className="text-accent-cyan" /> Fiction vs. Reality Index
-                </h3>
-                <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
-                        <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                            <XAxis type="number" dataKey="x" name="Year" domain={['auto', 'auto']} stroke="#64748b" tick={{fontSize: 10}} />
-                            <YAxis type="number" dataKey="y" name="Reality Score" unit="%" stroke="#64748b" tick={{fontSize: 10}} />
-                            <ZAxis type="number" dataKey="z" range={[50, 400]} />
-                            <Tooltip 
-                                cursor={{ strokeDasharray: '3 3' }}
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
-                            />
-                            <Scatter name="Media" data={scatterData} fill="#8884d8">
-                                {scatterData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.type === 'MOVIE' ? '#06b6d4' : entry.type === 'BOOK' ? '#8b5cf6' : '#ef4444'} />
-                                ))}
-                            </Scatter>
-                        </ScatterChart>
-                    </ResponsiveContainer>
+        <div className="animate-fade-in space-y-6">
+            {stats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <StatsCard label="Items Indexed" value={stats.total} icon={<DatabaseIcon size={20} />} color="text-slate-300" />
+                    <StatsCard label="Avg Reality" value={`${stats.avgReality}%`} icon={<Activity size={20} />} color="text-accent-cyan" />
+                    <StatsCard label="Top Complexity" value={stats.topComplexity} icon={<BrainIcon size={20} />} color="text-accent-purple" />
+                    <StatsCard label="Avg Year" value={Math.round(filteredMedia.reduce((acc, i) => acc + i.year, 0) / stats.total) || '-'} icon={<Clock size={20} />} color="text-yellow-500" />
                 </div>
-            </Card>
+            )}
 
-            <Card className="min-h-[400px] flex flex-col">
-                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                    <PieChart size={16} className="text-accent-purple" /> Media Distribution
-                </h3>
-                <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
-                    <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
-                        <BarChart data={typeDistribution}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                            <XAxis dataKey="name" stroke="#64748b" tick={{fontSize: 10}} />
-                            <YAxis stroke="#64748b" tick={{fontSize: 10}} />
-                            <Tooltip 
-                                cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
-                            />
-                            <Bar dataKey="value" fill="#8b5cf6" barSize={40} radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="min-h-[400px] flex flex-col">
+                    <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <Activity size={16} className="text-accent-cyan" /> Fiction vs. Reality Index
+                    </h3>
+                    <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                                <XAxis type="number" dataKey="x" name="Year" domain={['auto', 'auto']} stroke="#64748b" tick={{fontSize: 10}} />
+                                <YAxis type="number" dataKey="y" name="Reality Score" unit="%" stroke="#64748b" tick={{fontSize: 10}} />
+                                <ZAxis type="number" dataKey="z" range={[50, 400]} />
+                                <Tooltip 
+                                    cursor={{ strokeDasharray: '3 3' }}
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
+                                />
+                                <Scatter name="Media" data={scatterData} fill="#8884d8">
+                                    {scatterData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.type === 'MOVIE' ? '#06b6d4' : entry.type === 'BOOK' ? '#8b5cf6' : '#ef4444'} />
+                                    ))}
+                                </Scatter>
+                            </ScatterChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+
+                <Card className="min-h-[400px] flex flex-col">
+                    <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        <PieChart size={16} className="text-accent-purple" /> Media Distribution
+                    </h3>
+                    <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
+                        <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
+                            <BarChart data={typeDistribution}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                <XAxis dataKey="name" stroke="#64748b" tick={{fontSize: 10}} />
+                                <YAxis stroke="#64748b" tick={{fontSize: 10}} />
+                                <Tooltip 
+                                    cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
+                                />
+                                <Bar dataKey="value" fill="#8b5cf6" barSize={40} radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+            </div>
         </div>
     );
 };
+
+// Icons for stats (Helper)
+const DatabaseIcon = ({ size }: { size: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s 9-1.34 9-3V5"></path></svg>;
+const BrainIcon = ({ size }: { size: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>;
 
 const MediaHeader: React.FC = () => {
     const { t, filters, filter, setFilter, searchTerm, setSearchTerm, handleClearFilters, viewMode, setViewMode } = useMediaCulture();
@@ -271,12 +362,14 @@ const MediaHeader: React.FC = () => {
                 <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
                     <button 
                         onClick={() => setViewMode('GRID')}
+                        aria-pressed={viewMode === 'GRID'}
                         className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                     >
                         <LayoutGrid size={16} />
                     </button>
                     <button 
                         onClick={() => setViewMode('ANALYTICS')}
+                        aria-pressed={viewMode === 'ANALYTICS'}
                         className={`p-2 rounded transition-colors ${viewMode === 'ANALYTICS' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                     >
                         <BarChart2 size={16} />
@@ -347,7 +440,7 @@ export const MediaCulture: React.FC = () => {
 };
 
 const ContentSwitcher: React.FC = () => {
-    const { viewMode, filteredMedia, onNavigateToArchive, onNavigateToDetail, t } = useMediaCulture();
+    const { viewMode, filteredMedia, displayedMedia, onNavigateToArchive, onNavigateToDetail, t, hasMore, handleLoadMore, filter, searchTerm } = useMediaCulture();
 
     if (filteredMedia.length === 0) {
         return (
@@ -366,15 +459,33 @@ const ContentSwitcher: React.FC = () => {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            {filteredMedia.map(item => (
-                <MediaGridCard 
-                    key={item.id} 
-                    item={item} 
-                    onTagClick={onNavigateToArchive} 
-                    onOpen={() => onNavigateToDetail(item.id)} 
-                />
-            ))}
+        <div className="animate-fade-in pb-12">
+            {/* Show Spotlight only if no search filters active */}
+            {filter === 'ALL' && !searchTerm && <SpotlightHero />}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedMedia.map(item => (
+                    <MediaGridCard 
+                        key={item.id} 
+                        item={item} 
+                        onTagClick={onNavigateToArchive} 
+                        onOpen={() => onNavigateToDetail(item.id)} 
+                    />
+                ))}
+            </div>
+
+            {hasMore && (
+                <div className="flex justify-center mt-12">
+                    <Button 
+                        variant="secondary" 
+                        onClick={handleLoadMore} 
+                        className="w-full md:w-auto min-w-[200px] py-4 border-slate-700 hover:border-accent-cyan"
+                        icon={<ArrowDownCircle size={16} />}
+                    >
+                        Load More Entries
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

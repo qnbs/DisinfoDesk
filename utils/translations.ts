@@ -24,7 +24,47 @@ export const translations = {
       reset: 'Zurücksetzen',
       unknown: 'Unbekannt',
       version: 'Version',
-      build: 'Build'
+      build: 'Build',
+      ready: 'Bereit',
+      unsaved: 'Ungespeichert',
+      visual: 'Visuell',
+      code: 'Quellcode'
+    },
+    layout: {
+      footer: {
+        stable: 'Uplink Stabil',
+        offline: 'Offline Modus',
+        ping: 'PING',
+        cache: 'NUR CACHE',
+        reboot: 'System Neustart',
+        id: 'ID',
+        integrity: 'Systemintegrität'
+      },
+      mobile: {
+        uplink: 'MOBIL UPLINK',
+        command: 'System Kommando'
+      },
+      sidebar: {
+        primary: 'Primäre Module',
+        core: 'System Kern',
+        install: 'APP INSTALLIEREN',
+        local: 'Lokales Protokoll',
+        online: 'System Online'
+      },
+      sub: {
+        overview: 'ÜBERSICHT',
+        database: 'DATENBANK',
+        culture: 'KULTUR',
+        profiles: 'PROFILE',
+        threats: 'BEDROHUNGEN',
+        analytics: 'ANALYTIK',
+        uplink: 'KI UPLINK',
+        simulation: 'SIMULATION',
+        creator: 'EDITOR',
+        storage: 'SPEICHER',
+        config: 'KONFIG',
+        manual: 'HANDBUCH'
+      }
     },
     nav: {
       dashboard: 'Dashboard',
@@ -36,20 +76,31 @@ export const translations = {
       settings: 'Einstellungen',
       help: 'Hilfe',
       media: 'Medien & Kultur',
-      database: 'The Vault',
-      authors: 'Bibliothek der Autoren',
-      editor: 'Theory Lab'
+      database: 'Der Tresor',
+      authors: 'Autoren-Bibliothek',
+      editor: 'Theorie-Labor'
     },
     authors: {
-        title: 'Bibliothek der Autoren',
-        subtitle: 'Profile der einflussreichsten Denker, Whistleblower und Mythologen.',
+        title: 'Autoren-Bibliothek',
+        subtitle: 'Architekten des Unbekannten',
         filter: 'Fokus',
-        all: 'Alle Autoren',
+        all: 'Alle Profile',
         searchPlaceholder: 'Suche Autor, Buch oder Thema...',
         bio: 'Biografie',
         works: 'Schlüsselwerke',
         influence: 'Einfluss-Index',
-        focus: 'Kerngebiete'
+        focus: 'Kerngebiete',
+        indexed: 'PROFILE INDEXIERT',
+        notFound: 'KEINE PROFILE GEFUNDEN',
+        notFoundDesc: 'Die angeforderten Agenten wurden geschwärzt oder existieren in diesem Sektor nicht.',
+        semantic: 'Semantischer Index',
+        cats: {
+            all: 'Alle Profile',
+            cosmic: 'Kosmos & Ursprung',
+            system: 'System & Kontrolle',
+            history: 'Geschichte & Finanzen',
+            esoteric: 'Esoterik & Krypto'
+        }
     },
     dashboard: {
       title: 'Lagebericht',
@@ -74,16 +125,30 @@ export const translations = {
     dangerPage: {
         title: 'PROTOKOLL OMEGA',
         subtitle: 'Analyse von Narrativen, die ein unmittelbares Risiko für die gesellschaftliche Stabilität, die öffentliche Gesundheit oder die demokratische Integrität darstellen.',
+        status: 'KRITISCHER ALARM',
+        defcon: 'DEFCON',
+        readiness: {
+            max: 'MAXIMALE BEREITSCHAFT',
+            elevated: 'ERHÖHTE ALARMSTUFE',
+            normal: 'NORMALE BEREITSCHAFT'
+        },
+        stats: {
+            active: 'Aktive Bedrohungen',
+            avg: 'Ø Viralität'
+        },
         cards: {
           radicalization: { title: 'Radikalisierungsrisiko', desc: 'Narrative, die Gläubige isolieren und Gewalt gegen "Feinde" legitimieren.' },
           health: { title: 'Gesundheitsgefahr', desc: 'Falschinformationen, die zur Ablehnung medizinischer Hilfe oder Einnahme schädlicher Substanzen führen.' },
           erosion: { title: 'Gesellschaftliche Erosion', desc: 'Systematische Untergrabung des Vertrauens in Institutionen, Wissenschaft und objektive Realität.' }
         },
-        listHeader: 'Identifizierte Hochrisiko-Ziele'
+        listHeader: 'Identifizierte Hochrisiko-Ziele',
+        priority: 'Prioritäts-Ziele',
+        impact: 'IMPACT SCORE',
+        vector: 'Vektor-Analyse'
     },
     viralPage: {
         title: 'VIRALE MECHANIK',
-        subtitle: 'Simulation der Verbreitungswege von Fehlinformationen, Mutation von Narrativen und die Mechanik des Glaubens.',
+        subtitle: 'Simulations-Engine',
         timelineTitle: 'Narrative Entstehung (Timeline)',
         mediaTitle: 'Die Evolution der Übertragungswege',
         sim: {
@@ -105,13 +170,12 @@ export const translations = {
           actions: {
             factCheck: 'Faktencheck',
             ban: 'Cluster Bann'
+          },
+          hud: {
+              title: 'VEKTOR_SIM_V4',
+              density: 'DICHTE_KARTE_AKTIV',
+              live: 'LIVE_KNOTEN_PROPAGATION'
           }
-        },
-        mechanisms: {
-          echo: { title: 'Echokammern', desc: 'Algorithmische Rückkopplungsschleifen, die bestehende Überzeugungen verstärken.' },
-          velocity: { title: 'Geschwindigkeit', desc: 'Falschmeldungen verbreiten sich aufgrund emotionaler Bindung 6x schneller als Fakten.' },
-          tribalism: { title: 'Tribalismus', desc: 'Das Teilen von Informationen signalisiert Gruppenzugehörigkeit statt Faktenwissen.' },
-          mutation: { title: 'Mutation', desc: 'Narrative entwickeln sich schnell, um Widerlegungen auszuweichen.' }
         },
         timeline: {
           static: { title: 'Die Statische Ära', desc: 'Verbreitung über Flugblätter und Bücher. Hohe Hürden, langsame Übertragung.' },
@@ -122,7 +186,10 @@ export const translations = {
     },
     mediaPage: {
       title: 'Fiktionen der Wahrheit',
-      subtitle: 'Ein Archiv popkultureller Artefakte, die Verschwörungsmythen erforschen, widerspiegeln oder vorwegnehmen.',
+      subtitle: 'Popkultur Archiv',
+      status: 'DECODIERE...',
+      noSignal: 'Kein Signal',
+      access: 'Akte öffnen',
       filter: {
         all: 'Alle Medien',
         movie: 'Filme',
@@ -173,6 +240,28 @@ export const translations = {
         az: 'A-Z'
       }
     },
+    editor: {
+        titleNew: 'NEUE THEORIE',
+        titleEdit: 'AKTE BEARBEITEN',
+        subtitle: 'THEORIE LABOR // EDITOR',
+        labels: {
+            title: 'Titel / Betreff',
+            desc: 'Kurzbeschreibung (Zusammenfassung)',
+            category: 'Kategorie',
+            threat: 'Gefahrenstufe',
+            origin: 'Ursprungsjahr',
+            tags: 'Meta-Tags',
+            cover: 'Cover Visualisierung',
+            virality: 'Viralitäts-Index'
+        },
+        placeholders: {
+            title: 'z.B. Der Mond ist aus Käse',
+            desc: 'Beschreibe die Theorie in 1-2 Sätzen...',
+            tags: 'Tag hinzufügen...',
+            image: 'Bild-URL einfügen...'
+        },
+        info: 'Vom Benutzer erstellte Theorien werden lokal in Ihrem Browser-Cache gespeichert (Redux Persist). Sie bleiben über Neustarts hinweg erhalten, werden aber nicht auf einen Server hochgeladen. Nutzen Sie "Export" in den Einstellungen für Backups.'
+    },
     detail: {
       back: 'Zurück',
       analyzing: 'Analysiere Geheimdaten...',
@@ -192,7 +281,19 @@ export const translations = {
       network: 'Netzwerk',
       timeline: 'Zeitstrahl',
       connections: 'Verbindungen',
-      error: 'Fehler beim Laden der Daten.'
+      error: 'Fehler beim Laden der Daten.',
+      refresh: 'Analyse aktualisieren',
+      edit: 'Akte bearbeiten',
+      readTime: 'Lesezeit',
+      min: 'Min',
+      topology: 'Narrative Topologie',
+      nodesDetected: 'Knoten erkannt',
+      timelineEvents: {
+          inception: { title: 'Die Gründung', desc: 'Das Narrativ taucht erstmals im öffentlichen Diskurs auf, oft in Randpublikationen.' },
+          threshold: { title: 'Virale Schwelle', desc: 'Die Theorie überspringt die Nische zur Subkultur, angetrieben durch Foren.' },
+          mainstream: { title: 'Mainstream Kontakt', desc: 'Erwähnung in Massenmedien oder Filmen zementiert den Platz im Zeitgeist.' },
+          current: { title: 'Aktueller Status', desc: 'Laufender Viralitäts-Index. Das Narrativ entwickelt sich weiter.' }
+      }
     },
     chat: {
       botName: 'Dr. Veritas',
@@ -222,6 +323,18 @@ export const translations = {
       buttonStart: 'Enthülle die Wahrheit',
       archived: 'Archiviert',
       saveVault: 'In Vault speichern',
+      format: 'Format',
+      tone: 'Tonfall',
+      formats: {
+          leak: 'Geleaktes Memo',
+          forum: 'Foren-Rant',
+          article: 'Zeitungsartikel'
+      },
+      tones: {
+          angry: 'Wütend',
+          scientific: 'Pseudo-Wissenschaftlich',
+          mystical: 'Mystisch'
+      },
       params: {
         subject: 'Zielobjekt',
         paranoia: 'Realitätsverzerrung',
@@ -245,7 +358,7 @@ export const translations = {
       }
     },
     vault: {
-      title: 'Vault Manager',
+      title: 'Tresor Manager',
       subtitle: 'Sicherer Speicherzugriff',
       directory: 'Verzeichnis',
       usedSpace: 'Belegter Speicher',
@@ -258,6 +371,8 @@ export const translations = {
       source: 'Quellcode',
       modify: 'Modifizieren',
       commit: 'Bestätigen',
+      awaiting: 'WARTE AUF EINGABE',
+      awaitingDesc: 'Wählen Sie einen Datensatz aus dem Index.',
       tabs: {
         analyses: 'Analysen',
         media: 'Medien',
@@ -290,9 +405,17 @@ export const translations = {
         typography: 'Typografie-Skalierung',
         incognito: 'Inkognito-Modus',
         export: 'Daten exportieren',
-        purge: 'System Reset'
+        purge: 'System Reset',
+        contrastDesc: 'Erhöht die Sichtbarkeit von Rändern und reduziert Transparenz.',
+        motionDesc: 'Deaktiviert komplexe Animationen und Übergänge.',
+        soundDesc: 'Spielt subtile Töne bei Interaktionen.',
+        incognitoDesc: 'Verhindert das Protokollieren von Anfragen im Verlauf (simuliert).'
       },
-      aboutText: 'Dieses Interface dient der Aufklärung und Unterhaltung. Alle Analysen werden live von Google Gemini generiert.'
+      models: {
+          flash: { title: 'Gemini 2.5 Flash', desc: 'Ausgewogene Leistung. Ideal für allgemeine Aufgaben.' },
+          pro: { title: 'Gemini 3.0 Pro (Vorschau)', desc: 'Erweiterte Logikfähigkeiten.' }
+      },
+      privacyNote: 'DisinfoDesk arbeitet mit einer Client-Side-Architektur. Ihr Suchverlauf wird in der IndexedDB (Vault) Ihres Browsers gespeichert und nicht an unsere Server gesendet, außer für notwendige API-Aufrufe an Google Gemini.'
     },
     help: {
       title: 'Handbuch für Wahrheitssuchende',
@@ -343,7 +466,47 @@ export const translations = {
       reset: 'Reset',
       unknown: 'Unknown',
       version: 'Version',
-      build: 'Build'
+      build: 'Build',
+      ready: 'Ready',
+      unsaved: 'Unsaved',
+      visual: 'Visual',
+      code: 'Source Code'
+    },
+    layout: {
+      footer: {
+        stable: 'Uplink Stable',
+        offline: 'Offline Mode',
+        ping: 'PING',
+        cache: 'CACHE_ONLY',
+        reboot: 'System Reboot',
+        id: 'ID',
+        integrity: 'System Integrity'
+      },
+      mobile: {
+        uplink: 'MOBILE UPLINK',
+        command: 'System Command'
+      },
+      sidebar: {
+        primary: 'Primary Modules',
+        core: 'System Core',
+        install: 'INSTALL APP',
+        local: 'Local Protocol',
+        online: 'System Online'
+      },
+      sub: {
+        overview: 'OVERVIEW',
+        database: 'DATABASE',
+        culture: 'CULTURE',
+        profiles: 'PROFILES',
+        threats: 'THREATS',
+        analytics: 'ANALYTICS',
+        uplink: 'AI UPLINK',
+        simulation: 'SIMULATION',
+        creator: 'CREATOR',
+        storage: 'STORAGE',
+        config: 'CONFIG',
+        manual: 'MANUAL'
+      }
     },
     nav: {
       dashboard: 'Dashboard',
@@ -361,14 +524,25 @@ export const translations = {
     },
     authors: {
         title: 'Author Library',
-        subtitle: 'Profiles of the most influential thinkers, whistleblowers, and mythologists.',
+        subtitle: 'Architects of the Unknown',
         filter: 'Focus',
         all: 'All Authors',
         searchPlaceholder: 'Search author, book, or topic...',
         bio: 'Biography',
         works: 'Key Works',
         influence: 'Influence Index',
-        focus: 'Focus Areas'
+        focus: 'Focus Areas',
+        indexed: 'PROFILES INDEXED',
+        notFound: 'NO PROFILES FOUND',
+        notFoundDesc: 'The requested agents have been redacted or do not exist in this sector.',
+        semantic: 'Semantic Index',
+        cats: {
+            all: 'All Profiles',
+            cosmic: 'Cosmic & Origins',
+            system: 'System & Control',
+            history: 'History & Finance',
+            esoteric: 'Esoteric & Crypto'
+        }
     },
     dashboard: {
       title: 'Situation Report',
@@ -393,16 +567,30 @@ export const translations = {
     dangerPage: {
         title: 'PROTOCOL OMEGA',
         subtitle: 'Analysis of narratives that pose immediate risks to societal stability, public health, or democratic integrity. Handle with extreme caution.',
+        status: 'CRITICAL ALERT',
+        defcon: 'DEFCON',
+        readiness: {
+            max: 'MAXIMUM READINESS',
+            elevated: 'ELEVATED ALERT',
+            normal: 'NORMAL READINESS'
+        },
+        stats: {
+            active: 'Active Threats',
+            avg: 'Avg. Virality'
+        },
         cards: {
           radicalization: { title: 'Radicalization Risk', desc: 'Narratives that isolate believers and legitimize violence against perceived "enemies".' },
           health: { title: 'Health Hazard', desc: 'Misinformation leading to refusal of medical treatment or consumption of harmful substances.' },
           erosion: { title: 'Societal Erosion', desc: 'Systematic undermining of trust in institutions, science, and the concept of objective reality itself.' }
         },
-        listHeader: 'Identified High-Priority Targets'
+        listHeader: 'Identified High-Priority Targets',
+        priority: 'Priority Targets',
+        impact: 'IMPACT SCORE',
+        vector: 'Vector Analysis'
     },
     viralPage: {
         title: 'VIRAL MECHANICS',
-        subtitle: 'A deep dive into how misinformation spreads, mutations of narratives, and the mechanics of belief in the digital age.',
+        subtitle: 'Analytics Engine',
         timelineTitle: 'Narrative Genesis Timeline',
         mediaTitle: 'The Evolution of Transmission Vectors',
         sim: {
@@ -424,13 +612,12 @@ export const translations = {
           actions: {
             factCheck: 'Fact Check',
             ban: 'Ban Cluster'
+          },
+          hud: {
+              title: 'VECTOR_SIM_V4',
+              density: 'DENSITY_MAP_ENABLED',
+              live: 'LIVE_NODE_PROPAGATION'
           }
-        },
-        mechanisms: {
-          echo: { title: 'Echo Chambers', desc: 'Algorithmic feedback loops that reinforce existing beliefs by excluding dissenting views.' },
-          velocity: { title: 'Velocity', desc: 'Falsehoods spread 6x faster than truth on social platforms due to novelty and emotional engagement.' },
-          tribalism: { title: 'Tribalism', desc: 'Sharing information signals group loyalty rather than factual accuracy.' },
-          mutation: { title: 'Mutation', desc: 'Narratives evolve rapidly to evade debunking, shedding falsified details while keeping core themes.' }
         },
         timeline: {
           static: { title: 'The Static Era', desc: 'Spread via pamphlets and books. High barrier to entry, slow transmission, high persistence.' },
@@ -441,7 +628,10 @@ export const translations = {
     },
     mediaPage: {
       title: 'Fictions of Truth',
-      subtitle: 'An archive of pop-cultural artifacts that explore, reflect, or anticipate conspiracy myths.',
+      subtitle: 'Pop Culture Archive',
+      status: 'DECODING...',
+      noSignal: 'No Signal',
+      access: 'Access File',
       filter: {
         all: 'All Media',
         movie: 'Movies',
@@ -511,7 +701,19 @@ export const translations = {
       network: 'Connections',
       timeline: 'Timeline',
       connections: 'Connections',
-      error: 'Error loading data.'
+      error: 'Error loading data.',
+      refresh: 'Refresh Analysis',
+      edit: 'Edit File',
+      readTime: 'Reading Time',
+      min: 'Min',
+      topology: 'Narrative Topology',
+      nodesDetected: 'Nodes Detected',
+      timelineEvents: {
+          inception: { title: 'The Inception', desc: 'The narrative first appears in public discourse, often in fringe publications or isolated communities.' },
+          threshold: { title: 'Viral Threshold', desc: 'The theory bridges the gap from niche to subculture, gaining traction via forums or alternative media.' },
+          mainstream: { title: 'Mainstream Exposure', desc: 'Mentioned in major media, films, or political discourse, cementing its place in the cultural zeitgeist.' },
+          current: { title: 'Current Status', desc: 'Current virality index. The narrative continues to evolve.' }
+      }
     },
     chat: {
       botName: 'Dr. Veritas',
@@ -541,6 +743,18 @@ export const translations = {
       buttonStart: 'Reveal the Truth',
       archived: 'Archived',
       saveVault: 'Save to Vault',
+      format: 'Format',
+      tone: 'Tone',
+      formats: {
+          leak: 'Leaked Memo',
+          forum: 'Forum Rant',
+          article: 'News Article'
+      },
+      tones: {
+          angry: 'Angry',
+          scientific: 'Pseudo-Scientific',
+          mystical: 'Mystical'
+      },
       params: {
         subject: 'Target Subject',
         paranoia: 'Reality Distortion',
@@ -577,6 +791,8 @@ export const translations = {
       source: 'Source',
       modify: 'Modify',
       commit: 'Commit',
+      awaiting: 'AWAITING INPUT',
+      awaitingDesc: 'Select a record from the vault index to inspect content.',
       tabs: {
         analyses: 'Analyses',
         media: 'Media',
@@ -609,9 +825,17 @@ export const translations = {
         typography: 'Typography Scaling',
         incognito: 'Incognito Mode',
         export: 'Export Data JSON',
-        purge: 'System Reset'
+        purge: 'System Reset',
+        contrastDesc: 'Increases border visibility and reduces transparency.',
+        motionDesc: 'Disables complex animations and transitions.',
+        soundDesc: 'Play subtle cues on interaction.',
+        incognitoDesc: 'Prevents logging of queries to local history (simulated).'
       },
-      aboutText: 'This interface is for education and entertainment. All analyses are generated live by Google Gemini.'
+      models: {
+          flash: { title: 'Gemini 2.5 Flash', desc: 'Balanced performance. Ideal for general tasks.' },
+          pro: { title: 'Gemini 3.0 Pro (Preview)', desc: 'Enhanced reasoning capabilities.' }
+      },
+      privacyNote: 'DisinfoDesk operates on a client-side architecture. Your search history is stored in your browser\'s IndexedDB (Vault) and is not sent to our servers, except for necessary API calls to Google Gemini.'
     },
     help: {
       title: 'Guide for Truth Seekers',

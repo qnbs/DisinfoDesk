@@ -1,44 +1,72 @@
 
-import React, { useState, useEffect, useCallback, useMemo, createContext, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, createContext, useContext, useRef } from 'react';
 import { dbService, StorageStats } from '../services/dbService';
-import { StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis } from '../types';
+import { StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis, Message } from '../types';
 import { Card, Button, Badge, PageFrame, PageHeader, EmptyState } from './ui/Common';
 import { 
   Database, Trash2, Edit3, Save, Search, Server, FileText, 
   MessageSquare, Skull, ChevronRight, Lock, 
   Upload, Download, Activity, CheckSquare, Square, 
   Cpu, ShieldCheck, FileJson, AlertTriangle, Terminal, Check, HardDrive,
-  Folder, FolderOpen, Plus, Film, Zap, Eye, Brain
+  FolderOpen, Plus, Film, Zap, Eye, Brain, X, AlignLeft, Calendar,
+  Clock, Hash, Shield, BarChart3, Scan
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
+import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
 
 type Tab = 'ANALYSES' | 'MEDIA' | 'CHATS' | 'SATIRES';
 type DatabaseRecord = StoredAnalysis | StoredChat | StoredSatire | StoredMediaAnalysis;
 
-// --- 1. Logic Hook ---
+// --- 0. UTILS & FX ---
 
-const useDatabaseManagerLogic = () => {
+const ScrambleText: React.FC<{ text: string, active: boolean }> = ({ text, active }) => {
+    const [display, setDisplay] = useState(text);
+    const chars = '010101010101<>?#%_';
+    
+    useEffect(() => {
+        if (!active) {
+            setDisplay(text);
+            return;
+        }
+        let iter = 0;
+        const interval = setInterval(() => {
+            setDisplay(text.split('').map((c, i) => {
+                if (i < iter) return text[i];
+                return chars[Math.floor(Math.random() * chars.length)];
+            }).join(''));
+            if (iter >= text.length) clearInterval(interval);
+            iter += 1/2; 
+        }, 30);
+        return () => clearInterval(interval);
+    }, [text, active]);
+
+    return <span>{display}</span>;
+};
+
+// --- 1. LOGIC HOOK ---
+
+const useVaultLogic = () => {
     const { t } = useLanguage();
-    const [isUnlocked, setIsUnlocked] = useState(false);
+    const { showToast } = useToast();
     
     const [activeTab, setActiveTab] = useState<Tab>('ANALYSES');
     const [data, setData] = useState<DatabaseRecord[]>([]);
     const [stats, setStats] = useState<StorageStats>({ usageBytes: 0, recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0 }, totalRecords: 0 });
     const [loading, setLoading] = useState(false);
     
-    const [selectedItem, setSelectedItem] = useState<DatabaseRecord | null>(null);
+    // Selection & Viewing
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = useState<'VISUAL' | 'CODE'>('VISUAL');
+    const [inspectorMode, setInspectorMode] = useState<'VISUAL' | 'CODE'>('VISUAL');
+    const [isDecrypting, setIsDecrypting] = useState(false);
+
+    // Editing State
     const [editMode, setEditMode] = useState(false);
     const [editedContent, setEditedContent] = useState('');
-    const [notification, setNotification] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
-    const showNotification = useCallback((msg: string, type: 'success' | 'error') => {
-        setNotification({ msg, type });
-        setTimeout(() => setNotification(null), 3000);
-    }, []);
-
+    // Load Data
     const refreshData = useCallback(async () => {
         setLoading(true);
         try {
@@ -53,26 +81,27 @@ const useDatabaseManagerLogic = () => {
                 case 'SATIRES': result = await dbService.getAll<StoredSatire>('satires'); break;
             }
             setData(result.sort((a, b) => b.timestamp - a.timestamp));
-            if (selectedItem) {
-                const stillExists = result.find(i => i.id === selectedItem.id);
-                if (stillExists) setSelectedItem(stillExists);
-                else setSelectedItem(null);
+            
+            // Validate selected ID still exists
+            if (selectedId && !result.find(i => i.id === selectedId)) {
+                setSelectedId(null);
             }
-        } catch (e: unknown) {
-            console.error("DB Error", e);
+        } catch (e) {
+            console.error("Vault Access Denied", e);
+            showToast('Secure Vault Connection Failed.', 'error');
         } finally {
             setLoading(false);
         }
-    }, [activeTab, selectedItem]);
+    }, [activeTab, selectedId, showToast]);
 
-    useEffect(() => {
-        // Auto-unlock for now, can add auth later
-        setIsUnlocked(true);
-    }, []);
+    useEffect(() => { refreshData(); }, [refreshData]);
 
-    useEffect(() => {
-        if (isUnlocked) refreshData();
-    }, [refreshData, isUnlocked]);
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab);
+        setSelectedId(null);
+        setSelectedIds(new Set());
+        setSearchTerm('');
+    };
 
     const handleSelect = (id: string, multi: boolean) => {
         if (multi) {
@@ -81,33 +110,60 @@ const useDatabaseManagerLogic = () => {
             else newSet.add(id);
             setSelectedIds(newSet);
         } else {
-            const item = data.find(d => d.id === id) || null;
-            setSelectedItem(item);
+            if (selectedId === id) return;
+            setIsDecrypting(true);
+            setTimeout(() => setIsDecrypting(false), 600); // Fake decryption delay
+            setSelectedId(id);
             setEditMode(false);
-            setViewMode('VISUAL');
-            setSelectedIds(new Set([id]));
+            setInspectorMode('VISUAL');
+            // If strictly single select mode, clear multi
+            if (selectedIds.size <= 1) setSelectedIds(new Set([id]));
         }
     };
 
     const handleBatchDelete = async () => {
-        const ids = selectedIds.size > 0 ? Array.from(selectedIds) : (selectedItem ? [selectedItem.id] : []);
+        const ids = selectedIds.size > 0 ? Array.from(selectedIds) : (selectedId ? [selectedId] : []);
         if (ids.length === 0) return;
         
-        if (!window.confirm(`WARNING: Permanent deletion of ${ids.length} records initiated. Confirm?`)) return;
+        if (!window.confirm(`SECURITY ALERT: Permanently shredding ${ids.length} records. This action is irreversible. Proceed?`)) return;
 
         try {
-            let store: 'analyses' | 'chats' | 'satires' | 'media_analyses' = 'analyses';
-            if (activeTab === 'CHATS') store = 'chats';
-            else if (activeTab === 'SATIRES') store = 'satires';
-            else if (activeTab === 'MEDIA') store = 'media_analyses';
-
-            await dbService.deleteBatch(store, ids);
+            const storeNameMap: Record<Tab, any> = {
+                'ANALYSES': 'analyses',
+                'MEDIA': 'media_analyses',
+                'CHATS': 'chats',
+                'SATIRES': 'satires'
+            };
+            await dbService.deleteBatch(storeNameMap[activeTab], ids);
             setSelectedIds(new Set());
-            setSelectedItem(null);
-            showNotification(`Shredded ${ids.length} files successfully.`, 'success');
+            setSelectedId(null);
+            showToast(`${ids.length} records purged from Vault.`, 'success');
             refreshData();
-        } catch (e: unknown) {
-            showNotification('Deletion protocol failed.', 'error');
+        } catch (e) {
+            showToast('Purge Protocol Failed.', 'error');
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        if(!selectedId) return;
+        try {
+            const updatedItem = JSON.parse(editedContent) as DatabaseRecord;
+            const storeNameMap: Record<Tab, any> = {
+                'ANALYSES': 'analyses',
+                'MEDIA': 'media_analyses',
+                'CHATS': 'chats',
+                'SATIRES': 'satires'
+            };
+            
+            // Type-safe save dispatch
+            // @ts-ignore - Dynamic dispatch is safe here due to logic
+            await dbService.put(storeNameMap[activeTab], updatedItem);
+
+            setEditMode(false);
+            showToast('Record re-encrypted and saved.', 'success');
+            refreshData();
+        } catch (e) {
+            showToast('Syntax Error: JSON integrity check failed.', 'error');
         }
     };
 
@@ -116,58 +172,10 @@ const useDatabaseManagerLogic = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `disinfodesk_vault_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `vault_dump_${new Date().getTime()}.json`;
         a.click();
-        showNotification('Database dump extracted.', 'success');
+        showToast('Vault exported to local drive.', 'success');
     };
-
-    const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return;
-        const file = e.target.files[0];
-        
-        try {
-            const text = await file.text();
-            const result = await dbService.importDatabase(text);
-            if (result.success) {
-                showNotification(result.message, 'success');
-                refreshData();
-            } else {
-                showNotification(result.message, 'error');
-            }
-        } catch (err: unknown) {
-            showNotification('Read Error: File inaccessible.', 'error');
-        } finally {
-            // Reset input so the same file can be selected again if needed
-            e.target.value = '';
-        }
-    };
-
-    const handleSaveEdit = async () => {
-        if(!selectedItem) return;
-        try {
-            const updatedItem = JSON.parse(editedContent) as DatabaseRecord;
-            
-            if (activeTab === 'ANALYSES') await dbService.saveAnalysis(updatedItem as StoredAnalysis);
-            else if (activeTab === 'MEDIA') await dbService.saveMediaAnalysis(updatedItem as StoredMediaAnalysis);
-            else if (activeTab === 'CHATS') await dbService.saveChat(updatedItem as StoredChat);
-            else await dbService.saveSatire(updatedItem as StoredSatire);
-
-            setSelectedItem(updatedItem);
-            setEditMode(false);
-            showNotification('Record overwritten successfully.', 'success');
-            refreshData();
-        } catch (e: unknown) {
-            showNotification('Syntax Error: Update aborted.', 'error');
-        }
-    };
-
-    const filteredData = useMemo(() => {
-        const term = searchTerm.toLowerCase();
-        return data.filter(item => 
-            item.title.toLowerCase().includes(term) || 
-            item.id.toLowerCase().includes(term)
-        );
-    }, [data, searchTerm]);
 
     const formatBytes = (bytes: number) => {
         if (bytes === 0) return '0 B';
@@ -176,442 +184,395 @@ const useDatabaseManagerLogic = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + ['B', 'KB', 'MB', 'GB'][i];
     };
 
+    const filteredData = useMemo(() => {
+        const term = searchTerm.toLowerCase();
+        return data.filter(item => 
+            item.title?.toLowerCase().includes(term) || 
+            item.id.toLowerCase().includes(term)
+        );
+    }, [data, searchTerm]);
+
+    const selectedRecord = useMemo(() => data.find(d => d.id === selectedId), [data, selectedId]);
+
     return {
-        t,
-        isUnlocked, setIsUnlocked,
-        activeTab, setActiveTab,
-        stats,
-        loading,
-        selectedItem, setSelectedItem,
-        selectedIds, setSelectedIds,
+        t, activeTab, handleTabChange,
+        stats, loading, data: filteredData,
+        selectedId, selectedRecord, selectedIds,
+        handleSelect, handleBatchDelete, handleSaveEdit, handleExport,
         searchTerm, setSearchTerm,
-        viewMode, setViewMode,
-        editMode, setEditMode,
-        editedContent, setEditedContent,
-        notification,
-        filteredData,
-        handleSelect,
-        handleBatchDelete,
-        handleExport,
-        handleImportFile,
-        handleSaveEdit,
-        formatBytes
+        inspectorMode, setInspectorMode,
+        editMode, setEditMode, editedContent, setEditedContent,
+        isDecrypting, formatBytes
     };
 };
 
-// --- 2. Context & Provider ---
+// --- 2. CONTEXT ---
 
-type DatabaseContextType = ReturnType<typeof useDatabaseManagerLogic>;
-const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
-
-const useDatabase = () => {
-  const context = useContext(DatabaseContext);
-  if (!context) throw new Error('useDatabase must be used within a DatabaseProvider');
-  return context;
+const VaultContext = createContext<ReturnType<typeof useVaultLogic> | undefined>(undefined);
+const useVault = () => {
+    const ctx = useContext(VaultContext);
+    if (!ctx) throw new Error("useVault outside provider");
+    return ctx;
 };
 
-const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const logic = useDatabaseManagerLogic();
-  return <DatabaseContext.Provider value={logic}>{children}</DatabaseContext.Provider>;
-};
+// --- 3. COMPONENTS ---
 
-// --- 3. Sub-Components ---
+// Left Panel: Data Banks
+const DataBankSelector: React.FC = () => {
+    const { activeTab, handleTabChange, stats, t } = useVault();
+    
+    const banks: { id: Tab, label: string, icon: React.ElementType, color: string }[] = [
+        { id: 'ANALYSES', label: t.vault.tabs.analyses, icon: FileText, color: 'bg-accent-cyan' },
+        { id: 'MEDIA', label: t.vault.tabs.media, icon: Film, color: 'bg-accent-purple' },
+        { id: 'CHATS', label: t.vault.tabs.chats, icon: MessageSquare, color: 'bg-green-500' },
+        { id: 'SATIRES', label: t.vault.tabs.satires, icon: Skull, color: 'bg-yellow-500' },
+    ];
 
-const CodeViewer: React.FC<{ code: string, onChange?: (val: string) => void, editable?: boolean }> = ({ code, onChange, editable }) => {
+    // Explicit mapping to match StoreName
+    const storeMapping: Record<Tab, keyof typeof stats.recordCounts> = {
+        'ANALYSES': 'analyses',
+        'MEDIA': 'media_analyses',
+        'CHATS': 'chats',
+        'SATIRES': 'satires'
+    };
+
+    // Calc visuals
+    const maxCount = Math.max(...(Object.values(stats.recordCounts) as number[]), 1);
+
     return (
-        <div className="relative w-full h-full font-mono text-xs bg-[#0d1117] rounded-lg border border-slate-800 overflow-hidden group shadow-inner">
-            <div className="flex items-center justify-between px-3 py-2 bg-slate-900/80 border-b border-slate-800 text-[10px] text-slate-500 select-none backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                    </div>
-                    <span className="ml-2 font-bold text-slate-400">JSON_EDITOR</span>
-                </div>
-                <div className="font-mono text-slate-600">{editable ? 'RW' : 'RO'}</div>
+        <div className="flex flex-col gap-2 h-full p-4 border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl w-full md:w-64 shrink-0">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <Server size={12} /> Data Banks
             </div>
-            <textarea
-                value={code}
-                onChange={(e) => onChange && onChange(e.target.value)}
-                readOnly={!editable}
-                spellCheck={false}
-                className={`
-                    w-full h-full p-4 bg-transparent text-emerald-400 outline-none resize-none leading-relaxed
-                    selection:bg-accent-cyan/30 selection:text-white
-                    ${editable ? 'cursor-text' : 'cursor-default'}
-                `}
-                style={{ fontFamily: '"Fira Code", monospace' }}
-            />
-            {!editable && (
-                <div className="absolute top-12 right-6 pointer-events-none opacity-20">
-                    <Lock size={24} className="text-slate-400" />
+            {banks.map(bank => {
+                const count = stats.recordCounts[storeMapping[bank.id]] || 0;
+                const percent = (count / maxCount) * 100;
+                const isActive = activeTab === bank.id;
+
+                return (
+                    <button
+                        key={bank.id}
+                        onClick={() => handleTabChange(bank.id)}
+                        className={`
+                            relative flex flex-col p-4 rounded-xl border transition-all duration-300 group overflow-hidden text-left
+                            ${isActive 
+                                ? 'bg-slate-900 border-slate-600 shadow-lg' 
+                                : 'bg-slate-950/30 border-slate-800 hover:bg-slate-900 hover:border-slate-700'}
+                        `}
+                    >
+                        {/* Progress Bar Background */}
+                        <div 
+                            className={`absolute bottom-0 left-0 h-1 transition-all duration-500 ${bank.color}`} 
+                            style={{ width: isActive ? '100%' : `${percent}%`, opacity: isActive ? 1 : 0.3 }}
+                        />
+                        
+                        <div className="flex items-center justify-between mb-2 relative z-10">
+                            <div className={`p-2 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-900 text-slate-500'}`}>
+                                <bank.icon size={16} />
+                            </div>
+                            <span className="font-mono text-xs font-bold text-slate-400">{count}</span>
+                        </div>
+                        <div className={`text-xs font-bold uppercase tracking-wider relative z-10 ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                            {bank.label}
+                        </div>
+                        {isActive && <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none" />}
+                    </button>
+                );
+            })}
+            
+            <div className="mt-auto pt-6 border-t border-slate-800">
+                <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800 flex items-center gap-3">
+                    <ShieldCheck size={16} className="text-green-500" />
+                    <div>
+                        <div className="text-[9px] text-slate-500 uppercase font-bold">Vault Integrity</div>
+                        <div className="text-xs text-green-400 font-mono">100% SECURE</div>
+                    </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
 
-const VaultHeader: React.FC = () => {
-  const { stats, formatBytes, handleExport, handleImportFile, handleBatchDelete, t } = useDatabase(); 
-  return (
-    <PageHeader 
-        title={t.vault.title}
-        subtitle={t.vault.subtitle}
-        icon={Database}
-        status="ENCRYPTED"
-    >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex gap-6 font-mono border-r border-slate-800 pr-6">
-                <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">{t.vault.usedSpace}</div>
-                    <div className="text-lg text-white font-bold">{formatBytes(stats.usageBytes)}</div>
-                </div>
-                <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">{t.vault.totalFiles}</div>
-                    <div className="text-lg text-white font-bold">{stats.totalRecords}</div>
-                </div>
-            </div>
-            <div className="flex gap-2 items-center flex-wrap">
-                <Button variant="secondary" size="sm" onClick={handleExport} icon={<Download size={14} />} className="text-xs border-slate-700 hover:border-accent-cyan bg-slate-900/50">
-                    {t.common.export}
-                </Button>
-                 <label className="cursor-pointer block">
-                     <input type="file" className="hidden" accept=".json" onChange={handleImportFile} />
-                     <div className="bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-700 hover:border-accent-cyan px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-2 transition-all h-full justify-start font-mono uppercase tracking-wide">
-                        <Upload size={14} /> {t.common.import}
-                     </div>
-                 </label>
-                 <Button variant="danger" size="sm" onClick={handleBatchDelete} icon={<Trash2 size={14} />} className="text-xs opacity-70 hover:opacity-100 bg-red-950/20 border-red-900/50 ml-auto">
-                    {t.vault.purge}
-                 </Button>
-            </div>
-        </div>
-    </PageHeader>
-  );
-};
+// Center: Holo Grid
+const HoloGrid: React.FC = () => {
+    const { data, loading, selectedId, handleSelect, searchTerm, setSearchTerm, selectedIds, t } = useVault();
 
-const VaultBrowser: React.FC = () => {
-  const { activeTab, setActiveTab, setSelectedItem, setSearchTerm, searchTerm, handleBatchDelete, selectedIds, loading, filteredData, handleSelect, t } = useDatabase();
-  
-  return (
-    <Card className="w-full md:w-1/3 flex flex-col p-0 bg-slate-950/50 border-slate-800 rounded-lg overflow-hidden backdrop-blur-md">
-        {/* Tab Navigation / Folder Metaphor */}
-        <div className="flex flex-col bg-slate-900/50 border-b border-slate-800">
-            <div className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                {t.vault.directory}
-            </div>
-            <div className="flex px-2 pb-2 gap-1 overflow-x-auto scrollbar-hide">
-                {(['ANALYSES', 'MEDIA', 'CHATS', 'SATIRES'] as Tab[]).map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => { setActiveTab(tab); setSelectedItem(null); setSearchTerm(''); }}
-                        className={`
-                            flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono transition-all whitespace-nowrap
-                            ${activeTab === tab 
-                                ? 'bg-slate-800 text-white border border-slate-700 shadow-sm' 
-                                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'}
-                        `}
-                    >
-                        {activeTab === tab ? <FolderOpen size={14} className="text-accent-cyan" /> : <Folder size={14} />}
-                        {t.vault.tabs[tab.toLowerCase() as keyof typeof t.vault.tabs]}
-                    </button>
-                ))}
-            </div>
+    if (loading) return (
+        <div className="flex-1 flex flex-col items-center justify-center text-accent-cyan gap-4">
+            <Scan size={48} className="animate-spin-slow" />
+            <div className="text-xs font-mono uppercase tracking-[0.2em] animate-pulse">Decrypting Index...</div>
         </div>
+    );
 
-        <div className="p-3 border-b border-slate-800 flex gap-2">
-            <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600" size={12} />
-                <input 
-                    type="text"
-                    placeholder={t.vault.searchPlaceholder}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-8 pr-2 py-2 text-xs text-slate-300 focus:border-accent-cyan outline-none font-mono focus:ring-1 focus:ring-accent-cyan/50 transition-all"
-                />
-            </div>
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleBatchDelete} 
-                disabled={selectedIds.size === 0}
-                className={`px-2 ${selectedIds.size > 0 ? 'text-red-400 hover:bg-red-950/50' : 'text-slate-700'}`}
-            >
-                <Trash2 size={14} />
-            </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar bg-slate-950/20 relative min-h-[300px]">
-            {loading && <div className="text-center py-8 text-xs text-accent-cyan animate-pulse font-mono">scanning_sectors...</div>}
+    return (
+        <div className="flex-1 flex flex-col h-full bg-[#050b14] relative overflow-hidden">
+            {/* Grid Background */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
             
-            {!loading && filteredData.length === 0 && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                    <EmptyState 
-                        title={t.vault.empty}
-                        description={t.vault.emptyDesc}
-                        icon={HardDrive}
+            {/* Toolbar */}
+            <div className="p-4 border-b border-slate-800 flex gap-4 items-center bg-slate-900/80 backdrop-blur-sm z-10">
+                <div className="relative flex-1 group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-accent-cyan transition-colors" size={14} />
+                    <input 
+                        type="text" 
+                        placeholder="SEARCH_INDEX..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white font-mono focus:border-accent-cyan outline-none transition-all placeholder-slate-700"
                     />
                 </div>
-            )}
+                <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500">
+                    <span className="hidden md:inline">INDEX:</span>
+                    <span className="text-white">{data.length}</span>
+                </div>
+            </div>
 
-            {!loading && filteredData.map(item => {
-                 const isSelected = selectedIds.has(item.id);
-                 return (
-                    <div 
-                        key={item.id}
-                        onClick={() => handleSelect(item.id, false)}
-                        className={`
-                            group flex items-center gap-3 p-3 rounded border cursor-pointer transition-all touch-manipulation
-                            ${isSelected
-                                ? 'bg-slate-800/60 border-slate-600'
-                                : 'bg-transparent border-transparent hover:bg-slate-800/40 hover:border-slate-800'}
-                        `}
-                    >
-                         <button 
-                            onClick={(e) => { e.stopPropagation(); handleSelect(item.id, true); }}
-                            className={`shrink-0 p-1 -m-1 ${isSelected ? 'text-accent-cyan' : 'text-slate-600 group-hover:text-slate-400'}`}
-                        >
-                            {isSelected ? <CheckSquare size={14} /> : <Square size={14} />}
-                        </button>
-                         <div className="min-w-0 flex-1">
-                             <div className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
-                                {item.title || 'UNKNOWN_FILE'}
-                             </div>
-                             <div className="text-[10px] text-slate-600 font-mono truncate">
-                                {item.id}
-                             </div>
-                         </div>
-                         {isSelected && <ChevronRight size={14} className="text-accent-cyan" />}
+            {/* Grid Area */}
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar z-0">
+                {data.length === 0 ? (
+                    <EmptyState title="SECTOR EMPTY" description="No data shards found in this bank." icon={HardDrive} />
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {data.map((item, idx) => {
+                            const isSelected = selectedId === item.id;
+                            const isChecked = selectedIds.has(item.id);
+                            return (
+                                <div 
+                                    key={item.id}
+                                    onClick={() => handleSelect(item.id, false)}
+                                    className={`
+                                        group relative p-4 rounded-lg border transition-all duration-200 cursor-pointer overflow-hidden
+                                        ${isSelected 
+                                            ? 'bg-accent-cyan/10 border-accent-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
+                                            : 'bg-slate-900/40 border-slate-800 hover:border-slate-600 hover:bg-slate-900/80'}
+                                    `}
+                                    style={{ animationDelay: `${idx * 20}ms` }}
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className={`p-1.5 rounded-md ${isSelected ? 'bg-accent-cyan text-slate-900' : 'bg-slate-950 text-slate-500 group-hover:text-white'}`}>
+                                            <FileText size={14} />
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); handleSelect(item.id, true); }}
+                                            className={`hover:text-accent-cyan transition-colors ${isChecked ? 'text-accent-cyan' : 'text-slate-700'}`}
+                                        >
+                                            {isChecked ? <CheckSquare size={16} /> : <Square size={16} />}
+                                        </button>
+                                    </div>
+                                    <h4 className="text-xs font-bold text-slate-200 truncate mb-1 font-mono group-hover:text-accent-cyan transition-colors">
+                                        <ScrambleText text={item.title || 'UNTITLED_SHARD'} active={isSelected} />
+                                    </h4>
+                                    <div className="flex justify-between items-end mt-2 pt-2 border-t border-slate-800/50">
+                                        <span className="text-[9px] text-slate-600 font-mono truncate max-w-[80px]">{item.id}</span>
+                                        <span className="text-[9px] text-slate-500 font-mono flex items-center gap-1">
+                                            <Clock size={8} /> {new Date(item.timestamp).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
+                                        </span>
+                                    </div>
+                                    {isSelected && <div className="absolute inset-0 bg-accent-cyan/5 animate-pulse pointer-events-none" />}
+                                </div>
+                            );
+                        })}
                     </div>
-                 )
-            })}
+                )}
+            </div>
         </div>
-        <div className="p-2 border-t border-slate-800 text-[10px] text-slate-600 font-mono text-center uppercase bg-slate-950">
-            {filteredData.length} files
-        </div>
-    </Card>
-  );
+    );
 };
 
-const VaultInspector: React.FC = () => {
-  const { selectedItem, activeTab, viewMode, setViewMode, editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit, t } = useDatabase();
+// Right Panel: Deep Inspector
+const DeepInspector: React.FC = () => {
+    const { 
+        selectedRecord, isDecrypting, inspectorMode, setInspectorMode, 
+        editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit, t 
+    } = useVault();
 
-  if (!selectedItem) {
-      return (
-        <Card className="hidden md:flex flex-1 flex-col p-0 bg-slate-950/80 border-slate-800 rounded-lg overflow-hidden relative shadow-2xl backdrop-blur-md min-h-[400px]">
-            <div className="flex-1 flex flex-col items-center justify-center p-8">
-                 <EmptyState 
-                    title="AWAITING INPUT"
-                    description="Select a record from the vault index to inspect content."
-                    icon={Server}
-                 />
+    if (!selectedRecord) {
+        return (
+            <div className="hidden lg:flex w-96 bg-slate-950 border-l border-slate-800 flex-col items-center justify-center p-8 text-center">
+                <div className="p-4 bg-slate-900/50 rounded-full mb-4 border border-slate-800 animate-pulse">
+                    <Lock size={32} className="text-slate-600" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Secure Terminal</h3>
+                <p className="text-xs text-slate-600 mt-2 font-mono">Awaiting Shard Selection...</p>
             </div>
-        </Card>
-      );
-  }
+        );
+    }
 
-  return (
-    <Card className="hidden md:flex flex-1 flex-col p-0 bg-slate-950/80 border-slate-800 rounded-lg overflow-hidden relative shadow-2xl backdrop-blur-md min-h-[400px]">
-        <div className="h-14 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between px-6 backdrop-blur">
-            <div className="flex items-center gap-3">
-                <div className={`p-2 rounded bg-slate-800/50 border border-slate-700 ${activeTab === 'ANALYSES' ? 'text-cyan-400' : activeTab === 'MEDIA' ? 'text-blue-400' : activeTab === 'CHATS' ? 'text-purple-400' : 'text-red-400'}`}>
-                    {activeTab === 'ANALYSES' && <FileText size={16} />}
-                    {activeTab === 'MEDIA' && <Film size={16} />}
-                    {activeTab === 'CHATS' && <MessageSquare size={16} />}
-                    {activeTab === 'SATIRES' && <Skull size={16} />}
-                </div>
-                <div className="font-mono">
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wide">ID</div>
-                    <div className="text-xs text-slate-200 font-bold">{selectedItem.id}</div>
-                </div>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-slate-800">
-                <button 
-                    onClick={() => { setViewMode('VISUAL'); setEditMode(false); }}
-                    className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-colors ${viewMode === 'VISUAL' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                    {t.vault.visual}
-                </button>
-                <button 
-                    onClick={() => { setViewMode('CODE'); setEditedContent(JSON.stringify(selectedItem, null, 2)); }}
-                    className={`px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-colors ${viewMode === 'CODE' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                    {t.vault.source}
-                </button>
-            </div>
-        </div>
-        <div className="flex-1 overflow-y-auto relative bg-[#0a0f18] custom-scrollbar">
-            {viewMode === 'CODE' ? (
-                <div className="absolute inset-0 flex flex-col">
-                    <div className="absolute top-4 right-4 z-10 flex gap-2">
-                        {editMode ? (
-                            <>
-                                <Button variant="secondary" size="sm" onClick={() => setEditMode(false)} className="text-xs h-7 border-slate-700">{t.common.cancel}</Button>
-                                <Button variant="primary" size="sm" onClick={handleSaveEdit} className="text-xs h-7" icon={<Save size={12}/>}>{t.vault.commit}</Button>
-                            </>
-                        ) : (
-                            <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="text-xs h-7 border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white" icon={<Edit3 size={12}/>}>{t.vault.modify}</Button>
-                        )}
+    return (
+        <div className="fixed inset-0 z-50 md:static md:z-auto md:w-[450px] bg-[#020617] border-l border-slate-800 flex flex-col h-full shadow-2xl animate-fade-in-left">
+            {/* Mobile Close Handle (only visible on mobile via css usually, but logic kept simple here) */}
+            <div className="md:hidden h-1 w-12 bg-slate-700 rounded-full mx-auto my-2" />
+
+            {/* Header */}
+            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="p-2 bg-accent-cyan/10 rounded text-accent-cyan border border-accent-cyan/20">
+                        <Database size={16} />
                     </div>
-                    <CodeViewer 
-                        code={editMode ? editedContent : JSON.stringify(selectedItem, null, 2)} 
-                        onChange={setEditedContent}
-                        editable={editMode}
-                    />
+                    <div className="min-w-0">
+                        <div className="text-xs font-bold text-white truncate max-w-[150px]">{selectedRecord.title}</div>
+                        <div className="text-[9px] text-slate-500 font-mono">{selectedRecord.id}</div>
+                    </div>
                 </div>
-            ) : (
-                <div className="p-8 animate-fade-in max-w-4xl mx-auto">
-                    {activeTab === 'ANALYSES' && (
-                        <div className="space-y-6">
-                            <div className="flex items-start gap-6 mb-8">
-                                <div className="w-20 h-20 rounded-xl bg-slate-900 border border-slate-800 shrink-0 flex items-center justify-center shadow-lg">
-                                    <Activity size={32} className="text-cyan-500" />
-                                </div>
-                                <div>
-                                    <h1 className="text-xl md:text-2xl font-bold text-white mb-2 leading-tight">{selectedItem.title}</h1>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <Badge label={(selectedItem as StoredAnalysis).data.category} color="purple" />
-                                        <Badge label={(selectedItem as StoredAnalysis).data.dangerLevel} color="red" />
-                                        <div className="text-xs text-slate-500 font-mono border-l border-slate-700 pl-3 ml-1">
-                                            ORIGIN: {(selectedItem as StoredAnalysis).data.originYear}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-slate-900/30 rounded-lg p-6 border border-slate-800">
-                                <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                                    <FileText size={14} /> Executive Summary
-                                </h3>
-                                <p className="text-slate-300 text-sm leading-relaxed">
-                                    {(selectedItem as StoredAnalysis).data.shortDescription}
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-slate-900/30 rounded-lg p-4 border border-slate-800">
-                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Debunking Status</div>
-                                    <div className="text-sm font-bold text-green-400">{(selectedItem as StoredAnalysis).data.debunking ? 'DATA_AVAILABLE' : 'PENDING'}</div>
-                                </div>
-                                <div className="bg-slate-900/30 rounded-lg p-4 border border-slate-800">
-                                    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Sources</div>
-                                    <div className="text-sm font-bold text-blue-400">{(selectedItem as StoredAnalysis).data.sources?.length || 0} REFERENCES</div>
-                                </div>
-                            </div>
-                        </div>
+                <div className="flex gap-1">
+                    {!editMode ? (
+                        <Button size="sm" variant="ghost" onClick={() => { setEditMode(true); setEditedContent(JSON.stringify(selectedRecord, null, 2)); }} icon={<Edit3 size={14}/>} />
+                    ) : (
+                        <Button size="sm" variant="primary" onClick={handleSaveEdit} icon={<Save size={14}/>} />
                     )}
+                </div>
+            </div>
 
-                    {activeTab === 'MEDIA' && (
-                        <div className="space-y-6">
-                            <div className="flex items-start gap-6 mb-8">
-                                <div className="w-20 h-20 rounded-xl bg-slate-900 border border-slate-800 shrink-0 flex items-center justify-center shadow-lg relative overflow-hidden group">
-                                    <div className="absolute inset-0 bg-blue-500/10 opacity-50"></div>
-                                    <Film size={32} className="text-blue-400 relative z-10" />
-                                </div>
-                                <div>
-                                    <h1 className="text-xl md:text-2xl font-bold text-white mb-2 leading-tight">{selectedItem.title}</h1>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <Badge label={(selectedItem as StoredMediaAnalysis).mediaType} color="cyan" />
-                                        <div className="text-xs text-slate-500 font-mono border-l border-slate-700 pl-3 ml-1">
-                                            ID: {(selectedItem as StoredMediaAnalysis).id}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="bg-slate-900/30 rounded-lg p-6 border border-slate-800">
-                                <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
-                                    <FileText size={14} /> Narrative Analysis
-                                </h3>
-                                <p className="text-slate-300 text-sm leading-relaxed">
-                                    {(selectedItem as StoredMediaAnalysis).data.plotSummary}
-                                </p>
-                            </div>
+            {/* Mode Switcher */}
+            <div className="flex border-b border-slate-800">
+                <button 
+                    onClick={() => setInspectorMode('VISUAL')} 
+                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${inspectorMode === 'VISUAL' ? 'bg-slate-900 text-accent-cyan border-b-2 border-accent-cyan' : 'text-slate-500 hover:text-white'}`}
+                >
+                    <Eye size={12} /> Visual Decrypt
+                </button>
+                <button 
+                    onClick={() => setInspectorMode('CODE')} 
+                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${inspectorMode === 'CODE' ? 'bg-slate-900 text-accent-purple border-b-2 border-accent-purple' : 'text-slate-500 hover:text-white'}`}
+                >
+                    <Terminal size={12} /> Source Matrix
+                </button>
+            </div>
 
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="bg-slate-900/30 rounded-lg p-4 border border-slate-800">
-                                    <h3 className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><Eye size={12}/> Hidden Symbolism</h3>
-                                    <div className="text-sm text-slate-400 leading-relaxed">{(selectedItem as StoredMediaAnalysis).data.hiddenSymbolism}</div>
-                                </div>
-                                <div className="bg-slate-900/30 rounded-lg p-4 border border-slate-800">
-                                    <h3 className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><Zap size={12}/> Predictive Programming</h3>
-                                    <div className="text-sm text-slate-400 leading-relaxed">{(selectedItem as StoredMediaAnalysis).data.predictiveProgramming}</div>
-                                </div>
-                                <div className="bg-slate-900/30 rounded-lg p-4 border border-slate-800">
-                                    <h3 className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><Brain size={12}/> Real World Parallels</h3>
-                                    <div className="text-sm text-slate-400 leading-relaxed">{(selectedItem as StoredMediaAnalysis).data.realWorldParallels}</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+            {/* Content Body */}
+            <div className="flex-1 overflow-hidden relative">
+                {isDecrypting && (
+                    <div className="absolute inset-0 z-20 bg-slate-950 flex flex-col items-center justify-center text-accent-cyan font-mono text-xs">
+                        <Scan size={32} className="animate-spin mb-2" />
+                        <div>DECRYPTING_SHARD...</div>
+                    </div>
+                )}
 
-                    {activeTab === 'CHATS' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 border-b border-slate-800 pb-6 mb-6">
-                                <div className="w-16 h-16 rounded-xl bg-slate-900 border border-slate-800 shrink-0 flex items-center justify-center">
-                                    <MessageSquare size={32} className="text-purple-500" />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-bold text-white mb-2">{selectedItem.title}</h1>
-                                    <div className="flex gap-4 text-xs font-mono text-slate-500">
-                                        <span>MESSAGES: {(selectedItem as StoredChat).messages.length}</span>
-                                        <span>TIMESTAMP: {new Date(selectedItem.timestamp).toLocaleString()}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="space-y-4 font-mono text-sm">
-                                {(selectedItem as StoredChat).messages.map((msg, i) => (
-                                    <div key={i} className={`p-4 rounded-lg border ${msg.role === 'user' ? 'bg-slate-900/30 border-slate-700 ml-8' : 'bg-purple-900/10 border-purple-500/20 mr-8'}`}>
-                                        <div className="text-[10px] font-bold uppercase mb-2 opacity-50">{msg.role}</div>
-                                        <div className="text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.text}</div>
+                {editMode || inspectorMode === 'CODE' ? (
+                    <textarea 
+                        className="w-full h-full bg-[#0d1117] text-green-400 font-mono text-xs p-4 outline-none resize-none leading-relaxed"
+                        value={editMode ? editedContent : JSON.stringify(selectedRecord, null, 2)}
+                        onChange={e => editMode && setEditedContent(e.target.value)}
+                        readOnly={!editMode}
+                        spellCheck={false}
+                    />
+                ) : (
+                    <div className="h-full overflow-y-auto p-6 bg-slate-900/20">
+                        {/* DYNAMIC VISUALIZER BASED ON TYPE */}
+                        {'messages' in selectedRecord ? (
+                            <div className="space-y-4">
+                                <Badge label="ENCRYPTED CHAT LOG" className="bg-green-500/10 text-green-400 border-green-500/30" />
+                                {selectedRecord.messages.map((m, i) => (
+                                    <div key={i} className={`p-3 rounded-lg text-xs ${m.role === 'user' ? 'bg-slate-800 ml-8 border border-slate-700' : 'bg-slate-900 mr-8 border border-slate-800'}`}>
+                                        <div className="font-bold text-[9px] mb-1 opacity-50 uppercase">{m.role}</div>
+                                        <div className="text-slate-300 whitespace-pre-wrap">{m.text}</div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'SATIRES' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 border-b border-slate-800 pb-6 mb-6">
-                                <div className="w-16 h-16 rounded-xl bg-slate-900 border border-slate-800 shrink-0 flex items-center justify-center">
-                                    <Skull size={32} className="text-yellow-500" />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-bold text-white mb-2">{selectedItem.title}</h1>
-                                    <div className="flex gap-2 items-center">
-                                        <Badge label={(selectedItem as StoredSatire).params.archetype} color="yellow" />
-                                        <span className="text-xs text-slate-500 font-mono">PARANOIA: {(selectedItem as StoredSatire).params.paranoia}%</span>
+                        ) : 'content' in selectedRecord ? (
+                            <div className="bg-[#f4f4f5] text-black p-6 font-serif shadow-xl rounded-sm transform rotate-1">
+                                <h2 className="font-black text-xl mb-4 uppercase border-b-2 border-black pb-2">{selectedRecord.title}</h2>
+                                <div className="text-sm leading-relaxed whitespace-pre-wrap">{selectedRecord.content}</div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="bg-slate-950 border border-slate-800 p-4 rounded-lg">
+                                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><Cpu size={12}/> Metadata</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><div className="text-[9px] text-slate-600">ID</div><div className="text-xs font-mono text-slate-300">{selectedRecord.id}</div></div>
+                                        <div><div className="text-[9px] text-slate-600">SIZE</div><div className="text-xs font-mono text-slate-300">{JSON.stringify(selectedRecord).length} B</div></div>
                                     </div>
                                 </div>
+                                {'fullDescription' in selectedRecord && (
+                                    <div className="bg-slate-950/50 border border-slate-800/50 p-4 rounded-lg">
+                                        <div className="text-xs text-slate-300 leading-relaxed font-sans">{selectedRecord.fullDescription}</div>
+                                    </div>
+                                )}
                             </div>
-                            <div className="p-8 bg-[#fdfbf7] text-slate-900 rounded-sm shadow-xl font-serif leading-relaxed relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-6 opacity-10">
-                                    <Lock size={80} />
-                                </div>
-                                <h2 className="text-3xl font-black mb-6 uppercase tracking-tight border-b-4 border-slate-900 pb-4">{selectedItem.title}</h2>
-                                <div className="whitespace-pre-wrap text-lg">{(selectedItem as StoredSatire).content}</div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
-    </Card>
-  );
-};
-
-// --- 4. Main Component ---
-
-export const DatabaseManager: React.FC = () => {
-  return (
-      <DatabaseProvider>
-        <div className="max-w-7xl mx-auto h-full flex flex-col pb-6">
-            <VaultHeader />
-            <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-[600px] overflow-hidden">
-                <VaultBrowser />
-                <VaultInspector />
+                        )}
+                    </div>
+                )}
             </div>
         </div>
-      </DatabaseProvider>
-  );
+    );
+};
+
+// Top Bar: Telemetry
+const VaultTelemetry: React.FC = () => {
+    const { stats, formatBytes, handleExport, handleBatchDelete, t } = useVault();
+    const usedPercent = Math.min(100, (stats.usageBytes / (50 * 1024 * 1024)) * 100); // Assume 50MB quota
+
+    return (
+        <PageHeader 
+            title="SECURE VAULT"
+            subtitle="ENCRYPTED STORAGE MANAGEMENT"
+            icon={Database}
+            status="LOCKED"
+            visualizerState="IDLE"
+            actions={
+                <div className="flex gap-2">
+                    <Button variant="danger" size="sm" onClick={handleBatchDelete} icon={<Trash2 size={14} />} className="border-red-900/50 bg-red-950/20 hover:bg-red-900/40">
+                        SHRED
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={handleExport} icon={<Download size={14} />}>
+                        DUMP
+                    </Button>
+                </div>
+            }
+        >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div className="space-y-1">
+                    <div className="flex justify-between text-[9px] font-mono font-bold text-slate-500 uppercase">
+                        <span>Storage Usage</span>
+                        <span>{formatBytes(stats.usageBytes)} / 50 MB</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div className="h-full bg-gradient-to-r from-accent-cyan to-accent-purple" style={{ width: `${usedPercent}%` }}></div>
+                    </div>
+                </div>
+                
+                <div className="flex gap-4 border-l border-slate-800 pl-6">
+                    <div>
+                        <div className="text-[9px] font-bold text-slate-500 uppercase">Files</div>
+                        <div className="text-lg font-mono font-bold text-white">{stats.totalRecords}</div>
+                    </div>
+                    <div>
+                        <div className="text-[9px] font-bold text-slate-500 uppercase">Version</div>
+                        <div className="text-lg font-mono font-bold text-slate-400">v3.0</div>
+                    </div>
+                </div>
+
+                <div className="h-8 w-full">
+                    {/* Tiny Sparkline for activity visualization */}
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <AreaChart data={new Array(10).fill(0).map((_, i) => ({ val: Math.random() * 100 }))}>
+                            <Area type="monotone" dataKey="val" stroke="#334155" fill="#1e293b" strokeWidth={1} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+        </PageHeader>
+    );
+};
+
+// --- 4. MAIN LAYOUT ---
+
+export const DatabaseManager: React.FC = () => {
+    return (
+        <VaultContext.Provider value={useVaultLogic()}>
+            <PageFrame>
+                <VaultTelemetry />
+                <Card className="flex flex-col md:flex-row h-[calc(100vh-280px)] min-h-[600px] p-0 overflow-hidden bg-slate-950 border-slate-800 shadow-2xl mt-6 relative">
+                    {/* Background Noise */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5 pointer-events-none"></div>
+                    
+                    <DataBankSelector />
+                    <HoloGrid />
+                    <DeepInspector />
+                </Card>
+            </PageFrame>
+        </VaultContext.Provider>
+    );
 };
 
 export default DatabaseManager;

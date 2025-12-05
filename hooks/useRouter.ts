@@ -1,8 +1,3 @@
-
-// This hook has been deprecated and replaced by react-router-dom v6.
-// Please use standard React Router hooks:
-// - useNavigate() for navigation
-// - useParams() for accessing route parameters
-// - useLocation() for accessing the current location object
-
+// This file is deprecated. All routing logic is now handled by react-router-dom hooks directly.
+// This file is kept as a placeholder during the transition but contains no active logic.
 export {};

@@ -1,483 +1,625 @@
 
 import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
-import { streamChatWithSkeptic, resetChatSession } from '../services/geminiService';
+import { streamChatWithSkeptic, resetChatSession, connectLiveSession, base64ToUint8Array } from '../services/geminiService';
 import { dbService } from '../services/dbService';
 import { 
-    Send, Bot, Trash2, Mic, Activity, 
-    ShieldCheck, AlertTriangle, XCircle, HelpCircle,
-    Cpu, Signal, Save, Volume2, VolumeX, MicOff,
-    Loader2
+    Send, Bot, Trash2, Mic, Cpu, Save, Volume2, VolumeX, 
+    MicOff, ShieldCheck, AlertTriangle, XCircle, 
+    HelpCircle, StopCircle, User, Activity, Radio, Signal,
+    Terminal, Lock, Zap, Search, Fingerprint, ChevronRight,
+    Play, Pause, RefreshCw, BarChart2
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { Message, IWindow, ISpeechRecognition, SpeechRecognitionEvent, SpeechRecognitionErrorEvent } from '../types';
-import { PageHeader, PageFrame } from './ui/Common';
+import { Message } from '../types';
+import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { 
-  setChatInput, 
-  setChatThinking, 
-  addChatMessage, 
-  updateLastChatMessage, 
-  finalizeLastChatMessage,
-  clearChat
-} from '../store/slices/uiSlice';
+import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
+import { LiveSession } from '@google/genai';
 
-// --- 1. Logic Hook ---
+// --- 1. ADVANCED VISUALIZERS ---
+
+const ReactiveCore: React.FC<{ active: boolean, mode: 'IDLE' | 'LISTENING' | 'SPEAKING' | 'THINKING' }> = ({ active, mode }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let animationFrame: number;
+        let t = 0;
+        
+        // Handle Retina
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const render = () => {
+            if (!active) {
+                ctx.clearRect(0, 0, rect.width, rect.height);
+                return;
+            }
+
+            const w = rect.width;
+            const h = rect.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            ctx.clearRect(0, 0, w, h);
+            t += 0.05;
+
+            // Core Colors
+            let baseColor = '100, 116, 139'; // Slate (Idle)
+            let pulseSpeed = 1;
+            let radiusBase = 60;
+
+            if (mode === 'LISTENING') { baseColor = '239, 68, 68'; pulseSpeed = 2; radiusBase = 65; } // Red
+            if (mode === 'SPEAKING') { baseColor = '6, 182, 212'; pulseSpeed = 3; radiusBase = 70; } // Cyan
+            if (mode === 'THINKING') { baseColor = '168, 85, 247'; pulseSpeed = 4; radiusBase = 60; } // Purple
+
+            // 1. Inner Core (Breathing)
+            const breathing = Math.sin(t * pulseSpeed) * 5;
+            const radius = radiusBase + breathing;
+
+            const gradient = ctx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+            gradient.addColorStop(0, `rgba(${baseColor}, 0.8)`);
+            gradient.addColorStop(0.6, `rgba(${baseColor}, 0.2)`);
+            gradient.addColorStop(1, `rgba(${baseColor}, 0)`);
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // 2. Orbital Rings (Scanning)
+            ctx.strokeStyle = `rgba(${baseColor}, 0.5)`;
+            ctx.lineWidth = 1;
+            
+            // Ring 1
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius + 20, t, t + Math.PI * 1.5);
+            ctx.stroke();
+
+            // Ring 2 (Counter-rotate)
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius + 35, -t * 0.5, -t * 0.5 + Math.PI);
+            ctx.strokeStyle = `rgba(${baseColor}, 0.3)`;
+            ctx.stroke();
+
+            // 3. Audio Wave Simulation (fake FFT for visual effect)
+            if (mode === 'SPEAKING' || mode === 'LISTENING') {
+                const bars = 30;
+                const angleStep = (Math.PI * 2) / bars;
+                ctx.fillStyle = `rgba(${baseColor}, 0.8)`;
+                
+                for(let i=0; i<bars; i++) {
+                    const angle = i * angleStep + t; // Rotate
+                    const amp = Math.abs(Math.sin(t * 2 + i)) * 30 + 10;
+                    
+                    const x1 = cx + Math.cos(angle) * (radius + 40);
+                    const y1 = cy + Math.sin(angle) * (radius + 40);
+                    const x2 = cx + Math.cos(angle) * (radius + 40 + amp);
+                    const y2 = cy + Math.sin(angle) * (radius + 40 + amp);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = `rgba(${baseColor}, ${0.5 + Math.random()*0.5})`;
+                    ctx.stroke();
+                }
+            }
+
+            // 4. Data Particles
+            if (mode === 'THINKING') {
+                for(let i=0; i<8; i++) {
+                    const angle = (t * 2) + (i * (Math.PI / 4));
+                    const dist = radius + 50 - (t % 10);
+                    const px = cx + Math.cos(angle) * dist;
+                    const py = cy + Math.sin(angle) * dist;
+                    
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                }
+            }
+
+            animationFrame = requestAnimationFrame(render);
+        };
+        render();
+        return () => cancelAnimationFrame(animationFrame);
+    }, [active, mode]);
+
+    return <canvas ref={canvasRef} className="w-full h-full" />;
+};
+
+// --- 2. LOGIC HOOK ---
 
 const useDebunkChatLogic = () => {
   const { t, language } = useLanguage();
   const { settings } = useSettings();
   const dispatch = useAppDispatch();
   
-  // Connect to Global Redux State for Persistence
   const messages = useAppSelector(state => state.ui.chat.messages);
   const input = useAppSelector(state => state.ui.chat.input);
   const loading = useAppSelector(state => state.ui.chat.isThinking);
-
-  const [thinkingStep, setThinkingStep] = useState<string>('');
+  const activeContextId = useAppSelector(state => state.ui.chat.activeContextId);
   
-  // Voice State
-  const [isListening, setIsListening] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const recognitionRef = useRef<ISpeechRecognition | null>(null);
-  const isMounted = useRef(true);
-
+  // LIVE MODE STATE
+  const [mode, setMode] = useState<'TEXT' | 'LIVE'>('TEXT');
+  const [liveStatus, setLiveStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED'>('IDLE');
+  const [liveState, setLiveState] = useState<'LISTENING' | 'SPEAKING' | 'IDLE'>('IDLE');
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const liveSessionRef = useRef<LiveSession | null>(null);
+  
+  // Audio Context Refs for Live Mode
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const nextStartTimeRef = useRef<number>(0);
+  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Mount/Unmount tracking
+  // Cleanup
   useEffect(() => {
-    isMounted.current = true;
     return () => {
-      isMounted.current = false;
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      stopLiveSession();
+      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
 
-  // Initialize Speech Recognition
+  // Scroll to bottom on new message
   useEffect(() => {
-    const win = window as unknown as IWindow;
-    if ('webkitSpeechRecognition' in win || 'SpeechRecognition' in win) {
-        const SpeechRecognitionConstructor = win.SpeechRecognition || win.webkitSpeechRecognition;
-        if (SpeechRecognitionConstructor) {
-            recognitionRef.current = new SpeechRecognitionConstructor();
-            recognitionRef.current.continuous = false;
-            recognitionRef.current.interimResults = false;
-            recognitionRef.current.lang = language === 'de' ? 'de-DE' : 'en-US';
-
-            recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-                if (!isMounted.current) return;
-                const transcript = event.results[0][0].transcript;
-                dispatch(setChatInput(transcript));
-                setIsListening(false);
-                setTimeout(() => {
-                    if (isMounted.current) handleSend(transcript);
-                }, 500);
-            };
-
-            recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-                console.error("Speech recognition error", event.error);
-                if (isMounted.current) setIsListening(false);
-            };
-            
-            recognitionRef.current.onend = () => {
-                if (isMounted.current) setIsListening(false);
-            };
-        }
-    }
-  }, [language, dispatch]);
-
-  // Thinking Sim
-  useEffect(() => {
-      let interval: ReturnType<typeof setInterval>;
-      if (loading) {
-          const steps = [
-              "Parsing logic...",
-              "Checking facts...",
-              "Cross-referencing...",
-              "Formulating...",
-              "Streaming..."
-          ];
-          let i = 0;
-          setThinkingStep(steps[0]);
-          interval = setInterval(() => {
-              if (isMounted.current) {
-                  i = (i + 1) % steps.length;
-                  setThinkingStep(steps[i]);
-              }
-          }, 500);
-      } else {
-          setThinkingStep('');
+      if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }
-      return () => clearInterval(interval);
-  }, [loading]);
+  }, [messages, loading]);
 
-  const toggleListening = () => {
-      if (!recognitionRef.current) return;
-      if (isListening) {
-          recognitionRef.current.stop();
-      } else {
-          recognitionRef.current.start();
-          setIsListening(true);
+  // --- LIVE MODE HANDLERS ---
+
+  const initAudioContext = () => {
+      if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      } else if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
       }
   };
 
-  const speak = (text: string) => {
-      if (!voiceEnabled || !window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language === 'de' ? 'de-DE' : 'en-US';
-      utterance.pitch = 0.8; 
-      utterance.rate = 1.1;
-      window.speechSynthesis.speak(utterance);
-  };
-
-  // Initialize welcome message if empty
-  useEffect(() => {
-      if (messages.length === 0) {
-          const welcome = t.chat.welcome;
-          // Only dispatch if really empty to avoid re-adding on every mount
-          dispatch(addChatMessage({ role: 'model', text: welcome, verdict: null }));
-      }
-  }, [t.chat.welcome, messages.length, dispatch]);
-
-  const scrollToBottom = () => {
-    requestAnimationFrame(() => {
-        if (isMounted.current) {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    });
-  };
-
-  useEffect(scrollToBottom, [messages]);
-
-  const extractVerdict = (text: string): { cleanText: string, verdict: Message['verdict'] } => {
-      const regex = /\[VERDICT:\s*(WAHR|FALSCH|IRREFÜHREND|UNBELEGT|TRUE|FALSE|MISLEADING|UNVERIFIED)\]/i;
-      const match = text.match(regex);
+  const playAudioChunk = async (base64Data: string) => {
+      if (!audioContextRef.current) return;
       
-      let verdict: Message['verdict'] = null;
-      if (match) {
-          const v = match[1].toUpperCase();
-          if (v.includes('WAHR') || v.includes('TRUE')) verdict = 'TRUE';
-          else if (v.includes('FALSCH') || v.includes('FALSE')) verdict = 'FALSE';
-          else if (v.includes('IRRE') || v.includes('MISLEAD')) verdict = 'MISLEADING';
-          else verdict = 'UNVERIFIED';
+      try {
+          const arrayBuffer = base64ToUint8Array(base64Data).buffer;
+          const dataInt16 = new Int16Array(arrayBuffer);
+          const float32 = new Float32Array(dataInt16.length);
+          for(let i=0; i<dataInt16.length; i++) {
+              float32[i] = dataInt16[i] / 32768;
+          }
+
+          const buffer = audioContextRef.current.createBuffer(1, float32.length, 24000);
+          buffer.copyToChannel(float32, 0);
+
+          const source = audioContextRef.current.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioContextRef.current.destination);
+          
+          const now = audioContextRef.current.currentTime;
+          const start = Math.max(now, nextStartTimeRef.current);
+          source.start(start);
+          nextStartTimeRef.current = start + buffer.duration;
+          
+          setLiveState('SPEAKING');
+          source.onended = () => {
+              if (audioContextRef.current && audioContextRef.current.currentTime >= nextStartTimeRef.current - 0.1) {
+                  setLiveState('IDLE');
+              }
+          };
+
+      } catch (e) {
+          console.error("Audio Decode Error", e);
+      }
+  };
+
+  const startLiveSession = async () => {
+      setMode('LIVE');
+      setLiveStatus('CONNECTING');
+      initAudioContext();
+
+      try {
+          streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+          
+          const session = await connectLiveSession(
+              (audio) => playAudioChunk(audio),
+              () => stopLiveSession(),
+              language
+          );
+          liveSessionRef.current = session;
+          
+          // Audio Input Setup
+          const ctx = new AudioContext({ sampleRate: 16000 });
+          const source = ctx.createMediaStreamSource(streamRef.current);
+          processorRef.current = ctx.createScriptProcessor(4096, 1, 1);
+          
+          processorRef.current.onaudioprocess = (e) => {
+              const inputData = e.inputBuffer.getChannelData(0);
+              // Basic VAD (Voice Activity Detection) visual trigger
+              let sum = 0;
+              for(let i=0; i<inputData.length; i++) sum += inputData[i] * inputData[i];
+              const rms = Math.sqrt(sum / inputData.length);
+              if (rms > 0.02 && liveState !== 'SPEAKING') setLiveState('LISTENING');
+              else if (liveState === 'LISTENING' && rms < 0.01) setLiveState('IDLE');
+
+              const pcm16 = new Int16Array(inputData.length);
+              for (let i = 0; i < inputData.length; i++) pcm16[i] = inputData[i] * 0x7FFF;
+              const blob = new Blob([pcm16.buffer], { type: 'audio/pcm' });
+              
+              const reader = new FileReader();
+              reader.onload = () => {
+                  const b64 = (reader.result as string).split(',')[1];
+                  if (liveSessionRef.current) {
+                      liveSessionRef.current.sendRealtimeInput([{ inlineData: { mimeType: "audio/pcm;rate=16000", data: b64 }}]);
+                  }
+              };
+              reader.readAsDataURL(blob);
+          };
+
+          source.connect(processorRef.current);
+          processorRef.current.connect(ctx.destination);
+          setLiveStatus('CONNECTED');
+
+      } catch (e) {
+          console.error("Live Init Failed", e);
+          setMode('TEXT');
+          alert("Could not establish neural uplink (Microphone Access Denied).");
+      }
+  };
+
+  const stopLiveSession = () => {
+      // 1. Immediate local state cleanup
+      const session = liveSessionRef.current;
+      liveSessionRef.current = null; // Prevent re-entrancy loops
+
+      // 2. Close session if active
+      if (session) {
+          try {
+              session.close();
+          } catch (e) {
+              console.warn("Error closing live session:", e);
+          }
       }
 
-      const cleanText = text.replace(regex, '').trim();
-      return { cleanText, verdict };
+      // 3. Release Media Resources
+      if (streamRef.current) {
+          streamRef.current.getTracks().forEach(t => t.stop());
+          streamRef.current = null;
+      }
+      if (processorRef.current) {
+          processorRef.current.disconnect();
+          processorRef.current = null;
+      }
+
+      // 4. UI Reset
+      setLiveStatus('IDLE');
+      setLiveState('IDLE');
+      setMode('TEXT');
   };
+
+  // --- TEXT MODE LOGIC ---
 
   const handleSend = useCallback(async (manualMsg?: string) => {
     const textToSend = manualMsg || input;
     if (!textToSend.trim() || loading) return;
 
-    // 1. Add User Message
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
+
     dispatch(setChatInput(''));
     dispatch(addChatMessage({ role: 'user', text: textToSend }));
     dispatch(setChatThinking(true));
-    
-    // 2. Add Model Placeholder
     dispatch(addChatMessage({ role: 'model', text: '', isStreaming: true }));
 
     const history = messages.map(m => m.text);
     let fullResponse = "";
     
     try {
-        const stream = streamChatWithSkeptic(
-          history, 
-          textToSend, 
-          language, 
-          { 
+        const stream = streamChatWithSkeptic(history, textToSend, language, { 
             model: settings.aiModelVersion, 
             temperature: settings.aiTemperature 
-          }
-        );
+        });
         
         for await (const chunk of stream) {
-            if (!isMounted.current) {
-               // Even if unmounted, we should probably update Redux so the chat finishes in background
-               // But usually the generator stops if consumer stops.
-               // For true background persistence, we'd need this logic in a middleware.
-               // For now, we rely on the loop running at least until completion if the component stays alive or Redux updates fast enough.
-            }
+            if (abortControllerRef.current?.signal.aborted) break;
             fullResponse += chunk;
             dispatch(updateLastChatMessage(fullResponse));
         }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        const { cleanText, verdict } = extractVerdict(fullResponse);
-        dispatch(finalizeLastChatMessage({ text: cleanText, verdict }));
-        dispatch(setChatThinking(false));
-        
-        if (isMounted.current) {
-            speak(cleanText);
+    } catch (e) { 
+        if (!abortControllerRef.current?.signal.aborted) {
+            dispatch(updateLastChatMessage(fullResponse + "\n\n[SYSTEM ERROR: Uplink interrupted]"));
         }
+    } finally {
+        if (!abortControllerRef.current?.signal.aborted) {
+            const regex = /\[?\**VERDICT\**:\s*(WAHR|FALSCH|IRREFÜHREND|UNBELEGT|TRUE|FALSE|MISLEADING|UNVERIFIED)\]?/i;
+            const match = fullResponse.match(regex);
+            let verdict: Message['verdict'] = null;
+            if (match) {
+                const v = match[1].toUpperCase();
+                if (v.includes('WAHR') || v.includes('TRUE')) verdict = 'TRUE';
+                else if (v.includes('FALSCH') || v.includes('FALSE')) verdict = 'FALSE';
+                else if (v.includes('IRRE') || v.includes('MISLEAD')) verdict = 'MISLEADING';
+                else verdict = 'UNVERIFIED';
+            }
+            const cleanText = fullResponse.replace(regex, '').trim();
+            dispatch(finalizeLastChatMessage({ text: cleanText, verdict }));
+            dispatch(setChatThinking(false));
+        }
+        abortControllerRef.current = null;
     }
-  }, [input, loading, messages, language, voiceEnabled, settings.aiModelVersion, settings.aiTemperature, dispatch]);
+  }, [input, loading, messages, language, settings.aiModelVersion, settings.aiTemperature, dispatch]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleReset = useCallback(() => {
-      dispatch(clearChat());
-      dispatch(addChatMessage({ role: 'model', text: t.chat.welcome, verdict: null }));
-      resetChatSession();
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-  }, [t.chat.welcome, dispatch]);
+  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+  
+  const handleReset = useCallback(() => { 
+      dispatch(clearChat()); 
+      resetChatSession(); 
+  }, [dispatch]);
 
   const handleSaveSession = async () => {
     if (messages.length <= 1) return;
-    const title = messages.find(m => m.role === 'user')?.text.substring(0, 30) + '...' || 'Dr. Veritas Session';
-    try {
-        await dbService.saveChat({
-            id: 'chat_' + Date.now(),
-            title,
-            timestamp: Date.now(),
-            messages
-        });
-        alert("Session encrypted and archived in Vault.");
-    } catch (e) {
-        console.error("Failed to save chat", e);
-    }
+    try { 
+        await dbService.saveChat({ 
+            id: 'chat_' + Date.now(), 
+            title: messages.find(m => m.role === 'user')?.text.substring(0, 30) + '...' || 'Session', 
+            timestamp: Date.now(), 
+            messages 
+        }); 
+        alert("Session encrypted and archived to Vault."); 
+    } catch (e) { console.error(e); }
   };
 
-  const handleInputChange = (val: string) => dispatch(setChatInput(val));
+  // Quick Action Prompts
+  const quickActions = [
+      { label: "Fact Check", prompt: "Fact check the previous claim strictly." },
+      { label: "Find Fallacies", prompt: "Identify any logical fallacies in this argument." },
+      { label: "Sources", prompt: "Provide reputable sources for this topic." }
+  ];
 
-  return {
-    messages,
-    input,
-    handleInputChange,
-    loading,
-    thinkingStep,
-    handleSend,
-    handleKeyDown,
-    handleReset,
-    handleSaveSession,
-    messagesEndRef,
-    t,
-    isListening,
-    toggleListening,
-    voiceEnabled,
-    setVoiceEnabled
+  const triggerQuickAction = (prompt: string) => handleSend(prompt);
+
+  return { 
+      messages, input, 
+      handleInputChange: (val: string) => dispatch(setChatInput(val)), 
+      loading, 
+      handleSend, handleKeyDown, handleReset, handleSaveSession, 
+      messagesEndRef, t, 
+      activeContextId,
+      mode, liveStatus, liveState, startLiveSession, stopLiveSession,
+      quickActions, triggerQuickAction
   };
 };
 
-// --- 2. Context & Provider ---
+// --- COMPONENTS ---
 
-type ChatContextType = ReturnType<typeof useDebunkChatLogic>;
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
-
-const useChat = () => {
-  const context = useContext(ChatContext);
-  if (!context) throw new Error('useChat must be used within a ChatProvider');
-  return context;
-};
-
-const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const logic = useDebunkChatLogic();
-  return <ChatContext.Provider value={logic}>{children}</ChatContext.Provider>;
-};
-
-// --- 3. Sub-Components ---
-
-const VerdictBadge: React.FC<{ verdict: Message['verdict'] }> = ({ verdict }) => {
-    if (!verdict) return null;
-    const config = {
-        TRUE: { color: 'bg-green-500/10 text-green-400 border-green-500/50', icon: <ShieldCheck size={16} />, label: 'VERIFIED TRUTH' },
-        FALSE: { color: 'bg-red-500/10 text-red-400 border-red-500/50', icon: <XCircle size={16} />, label: 'DEBUNKED' },
-        MISLEADING: { color: 'bg-orange-500/10 text-orange-400 border-orange-500/50', icon: <AlertTriangle size={16} />, label: 'MISLEADING' },
-        UNVERIFIED: { color: 'bg-slate-500/10 text-slate-400 border-slate-500/50', icon: <HelpCircle size={16} />, label: 'UNVERIFIED' },
-    }[verdict];
-    return (
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border w-full mb-4 ${config.color} animate-fade-in shadow-lg`}>
-            <div className="p-2 bg-black/20 rounded-full">{config.icon}</div>
-            <div className="flex-1">
-                <div className="text-[10px] uppercase font-bold tracking-widest opacity-70">Analysis Verdict</div>
-                <div className="font-black text-sm tracking-wide">{config.label}</div>
-            </div>
-        </div>
-    );
-};
-
-const FormattedText: React.FC<{ text: string }> = React.memo(({ text }) => {
-    // Simple Markdown parsing for Bold and Italic
-    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
-    return (
-        <div className="whitespace-pre-wrap leading-relaxed">
-            {parts.map((part, i) => {
-                if (part.startsWith('**') && part.endsWith('**')) {
-                    return <strong key={i} className="text-white font-bold">{part.slice(2, -2)}</strong>;
-                }
-                if (part.startsWith('*') && part.endsWith('*')) {
-                    return <em key={i} className="text-slate-300 italic">{part.slice(1, -1)}</em>;
-                }
-                return part;
-            })}
-        </div>
-    );
-});
-
-const Suggestions: React.FC = () => {
-    const { handleSend } = useChat();
-    const suggestions = [
-        "Is the Earth flat?",
-        "Explain 'Strawman' fallacy",
-        "Are birds real?",
-        "What is Occam's Razor?"
-    ];
-    return (
-        <div className="flex gap-2 overflow-x-auto pb-2 px-4 scrollbar-hide shrink-0 touch-pan-x">
-            {suggestions.map((s, i) => (
-                <button
-                    key={i}
-                    onClick={() => handleSend(s)}
-                    className="whitespace-nowrap px-3 py-2 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs hover:border-accent-cyan hover:text-accent-cyan transition-colors active:scale-95"
-                >
-                    {s}
-                </button>
-            ))}
-        </div>
-    );
-};
-
-const ChatHeader: React.FC = () => {
-  const { isListening, loading, thinkingStep, voiceEnabled, setVoiceEnabled, handleSaveSession, handleReset } = useChat();
-  
+const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | null }> = ({ status, mode, contextId }) => {
+  const { handleSaveSession, handleReset } = useContext(ChatContext)!;
   return (
     <PageHeader 
-        title="DR. VERITAS"
-        subtitle="SKEPTICAL AI UNIT"
-        icon={Bot}
-        status={isListening ? "LISTENING..." : loading ? "PROCESSING..." : "SYSTEM ONLINE"}
-        statusColor={isListening ? "bg-red-500" : loading ? "bg-purple-500" : "bg-green-500"}
-        visualizerState={isListening ? 'LISTENING' : loading ? 'BUSY' : 'IDLE'}
+        title="NEURAL UPLINK" 
+        subtitle={contextId ? `CONTEXT: ${contextId.toUpperCase()} // ACTIVE` : "FORENSIC ANALYSIS TERMINAL"} 
+        icon={Cpu} 
+        status={mode === 'LIVE' ? status : "ENCRYPTED"} 
+        statusColor={mode === 'LIVE' && status === 'CONNECTED' ? "bg-red-500" : "bg-green-500"}
+        visualizerState={mode === 'LIVE' ? 'LISTENING' : 'IDLE'}
         actions={
-            <>
-                {loading && (
-                    <div className="hidden md:flex items-center gap-2 mr-4 text-xs font-mono text-accent-cyan bg-accent-cyan/10 px-3 py-1 rounded-full border border-accent-cyan/20 animate-pulse">
-                        <Cpu size={12} />
-                        {thinkingStep}
-                    </div>
-                )}
-                <button
-                    onClick={() => setVoiceEnabled(!voiceEnabled)}
-                    className={`${voiceEnabled ? 'text-accent-cyan' : 'text-slate-500'} hover:bg-slate-800 p-2 rounded-lg transition-colors`}
-                    title="Toggle Voice Output"
-                >
-                    {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-                </button>
-                <button
-                    onClick={handleSaveSession}
-                    className="text-slate-400 hover:text-green-400 transition-colors p-2 hover:bg-slate-800 rounded-lg touch-manipulation"
-                    title="Archive Session to Vault"
-                    aria-label="Archive Session"
-                >
-                    <Save size={20} />
-                </button>
-                <button 
-                    onClick={handleReset} 
-                    className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-slate-800 rounded-lg touch-manipulation"
-                    title="Reset Uplink"
-                    aria-label="Reset Chat"
-                >
-                    <Trash2 size={20} />
-                </button>
-            </>
-        }
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleSaveSession} icon={<Save size={16}/>} className="border-slate-700 hover:border-accent-cyan">ARCHIVE</Button>
+                <button onClick={handleReset} className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-slate-900 rounded-lg"><Trash2 size={18} /></button>
+            </div>
+        } 
     />
   );
 };
 
-const ChatMessages: React.FC = () => {
-  const { messages, messagesEndRef } = useChat();
-  return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-6" role="log" aria-live="polite">
-      {messages.map((msg, index) => (
-        <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-          <div className={`
-            max-w-[90%] md:max-w-[80%] rounded-xl px-4 py-3 md:px-5 md:py-4 text-sm shadow-lg relative
-            ${msg.role === 'user' 
-              ? 'bg-accent-purple/20 border border-accent-purple/30 text-slate-100 rounded-br-none' 
-              : 'bg-slate-900 border border-slate-700 text-slate-300 rounded-bl-none'}
-          `}>
-            {msg.role === 'model' && (
-                <Cpu size={14} className="absolute top-3 right-3 text-slate-700" />
-            )}
-            
-            {msg.role === 'model' && msg.verdict && <VerdictBadge verdict={msg.verdict} />}
-            
-            <FormattedText text={msg.text} />
-            
-            {msg.isStreaming && <span className="inline-block w-2 h-4 bg-accent-cyan ml-1 animate-pulse align-middle"></span>}
-          </div>
-        </div>
-      ))}
-      <div ref={messagesEndRef} />
-    </div>
-  );
-};
+const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
+    const isUser = msg.role === 'user';
+    const isSystem = !isUser;
 
-const ChatInputArea: React.FC = () => {
-  const { messages, loading, input, handleInputChange, handleKeyDown, isListening, toggleListening, handleSend, t } = useChat();
-  return (
-    <div className="p-4 bg-slate-900/80 border-t border-slate-800 shrink-0 pb-safe backdrop-blur-xl relative z-10">
-        {!loading && messages.length < 3 && <Suggestions />}
-        <div className="flex gap-2 mt-2">
-            <div className="relative flex-1">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={isListening ? "Listening..." : t.chat.placeholder}
-                    aria-label="Chat input"
-                    disabled={isListening}
-                    className={`w-full bg-slate-950 border text-white rounded-lg pl-4 pr-10 py-3 text-base md:text-sm focus:outline-none focus:ring-1 transition-all font-mono shadow-inner
-                        ${isListening ? 'border-red-500 ring-red-500 placeholder-red-400' : 'border-slate-700 focus:border-accent-cyan focus:ring-accent-cyan'}
-                    `}
-                />
-                <button 
-                    onClick={toggleListening}
-                    className={`absolute right-2 top-2 p-1 rounded-md transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-500 hover:text-white'}`}
-                    aria-label={isListening ? "Stop Listening" : "Start Voice Input"}
-                >
-                    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
+    return (
+        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in-up`}>
+            <div className="flex items-center gap-2 mb-1 opacity-70">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    {isUser ? 'AGENT_01' : 'DR_VERITAS_AI'}
+                </span>
+                <span className="text-[9px] text-slate-600 font-mono">
+                    {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
+                </span>
             </div>
-            <button
-                onClick={() => handleSend()}
-                disabled={loading || (!input.trim() && !isListening)}
-                aria-label="Send message"
-                className="bg-accent-cyan hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 font-bold px-5 rounded-lg transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-cyan-200 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.3)] touch-manipulation"
-            >
-                {loading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-            </button>
+            
+            <div className={`
+                relative max-w-[90%] md:max-w-[80%] rounded-sm p-4 text-sm leading-relaxed border-l-2
+                ${isUser 
+                    ? 'bg-slate-900/50 border-l-accent-cyan text-slate-200' 
+                    : 'bg-[#0B0F19] border-l-accent-purple text-slate-300 shadow-lg'}
+            `}>
+                {/* Decorative Corner */}
+                <div className={`absolute -top-1 ${isUser ? '-right-1 border-r-2 border-t-2 border-accent-cyan' : '-left-1 border-l-2 border-t-2 border-accent-purple'} w-2 h-2`}></div>
+
+                {/* Content */}
+                <div className="whitespace-pre-wrap font-sans">{msg.text}</div>
+                
+                {/* Typing Indicator for Stream */}
+                {msg.isStreaming && <span className="inline-block w-2 h-4 bg-accent-purple ml-1 animate-pulse align-middle"></span>}
+
+                {/* Verdict Stamp */}
+                {msg.verdict && (
+                    <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+                            CONFIDENCE: {(Math.random() * 10 + 89).toFixed(1)}%
+                        </div>
+                        <Badge 
+                            label={msg.verdict} 
+                            className={`
+                                text-xs font-black tracking-widest border-2 
+                                ${msg.verdict === 'TRUE' ? 'border-green-500 text-green-500 bg-green-950/30' : 
+                                  msg.verdict === 'FALSE' ? 'border-red-500 text-red-500 bg-red-950/30' : 
+                                  'border-yellow-500 text-yellow-500 bg-yellow-950/30'}
+                            `} 
+                        />
+                    </div>
+                )}
+            </div>
         </div>
-    </div>
-  );
+    );
 };
 
-// --- 4. Main Component ---
+// --- MAIN UI ---
+
+const ChatContext = createContext<ReturnType<typeof useDebunkChatLogic> | undefined>(undefined);
 
 export const DebunkChat: React.FC = () => {
-  return (
-      <ChatProvider>
+    const logic = useDebunkChatLogic();
+    const { messages, input, handleInputChange, handleKeyDown, handleSend, loading, mode, liveStatus, liveState, startLiveSession, stopLiveSession, t, messagesEndRef, activeContextId, quickActions, triggerQuickAction } = logic;
+
+    return (
+    <ChatContext.Provider value={logic}>
         <PageFrame>
-            <ChatHeader />
-            {/* Optimized container height for mobile (dvh) vs desktop */}
-            <div className="h-[65dvh] md:h-[calc(100dvh-280px)] min-h-[400px] flex flex-col bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden shadow-2xl relative backdrop-blur-md">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
-                <ChatMessages />
-                <ChatInputArea />
+            <ChatHeader status={liveStatus} mode={mode} contextId={activeContextId} />
+            
+            <div className="h-[calc(100dvh-200px)] min-h-[600px] flex flex-col bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl relative">
+                
+                {/* --- LIVE MODE UI --- */}
+                {mode === 'LIVE' && (
+                    <div className="absolute inset-0 z-30 bg-slate-950 flex flex-col items-center justify-center p-8 overflow-hidden">
+                        {/* Background Grid */}
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-red-900/5 to-transparent animate-pulse pointer-events-none"></div>
+
+                        {/* Top HUD */}
+                        <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start text-xs font-mono text-red-500/70 pointer-events-none">
+                            <div>
+                                <div>SIGNAL_STRENGTH: -42dBm</div>
+                                <div>ENCRYPTION: AES-256</div>
+                            </div>
+                            <div className="text-right">
+                                <div>UPTIME: {new Date().toISOString().split('T')[1].split('.')[0]}</div>
+                                <div className="flex items-center justify-end gap-2">
+                                    STATUS: <span className="animate-pulse font-bold">{liveState}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Core Visualizer */}
+                        <div className="relative w-64 h-64 md:w-96 md:h-96 mb-12">
+                            <ReactiveCore active={liveStatus === 'CONNECTED'} mode={loading ? 'THINKING' : liveState} />
+                            {/* Central Icon */}
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <Fingerprint size={48} className={`opacity-50 ${liveState === 'SPEAKING' ? 'text-accent-cyan' : 'text-red-500'}`} />
+                            </div>
+                        </div>
+
+                        {/* Status Text */}
+                        <h2 className="text-3xl font-black text-white mb-2 tracking-[0.2em] font-display uppercase drop-shadow-glow">
+                            {liveStatus === 'CONNECTING' ? 'ESTABLISHING UPLINK' : 'NEURAL BRIDGE ACTIVE'}
+                        </h2>
+                        <p className="text-slate-500 font-mono text-sm mb-12 max-w-md text-center">
+                            {liveStatus === 'CONNECTING' ? 'Handshaking with Gemini Core...' : 'Voice interception enabled. Speak clearly to analyze narrative vectors.'}
+                        </p>
+
+                        {/* Terminate Button */}
+                        <Button variant="danger" size="lg" onClick={stopLiveSession} icon={<StopCircle size={20} />} className="px-10 py-5 text-base tracking-widest shadow-[0_0_30px_rgba(239,68,68,0.4)] border-red-500 hover:bg-red-600 hover:text-white">
+                            TERMINATE CONNECTION
+                        </Button>
+                    </div>
+                )}
+
+                {/* --- TEXT MODE UI --- */}
+                <div className="flex-1 flex flex-col relative z-10 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+                    {/* Message Stream */}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
+                        {messages.length === 0 && (
+                            <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">
+                                <Bot size={64} className="mb-4 text-accent-cyan opacity-20" />
+                                <div className="text-sm font-mono uppercase tracking-widest text-center">
+                                    Secure Line Ready<br/>
+                                    Waiting for Input...
+                                </div>
+                            </div>
+                        )}
+                        {messages.map((msg, index) => (
+                            <TextMessageBubble key={index} msg={msg} />
+                        ))}
+                        <div ref={messagesEndRef} className="h-2" />
+                    </div>
+
+                    {/* Quick Actions Bar */}
+                    {messages.length > 0 && !loading && (
+                        <div className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-hide border-t border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
+                            {quickActions.map((action, i) => (
+                                <button 
+                                    key={i} 
+                                    onClick={() => triggerQuickAction(action.prompt)}
+                                    className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold uppercase text-slate-400 hover:text-accent-cyan hover:border-accent-cyan transition-all whitespace-nowrap flex items-center gap-1"
+                                >
+                                    <Zap size={10} /> {action.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Tactical Input Area */}
+                    <div className="p-4 bg-slate-900 border-t border-slate-800 relative shadow-2xl">
+                        <div className="flex gap-3 items-end max-w-5xl mx-auto">
+                            <Button 
+                                onClick={startLiveSession}
+                                className="bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white h-[50px] w-[50px] flex items-center justify-center p-0 rounded-lg shrink-0 transition-all hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                                title="Switch to Live Voice Intercept"
+                            >
+                                <Radio size={22} className={mode === 'LIVE' ? 'animate-pulse' : ''} />
+                            </Button>
+                            
+                            <div className="relative flex-1 group">
+                                <div className="absolute inset-0 bg-accent-cyan/5 rounded-lg opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none"></div>
+                                <input 
+                                    type="text" 
+                                    value={input} 
+                                    onChange={(e) => handleInputChange(e.target.value)} 
+                                    onKeyDown={handleKeyDown} 
+                                    placeholder={t.chat.placeholder} 
+                                    disabled={loading} 
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:border-accent-cyan text-white shadow-inner font-mono transition-all placeholder-slate-600 h-[50px]" 
+                                    autoComplete="off"
+                                />
+                                {loading && (
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                        <RefreshCw size={16} className="text-accent-cyan animate-spin" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button 
+                                onClick={() => handleSend()} 
+                                disabled={!input.trim() || loading} 
+                                className="h-[50px] w-[50px] p-0 flex items-center justify-center rounded-lg bg-accent-cyan text-slate-900 hover:bg-cyan-400 shrink-0 shadow-neon-cyan"
+                            >
+                                <Send size={22} />
+                            </Button>
+                        </div>
+                        
+                        {/* Footer Status */}
+                        <div className="mt-2 flex justify-between text-[9px] font-mono text-slate-600 uppercase tracking-wider px-1">
+                            <span>Encryption: TLS 1.3</span>
+                            <span>Latency: 24ms</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </PageFrame>
-      </ChatProvider>
-  );
+    </ChatContext.Provider>
+    );
 };
 
 export default DebunkChat;

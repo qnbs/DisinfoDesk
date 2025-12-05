@@ -1,14 +1,15 @@
+
 import { StoredAnalysis, StoredChat, StoredSatire, VaultBackup, StoredMediaAnalysis } from '../types';
 
 const DB_NAME = 'DisinfoDesk_Vault';
-const DB_VERSION = 2; // Upgraded for Media Analyses
+const DB_VERSION = 2;
 
 interface DBSchema {
   analyses: StoredAnalysis;
   media_analyses: StoredMediaAnalysis;
   chats: StoredChat;
   satires: StoredSatire;
-  app_state: { key: string; value: string }; // Store for Redux Persist state
+  app_state: { key: string; value: string };
 }
 
 type StoreName = keyof DBSchema;
@@ -19,14 +20,14 @@ export interface StorageStats {
   totalRecords: number;
 }
 
+/**
+ * Enhanced Database Service for IndexedDB.
+ * Implements Singleton pattern with strict typing and robust error handling.
+ */
 class DatabaseService {
   private db: IDBDatabase | null = null;
   private pendingOpen: Promise<IDBDatabase> | null = null;
 
-  /**
-   * Opens a secure connection to the IndexedDB.
-   * Implements a singleton pattern.
-   */
   private async open(): Promise<IDBDatabase> {
     if (this.db) return this.db;
     if (this.pendingOpen) return this.pendingOpen;
@@ -37,11 +38,9 @@ class DatabaseService {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         
-        // Helper to safely create stores
         const createStore = (name: string, keyPath: string = 'id') => {
            if (!db.objectStoreNames.contains(name)) {
              const store = db.createObjectStore(name, { keyPath });
-             // Add timestamp index for chronological sorting (except for key-value store)
              if (name !== 'app_state') {
                store.createIndex('timestamp', 'timestamp', { unique: false });
              }
@@ -49,10 +48,10 @@ class DatabaseService {
         };
 
         createStore('analyses');
-        createStore('media_analyses'); // New store
+        createStore('media_analyses');
         createStore('chats');
         createStore('satires');
-        createStore('app_state', 'key'); // Redux Persist Key-Value Store
+        createStore('app_state', 'key');
       };
 
       request.onsuccess = (event) => {
@@ -74,6 +73,10 @@ class DatabaseService {
         resolve(this.db);
       };
 
+      request.onblocked = () => {
+          console.warn('[Vault] Database blocked. Close other tabs.');
+      };
+
       request.onerror = (event) => {
         this.db = null;
         this.pendingOpen = null;
@@ -85,88 +88,117 @@ class DatabaseService {
     return this.pendingOpen;
   }
 
+  /**
+   * Generic Transaction Wrapper for ACID-like behavior.
+   * Ensures the DB connection is open before attempting operations.
+   */
+  private async executeTransaction<T>(
+    storeNames: StoreName[], 
+    mode: IDBTransactionMode, 
+    callback: (stores: Record<StoreName, IDBObjectStore>) => IDBRequest<T> | void
+  ): Promise<T> {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeNames, mode);
+      const stores = {} as Record<StoreName, IDBObjectStore>;
+      
+      storeNames.forEach(name => {
+        stores[name] = tx.objectStore(name);
+      });
+
+      let request: IDBRequest<T> | void;
+      
+      try {
+        request = callback(stores);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+
+      tx.oncomplete = () => {
+        // If the callback returned a request, resolve with its result.
+        // If the callback was void (e.g. delete), resolve undefined.
+        if (request && 'result' in request) {
+          resolve(request.result);
+        } else {
+          resolve(undefined as T);
+        }
+      };
+
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(new Error('Transaction aborted'));
+    });
+  }
+
   // --- CRUD Operations ---
 
   async getAll<T>(storeName: StoreName): Promise<T[]> {
     const db = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readonly');
-      const store = transaction.objectStore(storeName);
-      
-      const request = (storeName !== 'app_state' && store.indexNames.contains('timestamp'))
-        ? store.index('timestamp').getAll() 
-        : store.getAll();
+      const tx = db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const results: T[] = [];
 
-      request.onsuccess = () => {
-          const result = request.result as T[];
-          // Reverse time sort if using timestamp index (newest first)
-          resolve((storeName !== 'app_state' && store.indexNames.contains('timestamp')) ? result.reverse() : result);
+      // Use cursor with 'prev' direction to sort by timestamp DESC implicitly if index exists
+      let request: IDBRequest;
+      if (storeName !== 'app_state' && store.indexNames.contains('timestamp')) {
+        request = store.index('timestamp').openCursor(null, 'prev');
+      } else {
+        request = store.openCursor();
+      }
+
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+        if (cursor) {
+          results.push(cursor.value);
+          cursor.continue();
+        } else {
+          resolve(results);
+        }
       };
+
       request.onerror = () => reject(request.error);
     });
   }
 
   async get<T>(storeName: StoreName, key: string): Promise<T | undefined> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readonly');
-      const store = transaction.objectStore(storeName);
-      const request = store.get(key);
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+    return this.executeTransaction<T>([storeName], 'readonly', (stores) => {
+      return stores[storeName].get(key);
     });
   }
 
   async put<T>(storeName: StoreName, value: T): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.put(value);
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      request.onerror = () => reject(request.error);
+    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+      stores[storeName].put(value);
     });
   }
 
   async delete(storeName: StoreName, key: string): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      const request = store.delete(key);
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
+    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+      stores[storeName].delete(key);
     });
   }
 
   async clear(storeName: StoreName): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(storeName, 'readwrite');
-        const store = transaction.objectStore(storeName);
-        store.clear();
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
+    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+      stores[storeName].clear();
     });
   }
 
   async deleteBatch(storeName: StoreName, keys: string[]): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, 'readwrite');
-      const store = transaction.objectStore(storeName);
-      
-      keys.forEach(key => {
-        store.delete(key);
-      });
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error || new Error('Batch delete transaction failed'));
+    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+      keys.forEach(key => stores[storeName].delete(key));
     });
+  }
+
+  // --- Health Check ---
+  async healthCheck(): Promise<boolean> {
+    try {
+        await this.open();
+        return true;
+    } catch {
+        return false;
+    }
   }
 
   // --- Redux Persist Storage Engine Interface ---
@@ -207,6 +239,7 @@ class DatabaseService {
     };
 
     const db = await this.open();
+    // Using simple transaction loop for stats gathering
     const tx = db.transaction(stores, 'readonly');
 
     const promises = stores.map(storeName => {
@@ -218,14 +251,13 @@ class DatabaseService {
                 stats.totalRecords += countReq.result;
             };
 
-            // Estimate size
+            // Heuristic size estimation using a cursor
             const cursorReq = store.openCursor();
             cursorReq.onsuccess = (e) => {
-                // Use generic IDBRequest<IDBCursorWithValue> to avoid 'any'
                 const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
                 if (cursor) {
                     const value = cursor.value;
-                    const size = JSON.stringify(value).length * 2; // Approx bytes
+                    const size = JSON.stringify(value).length * 2; // Approx bytes in memory (UTF-16)
                     stats.usageBytes += size;
                     cursor.continue();
                 } else {
@@ -266,22 +298,12 @@ class DatabaseService {
       }
 
       let count = 0;
-
-      if (Array.isArray(data.analyses)) {
-        for (const item of data.analyses) { await this.saveAnalysis(item); count++; }
-      }
-      if (Array.isArray(data.media_analyses)) {
-        for (const item of data.media_analyses) { await this.saveMediaAnalysis(item); count++; }
-      }
-      if (Array.isArray(data.chats)) {
-        for (const item of data.chats) { await this.saveChat(item); count++; }
-      }
-      if (Array.isArray(data.satires)) {
-        for (const item of data.satires) { await this.saveSatire(item); count++; }
-      }
-      if (Array.isArray(data.settings)) {
-        for (const item of data.settings) { await this.put('app_state', item); count++; }
-      }
+      // Using sequential import for stability
+      if (Array.isArray(data.analyses)) for (const item of data.analyses) { await this.saveAnalysis(item); count++; }
+      if (Array.isArray(data.media_analyses)) for (const item of data.media_analyses) { await this.saveMediaAnalysis(item); count++; }
+      if (Array.isArray(data.chats)) for (const item of data.chats) { await this.saveChat(item); count++; }
+      if (Array.isArray(data.satires)) for (const item of data.satires) { await this.saveSatire(item); count++; }
+      if (Array.isArray(data.settings)) for (const item of data.settings) { await this.put('app_state', item); count++; }
       
       return { success: true, message: `Vault restored. ${count} records integrated.` };
     } catch (e) {
@@ -290,31 +312,14 @@ class DatabaseService {
     }
   }
 
-  // --- Wrappers ---
+  // --- Specific Methods ---
 
-  async saveAnalysis(analysis: StoredAnalysis) {
-    return this.put('analyses', analysis);
-  }
-
-  async getAnalysis(id: string) {
-    return this.get<StoredAnalysis>('analyses', id);
-  }
-
-  async saveMediaAnalysis(analysis: StoredMediaAnalysis) {
-    return this.put('media_analyses', analysis);
-  }
-
-  async getMediaAnalysis(id: string) {
-    return this.get<StoredMediaAnalysis>('media_analyses', id);
-  }
-
-  async saveChat(chat: StoredChat) {
-    return this.put('chats', chat);
-  }
-
-  async saveSatire(satire: StoredSatire) {
-    return this.put('satires', satire);
-  }
+  async saveAnalysis(analysis: StoredAnalysis) { return this.put('analyses', analysis); }
+  async getAnalysis(id: string) { return this.get<StoredAnalysis>('analyses', id); }
+  async saveMediaAnalysis(analysis: StoredMediaAnalysis) { return this.put('media_analyses', analysis); }
+  async getMediaAnalysis(id: string) { return this.get<StoredMediaAnalysis>('media_analyses', id); }
+  async saveChat(chat: StoredChat) { return this.put('chats', chat); }
+  async saveSatire(satire: StoredSatire) { return this.put('satires', satire); }
 }
 
 export const dbService = new DatabaseService();

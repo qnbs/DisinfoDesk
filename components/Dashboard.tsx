@@ -1,518 +1,393 @@
 
-import React, { useMemo, useState, useEffect, useCallback, createContext, useContext } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
-  Tooltip, Cell, AreaChart, Area
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
+  CartesianGrid, BarChart, Bar, Cell
 } from 'recharts';
 import { 
-  DangerLevel, DangerLevelEn, Category, CategoryEn, 
-  RadarDataPoint, ScatterDataPoint 
-} from '../types';
-import { 
-  VIZ_COLORS, CATEGORY_COLORS 
-} from '../constants';
-import { 
-  TrendingUp, ShieldAlert, BookOpen, Activity, 
-  Radio, Globe, Cpu, AlertOctagon, Fingerprint, Eye, Zap, Map, MousePointer2, Wifi, Power
+  Globe, Activity, ShieldAlert, Zap, Radio, 
+  Terminal, Cpu, Map as MapIcon, ChevronRight, 
+  AlertTriangle, Crosshair, ArrowUpRight, Signal, 
+  Lock, Share2, Wifi
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Card, PageFrame, PageHeader } from './ui/Common';
+import { Card, PageFrame, PageHeader, Button, Badge, cn } from './ui/Common';
 import { useAppSelector } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { useNavigate } from 'react-router-dom';
+import { DangerLevel } from '../types';
 
-// --- 1. Logic Hook ---
+// --- 1. UTILITY COMPONENTS ---
 
-const parseYear = (yearStr?: string): number => {
-  if (!yearStr) return 2000;
-  const match = yearStr.match(/\d{4}/);
-  if (match) return parseInt(match[0]);
-  if (yearStr.includes('19. Jh') || yearStr.includes('19th')) return 1850;
-  if (yearStr.includes('17. Jh') || yearStr.includes('17th')) return 1650;
-  return 2000;
-};
-
-const useDashboardLogic = () => {
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
-  const theories = useAppSelector(selectAllTheories);
-  
-  const [systemLoad, setSystemLoad] = useState(45);
-  const [networkActivity, setNetworkActivity] = useState<number[]>(new Array(20).fill(20));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSystemLoad(prev => Math.min(98, Math.max(12, prev + (Math.random() * 10 - 5))));
-      setNetworkActivity(prev => {
-        const next = [...prev.slice(1), Math.floor(Math.random() * 100)];
-        return next;
-      });
-    }, 2500); 
-    return () => clearInterval(interval);
-  }, []);
-
-  const stats = useMemo(() => {
-    const total = theories.length;
-    const criticalLevels: string[] = [DangerLevel.HIGH, DangerLevel.EXTREME, DangerLevelEn.HIGH, DangerLevelEn.EXTREME];
+// Scrambling Text Effect for "Decryption" visuals
+const ScrambleText: React.FC<{ text: string, className?: string, delay?: number }> = React.memo(({ text, className, delay = 0 }) => {
+    const [display, setDisplay] = useState(text.replace(/./g, '█')); // Start obscured
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     
-    const high = theories.filter(t => 
-      criticalLevels.includes(t.dangerLevel)
-    ).length;
-    const avgPop = Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (total || 1));
-    const integrity = Math.max(0, 100 - (high * 2)); 
-    
-    return { total, high, avgPop, integrity };
-  }, [theories]);
-  
-  const radarData = useMemo(() => {
-    const catEnum = language === 'de' ? Category : CategoryEn;
-    return Object.values(catEnum).map(cat => ({
-      subject: cat.split(' ')[0], 
-      fullSubject: cat,
-      count: theories.filter(t => t.category === cat).length,
-      fullMark: theories.length
-    }));
-  }, [theories, language]);
+    useEffect(() => {
+        let timeout: ReturnType<typeof setTimeout>;
+        let interval: ReturnType<typeof setInterval>;
 
-  const scatterData = useMemo(() => {
-    const criticalLevels: string[] = [DangerLevel.HIGH, DangerLevel.EXTREME, DangerLevelEn.HIGH, DangerLevelEn.EXTREME];
-    return theories.map(t => ({
-      id: t.id,
-      title: t.title,
-      x: parseYear(t.originYear),
-      y: t.popularity,
-      z: criticalLevels.includes(t.dangerLevel) ? 20 : 10,
-      category: t.category,
-      danger: t.dangerLevel
-    }));
-  }, [theories]);
+        timeout = setTimeout(() => {
+            let iter = 0;
+            interval = setInterval(() => {
+                setDisplay(
+                    text.split('').map((char, index) => {
+                        if (index < iter) return char;
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    }).join('')
+                );
+                if (iter >= text.length) clearInterval(interval);
+                iter += 1/2; 
+            }, 30);
+        }, delay);
 
-  const activityData = useMemo(() => {
-    return networkActivity.map((val, i) => ({ i, val }));
-  }, [networkActivity]);
+        return () => { clearTimeout(timeout); clearInterval(interval); };
+    }, [text, delay]);
 
-  const trendingTopics = useMemo(() => {
-    return [...theories]
-      .sort((a, b) => b.popularity - a.popularity)
-      .slice(0, 3);
-  }, [theories]);
+    return <span className={className}>{display}</span>;
+});
 
-  const handleNavList = useCallback(() => navigate('/archive'), [navigate]);
-  const handleNavDangerous = useCallback(() => navigate('/dangerous'), [navigate]);
-  const handleNavVirality = useCallback(() => navigate('/virality'), [navigate]);
-  const handleNavDetail = useCallback((id: string) => navigate(`/archive/${id}`), [navigate]);
-
-  return {
-    t,
-    stats,
-    radarData,
-    scatterData,
-    activityData,
-    trendingTopics,
-    systemLoad,
-    handleNavList,
-    handleNavDangerous,
-    handleNavVirality,
-    handleNavDetail
-  };
-};
-
-// --- 2. Context & Provider ---
-
-type DashboardContextType = ReturnType<typeof useDashboardLogic>;
-const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
-
-const useDashboard = () => {
-  const context = useContext(DashboardContext);
-  if (!context) throw new Error('useDashboard must be used within a DashboardProvider');
-  return context;
-};
-
-const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const logic = useDashboardLogic();
-  return <DashboardContext.Provider value={logic}>{children}</DashboardContext.Provider>;
-};
-
-// --- 3. Sub-Components ---
-
-interface CustomTooltipRadarProps {
-  active?: boolean;
-  payload?: { value: number; payload: RadarDataPoint }[];
-}
-const CustomTooltipRadar: React.FC<CustomTooltipRadarProps> = ({ active, payload }) => {
-  if (!active || !payload || !payload.length || !payload[0] || !payload[0].payload) return null;
-  const data = payload[0].payload;
-  return (
-    <div className="bg-slate-900/95 border border-slate-700 p-3 rounded-lg shadow-2xl backdrop-blur-md">
-      <p className="text-accent-cyan font-bold text-xs mb-1 font-mono uppercase tracking-wider">{data.fullSubject}</p>
-      <div className="flex justify-between items-center gap-4">
-          <span className="text-slate-400 text-xs">Total:</span>
-          <span className="font-mono font-bold text-white text-sm">{payload[0].value}</span>
-      </div>
-    </div>
-  );
-};
-
-interface CustomTooltipScatterProps {
-  active?: boolean;
-  payload?: { value: number | string; payload: ScatterDataPoint }[];
-}
-const CustomTooltipScatter: React.FC<CustomTooltipScatterProps> = ({ active, payload }) => {
-  if (!active || !payload || !payload.length || !payload[0] || !payload[0].payload) return null;
-  const data = payload[0].payload;
-  return (
-    <div className="bg-slate-900/95 border-l-2 border-accent-purple p-3 rounded-r-lg shadow-2xl backdrop-blur-md min-w-[200px] z-50">
-      <div className="flex justify-between items-start mb-1">
-        <p className="text-[10px] text-slate-500 font-mono uppercase">{data.x}</p>
-        <span className="text-[10px] uppercase bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">{data.danger}</span>
-      </div>
-      <p className="text-white font-bold text-sm mb-2">{data.title}</p>
-      <div className="flex justify-between items-center border-t border-slate-700/50 pt-2">
-          <span className="text-xs text-accent-cyan font-mono">{data.category.split(' ')[0]}</span>
-          <span className="text-xs font-bold text-white">Viral: {data.y}%</span>
-      </div>
-    </div>
-  );
-};
-
-const KPICard: React.FC<{ 
-  title: string; 
-  value: string | number; 
-  sub: string; 
-  icon: React.ReactNode; 
-  trend?: 'up' | 'down' | 'neutral';
-  color: string;
-  onClick?: () => void;
-}> = React.memo(({ title, value, sub, icon, trend, color, onClick }) => (
-  <Card 
-    onClick={onClick}
-    className={`p-4 relative overflow-hidden group hover:border-${color} transition-all duration-300 ${onClick ? 'cursor-pointer active:scale-95' : ''}`}
-  >
-    <div className={`absolute -right-6 -top-6 opacity-5 text-${color} group-hover:scale-110 transition-transform duration-700 rotate-12`}>
-      <Fingerprint size={120} />
-    </div>
-    
-    <div className="flex justify-between items-start mb-3 relative z-10">
-      <div className={`text-slate-400 text-[10px] font-bold uppercase tracking-widest font-mono`}>{title}</div>
-      <div className={`p-1.5 rounded-md bg-${color}/10 text-${color} ring-1 ring-${color}/20 shadow-[0_0_10px_rgba(0,0,0,0.3)]`}>
-        {icon}
-      </div>
-    </div>
-    
-    <div className="text-2xl md:text-4xl font-bold text-white mb-2 font-mono tracking-tighter relative z-10 drop-shadow-md">
-      {value}
-    </div>
-    
-    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono relative z-10">
-       {trend === 'up' && <TrendingUp size={12} className="text-red-400" />}
-       <span className="opacity-70">{sub}</span>
-    </div>
-    
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent h-[50%] w-full animate-scan pointer-events-none opacity-0 group-hover:opacity-100"></div>
-  </Card>
-));
-
-const DashboardHeader: React.FC = () => {
-  const { t, systemLoad } = useDashboard();
-  return (
-    <PageHeader 
-      title={t.dashboard.title}
-      subtitle={t.dashboard.subtitle}
-      icon={Globe}
-      actions={
-         <div className="text-left md:text-right border-l-2 md:border-l-0 md:border-r-2 border-accent-cyan/30 pl-3 md:pl-0 md:pr-3">
-            <div className="text-[10px] text-slate-500 font-mono uppercase">{t.common.systemLoad}</div>
-            <div className="text-xs text-accent-cyan font-bold font-mono flex items-center justify-end gap-2">
-                <span>{systemLoad.toFixed(1)}%</span>
-                <div className="w-12 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-accent-cyan" style={{ width: `${systemLoad}%` }}></div>
-                </div>
-            </div>
-         </div>
-      }
-    />
-  );
-};
-
-const DashboardTicker: React.FC = () => {
-  const { t } = useDashboard();
-  return (
-    <div className="w-full bg-slate-900/80 border-y border-white/10 h-10 md:h-8 flex items-center overflow-hidden relative mb-6 backdrop-blur-sm shadow-md" aria-hidden="true">
-      <div className="absolute left-0 bg-accent-cyan/20 text-accent-cyan px-3 text-[10px] font-bold h-full flex items-center z-20 border-r border-accent-cyan/30">
-        LIVE
-      </div>
-      <div className="animate-marquee whitespace-nowrap flex gap-12 text-xs md:text-[10px] font-mono text-slate-400 items-center pl-16">
-        <span>{t.dashboard.ticker.detected}</span>
-        <span className="text-red-400 flex items-center gap-1"><ShieldAlert size={10} /> {t.dashboard.ticker.warning}</span>
-        <span>{t.dashboard.ticker.analysis}</span>
-        <span className="text-accent-cyan flex items-center gap-1"><Cpu size={10} /> {t.dashboard.ticker.system}</span>
-        <span>{t.dashboard.ticker.archive}</span>
-      </div>
-      <div className="absolute right-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-l from-[#020617] to-transparent z-10 pointer-events-none"></div>
-    </div>
-  );
-};
-
-const DashboardKPIs: React.FC = () => {
-  const { stats, t, handleNavList, handleNavDangerous, handleNavVirality } = useDashboard();
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6">
-      <KPICard 
-         title="ARCHIVED" 
-         value={stats.total} 
-         sub={t.dashboard.total} 
-         icon={<BookOpen size={18} />} 
-         trend="up"
-         color="cyan"
-         onClick={handleNavList}
-      />
-      <KPICard 
-         title="THREATS" 
-         value={stats.high} 
-         sub={t.dashboard.critical} 
-         icon={<AlertOctagon size={18} />} 
-         trend="up"
-         color="red"
-         onClick={handleNavDangerous}
-      />
-       <KPICard 
-         title="VIRALITY" 
-         value={`${stats.avgPop}%`} 
-         sub={t.dashboard.virality} 
-         icon={<Radio size={18} />} 
-         trend="neutral"
-         color="purple"
-         onClick={handleNavVirality}
-      />
-       <KPICard 
-         title="INTEGRITY" 
-         value={`${stats.integrity}%`} 
-         sub={t.dashboard.integrity} 
-         icon={<ShieldAlert size={18} />} 
-         trend="down"
-         color="green"
-      />
-    </div>
-  );
-};
-
-const GeoThreatMap: React.FC = () => {
-    const { activityData, t } = useDashboard();
+// Mini Sparkline for Cards
+const Sparkline: React.FC<{ data: number[], color: string }> = ({ data, color }) => {
+    const chartData = data.map((val, i) => ({ i, val }));
     return (
-        <Card className="col-span-1 min-h-[400px] flex flex-col relative overflow-hidden bg-slate-950 p-0">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"></div>
-            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                <h3 className="text-xs font-bold text-white flex items-center gap-2 font-mono uppercase tracking-wider">
-                    <Map size={14} className="text-accent-cyan" />
-                    {t.dashboard.map}
-                </h3>
-            </div>
-            
-            <div className="relative flex-1 bg-[#050b14]">
-                <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 800 400" preserveAspectRatio="none">
-                    <path d="M50,100 Q150,50 250,120 T400,100 T600,80 T750,120" stroke="#1e293b" strokeWidth="2" fill="none" />
-                    <path d="M80,300 Q200,350 300,320 T500,350 T700,320" stroke="#1e293b" strokeWidth="2" fill="none" />
-                    <circle cx="200" cy="150" r="30" fill="#1e293b" opacity="0.5" />
-                    <circle cx="550" cy="180" r="40" fill="#1e293b" opacity="0.5" />
-                    <circle cx="350" cy="280" r="25" fill="#1e293b" opacity="0.5" />
-                </svg>
-                
-                {[...Array(8)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute w-2 h-2 rounded-full bg-red-500 animate-ping"
-                        style={{
-                            top: `${20 + Math.random() * 60}%`,
-                            left: `${10 + Math.random() * 80}%`,
-                            animationDuration: `${1 + Math.random() * 2}s`,
-                            animationDelay: `${Math.random()}s`
-                        }}
-                    ></div>
-                ))}
-                
-                <div className="absolute bottom-0 left-0 w-full h-24 p-0 pointer-events-none">
-                    <div className="w-full h-full p-2 opacity-80" style={{ height: '96px', width: '100%' }}>
-                        <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
-                            <AreaChart data={activityData}>
-                                <defs>
-                                    <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="val" 
-                                    stroke="#06b6d4" 
-                                    strokeWidth={1.5}
-                                    fill="url(#colorActivity)" 
-                                    isAnimationActive={false}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="p-2 border-t border-slate-800 bg-slate-900/30 text-[9px] font-mono text-slate-500 flex justify-between relative z-10">
-                <span>LAT: 45.23 / LON: -12.44</span>
-                <span className="flex items-center gap-1"><Activity size={8} /> LIVE TRAFFIC</span>
-            </div>
-        </Card>
+        <div className="h-8 w-24">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <AreaChart data={chartData}>
+                    <defs>
+                        <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={color} stopOpacity={0.4}/>
+                            <stop offset="100%" stopColor={color} stopOpacity={0}/>
+                        </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="val" stroke={color} strokeWidth={2} fill={`url(#grad-${color})`} isAnimationActive={false} />
+                </AreaChart>
+            </ResponsiveContainer>
+        </div>
     );
 };
 
-const DashboardCharts: React.FC = () => {
-  const { scatterData, radarData, t, handleNavDetail } = useDashboard();
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
-       {/* Temporal Scatter */}
-       <Card className="col-span-1 md:col-span-2 lg:col-span-2 flex flex-col min-h-[400px]">
-          <div className="p-4 border-b border-white/5 flex justify-between items-center">
-            <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
-              <Activity size={14} className="text-accent-purple" />
-              {t.dashboard.temporal}
-            </h3>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] text-accent-purple animate-pulse flex items-center gap-1"><MousePointer2 size={10} /> INTERACTIVE</span>
-            </div>
-          </div>
-          <div className="w-full flex-1" style={{ minHeight: '300px', width: '100%', height: '300px' }}>
-            <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                <XAxis 
-                  type="number" 
-                  dataKey="x" 
-                  name="Year" 
-                  domain={[1940, 2025]} 
-                  tick={{ fontSize: 10, fill: '#64748b', fontFamily: 'monospace' }} 
-                  tickCount={5}
-                  axisLine={{ stroke: '#334155' }}
-                  tickLine={false}
-                />
-                <YAxis 
-                  type="number" 
-                  dataKey="y" 
-                  name="Popularity" 
-                  tick={{ fontSize: 10, fill: '#64748b', fontFamily: 'monospace' }} 
-                  unit="%" 
-                  axisLine={{ stroke: '#334155' }}
-                  tickLine={false}
-                />
-                <ZAxis type="number" dataKey="z" range={[50, 400]} />
-                <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#475569' }} content={<CustomTooltipScatter />} />
-                <Scatter 
-                    name="Theories" 
-                    data={scatterData} 
-                    onClick={(data) => handleNavDetail(data.payload.id)}
-                    style={{ cursor: 'pointer' }}
-                >
-                  {scatterData.map((entry, index) => (
-                    <Cell 
-                        key={`cell-${index}`} 
-                        fill={CATEGORY_COLORS[entry.category] || VIZ_COLORS.slate} 
-                        fillOpacity={0.6} 
-                        strokeWidth={1} 
-                        className="hover:opacity-100 transition-opacity cursor-pointer"
-                    />
-                  ))}
-                </Scatter>
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-       </Card>
+// --- 2. COMPLEX WIDGETS ---
 
-       {/* Radar */}
-       <Card className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col relative min-h-[400px]">
-          <div className="p-4 border-b border-white/5 flex justify-between items-center">
-            <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
-              <Eye size={14} className="text-accent-cyan" />
-              {t.dashboard.distribution}
-            </h3>
-            <div className="flex gap-1.5">
-              <div className="w-1 h-1 bg-accent-cyan rounded-full animate-pulse"></div>
-              <div className="w-1 h-1 bg-accent-purple rounded-full"></div>
-            </div>
-          </div>
-          <div className="w-full relative flex-1" style={{ minHeight: '300px', width: '100%', height: '300px' }}>
-            <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                <PolarGrid stroke="#334155" strokeDasharray="3 3" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'monospace' }} />
-                <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
-                <Radar
-                  name="Theories"
-                  dataKey="count"
-                  stroke="#06b6d4"
-                  strokeWidth={2}
-                  fill="#06b6d4"
-                  fillOpacity={0.15}
-                />
-                <Tooltip content={<CustomTooltipRadar />} />
-              </RadarChart>
-            </ResponsiveContainer>
-            <div className="absolute top-2 left-2 text-[8px] text-slate-700 font-mono">RADAR_SEQ_09</div>
-            <div className="absolute bottom-2 right-2 text-[8px] text-slate-700 font-mono">SCALE: LOG</div>
-          </div>
-       </Card>
+// World Map Projection (SVG)
+const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void }> = ({ data, onSelect }) => {
+    // Simulated coords for demo purposes since we don't have real LatLong in Theory model yet
+    // In a real app, we'd map countries/cities to coords. Here we use deterministic random based on ID.
+    const getCoords = (id: string) => {
+        let hash = 0;
+        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+        const x = Math.abs(Math.sin(hash) * 800) + 50; // Map width approx
+        const y = Math.abs(Math.cos(hash) * 400) + 50; // Map height approx
+        return { x, y };
+    };
 
-       <GeoThreatMap />
-    </div>
-  );
+    return (
+        <div className="relative w-full h-full overflow-hidden bg-[#020617] rounded-xl border border-slate-800 group">
+            {/* Map Background (Abstract Grid/Continents placeholder) */}
+            <div className="absolute inset-0 opacity-20 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg')] bg-cover bg-center mix-blend-overlay grayscale invert"></div>
+            <div className="absolute inset-0 bg-cyber-grid opacity-10"></div>
+            
+            {/* Radar Scan Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/10 to-transparent w-[50%] h-full animate-[marquee_4s_linear_infinite] pointer-events-none mix-blend-screen"></div>
+
+            {/* Data Points */}
+            <svg viewBox="0 0 1000 500" className="w-full h-full absolute inset-0 preserve-3d">
+                {data.map((item) => {
+                    const { x, y } = getCoords(item.id);
+                    const isCritical = item.dangerLevel.includes('High') || item.dangerLevel.includes('Extreme');
+                    return (
+                        <g key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:opacity-100 transition-opacity">
+                            <circle cx={x} cy={y} r={isCritical ? 6 : 3} fill={isCritical ? '#ef4444' : '#06b6d4'} className="animate-pulse" opacity="0.6">
+                                <animate attributeName="r" values={isCritical ? "6;10;6" : "3;6;3"} dur="3s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite" />
+                            </circle>
+                            <circle cx={x} cy={y} r={2} fill="#fff" />
+                        </g>
+                    );
+                })}
+            </svg>
+
+            {/* HUD Overlay */}
+            <div className="absolute bottom-4 left-4 text-[9px] font-mono text-accent-cyan bg-slate-900/80 px-2 py-1 rounded border border-accent-cyan/30 backdrop-blur">
+                <span className="animate-pulse">●</span> LIVE TRACKING: {data.length} SIGNALS
+            </div>
+        </div>
+    );
 };
 
-const DashboardTrending: React.FC = () => {
-  const { trendingTopics, t, handleNavDetail } = useDashboard();
-  return (
-    <div className="grid grid-cols-1">
-        <Card className="col-span-1 md:col-span-2 lg:col-span-4 border-t-2 border-t-accent-purple">
-            <div className="p-4 border-b border-white/5 flex justify-between items-center">
-                <h3 className="text-xs font-bold text-slate-300 flex items-center gap-2 font-mono uppercase tracking-wider">
-                    <Zap size={14} className="text-accent-purple" />
-                    {t.dashboard.toplist}
-                </h3>
+// Intelligence Feed (Scrolling Terminal)
+const IntelFeed: React.FC = () => {
+    const [lines, setLines] = useState<string[]>([]);
+    const msgs = [
+        "Intercepted encrypted packet: Sector 7G...",
+        "Analyzing sentiment: 4chan /pol/...",
+        "Cross-referencing: 'Project Blue Beam'...",
+        "Node 42 going dark...",
+        "New cluster detected: Frankfurt Server...",
+        "Gemini 2.5: Context window refreshed...",
+        "Updating heuristic models...",
+        "Botnet traffic spike detected..."
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLines(prev => {
+                const next = [...prev, `[${new Date().toLocaleTimeString()}] ${msgs[Math.floor(Math.random() * msgs.length)]}`];
+                return next.slice(-8); // Keep last 8
+            });
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="h-full bg-black font-mono text-[10px] p-3 overflow-hidden flex flex-col justify-end border-l border-slate-800/50">
+            <div className="mb-2 text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                <Terminal size={10} /> System Log
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-800">
-                {trendingTopics.map((theory, idx) => (
-                    <div 
-                        key={theory.id} 
-                        onClick={() => handleNavDetail(theory.id)}
-                        className="p-4 hover:bg-slate-800/50 cursor-pointer transition-colors group flex items-start gap-3 active:bg-slate-800"
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleNavDetail(theory.id); }}
-                    >
-                        <span className="text-2xl font-mono font-bold text-slate-600 group-hover:text-accent-purple transition-colors">0{idx + 1}</span>
-                        <div>
-                            <h4 className="text-sm font-bold text-white group-hover:text-accent-cyan transition-colors">{theory.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">{theory.category.split(' ')[0]}</span>
-                                <span className="text-[10px] text-green-400 flex items-center gap-0.5"><TrendingUp size={10} /> +{Math.floor(Math.random() * 20)}%</span>
-                            </div>
-                        </div>
+            <div className="space-y-1">
+                {lines.map((line, i) => (
+                    <div key={i} className="text-green-500/80 truncate animate-fade-in-up">
+                        {line}
                     </div>
                 ))}
+                <div className="w-2 h-3 bg-green-500 animate-pulse mt-1"></div>
             </div>
-        </Card>
-    </div>
-  );
+        </div>
+    );
 };
 
-// --- 4. Main Component ---
+// --- 3. MAIN DASHBOARD COMPONENT ---
+
+const useDashboardLogic = () => {
+    const { t } = useLanguage();
+    const navigate = useNavigate();
+    const theories = useAppSelector(selectAllTheories);
+
+    // --- Statistics Calculation ---
+    const stats = useMemo(() => {
+        const total = theories.length;
+        const critical = theories.filter(t => t.dangerLevel.includes('High') || t.dangerLevel.includes('Extreme')).length;
+        const avgViral = Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (total || 1));
+        
+        // Mock historical data for sparklines
+        const history = new Array(10).fill(0).map(() => Math.floor(Math.random() * 100));
+        
+        return { total, critical, avgViral, history };
+    }, [theories]);
+
+    // --- Radar Data ---
+    const radarData = useMemo(() => {
+        const categories = theories.reduce((acc, t) => {
+            const cat = t.category.split(' ')[0]; // Shorten name
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+        
+        return Object.entries(categories).map(([subject, A]) => ({ subject, A, fullMark: theories.length })).slice(0, 6);
+    }, [theories]);
+
+    // --- Trend Data (Simulated Time Series) ---
+    const trendData = useMemo(() => {
+        return new Array(7).fill(0).map((_, i) => ({
+            day: `Day ${i+1}`,
+            scans: Math.floor(Math.random() * 500) + 200,
+            threats: Math.floor(Math.random() * 50) + 10,
+        }));
+    }, []);
+
+    return { stats, radarData, trendData, theories, navigate, t };
+};
+
+const MetricCard: React.FC<{ 
+    title: string, value: string | number, sub: string, 
+    icon: React.ElementType, color: string, sparklineData?: number[],
+    onClick?: () => void
+}> = ({ title, value, sub, icon: Icon, color, sparklineData, onClick }) => (
+    <Card 
+        onClick={onClick}
+        className={cn(
+            "p-5 flex flex-col justify-between relative overflow-hidden group cursor-pointer border-slate-800 bg-slate-950/50 hover:bg-slate-900 transition-all active:scale-[0.98]",
+            "hover:border-l-4 hover:border-l-[color:var(--highlight)]" // Dynamic border handled via style or simpler class
+        )}
+        style={{ '--highlight': color } as React.CSSProperties}
+    >
+        <div className="flex justify-between items-start z-10 relative">
+            <div>
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <Icon size={12} className={cn(color.replace('text-', 'text-'))} /> {title}
+                </div>
+                <div className="text-3xl font-black text-white font-display tracking-tight mt-1">
+                    <ScrambleText text={String(value)} />
+                </div>
+            </div>
+            {sparklineData && <Sparkline data={sparklineData} color={color === 'text-red-500' ? '#ef4444' : color === 'text-accent-cyan' ? '#06b6d4' : '#8b5cf6'} />}
+        </div>
+        
+        <div className="mt-4 pt-3 border-t border-slate-800/50 flex justify-between items-center z-10 relative">
+            <span className="text-[10px] font-mono text-slate-400">{sub}</span>
+            <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100" />
+        </div>
+
+        {/* Decor */}
+        <div className={cn("absolute -bottom-4 -right-4 w-24 h-24 rounded-full opacity-5 group-hover:opacity-10 transition-opacity blur-xl", color.replace('text-', 'bg-'))} />
+    </Card>
+);
 
 export const Dashboard: React.FC = () => {
-  return (
-      <DashboardProvider>
+    const { stats, radarData, trendData, theories, navigate, t } = useDashboardLogic();
+
+    return (
         <PageFrame>
-          <DashboardHeader />
-          <DashboardTicker />
-          <DashboardKPIs />
-          <DashboardCharts />
-          <DashboardTrending />
+            <PageHeader 
+                title="COMMAND CENTER" 
+                subtitle="SITUATION AWARENESS // LIVE" 
+                icon={Activity}
+                status="SYSTEM NOMINAL"
+                visualizerState="BUSY"
+            >
+                <div className="flex items-center gap-4 text-[10px] font-mono text-slate-500 mt-2">
+                    <span className="flex items-center gap-1"><Cpu size={10} /> LOAD: 14%</span>
+                    <span className="flex items-center gap-1"><Wifi size={10} /> LATENCY: 24ms</span>
+                    <span className="flex items-center gap-1"><Lock size={10} /> VAULT: SECURE</span>
+                </div>
+            </PageHeader>
+
+            {/* --- TOP ROW: KPI GRID --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <MetricCard 
+                    title="Database Index" 
+                    value={stats.total} 
+                    sub="TOTAL ARCHIVED FILES" 
+                    icon={Terminal} 
+                    color="text-slate-400" 
+                    sparklineData={stats.history}
+                    onClick={() => navigate('/archive')}
+                />
+                <MetricCard 
+                    title="Active Threats" 
+                    value={stats.critical} 
+                    sub="PROTOCOL OMEGA TARGETS" 
+                    icon={ShieldAlert} 
+                    color="text-red-500" 
+                    sparklineData={stats.history.map(x => x * 0.4)}
+                    onClick={() => navigate('/dangerous')}
+                />
+                <MetricCard 
+                    title="Viral Velocity" 
+                    value={`${stats.avgViral}%`} 
+                    sub="GLOBAL INFECTION RATE" 
+                    icon={Radio} 
+                    color="text-accent-cyan" 
+                    sparklineData={stats.history.map(x => x + 20)}
+                    onClick={() => navigate('/virality')}
+                />
+                <MetricCard 
+                    title="Counter-Intel" 
+                    value="ONLINE" 
+                    sub="AI SKEPTIC ACTIVE" 
+                    icon={Zap} 
+                    color="text-accent-purple" 
+                    onClick={() => navigate('/chat')}
+                />
+            </div>
+
+            {/* --- MIDDLE ROW: MAP & INTEL --- */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 min-h-[400px]">
+                {/* Global Map */}
+                <Card className="lg:col-span-2 p-0 flex flex-col bg-slate-950 border-slate-800 shadow-2xl relative">
+                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur">
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                            <Globe size={14} className="text-accent-cyan" /> GLOBAL INCIDENCE MAP
+                        </div>
+                        <div className="flex gap-2">
+                            <Badge label="LIVE" className="bg-red-500/10 text-red-500 border-red-500/50 animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="flex-1 relative">
+                        <GlobalIncidentMap data={theories} onSelect={(id) => navigate(`/archive/${id}`)} />
+                    </div>
+                </Card>
+
+                {/* Side Panel: Defcon & Feed */}
+                <div className="flex flex-col gap-6 h-full">
+                    {/* Defcon Gauge */}
+                    <Card className="flex-1 p-0 bg-slate-900/50 border-red-900/30 overflow-hidden relative flex flex-col items-center justify-center text-center">
+                        <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-transparent pointer-events-none"></div>
+                        <AlertTriangle size={48} className="text-red-500 mb-2 animate-pulse" />
+                        <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] mb-1">Current Status</div>
+                        <div className="text-5xl font-black text-white font-display tracking-tighter">DEFCON 4</div>
+                        <div className="mt-4 w-full px-8">
+                            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-red-500 w-[20%] animate-pulse"></div>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* Intel Feed */}
+                    <Card className="flex-[2] p-0 border-slate-800 overflow-hidden">
+                        <IntelFeed />
+                    </Card>
+                </div>
+            </div>
+
+            {/* --- BOTTOM ROW: ANALYTICS --- */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Temporal Activity */}
+                <Card className="lg:col-span-2 p-0 bg-slate-950 border-slate-800">
+                    <div className="p-4 border-b border-slate-800 flex items-center gap-2">
+                        <Signal size={14} className="text-accent-purple" />
+                        <span className="text-xs font-bold text-white uppercase tracking-widest">Signal Interception Volume</span>
+                    </div>
+                    <div className="h-64 w-full p-4">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                            <AreaChart data={trendData}>
+                                <defs>
+                                    <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <XAxis dataKey="day" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
+                                    itemStyle={{ color: '#fff' }}
+                                />
+                                <Area type="monotone" dataKey="scans" stroke="#8b5cf6" strokeWidth={2} fillOpacity={1} fill="url(#colorScans)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </Card>
+
+                {/* Threat Vector Radar */}
+                <Card className="p-0 bg-slate-950 border-slate-800">
+                    <div className="p-4 border-b border-slate-800 flex items-center gap-2">
+                        <Crosshair size={14} className="text-accent-cyan" />
+                        <span className="text-xs font-bold text-white uppercase tracking-widest">Vector Analysis</span>
+                    </div>
+                    <div className="h-64 w-full relative">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                                <PolarGrid stroke="#334155" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
+                                <Radar name="Threats" dataKey="A" stroke="#06b6d4" strokeWidth={2} fill="#06b6d4" fillOpacity={0.3} />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', fontSize: '12px' }}
+                                    itemStyle={{ color: '#06b6d4' }}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                        {/* Overlay Scan Effect */}
+                        <div className="absolute inset-0 pointer-events-none rounded-full border border-accent-cyan/10 scale-75 animate-[ping_3s_linear_infinite]"></div>
+                    </div>
+                </Card>
+            </div>
         </PageFrame>
-      </DashboardProvider>
-  );
+    );
 };
 
 export default Dashboard;

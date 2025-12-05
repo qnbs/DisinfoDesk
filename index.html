@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f172a" />
-    <meta name="description" content="Ein interaktives Kompendium moderner Mythen und Verschwörungstheorien mit KI-Analyse." />
+    <meta name="theme-color" content="#020617" />
+    <meta name="description" content="Ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse und Faktencheck." />
     
     <!-- PWA Settings -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DisinfoDesk">
+    
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2040/2040504.png">
     
@@ -18,8 +20,7 @@
     <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Added Rajdhani for futuristic headers -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -28,8 +29,8 @@
         theme: {
           extend: {
             colors: {
-              'mystic-dark': '#0f172a',
-              'mystic-light': '#1e293b',
+              'mystic-dark': '#020617', // Slate 950
+              'mystic-card': '#0f172a', // Slate 900
               'accent-cyan': '#06b6d4',
               'accent-purple': '#8b5cf6',
               'danger-red': '#ef4444',
@@ -37,7 +38,7 @@
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
               mono: ['Fira Code', 'monospace'],
-              display: ['Rajdhani', 'sans-serif'], /* New Futuristic Font */
+              display: ['Rajdhani', 'sans-serif'],
             },
             spacing: {
               'safe-top': 'env(safe-area-inset-top)',
@@ -45,12 +46,25 @@
               'safe-left': 'env(safe-area-inset-left)',
               'safe-right': 'env(safe-area-inset-right)',
             },
+            boxShadow: {
+              'neon-cyan': '0 0 10px theme("colors.cyan.500/0.5"), 0 0 20px theme("colors.cyan.500/0.3")',
+              'neon-purple': '0 0 10px theme("colors.purple.500/0.5"), 0 0 20px theme("colors.purple.500/0.3")',
+              'neon-red': '0 0 10px theme("colors.red.500/0.5"), 0 0 20px theme("colors.red.500/0.3")',
+              'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              'inner-light': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+              'cyber-grid': 'linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)',
+            },
             animation: {
-              'marquee': 'marquee 30s linear infinite',
-              'scan': 'scan 3s linear infinite',
-              'fade-in': 'fadeIn 0.6s ease-out forwards',
+              'marquee': 'marquee 40s linear infinite',
+              'scan': 'scan 4s linear infinite',
+              'fade-in': 'fadeIn 0.4s ease-out forwards',
+              'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               'spin-reverse': 'spinReverse 1s linear infinite',
-              'glitch': 'glitch 1s linear infinite',
+              'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shimmer': 'shimmer 2.5s linear infinite',
             },
             keyframes: {
               marquee: {
@@ -59,10 +73,15 @@
               },
               scan: {
                 '0%': { transform: 'translateY(-100%)', opacity: '0' },
-                '50%': { opacity: '1' },
+                '15%': { opacity: '1' },
+                '85%': { opacity: '1' },
                 '100%': { transform: 'translateY(100%)', opacity: '0' },
               },
               fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeInUp: {
                 '0%': { opacity: '0', transform: 'translateY(10px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
               },
@@ -70,10 +89,9 @@
                 from: { transform: 'rotate(360deg)' },
                 to: { transform: 'rotate(0deg)' }
               },
-              glitch: {
-                '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
-                '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
-                '62%': { transform: 'translate(0,0) skew(5deg)' },
+              shimmer: {
+                '0%': { backgroundPosition: '-1000px 0' },
+                '100%': { backgroundPosition: '1000px 0' }
               }
             }
           }
@@ -82,31 +100,33 @@
     </script>
     <style>
       body {
-        background-color: #0f172a;
+        background-color: #020617;
         color: #e2e8f0;
-        overscroll-behavior-y: none; /* PWA Feel */
+        overscroll-behavior-y: none;
         -webkit-tap-highlight-color: transparent;
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
-      /* Custom Scrollbar */
+      
+      /* Global Custom Scrollbar - Slimmer & Darker */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 4px;
+        height: 4px;
       }
       ::-webkit-scrollbar-track {
-        background: #020617; 
+        background: transparent; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 4px;
-        border: 1px solid #020617;
+        background: #1e293b; 
+        border-radius: 999px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
+        background: #334155; 
       }
+      
+      /* Utility Classes */
       .scrollbar-hide::-webkit-scrollbar {
           display: none;
       }
@@ -114,15 +134,34 @@
           -ms-overflow-style: none;
           scrollbar-width: none;
       }
-      /* High Contrast Mode Utility */
+      
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #06b6d4;
+      }
+
       .contrast-more {
         --tw-bg-opacity: 1 !important;
         --tw-text-opacity: 1 !important;
         --tw-border-opacity: 1 !important;
       }
-      /* Mobile Touch Targets */
+      
       button, a {
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .bg-noise {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
       }
     </style>
   <script type="importmap">

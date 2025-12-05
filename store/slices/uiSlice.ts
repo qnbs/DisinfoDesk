@@ -1,4 +1,3 @@
-
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { Message } from '../../types';
 import type { RootState } from '../store';
@@ -8,6 +7,7 @@ interface UIState {
     messages: Message[];
     input: string;
     isThinking: boolean; 
+    activeContextId: string | null; // ID of the theory currently being discussed
   };
   theoryDetails: {
     [id: string]: {
@@ -17,6 +17,7 @@ interface UIState {
   scrollPositions: {
     [path: string]: number;
   };
+  activeFileId: string | null; // Globally tracks the currently "open" investigation
   isSearchOpen: boolean;
 }
 
@@ -25,9 +26,11 @@ const initialState: UIState = {
     messages: [],
     input: '',
     isThinking: false,
+    activeContextId: null,
   },
   theoryDetails: {},
   scrollPositions: {},
+  activeFileId: null,
   isSearchOpen: false,
 };
 
@@ -38,6 +41,11 @@ export const uiSlice = createSlice({
     // --- Global Search ---
     setSearchOpen: (state, action: PayloadAction<boolean>) => {
       state.isSearchOpen = action.payload;
+    },
+
+    // --- Active File Tracking (Workflow Continuity) ---
+    setActiveFile: (state, action: PayloadAction<string | null>) => {
+        state.activeFileId = action.payload;
     },
 
     // --- Chat Logic ---
@@ -59,7 +67,6 @@ export const uiSlice = createSlice({
          lastMsg.text = action.payload.text;
          lastMsg.verdict = action.payload.verdict;
          lastMsg.isStreaming = false;
-         // Auto-timestamp if missing
          if (!lastMsg.timestamp) lastMsg.timestamp = Date.now();
        }
     },
@@ -69,10 +76,23 @@ export const uiSlice = createSlice({
     setChatThinking: (state, action: PayloadAction<boolean>) => {
       state.chat.isThinking = action.payload;
     },
+    // Enhanced: Inject Context
+    injectChatContext: (state, action: PayloadAction<{ contextId: string; initialMessage?: string }>) => {
+        // Critical: If context changes, we MUST wipe the previous conversation to prevent context bleeding
+        if (state.chat.activeContextId !== action.payload.contextId) {
+            state.chat.messages = [];
+        }
+        
+        state.chat.activeContextId = action.payload.contextId;
+        if (action.payload.initialMessage) {
+            state.chat.input = action.payload.initialMessage;
+        }
+    },
     clearChat: (state) => {
       state.chat.messages = [];
       state.chat.input = '';
       state.chat.isThinking = false;
+      state.chat.activeContextId = null;
     },
 
     // --- Tab Persistence ---
@@ -100,6 +120,8 @@ export const selectChatState = createSelector(
   (ui) => ui.chat
 );
 
+export const selectActiveFile = (state: RootState) => state.ui.activeFileId;
+
 // Returns active tab for a specific theory, defaulting to ANALYSIS if undefined
 export const selectActiveTheoryTab = (id: string) => createSelector(
   [selectUI],
@@ -107,9 +129,9 @@ export const selectActiveTheoryTab = (id: string) => createSelector(
 );
 
 export const { 
-  setSearchOpen,
+  setSearchOpen, setActiveFile,
   setChatMessages, addChatMessage, updateLastChatMessage, finalizeLastChatMessage,
-  setChatInput, setChatThinking, clearChat,
+  setChatInput, setChatThinking, clearChat, injectChatContext,
   setTheoryTab, saveScrollPosition 
 } = uiSlice.actions;
 

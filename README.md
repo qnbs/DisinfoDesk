@@ -1,133 +1,183 @@
-# DisinfoDesk (Project Disinfo)
 
-![Version](https://img.shields.io/badge/version-2.6.0--extended-blue.svg) 
-![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
-![Tech](https://img.shields.io/badge/stack-React%2019%20%7C%20Redux%20Toolkit%20%7C%20Gemini%202.5-purple)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+<div align="center">
 
-> **Ein interaktives, KI-gestütztes Betriebssystem zur Analyse, Dekonstruktion und Simulation moderner Mythen, Verschwörungstheorien und urbaner Legenden.**
+```text
+██████╗ ██╗███████╗██╗███╗   ██╗███████╗ ██████╗ ██████╗ ███████╗███████╗██╗  ██╗
+██╔══██╗██║██╔════╝██║████╗  ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝██║ ██╔╝
+██║  ██║██║███████╗██║██╔██╗ ██║█████╗  ██║   ██║██║  ██║█████╗  ███████╗█████╔╝ 
+██║  ██║██║╚════██║██║██║╚██╗██║██╔══╝  ██║   ██║██║  ██║██╔══╝  ╚════██║██╔═██╗ 
+██████╔╝██║███████║██║██║ ╚████║██║     ╚██████╔╝██████╔╝███████╗███████║██║  ██╗
+╚═════╝ ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+```
 
----
+**SYSTEM DESIGNATION: DISINFODESK // CODENAME: PROJECT OMEGA**
 
-## 🌐 Überblick / Overview
+[![Release](https://img.shields.io/badge/release-v2.7.0--modular-06b6d4?style=for-the-badge&logo=git)](https://github.com/your-repo/disinfodesk)
+[![Core](https://img.shields.io/badge/core-React_19_%7C_TypeScript_5-3178C6?style=for-the-badge&logo=react)](https://react.dev/)
+[![State](https://img.shields.io/badge/state-Redux_Toolkit_%2B_Undo-764ABC?style=for-the-badge&logo=redux)](https://redux-toolkit.js.org/)
+[![Intelligence](https://img.shields.io/badge/neural-Gemini_2.5_Pro-8E75B2?style=for-the-badge&logo=google-gemini)](https://ai.google.dev/)
+[![License](https://img.shields.io/badge/license-MIT-ef4444?style=for-the-badge)](LICENSE)
 
-**DisinfoDesk** ist mehr als ein Lexikon. Es ist eine Progressive Web App (PWA), die als pädagogisches Werkzeug dient, um Desinformation zu verstehen. Durch die Nutzung der Google Gemini API (Modelle `gemini-2.5-flash`, `gemini-3-pro`) bietet die App Echtzeit-Faktenchecks, simuliert virale Verbreitungswege und analysiert die Gefahrenpotenziale von Narrativen.
+*An advanced Cognitive Defense Grid and OSINT Analysis Platform engineered to deconstruct modern disinformation vectors through generative AI and agent-based simulation.*
 
-Die Anwendung ist vollständig **bilingual (Deutsch / Englisch)** und läuft dank **Offline-First Architektur** auch ohne permanente Internetverbindung (lokaler Cache).
+[<kbd>LAUNCH SYSTEM</kbd>](#-installation--deployment) • [<kbd>ARCHITECTURE</kbd>](#%EF%B8%8F-technical-architecture) • [<kbd>INTELLIGENCE LAYER</kbd>](#-neural-intelligence-layer)
 
----
-
-## 🚀 Module & Features
-
-### 1. 📊 The Dashboard (Command Center)
-*   **Real-time Analytics:** Visualisierung von Datenpunkten mittels Recharts (Radar, Scatter, Area Charts).
-*   **System Integrity:** Überwachung der "Systemlast" und Netzwerkaktivität (simuliert).
-*   **Trend Detection:** Identifizierung viraler Narrative basierend auf Popularitäts-Scores.
-
-### 2. 🗃️ The Archive (Datenbank)
-*   **Procedural Art Engine:** Generiert dynamische SVG-Illustrationen für jede Theorie basierend auf Kategorie und ID.
-*   **Deep Filtering:** Redux-gesteuerte Filterung nach Gefahrenstufe, Tags, Kategorie und Volltext.
-*   **Entity Normalization:** Datenhaltung über `createEntityAdapter` für O(1) Zugriffszeiten.
-
-### 3. 🧠 AI Intelligence Layer
-*   **Dr. Veritas (Debunk Chat):** Ein skeptischer KI-Agent mit Streaming-Response, Sprachausgabe (TTS) und Spracherkennung (STT).
-*   **Generation HUD:** Ein visueller "Heads-Up Display", der den Denkprozess der KI (Tokenisierung, Safety Checks, Rendering) transparent macht.
-*   **Image Synthesis:** On-the-fly Generierung von atmosphärischen Bildern mittels `gemini-2.5-flash-image`.
-
-### 4. ☣️ Threat Matrix (Gefahrenanalyse)
-*   **Risk Assessment:** Klassifizierung von Theorien nach Radikalisierungspotenzial, Gesundheitsgefahr und demokratischer Erosion.
-*   **Visual Data:** 3D-Scatterplots zur Korrelation von Viralität und Schweregrad.
-
-### 5. 🕸️ Viral Simulation (Agent-Based Modeling)
-*   **Canvas-basierte Simulation:** Visuelle Darstellung eines Infektionsnetzwerks (Nodes) in Echtzeit.
-*   **Parameter-Steuerung:** Manipulation von R-Wert-Faktoren wie "Emotional Payload", "Echo Chamber Density" und "Visual Proof".
-*   **Time-Travel:** Redux-basiertes Undo/Redo-System für Simulationsschritte.
-
-### 6. 💾 The Vault (Database Manager)
-*   **IndexedDB Wrapper:** Eigene `dbService`-Klasse für persistente Speicherung von Chats, Analysen und Satire-Texten.
-*   **JSON Editor:** Eingebauter Code-Editor zur manuellen Manipulation von Datensätzen.
-*   **Import/Export:** Vollständige Backup-Funktionalität des lokalen App-Status.
-
-### 7. 🎬 Media Culture
-*   **Pop Culture Analysis:** Analyse von Filmen, Spielen und Büchern auf okkulte Symbolik und "Predictive Programming".
-*   **Relation Mapping:** Verknüpfung fiktiver Werke mit realen Verschwörungstheorien.
+</div>
 
 ---
 
-## 🛠️ Technische Architektur
+## 🌐 Executive Summary
 
-### Frontend Core
-*   **React 19:** Nutzung der neuesten Features (Suspense, Concurrent Mode).
-*   **TypeScript:** Strenge Typisierung für alle Datenmodelle und API-Responses.
-*   **Vite:** HMR und optimiertes Building.
+**DisinfoDesk** is a sovereign, Progressive Web Application (PWA) designed as an educational counter-measure against narrative warfare. Unlike static encyclopedias, it functions as a live operating system.
 
-### State Management (Redux Toolkit)
-*   **Slices:** Modularer State für `settings`, `theories` und `simulation`.
-*   **RTK Query:** Caching und Request-Management für die Google Gemini API (`fakeBaseQuery` Implementierung für SDK-Nutzung).
-*   **Reselect:** Memoized Selectors für hochperformante Listenfilterung.
-*   **Redux Persist:** Speicherung von User-Einstellungen und Favoriten im LocalStorage.
+By leveraging **Google's Gemini 2.5 Flash & Pro models**, the system performs real-time forensic analysis of conspiracy theories, hallucinates satirical narratives for educational contrast, and mathematically models viral spread using **Canvas-based agent simulations**.
 
-### Data Persistence
-*   **IndexedDB:** Asynchrone Speicherung großer Datenmengen (komplette Analyse-Berichte, Chat-Logs) um den Main-Thread nicht zu blockieren.
-*   **Service Worker:** Workbox-Integration für Caching von Assets, Fonts und App-Shell (PWA Level 5).
-
-### UI/UX Design
-*   **Tailwind CSS:** Utility-first Styling mit Custom Config für das "Cyber-Mystic" Theme.
-*   **Framer Motion / CSS Animations:** Hardware-beschleunigte Übergänge.
-*   **Canvas API:** Für Hochleistungs-Visualisierungen (Header-Wellen, Viral-Simulation).
+The architecture follows a strict **Local-First / Offline-Capable** philosophy, utilizing a custom IndexedDB wrapper (`Vault`) to ensure user data sovereignty.
 
 ---
 
-## 📦 Installation & Setup
+## 🏛️ Technical Architecture
 
-### Voraussetzungen
-*   Node.js (v18+)
-*   Google AI Studio API Key
+The system is built upon a high-performance, type-safe stack designed for reliability and complex state orchestration.
 
-### Schritte
+### Core Stack
+*   **Runtime:** React 19 (leveraging Concurrent Mode & Suspense boundaries).
+*   **Language:** TypeScript 5 (Strict Mode enabled).
+*   **Build System:** Vite (HMR & Module Federation ready).
+*   **Styling:** Tailwind CSS with a custom "Cyber-Mystic" configuration & CSS Variables for high-performance theming.
 
-1.  **Repository klonen**
+### State Management & Persistence (The "Cortex")
+The application utilizes a sophisticated Redux Toolkit implementation:
+*   **Entity Normalization:** Usage of `createEntityAdapter` for O(1) lookups of Theories and Authors, optimizing rendering performance for large datasets.
+*   **Time-Travel Debugging:** The `simulation` slice is wrapped in `redux-undo`, allowing users to traverse the history of viral parameters (Undo/Redo).
+*   **Hydration:** `redux-persist` is configured with a custom storage engine (`dbService`) to sync Redux state directly to IndexedDB.
+
+### The Vault (Storage Layer)
+Instead of relying on `localStorage` (blocking, low quota), DisinfoDesk implements a custom Singleton `DatabaseService` class.
+*   **Technology:** Native `IndexedDB` API.
+*   **Capabilities:** Asynchronous CRUD operations for heavy text payloads (Chat Logs, AI Analyses) and Blobs.
+*   **Encryption:** Ready for client-side encryption (Architecture prepared).
+
+---
+
+## 🧠 Neural Intelligence Layer
+
+The AI integration is not merely a chatbot; it is deeply woven into the application's fabric via the `@google/genai` SDK.
+
+### 1. Dr. Veritas (Skeptical Engine)
+*   **Model:** `gemini-2.5-flash` (Low latency) or `gemini-3-pro` (Deep reasoning).
+*   **System Prompting:** Hardened system instructions force the model into a "Scientific Skeptic" persona, utilizing structured headers like `[VERDICT: ...]`.
+*   **Architecture:** Implemented via RTK Query `fakeBaseQuery` to manage loading states, caching, and error handling within the Redux lifecycle.
+
+### 2. Search Grounding (OSINT)
+*   The analysis module utilizes the `googleSearch` tool integration to fetch real-time, cited refutations for conspiracy theories, ensuring the AI does not hallucinate historical facts.
+
+### 3. Procedural Art & Vision
+*   **Generative:** Uses `gemini-2.5-flash-image` to synthesize atmospheric, "X-Files" style evidence photos.
+*   **Algorithmic Fallback:** A custom `artEngine.ts` generates deterministic SVG vector art based on theory IDs and entropy seeds when offline or to save tokens.
+
+---
+
+## 🕸️ Vector Simulation Engine
+
+A dedicated module for visualizing the mathematics of virality.
+
+*   **Rendering:** HTML5 Canvas (2D Context) optimized with `requestAnimationFrame` and off-screen buffering concepts.
+*   **Logic:** Agent-Based Modeling (ABM) with ~120 autonomous nodes.
+*   **Parameters:**
+    *   *Echo Chamber Density:* Controls spatial segregation of nodes.
+    *   *Emotional Payload:* Modifies infection probability.
+    *   *Visual Proof:* Modifies node velocity/transmission speed.
+
+---
+
+## 📂 System Topology
+
+```text
+/src
+├── components/        # React UI Components (Atomic Design)
+│   ├── ui/            # Generic primitives (Card, Button, HUD)
+│   └── ...            # Feature-specific modules (Chat, Editor)
+├── config/            # System constants & Theme definitions
+├── contexts/          # React Contexts (Toast, Language, Settings)
+├── data/              # Static seed data (Theories, Media, Authors)
+├── services/          # External IO (Gemini SDK, IndexedDB wrapper)
+├── store/             # Redux Logic
+│   ├── api/           # RTK Query definitions
+│   ├── middleware/    # Custom middleware (Error Logging, Analytics)
+│   └── slices/        # Feature reducers
+├── types/             # TypeScript Definitions (Strict contracts)
+└── utils/             # Heuristics & Helpers
+```
+
+---
+
+## 🚀 Installation & Deployment
+
+### Prerequisites
+*   Node.js v18+
+*   A valid [Google AI Studio API Key](https://aistudio.google.com/) (Required for Neural Modules)
+
+### Initialization Sequence
+
+1.  **Clone Repository**
     ```bash
     git clone https://github.com/your-username/disinfodesk.git
     cd disinfodesk
     ```
 
-2.  **Abhängigkeiten installieren**
+2.  **Install Dependencies**
     ```bash
     npm install
     ```
 
-3.  **Environment Variablen**
-    Erstelle eine `.env` Datei im Root-Verzeichnis:
+3.  **Environment Configuration**
+    Create a `.env` file in the root directory.
     ```env
-    API_KEY=dein_google_gemini_api_key
+    # Critical for AI functions. Get one at aistudio.google.com
+    API_KEY=AIzaSy...
     ```
 
-4.  **Starten**
+4.  **Dev Mode Launch**
     ```bash
     npm start
     ```
+    *Access the uplink at `http://localhost:5173`*
+
+### Production Build
+```bash
+npm run build
+# The 'dist' folder is now ready for deployment (Vercel, Netlify, Docker).
+```
 
 ---
 
-## 📖 Nutzung des "Vault" (Datenbank)
+## 🛡️ Usage Protocols
 
-Der **Vault** ist das Herzstück der lokalen Datenhaltung.
+### The Archive
+The central database. Use the **OmniSearch (CMD+K)** to instantly query normalized data across Theories, Authors, and Media.
 
-*   **Zugriff:** Über das Menü "The Vault" oder "Database".
-*   **Funktion:** Hier werden alle KI-Analysen, Chat-Verläufe mit Dr. Veritas und generierte Satiren gespeichert.
-*   **Security:** Die Daten verlassen nie Ihren Browser (Client-Side Only).
-*   **Boot Sequence:** Beim ersten Laden wird eine Terminal-Boot-Sequenz simuliert, um die Initialisierung der IndexedDB zu visualisieren.
+### The Editor (Theory Lab)
+Create new theory files. The system uses a specialized prompt to "draft" content based on a title, and the **Art Engine** automatically generates a unique cover image. These files are persisted locally.
 
----
-
-## ⚠️ Haftungsausschluss
-
-Diese Anwendung dient ausschließlich **Bildungs- und Unterhaltungszwecken**.
-*   Die KI-Analysen werden live generiert und können "Halluzinationen" (Fehlinformationen) enthalten.
-*   Der "Satire-Generator" erstellt fiktive Inhalte.
-*   Bitte nutzen Sie die bereitgestellten "Faktencheck"-Quellen für kritische Recherchen.
+### Threat Matrix (Protocol Omega)
+A visual dashboard classifying narratives by "Danger Level." It utilizes Recharts for 3D Scatterplots correlating `Virality` vs. `Severity`.
 
 ---
 
-Made with 💻 and ☕ by a Senior Frontend Engineer.
+## ⚠️ Liability Disclaimer
+
+**DisinfoDesk is a simulation and educational tool.**
+*   **AI hallucinations:** The "Dr. Veritas" module may generate plausible but incorrect information. Always verify citations.
+*   **Satire:** The "Satire Generator" creates fictional narratives for illustrative purposes.
+*   **Privacy:** This system operates **Client-Side**. Your query history is stored in your browser's IndexedDB and is not transmitted to our servers (only strictly necessary prompts are sent to Google's API).
+
+---
+
+<div align="center">
+
+**[ END OF TRANSMISSION ]**
+
+<sub>Engineered by a Senior Frontend Engineer</sub>
+
+</div>

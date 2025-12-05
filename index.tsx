@@ -28,6 +28,18 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...args);
 };
 
+// Polyfill for console.warn to suppress the specific Recharts warning regarding width(-1)
+const originalConsoleWarn = console.warn;
+console.warn = (...args: unknown[]) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes('The width(-1) and height(-1)')
+  ) {
+    return;
+  }
+  originalConsoleWarn(...args);
+};
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");

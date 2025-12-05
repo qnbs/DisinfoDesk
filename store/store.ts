@@ -1,4 +1,3 @@
-
 import { configureStore, combineReducers, UnknownAction, Reducer } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { 
@@ -25,35 +24,22 @@ import { rtkQueryErrorLogger } from './middleware/errorLogger';
 
 // --- Persistence Strategies ---
 
-/**
- * Strategy 1: Critical Config
- * Uses IndexedDB (via dbService adapter) but is treated as "Root" config.
- */
 const rootPersistConfig = {
   key: 'root_settings',
   version: 1,
   storage: dbService.reduxStorage,
   whitelist: ['config', 'language', 'logs'], 
-  timeout: 5000, // Fail fast if DB is locked
+  timeout: 5000, 
 };
 
-/**
- * Strategy 2: Heavy Data
- * Separated to ensure editing one theory doesn't re-serialize the entire settings tree.
- * VERSION BUMP (3 -> 4): Forces a purge of stale theory data (missing images) on client update.
- */
 const theoriesPersistConfig = {
   key: 'theory_data',
-  version: 4, // Bumped to force reload of new SVGs with robust generator
+  version: 4, 
   storage: dbService.reduxStorage,
   whitelist: ['favorites', 'entitiesDe', 'entitiesEn'], 
   timeout: 10000,
 };
 
-/**
- * Strategy 3: UI Continuity
- * Keeps chat and tabs alive.
- */
 const uiPersistConfig = {
   key: 'ui_state',
   version: 1,
@@ -68,25 +54,17 @@ const appReducer = combineReducers({
     settings: persistReducer(rootPersistConfig, settingsReducer),
     theories: persistReducer(theoriesPersistConfig, theoriesReducer),
     ui: persistReducer(uiPersistConfig, uiReducer),
-    // Undoable wrapper handles its own history state, no need to persist full history usually
     simulation: undoable(simulationReducer, {
-        limit: 50, // Increased history limit for deeper analysis
+        limit: 50, 
         filter: excludeAction(resetParams.type),
-        syncFilter: true // Ensure state consistency
+        syncFilter: true 
     }),
     satire: satireReducer,
     [aiApi.reducerPath]: aiApi.reducer,
 });
 
-/**
- * Meta-Reducer for System Purge
- * Allows completely resetting the store state to undefined (initial) 
- * when the user triggers a factory reset.
- */
 const rootReducer: Reducer = (state: ReturnType<typeof appReducer> | undefined, action: UnknownAction) => {
   if (action.type === 'settings/systemPurge') {
-    // Clear storage is handled in the thunk/component, 
-    // here we just wipe memory state.
     state = undefined;
   }
   return appReducer(state, action);
@@ -99,12 +77,12 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore Redux Persist actions which contain non-serializable functions
+        // Ignored actions for redux-persist to avoid non-serializable checks on register/persist functions
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-        // Large data structures in simulation might trigger warnings in Dev, 
-        // we relax the check slightly for performance in Dev mode.
+        // Warn only if serialization check takes too long (dev mode perf optimization)
         warnAfter: 128, 
       },
+      // Increase warning threshold for immutable state checks in dev mode
       immutableCheck: { warnAfter: 128 }
     })
     .prepend(listenerMiddleware.middleware)
@@ -119,10 +97,8 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-// Setup RTK Query listeners (focus refetching, online status)
 setupListeners(store.dispatch);
 
 // --- Type Definitions ---
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-    

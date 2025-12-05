@@ -163,7 +163,7 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
   return (
     <div 
       onClick={() => onSelect(theory)}
-      className="group relative h-[320px] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-accent-cyan/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 animate-fade-in-up active:scale-[0.98]"
+      className="group relative h-[340px] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-accent-cyan/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 animate-fade-in-up active:scale-[0.98]"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Dynamic Border Glow */}
@@ -192,7 +192,7 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
       </div>
 
       {/* Content Section */}
-      <div className="p-5 flex flex-col h-[160px] relative z-10 bg-slate-900/95 backdrop-blur-sm">
+      <div className="p-5 flex flex-col h-[180px] relative z-10 bg-slate-900/95 backdrop-blur-sm">
         {/* Header Line */}
         <div className="flex justify-between items-center mb-2">
            <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
@@ -203,8 +203,8 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
            </span>
         </div>
 
-        {/* Title & Desc */}
-        <h3 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-accent-cyan transition-colors font-display tracking-wide uppercase">
+        {/* Title & Desc - Improved Line Height & Padding for Descenders */}
+        <h3 className="text-sm font-bold text-white mb-2 line-clamp-2 leading-normal py-0.5 group-hover:text-accent-cyan transition-colors font-display tracking-wide uppercase">
           {theory.title}
         </h3>
         <p className="text-xs text-slate-400 line-clamp-2 mb-auto leading-relaxed">
@@ -247,7 +247,9 @@ const ArchiveListRow: React.FC<{ theory: Theory, index: number }> = React.memo((
       <div className="flex-1 min-w-0 w-full grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
          <div className="md:col-span-6">
             <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-bold text-white text-base truncate group-hover:text-accent-cyan transition-colors font-display uppercase tracking-wide">{theory.title}</h3>
+                <h3 className="font-bold text-white text-base truncate group-hover:text-accent-cyan transition-colors font-display uppercase tracking-wide py-1 leading-normal">
+                    {theory.title}
+                </h3>
                 {favorites.includes(theory.id) && <Heart size={12} className="fill-red-500 text-red-500 animate-pulse" />}
             </div>
             <p className="text-xs text-slate-400 line-clamp-1">{theory.shortDescription}</p>
@@ -288,7 +290,7 @@ const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.me
       style={{ animationDelay: `${index * 10}ms` }}
     >
        <div className="col-span-2 md:col-span-1 text-slate-600">#{theory.id.substring(0,6).toUpperCase()}</div>
-       <div className="col-span-6 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase">{theory.title}</div>
+       <div className="col-span-6 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase py-1 leading-normal">{theory.title}</div>
        <div className="col-span-4 md:col-span-2 text-slate-500 truncate">{theory.category.split(' ')[0]}</div>
        <div className="col-span-3 md:col-span-2 text-right md:text-left">
            <span className={`${isDanger ? 'text-red-500' : 'text-green-500'}`}>{isDanger ? 'CRITICAL' : 'STABLE'}</span>
@@ -387,7 +389,7 @@ const FilterHUD: React.FC = () => {
                 <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-2">
                     <Hash size={10} /> Metadata Index
                 </h4>
-                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto custom-scrollbar p-1">
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar p-2">
                     {tagData.uniqueTags.map(tag => (
                         <button
                             key={tag}

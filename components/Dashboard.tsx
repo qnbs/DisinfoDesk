@@ -9,7 +9,8 @@ import {
   Globe, Activity, ShieldAlert, Zap, Radio, 
   Terminal, Cpu, Map as MapIcon, ChevronRight, 
   AlertTriangle, Crosshair, ArrowUpRight, Signal, 
-  Lock, Share2, Wifi
+  Lock, Share2, Wifi, BookOpen, Film, Feather, MessageSquare, 
+  Skull, Edit3, Database, Settings, HelpCircle, HardDrive, LayoutDashboard
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, PageFrame, PageHeader, Button, Badge, cn } from './ui/Common';
@@ -71,8 +72,81 @@ const Sparkline: React.FC<{ data: number[], color: string }> = ({ data, color })
 
 // --- 2. COMPLEX WIDGETS ---
 
+// Mission Control / Launchpad (New Component)
+const MissionLaunchpad: React.FC = () => {
+    const { t } = useLanguage();
+    const navigate = useNavigate();
+
+    const sections = [
+        {
+            title: t.dashboard.launchpad.sections.intel,
+            items: [
+                { id: 'dang', icon: ShieldAlert, label: t.nav.dangerous, desc: t.dashboard.launchpad.desc.dangerous, path: '/dangerous', color: 'text-red-500' },
+                { id: 'vir', icon: Activity, label: t.nav.virality, desc: t.dashboard.launchpad.desc.virality, path: '/virality', color: 'text-orange-400' },
+                { id: 'chat', icon: MessageSquare, label: t.nav.chat, desc: t.dashboard.launchpad.desc.chat, path: '/chat', color: 'text-accent-purple' },
+            ]
+        },
+        {
+            title: t.dashboard.launchpad.sections.archives,
+            items: [
+                { id: 'arch', icon: BookOpen, label: t.nav.archive, desc: t.dashboard.launchpad.desc.archive, path: '/archive', color: 'text-blue-400' },
+                { id: 'med', icon: Film, label: t.nav.media, desc: t.dashboard.launchpad.desc.media, path: '/media', color: 'text-cyan-400' },
+                { id: 'auth', icon: Feather, label: t.nav.authors, desc: t.dashboard.launchpad.desc.authors, path: '/authors', color: 'text-yellow-400' },
+            ]
+        },
+        {
+            title: t.dashboard.launchpad.sections.system,
+            items: [
+                { id: 'edit', icon: Edit3, label: t.nav.editor, desc: t.dashboard.launchpad.desc.editor, path: '/editor', color: 'text-green-400' },
+                { id: 'sat', icon: Skull, label: t.nav.generator, desc: t.dashboard.launchpad.desc.satire, path: '/satire', color: 'text-pink-400' },
+                { id: 'vault', icon: HardDrive, label: t.nav.database, desc: t.dashboard.launchpad.desc.vault, path: '/database', color: 'text-slate-400' },
+                { id: 'set', icon: Settings, label: t.nav.settings, desc: t.dashboard.launchpad.desc.settings, path: '/settings', color: 'text-slate-500' },
+                { id: 'help', icon: HelpCircle, label: t.nav.help, desc: t.dashboard.launchpad.desc.help, path: '/help', color: 'text-slate-500' },
+            ]
+        }
+    ];
+
+    return (
+        <div className="mb-8 space-y-6">
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
+                <LayoutDashboard className="text-accent-cyan" size={18} />
+                <h2 className="text-sm font-bold text-white uppercase tracking-widest">{t.dashboard.launchpad.title}</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sections.map((section, idx) => (
+                    <div key={idx} className="space-y-3">
+                        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">{section.title}</h3>
+                        <div className="grid grid-cols-1 gap-2">
+                            {section.items.map(item => (
+                                <button 
+                                    key={item.id}
+                                    onClick={() => navigate(item.path)}
+                                    className="group flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-800 hover:border-slate-600 rounded-lg text-left transition-all hover:bg-slate-900 active:scale-[0.99] relative overflow-hidden"
+                                >
+                                    <div className={`p-2 rounded-md bg-slate-950 border border-slate-800 group-hover:border-slate-700 transition-colors ${item.color}`}>
+                                        <item.icon size={16} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">{item.label}</div>
+                                        <div className="text-[10px] text-slate-500 font-mono truncate">{item.desc}</div>
+                                    </div>
+                                    <ChevronRight size={14} className="text-slate-700 group-hover:text-accent-cyan transition-colors" />
+                                    
+                                    {/* Hover Shine */}
+                                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 // World Map Projection (SVG)
-const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void }> = ({ data, onSelect }) => {
+const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void, label: string, liveLabel: string }> = ({ data, onSelect, label, liveLabel }) => {
     // Simulated coords for demo purposes since we don't have real LatLong in Theory model yet
     // In a real app, we'd map countries/cities to coords. Here we use deterministic random based on ID.
     const getCoords = (id: string) => {
@@ -111,7 +185,7 @@ const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void 
 
             {/* HUD Overlay */}
             <div className="absolute bottom-4 left-4 text-[9px] font-mono text-accent-cyan bg-slate-900/80 px-2 py-1 rounded border border-accent-cyan/30 backdrop-blur">
-                <span className="animate-pulse">●</span> LIVE TRACKING: {data.length} SIGNALS
+                <span className="animate-pulse">●</span> {liveLabel}: {data.length} {label}
             </div>
         </div>
     );
@@ -119,32 +193,35 @@ const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void 
 
 // Intelligence Feed (Scrolling Terminal)
 const IntelFeed: React.FC = () => {
+    const { t } = useLanguage();
     const [lines, setLines] = useState<string[]>([]);
+    
+    // Dynamic messages based on translation
     const msgs = [
-        "Intercepted encrypted packet: Sector 7G...",
-        "Analyzing sentiment: 4chan /pol/...",
-        "Cross-referencing: 'Project Blue Beam'...",
-        "Node 42 going dark...",
-        "New cluster detected: Frankfurt Server...",
-        "Gemini 2.5: Context window refreshed...",
-        "Updating heuristic models...",
-        "Botnet traffic spike detected..."
+        t.dashboard.feed.intercept,
+        t.dashboard.feed.sentiment,
+        t.dashboard.feed.ref,
+        t.dashboard.feed.node,
+        t.dashboard.feed.cluster,
+        t.dashboard.feed.context,
+        t.dashboard.feed.heuristic,
+        t.dashboard.feed.botnet
     ];
 
     useEffect(() => {
         const interval = setInterval(() => {
             setLines(prev => {
-                const next = [...prev, `[${new Date().toLocaleTimeString()}] ${msgs[Math.floor(Math.random() * msgs.length)]}`];
+                const next = [...prev, `[${new Date().toLocaleTimeString()}] ${msgs[Math.floor(Math.random() * msgs.length)]}...`];
                 return next.slice(-8); // Keep last 8
             });
         }, 2500);
         return () => clearInterval(interval);
-    }, []);
+    }, [t]);
 
     return (
         <div className="h-full bg-black font-mono text-[10px] p-3 overflow-hidden flex flex-col justify-end border-l border-slate-800/50">
             <div className="mb-2 text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                <Terminal size={10} /> System Log
+                <Terminal size={10} /> {t.dashboard.feed.title}
             </div>
             <div className="space-y-1">
                 {lines.map((line, i) => (
@@ -241,23 +318,26 @@ export const Dashboard: React.FC = () => {
     return (
         <PageFrame>
             <PageHeader 
-                title="COMMAND CENTER" 
-                subtitle="SITUATION AWARENESS // LIVE" 
+                title={t.dashboard.title}
+                subtitle={t.dashboard.subtitle}
                 icon={Activity}
-                status="SYSTEM NOMINAL"
+                status={t.common.online}
                 visualizerState="BUSY"
             >
                 <div className="flex items-center gap-4 text-[10px] font-mono text-slate-500 mt-2">
-                    <span className="flex items-center gap-1"><Cpu size={10} /> LOAD: 14%</span>
-                    <span className="flex items-center gap-1"><Wifi size={10} /> LATENCY: 24ms</span>
-                    <span className="flex items-center gap-1"><Lock size={10} /> VAULT: SECURE</span>
+                    <span className="flex items-center gap-1"><Cpu size={10} /> {t.dashboard.load}: 14%</span>
+                    <span className="flex items-center gap-1"><Wifi size={10} /> {t.dashboard.latency}: 24ms</span>
+                    <span className="flex items-center gap-1"><Lock size={10} /> {t.dashboard.vault}: {t.dashboard.secure}</span>
                 </div>
             </PageHeader>
+
+            {/* --- NEW MISSION CONTROL --- */}
+            <MissionLaunchpad />
 
             {/* --- TOP ROW: KPI GRID --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <MetricCard 
-                    title="Database Index" 
+                    title={t.dashboard.total} 
                     value={stats.total} 
                     sub="TOTAL ARCHIVED FILES" 
                     icon={Terminal} 
@@ -266,7 +346,7 @@ export const Dashboard: React.FC = () => {
                     onClick={() => navigate('/archive')}
                 />
                 <MetricCard 
-                    title="Active Threats" 
+                    title={t.dashboard.critical}
                     value={stats.critical} 
                     sub="PROTOCOL OMEGA TARGETS" 
                     icon={ShieldAlert} 
@@ -275,7 +355,7 @@ export const Dashboard: React.FC = () => {
                     onClick={() => navigate('/dangerous')}
                 />
                 <MetricCard 
-                    title="Viral Velocity" 
+                    title={t.dashboard.virality}
                     value={`${stats.avgViral}%`} 
                     sub="GLOBAL INFECTION RATE" 
                     icon={Radio} 
@@ -284,7 +364,7 @@ export const Dashboard: React.FC = () => {
                     onClick={() => navigate('/virality')}
                 />
                 <MetricCard 
-                    title="Counter-Intel" 
+                    title={t.dashboard.sources}
                     value="ONLINE" 
                     sub="AI SKEPTIC ACTIVE" 
                     icon={Zap} 
@@ -299,14 +379,19 @@ export const Dashboard: React.FC = () => {
                 <Card className="lg:col-span-2 p-0 flex flex-col bg-slate-950 border-slate-800 shadow-2xl relative">
                     <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur">
                         <div className="text-xs font-bold text-white flex items-center gap-2">
-                            <Globe size={14} className="text-accent-cyan" /> GLOBAL INCIDENCE MAP
+                            <Globe size={14} className="text-accent-cyan" /> {t.dashboard.mapLabel}
                         </div>
                         <div className="flex gap-2">
                             <Badge label="LIVE" className="bg-red-500/10 text-red-500 border-red-500/50 animate-pulse" />
                         </div>
                     </div>
                     <div className="flex-1 relative">
-                        <GlobalIncidentMap data={theories} onSelect={(id) => navigate(`/archive/${id}`)} />
+                        <GlobalIncidentMap 
+                            data={theories} 
+                            onSelect={(id) => navigate(`/archive/${id}`)} 
+                            label={t.dashboard.signals}
+                            liveLabel={t.dashboard.live}
+                        />
                     </div>
                 </Card>
 
@@ -316,8 +401,8 @@ export const Dashboard: React.FC = () => {
                     <Card className="flex-1 p-0 bg-slate-900/50 border-red-900/30 overflow-hidden relative flex flex-col items-center justify-center text-center">
                         <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-transparent pointer-events-none"></div>
                         <AlertTriangle size={48} className="text-red-500 mb-2 animate-pulse" />
-                        <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] mb-1">Current Status</div>
-                        <div className="text-5xl font-black text-white font-display tracking-tighter">DEFCON 4</div>
+                        <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] mb-1">{t.dashboard.status}</div>
+                        <div className="text-5xl font-black text-white font-display tracking-tighter">{t.dashboard.defcon} 4</div>
                         <div className="mt-4 w-full px-8">
                             <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                                 <div className="h-full bg-red-500 w-[20%] animate-pulse"></div>
@@ -338,7 +423,7 @@ export const Dashboard: React.FC = () => {
                 <Card className="lg:col-span-2 p-0 bg-slate-950 border-slate-800">
                     <div className="p-4 border-b border-slate-800 flex items-center gap-2">
                         <Signal size={14} className="text-accent-purple" />
-                        <span className="text-xs font-bold text-white uppercase tracking-widest">Signal Interception Volume</span>
+                        <span className="text-xs font-bold text-white uppercase tracking-widest">{t.dashboard.temporal}</span>
                     </div>
                     <div className="h-64 w-full p-4">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -366,7 +451,7 @@ export const Dashboard: React.FC = () => {
                 <Card className="p-0 bg-slate-950 border-slate-800">
                     <div className="p-4 border-b border-slate-800 flex items-center gap-2">
                         <Crosshair size={14} className="text-accent-cyan" />
-                        <span className="text-xs font-bold text-white uppercase tracking-widest">Vector Analysis</span>
+                        <span className="text-xs font-bold text-white uppercase tracking-widest">{t.dangerPage.vector}</span>
                     </div>
                     <div className="h-64 w-full relative">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>

@@ -1,21 +1,60 @@
 {
   "short_name": "DisinfoDesk",
   "name": "DisinfoDesk: Das Lexikon",
+  "description": "Ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse.",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "orientation": "portrait-primary",
+  "id": "disinfodesk-v3",
+  "dir": "ltr",
+  "lang": "de",
+  "categories": ["education", "reference", "news"],
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a",
-  "orientation": "portrait-primary"
+  "screenshots": [
+    {
+      "src": "https://images.unsplash.com/photo-1614064641938-3e8401107d65?q=80&w=1280&auto=format&fit=crop",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Desktop Dashboard"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=720&auto=format&fit=crop",
+      "sizes": "720x1280",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Mobile Feed"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Das Archiv",
+      "short_name": "Archiv",
+      "description": "Öffne die Datenbank",
+      "url": "/#/archive",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "KI Chat",
+      "short_name": "Dr. Veritas",
+      "description": "Starte den Debunk-Bot",
+      "url": "/#/chat",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+    }
+  ]
 }

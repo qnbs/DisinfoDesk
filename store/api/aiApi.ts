@@ -1,4 +1,3 @@
-
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Theory, Language, AppError, SatireOptions } from '../../types';
 import { analyzeTheoryWithGemini, generateSatireTheory, generateTheoryImage } from '../../services/geminiService';
@@ -14,15 +13,16 @@ export const aiApi = createApi({
   reducerPath: 'aiApi',
   baseQuery: fakeBaseQuery<AppError>(),
   tagTypes: [TAGS.ANALYSIS, TAGS.IMAGE, TAGS.SATIRE],
-  refetchOnMountOrArgChange: 300, // Re-fetch if components remount after 5 mins
+  refetchOnMountOrArgChange: 300, // Re-fetch if components remount after 5 mins to ensure fresh but cached data
   
   endpoints: (builder) => ({
     // 1. Analyze Theory
     // Uses sophisticated tagging to cache by ID. If we invalidate 'Analysis', we can target specific IDs.
     analyzeTheory: builder.query({
-      queryFn: async ({ theory, language, model, temp }: { theory: Theory; language: Language; model: string; temp: number }) => {
+      queryFn: async ({ theory, language, model, temp, budget }: { theory: Theory; language: Language; model: string; temp: number, budget?: number }) => {
         try {
-          const data = await analyzeTheoryWithGemini(theory, language, { model, temperature: temp });
+          // Pass budget to service
+          const data = await analyzeTheoryWithGemini(theory, language, { model, temperature: temp, thinkingBudget: budget });
           return { data };
         } catch (error) {
           const err = error as Error;
@@ -65,7 +65,7 @@ export const aiApi = createApi({
           return { error: { message: err.message, stack: err.stack, code: err.name } };
         }
       },
-      // Satire is ephemeral, we don't strictly cache the generation trigger, but we could tag the list
+      // Satire is ephemeral, invalidating LIST is a safe default
       invalidatesTags: [{ type: TAGS.SATIRE, id: 'LIST' }]
     }),
   }),

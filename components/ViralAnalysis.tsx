@@ -216,10 +216,15 @@ const AdvancedPropagationNetwork: React.FC<{
         const resize = () => {
             const parent = canvas.parentElement;
             if (parent) {
-                canvas.width = parent.clientWidth * window.devicePixelRatio;
-                canvas.height = parent.clientHeight * window.devicePixelRatio;
-                canvas.style.width = `${parent.clientWidth}px`;
-                canvas.style.height = `${parent.clientHeight}px`;
+                // Ensure dimensions are valid (>0) to avoid processing errors
+                const w = Math.max(parent.clientWidth, 100);
+                const h = Math.max(parent.clientHeight, 100);
+                
+                canvas.width = w * window.devicePixelRatio;
+                canvas.height = h * window.devicePixelRatio;
+                canvas.style.width = `${w}px`;
+                canvas.style.height = `${h}px`;
+                
                 if (agentsRef.current.length === 0) agentsRef.current = initAgents(canvas.width, canvas.height);
             }
         };
@@ -414,17 +419,18 @@ const TacticalPanel: React.FC<{
     params: SimulationParams, 
     onChange: (key: keyof SimulationParams, val: number) => void 
 }> = ({ params, onChange }) => {
+    const { t } = useLanguage();
     return (
         <div className="grid grid-cols-2 gap-4 p-4 text-[10px] font-mono">
             {[
-                { key: 'emotionalPayload', label: 'EMO_PAYLOAD', color: 'accent-red' },
-                { key: 'novelty', label: 'NOVELTY_SCORE', color: 'accent-purple' },
-                { key: 'visualProof', label: 'VISUAL_PROOF', color: 'accent-cyan' },
-                { key: 'echoChamberDensity', label: 'ECHO_DENSITY', color: 'accent-yellow' },
+                { key: 'emotionalPayload', label: t.viralPage.sim.params.emotional, color: 'accent-red' },
+                { key: 'novelty', label: t.viralPage.sim.params.novelty, color: 'accent-purple' },
+                { key: 'visualProof', label: t.viralPage.sim.params.visual, color: 'accent-cyan' },
+                { key: 'echoChamberDensity', label: t.viralPage.sim.params.echo, color: 'accent-yellow' },
             ].map((p) => (
                 <div key={p.key} className="bg-slate-900 border border-slate-800 p-3 rounded-lg relative overflow-hidden group">
                     <div className="flex justify-between mb-2 z-10 relative">
-                        <span className="text-slate-500 font-bold">{p.label}</span>
+                        <span className="text-slate-500 font-bold truncate max-w-[80%]">{p.label}</span>
                         <span className="text-white">{params[p.key as keyof SimulationParams]}%</span>
                     </div>
                     <input 
@@ -470,8 +476,8 @@ export const ViralAnalysis: React.FC = () => {
     return (
         <PageFrame>
             <PageHeader
-                title="VIRAL MECHANICS"
-                subtitle="MEMETIC WARFARE SIMULATION DECK"
+                title={t.viralPage.title}
+                subtitle={t.viralPage.subtitle}
                 icon={Network}
                 status={status}
                 statusColor={rValue < 1 ? 'bg-green-500' : rValue < 3 ? 'bg-yellow-500' : 'bg-red-500'}
@@ -480,24 +486,71 @@ export const ViralAnalysis: React.FC = () => {
                     <div className="flex gap-2">
                         <Button variant="ghost" onClick={handleUndo} disabled={!canUndo} icon={<Undo size={16}/>} />
                         <Button variant="ghost" onClick={handleRedo} disabled={!canRedo} icon={<Redo size={16}/>} />
-                        <Button variant="secondary" onClick={handleReset} icon={<RefreshCw size={16}/>}>RESET</Button>
+                        <Button variant="secondary" onClick={handleReset} icon={<RefreshCw size={16}/>}>{t.common.reset}</Button>
                     </div>
                 }
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-200px)] min-h-[700px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[calc(100vh-200px)] lg:min-h-[700px] overflow-y-auto lg:overflow-hidden pb-10 lg:pb-0">
                 
-                {/* LEFT: Controls & Telemetry */}
-                <div className="lg:col-span-3 flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-1">
+                {/* RIGHT: Main Simulation Stage (Order First on Mobile) */}
+                <div className="lg:col-span-9 order-first lg:order-last relative rounded-xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden group min-h-[400px]">
+                    <AdvancedPropagationNetwork 
+                        params={params} 
+                        mode={renderMode}
+                        tool={activeTool}
+                        paused={isPaused}
+                        onStatsUpdate={updateStats}
+                    />
+
+                    {/* HUD Overlay */}
+                    <div className="absolute top-4 left-4 flex gap-4 pointer-events-none">
+                        <div className="bg-slate-900/90 backdrop-blur px-3 py-2 rounded border border-slate-700 text-xs font-mono text-slate-400 shadow-lg">
+                            <div className="flex items-center gap-2 mb-1"><span className="text-white font-bold">{t.viralPage.sim.hud.mode}:</span> {renderMode}</div>
+                            <div className="flex items-center gap-2"><span className="text-white font-bold">{t.viralPage.sim.hud.tool}:</span> {activeTool}</div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Controls */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 p-2 bg-slate-900/90 backdrop-blur-md rounded-xl border border-slate-700 shadow-2xl z-10 w-max max-w-[90%] overflow-x-auto">
+                        <button onClick={() => setIsPaused(!isPaused)} className={`p-3 rounded-lg border transition-all ${isPaused ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-slate-800 text-white border-slate-600'}`}>
+                            {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
+                        </button>
+                        
+                        <div className="w-px h-10 bg-slate-700 mx-2"></div>
+
+                        <button onClick={() => setRenderMode('NETWORK')} className={`p-3 rounded-lg border transition-all ${renderMode === 'NETWORK' ? 'bg-accent-cyan text-slate-900 border-accent-cyan' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Network Graph">
+                            <Network size={18} />
+                        </button>
+                        <button onClick={() => setRenderMode('HEATMAP')} className={`p-3 rounded-lg border transition-all ${renderMode === 'HEATMAP' ? 'bg-red-500 text-white border-red-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Heatmap">
+                            <Flame size={18} />
+                        </button>
+
+                        <div className="w-px h-10 bg-slate-700 mx-2"></div>
+
+                        <button onClick={() => setActiveTool('OBSERVE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'OBSERVE' ? 'bg-slate-700 text-white border-slate-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title={t.viralPage.sim.actions.observe}>
+                            <Microscope size={18} />
+                        </button>
+                        <button onClick={() => setActiveTool('CURE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'CURE' ? 'bg-green-500 text-slate-900 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-green-900/20 text-green-500 border-green-900'}`} title={t.viralPage.sim.actions.cure}>
+                            <Shield size={18} />
+                        </button>
+                        <button onClick={() => setActiveTool('INFECT')} className={`p-3 rounded-lg border transition-all ${activeTool === 'INFECT' ? 'bg-red-500 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-red-900/20 text-red-500 border-red-900'}`} title={t.viralPage.sim.actions.infect}>
+                            <AlertTriangle size={18} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* LEFT: Controls & Telemetry (Order Last on Mobile) */}
+                <div className="lg:col-span-3 order-last lg:order-first flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar pr-1">
                     {/* R-Value Core */}
                     <Card className="p-6 bg-slate-950/80 border-slate-800 shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10"><Activity size={64} /></div>
-                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">Reproduction Rate</div>
+                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">{t.viralPage.sim.rValue}</div>
                         <div className={`text-5xl font-black font-display tracking-tighter ${statusColor} drop-shadow-glow`}>
                             {rValue.toFixed(2)}
                         </div>
                         <div className="text-xs text-slate-400 mt-2 font-mono">
-                            <span className="text-accent-cyan">PROJECTED:</span> {Math.pow(rValue, 5).toFixed(0)} NODES / 5 GEN
+                            <span className="text-accent-cyan">{t.viralPage.sim.projected}:</span> {Math.pow(rValue, 5).toFixed(0)} NODES / 5 GEN
                         </div>
                         <div className="w-full h-1 bg-slate-900 mt-4 rounded-full overflow-hidden">
                             <div className={`h-full ${statusColor.replace('text-', 'bg-')}`} style={{ width: `${Math.min(100, (rValue/5)*100)}%` }}></div>
@@ -506,16 +559,16 @@ export const ViralAnalysis: React.FC = () => {
 
                     {/* Scenarios */}
                     <div className="grid grid-cols-2 gap-2">
-                        <Button variant="secondary" size="sm" onClick={() => applyScenario('ECHO')} className="text-[10px] justify-start bg-slate-900"><Layers size={12}/> Echo Chamber</Button>
-                        <Button variant="secondary" size="sm" onClick={() => applyScenario('BOTS')} className="text-[10px] justify-start bg-slate-900"><Zap size={12}/> Bot Swarm</Button>
-                        <Button variant="secondary" size="sm" onClick={() => applyScenario('ORGANIC')} className="text-[10px] justify-start bg-slate-900"><Users size={12}/> Organic</Button>
-                        <Button variant="secondary" size="sm" onClick={() => applyScenario('LOCKDOWN')} className="text-[10px] justify-start bg-slate-900 text-blue-400 border-blue-900/50"><Lock size={12}/> Lockdown</Button>
+                        <Button variant="secondary" size="sm" onClick={() => applyScenario('ECHO')} className="text-[10px] justify-start bg-slate-900"><Layers size={12}/> {t.viralPage.sim.scenarios.echo}</Button>
+                        <Button variant="secondary" size="sm" onClick={() => applyScenario('BOTS')} className="text-[10px] justify-start bg-slate-900"><Zap size={12}/> {t.viralPage.sim.scenarios.bot}</Button>
+                        <Button variant="secondary" size="sm" onClick={() => applyScenario('ORGANIC')} className="text-[10px] justify-start bg-slate-900"><Users size={12}/> {t.viralPage.sim.scenarios.organic}</Button>
+                        <Button variant="secondary" size="sm" onClick={() => applyScenario('LOCKDOWN')} className="text-[10px] justify-start bg-slate-900 text-blue-400 border-blue-900/50"><Lock size={12}/> {t.viralPage.sim.scenarios.lockdown}</Button>
                     </div>
 
                     {/* Sliders */}
                     <Card className="flex-1 border-slate-800 bg-slate-950/50 flex flex-col p-0">
                         <div className="p-3 border-b border-slate-800 bg-slate-900/50 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                            Vector Parameters
+                            {t.viralPage.sim.params.title}
                         </div>
                         <TacticalPanel params={params} onChange={handleParamChange} />
                     </Card>
@@ -523,7 +576,7 @@ export const ViralAnalysis: React.FC = () => {
                     {/* Live Telemetry Chart */}
                     <Card className="h-48 border-slate-800 bg-slate-950/80 p-0 flex flex-col">
                         <div className="p-3 border-b border-slate-800 flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2"><BarChart3 size={12}/> Live Telemetry</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2"><BarChart3 size={12}/> {t.viralPage.sim.charts.telemetry}</span>
                             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></span>
                         </div>
                         <div className="flex-1 w-full min-h-0">
@@ -542,53 +595,6 @@ export const ViralAnalysis: React.FC = () => {
                             </ResponsiveContainer>
                         </div>
                     </Card>
-                </div>
-
-                {/* RIGHT: Main Simulation Stage */}
-                <div className="lg:col-span-9 relative rounded-xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden group">
-                    <AdvancedPropagationNetwork 
-                        params={params} 
-                        mode={renderMode}
-                        tool={activeTool}
-                        paused={isPaused}
-                        onStatsUpdate={updateStats}
-                    />
-
-                    {/* HUD Overlay */}
-                    <div className="absolute top-4 left-4 flex gap-4 pointer-events-none">
-                        <div className="bg-slate-900/90 backdrop-blur px-3 py-2 rounded border border-slate-700 text-xs font-mono text-slate-400 shadow-lg">
-                            <div className="flex items-center gap-2 mb-1"><span className="text-white font-bold">MODE:</span> {renderMode}</div>
-                            <div className="flex items-center gap-2"><span className="text-white font-bold">TOOL:</span> {activeTool}</div>
-                        </div>
-                    </div>
-
-                    {/* Bottom Controls */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 p-2 bg-slate-900/90 backdrop-blur-md rounded-xl border border-slate-700 shadow-2xl z-10">
-                        <button onClick={() => setIsPaused(!isPaused)} className={`p-3 rounded-lg border transition-all ${isPaused ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-slate-800 text-white border-slate-600'}`}>
-                            {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
-                        </button>
-                        
-                        <div className="w-px h-10 bg-slate-700 mx-2"></div>
-
-                        <button onClick={() => setRenderMode('NETWORK')} className={`p-3 rounded-lg border transition-all ${renderMode === 'NETWORK' ? 'bg-accent-cyan text-slate-900 border-accent-cyan' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Network Graph">
-                            <Network size={18} />
-                        </button>
-                        <button onClick={() => setRenderMode('HEATMAP')} className={`p-3 rounded-lg border transition-all ${renderMode === 'HEATMAP' ? 'bg-red-500 text-white border-red-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Heatmap">
-                            <Flame size={18} />
-                        </button>
-
-                        <div className="w-px h-10 bg-slate-700 mx-2"></div>
-
-                        <button onClick={() => setActiveTool('OBSERVE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'OBSERVE' ? 'bg-slate-700 text-white border-slate-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Observe">
-                            <Microscope size={18} />
-                        </button>
-                        <button onClick={() => setActiveTool('CURE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'CURE' ? 'bg-green-500 text-slate-900 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-green-900/20 text-green-500 border-green-900'}`} title="Truth Bomb (Cure)">
-                            <Shield size={18} />
-                        </button>
-                        <button onClick={() => setActiveTool('INFECT')} className={`p-3 rounded-lg border transition-all ${activeTool === 'INFECT' ? 'bg-red-500 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-red-900/20 text-red-500 border-red-900'}`} title="Inject Disinfo">
-                            <AlertTriangle size={18} />
-                        </button>
-                    </div>
                 </div>
             </div>
         </PageFrame>

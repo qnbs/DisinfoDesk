@@ -99,7 +99,10 @@ export const translations = {
             cosmic: 'Kosmos & Ursprung',
             system: 'System & Kontrolle',
             history: 'Geschichte & Finanzen',
-            esoteric: 'Esoterik & Krypto'
+            esoteric: 'Esoterik & Krypto',
+            global: 'Globaler Index',
+            revisionism: 'Revisionismus',
+            occult: 'Okkultes Wissen'
         }
     },
     dashboard: {
@@ -114,17 +117,51 @@ export const translations = {
       toplist: 'Viralitäts-Topliste (Top 3)',
       temporal: 'Temporale Bedrohungsmatrix',
       map: 'Globale Inzidenz-Karte',
-      ticker: {
-        detected: 'DETEKTIERT: Hochfrequenzsignal im Sektor 7G...',
-        warning: 'WARNUNG: Desinformations-Spitze bzgl. "Projekt Blue Beam"...',
-        analysis: 'ANALYSE: 98,4% Wahrscheinlichkeit für Bot-Aktivität...',
-        system: 'SYSTEM: Gemini 2.5 Node betriebsbereit...',
-        archive: 'ARCHIV: Neue Beweise zur "Roswell"-Akte hinzugefügt...'
+      mapLabel: 'GLOBALE KARTE',
+      live: 'LIVE TRACKING',
+      signals: 'SIGNALE',
+      load: 'LAST',
+      latency: 'LATENZ',
+      vault: 'TRESOR',
+      secure: 'SICHER',
+      defcon: 'DEFCON',
+      status: 'Aktueller Status',
+      launchpad: {
+        title: 'Mission Control',
+        sections: {
+            intel: 'Active Intelligence',
+            archives: 'Datenbank & Archiv',
+            system: 'System & Tools'
+        },
+        desc: {
+            archive: 'Zugriff auf die Hauptdatenbank.',
+            media: 'Analyse popkultureller Einflüsse.',
+            authors: 'Profile bekannter Akteure.',
+            dangerous: 'Hochriskante Narrative überwachen.',
+            virality: 'Verbreitungssimulation starten.',
+            chat: 'Interrogation via KI-Uplink.',
+            editor: 'Neue Akte anlegen.',
+            satire: 'Synthetische Narrative generieren.',
+            vault: 'Lokalen Speicher verwalten.',
+            settings: 'Systemkonfiguration anpassen.',
+            help: 'Benutzerhandbuch öffnen.'
+        }
+      },
+      feed: {
+        title: 'System Protokoll',
+        intercept: 'Verschlüsseltes Paket abgefangen',
+        sentiment: 'Analysiere Sentiment',
+        ref: 'Querverweis geprüft',
+        node: 'Knoten 42 offline',
+        cluster: 'Neuer Cluster entdeckt',
+        context: 'Kontext-Fenster aktualisiert',
+        heuristic: 'Heuristik Update',
+        botnet: 'Botnetz-Spitze erkannt'
       }
     },
     dangerPage: {
         title: 'PROTOKOLL OMEGA',
-        subtitle: 'Analyse von Narrativen, die ein unmittelbares Risiko für die gesellschaftliche Stabilität, die öffentliche Gesundheit oder die demokratische Integrität darstellen.',
+        subtitle: 'Analyse von Narrativen, die ein unmittelbares Risiko für die gesellschaftliche Stabilität darstellen.',
         status: 'KRITISCHER ALARM',
         defcon: 'DEFCON',
         readiness: {
@@ -136,26 +173,51 @@ export const translations = {
             active: 'Aktive Bedrohungen',
             avg: 'Ø Viralität'
         },
-        cards: {
-          radicalization: { title: 'Radikalisierungsrisiko', desc: 'Narrative, die Gläubige isolieren und Gewalt gegen "Feinde" legitimieren.' },
-          health: { title: 'Gesundheitsgefahr', desc: 'Falschinformationen, die zur Ablehnung medizinischer Hilfe oder Einnahme schädlicher Substanzen führen.' },
-          erosion: { title: 'Gesellschaftliche Erosion', desc: 'Systematische Untergrabung des Vertrauens in Institutionen, Wissenschaft und objektive Realität.' }
-        },
         listHeader: 'Identifizierte Hochrisiko-Ziele',
         priority: 'Prioritäts-Ziele',
         impact: 'IMPACT SCORE',
-        vector: 'Vektor-Analyse'
+        vector: 'Vektor-Analyse',
+        charts: {
+            scatterTitle: 'Schweregrad-Verteilung',
+            scatterX: 'Viralität',
+            scatterY: 'Schweregrad',
+            scatterZ: 'Reichweite',
+            radarTitle: 'Einschlag-Analyse',
+            globeLabel: 'BEDROHUNGS-KARTE',
+            feedTitle: 'DATEN STROM',
+            encrypted: 'VERSCHLÜSSELT',
+            intercepted: 'ABGEFANGEN'
+        },
+        vectors: {
+            destabilization: 'Destabilisierung',
+            biosecurity: 'Bio-Sicherheit',
+            revisionism: 'Revisionismus',
+            cognitive: 'Kognitiv',
+            social: 'Sozial'
+        },
+        actions: {
+            view: 'Akte ansehen',
+            counter: 'Gegenmaßnahmen',
+            deploying: 'Wird ausgeführt...'
+        },
+        advisory: {
+            title: 'Warnhinweis',
+            text: 'Hochgradig ansteckende memetische Erreger erkannt. Interaktion ohne kognitive Schutzmaßnahmen nicht empfohlen. Nutzen Sie KI-Eindämmungsprotokolle.'
+        }
     },
     viralPage: {
         title: 'VIRALE MECHANIK',
         subtitle: 'Simulations-Engine',
-        timelineTitle: 'Narrative Entstehung (Timeline)',
-        mediaTitle: 'Die Evolution der Übertragungswege',
         sim: {
           core: 'Simulation Core',
           infected: 'Infiziert',
+          recovered: 'Genesen',
+          susceptible: 'Anfällig',
           velocity: 'Geschwindigkeit',
+          rValue: 'Reproduktionszahl',
+          projected: 'PROGNOSE',
           params: {
+            title: 'Vektor Parameter',
             emotional: 'Emotionale Ladung',
             novelty: 'Neuheitswert (Schock)',
             visual: 'Visuelle "Beweise"',
@@ -165,23 +227,23 @@ export const translations = {
             echo: 'Echokammer',
             bot: 'Bot Angriff',
             organic: 'Organisch',
-            lockdown: 'Containment'
+            lockdown: 'Lockdown'
           },
           actions: {
             factCheck: 'Faktencheck',
-            ban: 'Cluster Bann'
+            ban: 'Cluster Bann',
+            observe: 'Beobachten',
+            cure: 'Wahrheit (Heilung)',
+            infect: 'Desinfo (Infektion)'
           },
           hud: {
               title: 'VEKTOR_SIM_V4',
-              density: 'DICHTE_KARTE_AKTIV',
-              live: 'LIVE_KNOTEN_PROPAGATION'
+              mode: 'MODUS',
+              tool: 'WERKZEUG'
+          },
+          charts: {
+              telemetry: 'Echtzeit-Telemetrie'
           }
-        },
-        timeline: {
-          static: { title: 'Die Statische Ära', desc: 'Verbreitung über Flugblätter und Bücher. Hohe Hürden, langsame Übertragung.' },
-          broadcast: { title: 'Die Broadcast Ära', desc: 'Radio und TV erlaubten zentrale Verbreitung. Verschwörungen wurden zu nationalen Events.' },
-          forum: { title: 'Die Foren Ära', desc: 'Frühes Internet (Usenet). Dezentrale Gemeinschaften bilden isolierte Realitäten.' },
-          algo: { title: 'Die Algorithmische Ära', desc: 'Algorithmen priorisieren Engagement über Wahrheit. Bot-Netzwerke als Waffen.' }
         }
     },
     mediaPage: {
@@ -260,7 +322,7 @@ export const translations = {
             tags: 'Tag hinzufügen...',
             image: 'Bild-URL einfügen...'
         },
-        info: 'Vom Benutzer erstellte Theorien werden lokal in Ihrem Browser-Cache gespeichert (Redux Persist). Sie bleiben über Neustarts hinweg erhalten, werden aber nicht auf einen Server hochgeladen. Nutzen Sie "Export" in den Einstellungen für Backups.'
+        info: 'Vom Benutzer erstellte Theorien werden lokal in Ihrem Browser-Cache gespeichert.'
     },
     detail: {
       back: 'Zurück',
@@ -289,40 +351,40 @@ export const translations = {
       topology: 'Narrative Topologie',
       nodesDetected: 'Knoten erkannt',
       timelineEvents: {
-          inception: { title: 'Die Gründung', desc: 'Das Narrativ taucht erstmals im öffentlichen Diskurs auf, oft in Randpublikationen.' },
-          threshold: { title: 'Virale Schwelle', desc: 'Die Theorie überspringt die Nische zur Subkultur, angetrieben durch Foren.' },
-          mainstream: { title: 'Mainstream Kontakt', desc: 'Erwähnung in Massenmedien oder Filmen zementiert den Platz im Zeitgeist.' },
-          current: { title: 'Aktueller Status', desc: 'Laufender Viralitäts-Index. Das Narrativ entwickelt sich weiter.' }
+          inception: { title: 'Die Gründung', desc: 'Das Narrativ taucht erstmals im öffentlichen Diskurs auf.' },
+          threshold: { title: 'Virale Schwelle', desc: 'Die Theorie überspringt die Nische zur Subkultur.' },
+          mainstream: { title: 'Mainstream Kontakt', desc: 'Erwähnung in Massenmedien oder Filmen.' },
+          current: { title: 'Aktueller Status', desc: 'Laufender Viralitäts-Index.' }
       }
     },
     chat: {
       botName: 'Dr. Veritas',
       botStatus: 'Skeptiker-KI • Online',
-      welcome: 'Hallo. Ich bin Dr. Veritas. Hast du eine Theorie gehört, die dir seltsam vorkommt? Lass uns gemeinsam die Fakten prüfen.',
-      placeholder: 'Frage etwas, z.B. "Stimmt es, dass Vögel Drohnen sind?"',
+      welcome: 'Hallo. Ich bin Dr. Veritas.',
+      placeholder: 'Frage etwas...',
       reset: 'Reset Uplink',
       save: 'Sitzung archivieren',
       voice: 'Sprachausgabe',
       verdict: {
-        true: 'VERIFIZIERTE WAHRHEIT',
+        true: 'WAHRHEIT',
         false: 'WIDERLEGT',
         misleading: 'IRREFÜHREND',
         unverified: 'UNBESTÄTIGT'
       },
-      error: 'Verbindung zum Skeptiker-Netzwerk unterbrochen.'
+      error: 'Verbindung unterbrochen.'
     },
     satire: {
       title: 'Der Aluhut-Generator',
-      subtitle: 'Manchmal ist die Realität zu langweilig. Lassen Sie die KI eine absolut harmlose, aber verrückte Verschwörungstheorie erfinden.',
-      instruction: 'Klicke auf den Button, um die "Wahrheit" zu erfahren.',
+      subtitle: 'KI-generierte Verschwörungstheorien.',
+      instruction: 'Klicke auf den Button.',
       loading1: 'Verbinde Punkte...',
       loading2: 'Interpretiere Kornkreise...',
-      copy: 'Text kopieren',
-      copied: 'In Zwischenablage kopiert',
-      buttonNew: 'Neue Theorie generieren',
-      buttonStart: 'Enthülle die Wahrheit',
-      archived: 'Archiviert',
-      saveVault: 'In Vault speichern',
+      copy: 'Kopieren',
+      copied: 'Kopiert',
+      buttonNew: 'Neue Theorie',
+      buttonStart: 'Starten',
+      archived: 'Archived',
+      saveVault: 'Speichern',
       format: 'Format',
       tone: 'Tonfall',
       formats: {
@@ -338,7 +400,7 @@ export const translations = {
       params: {
         subject: 'Zielobjekt',
         paranoia: 'Realitätsverzerrung',
-        archetype: 'Erzähl-Archetyp'
+        archetype: 'Archetyp'
       },
       subjects: {
         CATS: 'Katzen',
@@ -365,14 +427,14 @@ export const translations = {
       totalFiles: 'Dateien Gesamt',
       purge: 'Batch Löschung',
       empty: 'Ordner Leer',
-      emptyDesc: 'Keine Aufzeichnungen in diesem Sektor gefunden.',
+      emptyDesc: 'Keine Aufzeichnungen gefunden.',
       searchPlaceholder: 'Suche ID / Titel...',
       visual: 'Visuell',
       source: 'Quellcode',
       modify: 'Modifizieren',
       commit: 'Bestätigen',
       awaiting: 'WARTE AUF EINGABE',
-      awaitingDesc: 'Wählen Sie einen Datensatz aus dem Index.',
+      awaitingDesc: 'Wählen Sie einen Datensatz.',
       tabs: {
         analyses: 'Analysen',
         media: 'Medien',
@@ -390,54 +452,54 @@ export const translations = {
         SYSTEM: 'Systeminfo'
       },
       sections: {
-        localization: { title: 'Lokalisierungsprotokoll', desc: 'Wählen Sie die Primärsprache für Interface und KI-Synthese.' },
-        neural: { title: 'Neurale Konfiguration', desc: 'Feinabstimmung der Gemini 2.5 Generative Engine.' },
-        visual: { title: 'Visuell & Haptisch', desc: 'Anpassung von Viewport und Feedback.' },
-        privacy: { title: 'Datensouveränität', desc: 'Verwalten Sie Ihren lokalen Fußabdruck.' },
-        system: { title: 'Systemdiagnose', desc: 'Versionskontrolle und Umgebungsstatus.' }
+        localization: { title: 'Lokalisierungsprotokoll', desc: 'Sprache für Interface und KI.' },
+        neural: { title: 'Neurale Konfiguration', desc: 'Gemini 2.5 Engine Einstellungen.' },
+        visual: { title: 'Visuell & Haptisch', desc: 'Viewport und Feedback.' },
+        privacy: { title: 'Datensouveränität', desc: 'Lokaler Speicher.' },
+        system: { title: 'Systemdiagnose', desc: 'Status.' }
       },
       labels: {
-        modelSelect: 'Modellauswahl',
-        temp: 'Temperatur (Kreativität)',
-        contrast: 'Hoher Kontrast',
-        motion: 'Reduzierte Bewegung',
-        sound: 'Interface-Töne',
-        typography: 'Typografie-Skalierung',
-        incognito: 'Inkognito-Modus',
-        export: 'Daten exportieren',
-        purge: 'System Reset',
-        contrastDesc: 'Erhöht die Sichtbarkeit von Rändern und reduziert Transparenz.',
-        motionDesc: 'Deaktiviert komplexe Animationen und Übergänge.',
-        soundDesc: 'Spielt subtile Töne bei Interaktionen.',
-        incognitoDesc: 'Verhindert das Protokollieren von Anfragen im Verlauf (simuliert).'
+        modelSelect: 'Modell',
+        temp: 'Temperatur',
+        contrast: 'Kontrast',
+        motion: 'Bewegung',
+        sound: 'Töne',
+        typography: 'Typografie',
+        incognito: 'Inkognito',
+        export: 'Export',
+        purge: 'Reset',
+        contrastDesc: 'Erhöht Sichtbarkeit.',
+        motionDesc: 'Reduziert Animationen.',
+        soundDesc: 'Interface Töne.',
+        incognitoDesc: 'Kein Verlauf.'
       },
       models: {
-          flash: { title: 'Gemini 2.5 Flash', desc: 'Ausgewogene Leistung. Ideal für allgemeine Aufgaben.' },
-          pro: { title: 'Gemini 3.0 Pro (Vorschau)', desc: 'Erweiterte Logikfähigkeiten.' }
+          flash: { title: 'Gemini 2.5 Flash', desc: 'Ausgewogen.' },
+          pro: { title: 'Gemini 3.0 Pro', desc: 'Erweitert.' }
       },
-      privacyNote: 'DisinfoDesk arbeitet mit einer Client-Side-Architektur. Ihr Suchverlauf wird in der IndexedDB (Vault) Ihres Browsers gespeichert und nicht an unsere Server gesendet, außer für notwendige API-Aufrufe an Google Gemini.'
+      privacyNote: 'Local-First Architektur.'
     },
     help: {
-      title: 'Handbuch für Wahrheitssuchende',
+      title: 'Handbuch',
       howItWorks: 'Wie funktioniert das?',
-      howItWorksText: 'Wählen Sie eine Theorie aus dem Archiv, um eine Echtzeit-Analyse durchzuführen. Unser KI-Agent prüft Fakten, historischen Ursprung und wissenschaftlichen Konsens.',
-      dangerLevels: 'Gefahrenstufen erklärt',
+      howItWorksText: 'Wählen Sie eine Theorie für die Analyse.',
+      dangerLevels: 'Gefahrenstufen',
       disclaimer: 'Haftungsausschluss',
-      disclaimerText: 'Die generierten Inhalte dienen Bildungs- und Unterhaltungszwecken. KI kann halluzinieren. Prüfen Sie wichtige Informationen immer anhand von Primärquellen.'
+      disclaimerText: 'Bildungszwecke.'
     },
     search: {
-      placeholder: 'Suche Datenbank, Befehle oder Entitäten...',
-      noResults: 'KEINE TREFFER IM ARCHIV',
+      placeholder: 'Suche...',
+      noResults: 'KEINE TREFFER',
       footerLeft: 'DISINFODESK OS v2.7',
-      footerRight: 'INDEXIERUNG ABGESCHLOSSEN'
+      footerRight: 'INDEXIERUNG FERTIG'
     },
     onboarding: {
-      step0: { title: 'SPRACHPROTOKOLL', msg: 'Bitte wählen Sie Ihre bevorzugte Interface-Sprache für die Initialisierung.' },
-      step1: { title: 'AGENTEN ORIENTIERUNG', msg: 'Identität bestätigt. Willkommen beim DisinfoDesk, Ihrer Kommandozentrale zur Analyse moderner Informationskriege.' },
-      step2: { title: 'MODUL NAVIGATION', msg: 'Greifen Sie über die Seitenleiste auf das Archiv, die Bedrohungsmatrix und virale Simulatoren zu.' },
-      step3: { title: 'GLOBALE AUFKLÄRUNG', msg: 'Nutzen Sie OmniSearch (CMD+K), um sofort die gesamte Datenbank nach Theorien, Autoren und Medien zu durchsuchen.' },
-      step4: { title: 'KI UPLINK', msg: 'Dr. Veritas steht bereit. Nutzen Sie das Chat-Modul für Echtzeit-Faktenchecks und Logikanalysen.' },
-      skip: 'BRIEFING ÜBERSPRINGEN',
+      step0: { title: 'SPRACHE', msg: 'Wählen Sie Ihre Sprache.' },
+      step1: { title: 'ORIENTIERUNG', msg: 'Willkommen beim DisinfoDesk.' },
+      step2: { title: 'NAVIGATION', msg: 'Nutzen Sie die Seitenleiste.' },
+      step3: { title: 'SUCHE', msg: 'Nutzen Sie OmniSearch (CMD+K).' },
+      step4: { title: 'KI UPLINK', msg: 'Dr. Veritas steht bereit.' },
+      skip: 'ÜBERSPRINGEN',
       next: 'WEITER',
       init: 'INITIALISIEREN'
     }
@@ -541,7 +603,10 @@ export const translations = {
             cosmic: 'Cosmic & Origins',
             system: 'System & Control',
             history: 'History & Finance',
-            esoteric: 'Esoteric & Crypto'
+            esoteric: 'Esoterik & Crypto',
+            global: 'Global Index',
+            revisionism: 'Revisionism',
+            occult: 'Occult Knowledge'
         }
     },
     dashboard: {
@@ -556,17 +621,51 @@ export const translations = {
       toplist: 'Virality Top List (Top 3)',
       temporal: 'Temporal Threat Matrix',
       map: 'Global Incidence Map',
-      ticker: {
-        detected: 'DETECTED: High frequency signal in sector 7G...',
-        warning: 'WARNING: Disinformation spike regarding "Project Blue Beam"...',
-        analysis: 'ANALYSIS: 98.4% probability of bot activity in trending tags...',
-        system: 'SYSTEM: Gemini 2.5 Node operational...',
-        archive: 'ARCHIVE: New evidence added to "Roswell" case file...'
+      mapLabel: 'GLOBAL MAP',
+      live: 'LIVE TRACKING',
+      signals: 'SIGNALS',
+      load: 'LOAD',
+      latency: 'LATENCY',
+      vault: 'VAULT',
+      secure: 'SECURE',
+      defcon: 'DEFCON',
+      status: 'Current Status',
+      launchpad: {
+        title: 'Mission Control',
+        sections: {
+            intel: 'Active Intelligence',
+            archives: 'Databases & Archives',
+            system: 'System & Tools'
+        },
+        desc: {
+            archive: 'Access main database.',
+            media: 'Analyze pop culture influence.',
+            authors: 'Profiles of key actors.',
+            dangerous: 'Monitor high-risk narratives.',
+            virality: 'Launch propagation simulation.',
+            chat: 'Interrogation via AI Uplink.',
+            editor: 'Create new dossier.',
+            satire: 'Generate synthetic narratives.',
+            vault: 'Manage local storage.',
+            settings: 'Adjust system config.',
+            help: 'Open manual.'
+        }
+      },
+      feed: {
+        title: 'System Log',
+        intercept: 'Intercepted encrypted packet',
+        sentiment: 'Analyzing sentiment',
+        ref: 'Cross-referencing',
+        node: 'Node 42 going dark',
+        cluster: 'New cluster detected',
+        context: 'Context window refreshed',
+        heuristic: 'Updating heuristic',
+        botnet: 'Botnet traffic spike'
       }
     },
     dangerPage: {
         title: 'PROTOCOL OMEGA',
-        subtitle: 'Analysis of narratives that pose immediate risks to societal stability, public health, or democratic integrity. Handle with extreme caution.',
+        subtitle: 'Analysis of narratives that pose immediate risks to societal stability.',
         status: 'CRITICAL ALERT',
         defcon: 'DEFCON',
         readiness: {
@@ -578,26 +677,51 @@ export const translations = {
             active: 'Active Threats',
             avg: 'Avg. Virality'
         },
-        cards: {
-          radicalization: { title: 'Radicalization Risk', desc: 'Narratives that isolate believers and legitimize violence against perceived "enemies".' },
-          health: { title: 'Health Hazard', desc: 'Misinformation leading to refusal of medical treatment or consumption of harmful substances.' },
-          erosion: { title: 'Societal Erosion', desc: 'Systematic undermining of trust in institutions, science, and the concept of objective reality itself.' }
-        },
         listHeader: 'Identified High-Priority Targets',
         priority: 'Priority Targets',
         impact: 'IMPACT SCORE',
-        vector: 'Vector Analysis'
+        vector: 'Vector Analysis',
+        charts: {
+            scatterTitle: 'Severity Scatter',
+            scatterX: 'Virality',
+            scatterY: 'Severity',
+            scatterZ: 'Reach',
+            radarTitle: 'Impact Analysis',
+            globeLabel: 'THREAT MAP',
+            feedTitle: 'DATA STREAM',
+            encrypted: 'ENCRYPTED',
+            intercepted: 'INTERCEPTED'
+        },
+        vectors: {
+            destabilization: 'Destabilization',
+            biosecurity: 'Bio-Security',
+            revisionism: 'Revisionism',
+            cognitive: 'Cognitive',
+            social: 'Social'
+        },
+        actions: {
+            view: 'View Dossier',
+            counter: 'Counter',
+            deploying: 'Deploying...'
+        },
+        advisory: {
+            title: 'Advisory Notice',
+            text: 'High-level memetic pathogens detected. Engagement without activated cognitive shielding is not recommended. Use AI containment protocols.'
+        }
     },
     viralPage: {
         title: 'VIRAL MECHANICS',
         subtitle: 'Analytics Engine',
-        timelineTitle: 'Narrative Genesis Timeline',
-        mediaTitle: 'The Evolution of Transmission Vectors',
         sim: {
           core: 'Simulation Core',
           infected: 'Infected',
+          recovered: 'Recovered',
+          susceptible: 'Susceptible',
           velocity: 'Velocity',
+          rValue: 'Reproduction Rate',
+          projected: 'PROJECTED',
           params: {
+            title: 'Vector Parameters',
             emotional: 'Emotional Payload',
             novelty: 'Novelty / Shock',
             visual: 'Visual "Evidence"',
@@ -611,19 +735,19 @@ export const translations = {
           },
           actions: {
             factCheck: 'Fact Check',
-            ban: 'Ban Cluster'
+            ban: 'Ban Cluster',
+            observe: 'Observe',
+            cure: 'Truth (Cure)',
+            infect: 'Disinfo (Infect)'
           },
           hud: {
               title: 'VECTOR_SIM_V4',
-              density: 'DENSITY_MAP_ENABLED',
-              live: 'LIVE_NODE_PROPAGATION'
+              mode: 'MODE',
+              tool: 'TOOL'
+          },
+          charts: {
+              telemetry: 'Live Telemetry'
           }
-        },
-        timeline: {
-          static: { title: 'The Static Era', desc: 'Spread via pamphlets and books. High barrier to entry, slow transmission, high persistence.' },
-          broadcast: { title: 'The Broadcast Era', desc: 'Radio and TV allowed centralized dissemination. Conspiracies became synchronized national events.' },
-          forum: { title: 'The Forum Era', desc: 'Early internet (Usenet, Forums). Decentralized communities begin to form "alternate realities" in isolation.' },
-          algo: { title: 'The Algorithmic Era', desc: 'Social media algorithms prioritize engagement over truth. Micro-targeting and bot networks weaponize narratives.' }
         }
     },
     mediaPage: {
@@ -709,40 +833,40 @@ export const translations = {
       topology: 'Narrative Topology',
       nodesDetected: 'Nodes Detected',
       timelineEvents: {
-          inception: { title: 'The Inception', desc: 'The narrative first appears in public discourse, often in fringe publications or isolated communities.' },
-          threshold: { title: 'Viral Threshold', desc: 'The theory bridges the gap from niche to subculture, gaining traction via forums or alternative media.' },
-          mainstream: { title: 'Mainstream Exposure', desc: 'Mentioned in major media, films, or political discourse, cementing its place in the cultural zeitgeist.' },
-          current: { title: 'Current Status', desc: 'Current virality index. The narrative continues to evolve.' }
+          inception: { title: 'The Inception', desc: 'The narrative first appears in public discourse.' },
+          threshold: { title: 'Viral Threshold', desc: 'The theory bridges the gap from niche to subculture.' },
+          mainstream: { title: 'Mainstream Exposure', desc: 'Mentioned in major media, films, or political discourse.' },
+          current: { title: 'Current Status', desc: 'Current virality index.' }
       }
     },
     chat: {
       botName: 'Dr. Veritas',
       botStatus: 'Skeptical AI • Online',
-      welcome: 'Hello. I am Dr. Veritas. Have you heard a theory that seems odd? Let\'s check the facts together.',
-      placeholder: 'Ask something, e.g. "Are birds actually drones?"',
+      welcome: 'Hello. I am Dr. Veritas.',
+      placeholder: 'Ask something...',
       reset: 'Reset Uplink',
       save: 'Archive Session',
       voice: 'Voice Output',
       verdict: {
-        true: 'VERIFIED TRUTH',
+        true: 'TRUTH',
         false: 'DEBUNKED',
         misleading: 'MISLEADING',
         unverified: 'UNVERIFIED'
       },
-      error: 'Connection to Skeptic Network interrupted.'
+      error: 'Connection interrupted.'
     },
     satire: {
       title: 'Tinfoil Hat Generator',
-      subtitle: 'Sometimes reality is too boring. Let AI invent an absolutely harmless but crazy conspiracy theory.',
-      instruction: 'Click the button to learn the "Truth".',
+      subtitle: 'AI-generated conspiracy theories.',
+      instruction: 'Click the button.',
       loading1: 'Connecting dots...',
       loading2: 'Interpretiere crop circles...',
-      copy: 'Copy Text',
-      copied: 'Copied to clipboard',
-      buttonNew: 'Generate New Theory',
-      buttonStart: 'Reveal the Truth',
+      copy: 'Copy',
+      copied: 'Copied',
+      buttonNew: 'New Theory',
+      buttonStart: 'Start',
       archived: 'Archived',
-      saveVault: 'Save to Vault',
+      saveVault: 'Save',
       format: 'Format',
       tone: 'Tone',
       formats: {
@@ -758,7 +882,7 @@ export const translations = {
       params: {
         subject: 'Target Subject',
         paranoia: 'Reality Distortion',
-        archetype: 'Narrative Archetype'
+        archetype: 'Archetype'
       },
       subjects: {
         CATS: 'Cats',
@@ -785,14 +909,14 @@ export const translations = {
       totalFiles: 'Total Files',
       purge: 'Batch Purge',
       empty: 'Folder Empty',
-      emptyDesc: 'No records found in this sector.',
+      emptyDesc: 'No records found.',
       searchPlaceholder: 'Search ID / Title...',
       visual: 'Visual',
       source: 'Source',
       modify: 'Modify',
       commit: 'Commit',
       awaiting: 'AWAITING INPUT',
-      awaitingDesc: 'Select a record from the vault index to inspect content.',
+      awaitingDesc: 'Select a record.',
       tabs: {
         analyses: 'Analyses',
         media: 'Media',
@@ -806,58 +930,58 @@ export const translations = {
         GENERAL: 'General',
         INTELLIGENCE: 'Intelligence',
         INTERFACE: 'Interface',
-        PRIVACY: 'Data & Privacy',
-        SYSTEM: 'System Info'
+        PRIVACY: 'Privacy',
+        SYSTEM: 'System'
       },
       sections: {
-        localization: { title: 'Localization Protocol', desc: 'Select the primary language for interface and AI synthesis.' },
-        neural: { title: 'Neural Configuration', desc: 'Fine-tune the behavior of the Gemini 2.5 generative engine.' },
-        visual: { title: 'Visual & Haptic', desc: 'Customize the viewport and sensory feedback.' },
-        privacy: { title: 'Data Sovereignty', desc: 'Manage your local footprint.' },
-        system: { title: 'System Diagnostic', desc: 'Version control and environment status.' }
+        localization: { title: 'Localization Protocol', desc: 'Language.' },
+        neural: { title: 'Neural Configuration', desc: 'Gemini 2.5 Engine.' },
+        visual: { title: 'Visual & Haptic', desc: 'Viewport.' },
+        privacy: { title: 'Data Sovereignty', desc: 'Local footprint.' },
+        system: { title: 'System Diagnostic', desc: 'Status.' }
       },
       labels: {
-        modelSelect: 'Model Selection',
-        temp: 'Temperatur (Creativity)',
-        contrast: 'High Contrast Mode',
-        motion: 'Reduced Motion',
-        sound: 'Interface Sounds',
-        typography: 'Typography Scaling',
-        incognito: 'Incognito Mode',
-        export: 'Export Data JSON',
-        purge: 'System Reset',
-        contrastDesc: 'Increases border visibility and reduces transparency.',
-        motionDesc: 'Disables complex animations and transitions.',
-        soundDesc: 'Play subtle cues on interaction.',
-        incognitoDesc: 'Prevents logging of queries to local history (simulated).'
+        modelSelect: 'Model',
+        temp: 'Temperature',
+        contrast: 'Contrast',
+        motion: 'Motion',
+        sound: 'Sounds',
+        typography: 'Typography',
+        incognito: 'Incognito',
+        export: 'Export',
+        purge: 'Reset',
+        contrastDesc: 'Increases visibility.',
+        motionDesc: 'Disables animations.',
+        soundDesc: 'Interface cues.',
+        incognitoDesc: 'No history.'
       },
       models: {
-          flash: { title: 'Gemini 2.5 Flash', desc: 'Balanced performance. Ideal for general tasks.' },
-          pro: { title: 'Gemini 3.0 Pro (Preview)', desc: 'Enhanced reasoning capabilities.' }
+          flash: { title: 'Gemini 2.5 Flash', desc: 'Balanced.' },
+          pro: { title: 'Gemini 3.0 Pro', desc: 'Enhanced.' }
       },
-      privacyNote: 'DisinfoDesk operates on a client-side architecture. Your search history is stored in your browser\'s IndexedDB (Vault) and is not sent to our servers, except for necessary API calls to Google Gemini.'
+      privacyNote: 'Local-First Architecture.'
     },
     help: {
-      title: 'Guide for Truth Seekers',
+      title: 'Guide',
       howItWorks: 'How does it work?',
-      howItWorksText: 'Select a theory from the archive to perform a real-time analysis. Our AI agent checks facts, historical origins, and scientific consensus.',
-      dangerLevels: 'Danger Levels Explained',
+      howItWorksText: 'Select a theory.',
+      dangerLevels: 'Danger Levels',
       disclaimer: 'Disclaimer',
-      disclaimerText: 'Generated content is for educational and entertainment purposes. AI can hallucinate. Always verify important information with primary sources.'
+      disclaimerText: 'Educational purposes.'
     },
     search: {
-      placeholder: 'Search database, commands, or entities...',
-      noResults: 'NO MATCHES IN ARCHIVE',
+      placeholder: 'Search...',
+      noResults: 'NO MATCHES',
       footerLeft: 'DISINFODESK OS v2.7',
       footerRight: 'INDEXING COMPLETE'
     },
     onboarding: {
-      step0: { title: 'LANGUAGE PROTOCOL', msg: 'Please select your primary interface language for initialization.' },
-      step1: { title: 'AGENT ORIENTATION', msg: 'Identity Confirmed. Welcome to DisinfoDesk, your central command for analyzing and deconstructing modern information warfare.' },
-      step2: { title: 'MODULE NAVIGATION', msg: 'Access the Archive, Threat Matrix, and Viral Simulators from the secure sidebar. Your toolkit lies here.' },
-      step3: { title: 'GLOBAL INTEL', msg: 'Use OmniSearch (CMD+K) to instantly query the entire database of theories, authors, and media artifacts.' },
-      step4: { title: 'AI UPLINK', msg: 'Dr. Veritas is standing by. Use the Chat module for real-time fact-checking and logic analysis.' },
-      skip: 'SKIP BRIEFING',
+      step0: { title: 'LANGUAGE', msg: 'Select language.' },
+      step1: { title: 'ORIENTATION', msg: 'Welcome.' },
+      step2: { title: 'NAVIGATION', msg: 'Use the sidebar.' },
+      step3: { title: 'SEARCH', msg: 'Use OmniSearch (CMD+K).' },
+      step4: { title: 'AI UPLINK', msg: 'Dr. Veritas is ready.' },
+      skip: 'SKIP',
       next: 'NEXT',
       init: 'INITIALIZE'
     }

@@ -4,7 +4,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Layout } from './components/Layout';
 import { ErrorFallback, Skeleton } from './components/ui/Common';
 import { Loader2 } from 'lucide-react';
-import { useAppSelector } from './store/hooks';
+import { useAppSelector, useAppDispatch } from './store/hooks';
+import { resetTransientState } from './store/slices/uiSlice';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -30,6 +31,7 @@ const AuthorDetail = React.lazy(() => import('./components/AuthorDetail').then(m
 // Global Effect Handler Wrapper
 const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const settings = useAppSelector(state => state.settings.config);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     document.documentElement.style.fontSize = 
@@ -39,6 +41,11 @@ const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     if (settings.highContrast) document.documentElement.classList.add('contrast-more');
     else document.documentElement.classList.remove('contrast-more');
   }, [settings]);
+
+  // System Integrity Check on Mount
+  useEffect(() => {
+    dispatch(resetTransientState());
+  }, [dispatch]);
 
   return <>{children}</>;
 };

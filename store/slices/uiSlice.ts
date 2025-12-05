@@ -1,3 +1,4 @@
+
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { Message } from '../../types';
 import type { RootState } from '../store';
@@ -107,6 +108,18 @@ export const uiSlice = createSlice({
     // --- Scroll Restoration ---
     saveScrollPosition: (state, action: PayloadAction<{ path: string; position: number }>) => {
       state.scrollPositions[action.payload.path] = action.payload.position;
+    },
+
+    // --- System Repair ---
+    // Resets transient states (like loading spinners) that might get stuck in Redux Persist
+    resetTransientState: (state) => {
+      state.chat.isThinking = false;
+      state.isSearchOpen = false;
+      
+      // Clean up any streaming flags in messages
+      state.chat.messages.forEach(msg => {
+        if (msg.isStreaming) msg.isStreaming = false;
+      });
     }
   },
 });
@@ -132,7 +145,7 @@ export const {
   setSearchOpen, setActiveFile,
   setChatMessages, addChatMessage, updateLastChatMessage, finalizeLastChatMessage,
   setChatInput, setChatThinking, clearChat, injectChatContext,
-  setTheoryTab, saveScrollPosition 
+  setTheoryTab, saveScrollPosition, resetTransientState
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

@@ -48,7 +48,7 @@ export const ESOTERIC_THEORIES_DE: Theory[] = [
     originYear: '2003 (Bostrom)',
     tags: ['Matrix', 'Philosophie', 'Technologie', 'KI'],
     videoUrl: 'https://www.youtube.com/watch?v=tlBKz9e3jXU',
-    relatedIds: ['t6', 't47', 't57']
+    relatedIds: ['t6', 't47', 't57', 't77']
   },
   {
     id: 't28',
@@ -70,7 +70,7 @@ export const ESOTERIC_THEORIES_DE: Theory[] = [
     popularity: 50,
     originYear: '1950er',
     tags: ['Aliens', 'Spiritualität', 'Channeling', 'Kontaktler'],
-    relatedIds: ['t19', 't3']
+    relatedIds: ['t19', 't3', 't78']
   },
   {
     id: 't39',
@@ -105,6 +105,39 @@ export const ESOTERIC_THEORIES_DE: Theory[] = [
     tags: ['Spiritualität', 'Gedächtnis', 'Äther', 'Metaphysik'],
     relatedIds: ['t15', 't22', 't38']
   },
+  {
+    id: 't62',
+    title: 'CERN Portale',
+    shortDescription: 'Der Large Hadron Collider (LHC) wird verdächtigt, Portale zu anderen Dimensionen oder zur Hölle zu öffnen (Shiva-Statue, Gotthard-Tunnel Ritual).',
+    category: Category.ESOTERIC,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 70,
+    originYear: '2008',
+    tags: ['Physik', 'Dimensionen', 'Dämonen', 'Schweiz'],
+    relatedIds: ['t22', 't12']
+  },
+  {
+    id: 't77',
+    title: 'Gefängnisplanet (Prison Planet)',
+    shortDescription: 'Die Theorie, dass die Erde eine spirituelle Falle ist, in der Seelen durch Reinkarnation (den "Lichttunnel") recycelt werden, um Energie für Archonten zu liefern.',
+    category: Category.ESOTERIC,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 65,
+    originYear: 'Gnostizismus',
+    tags: ['Gnostik', 'Archonten', 'Reinkarnation', 'Matrix'],
+    relatedIds: ['t22', 't3']
+  },
+  {
+    id: 't78',
+    title: 'Starseeds',
+    shortDescription: 'Menschen, die glauben, ihre Seelen stammten von anderen Sternensystemen (Plejaden, Sirius), um die Schwingung der Erde zu erhöhen.',
+    category: Category.ESOTERIC,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 80,
+    originYear: '1970er',
+    tags: ['New Age', 'Aliens', 'Aufstieg', 'Spiritualität'],
+    relatedIds: ['t38']
+  },
   // HEALTH
   {
     id: 't29',
@@ -127,6 +160,28 @@ export const ESOTERIC_THEORIES_DE: Theory[] = [
     originYear: '2020',
     tags: ['Virus', 'Impfung', 'Bill Gates', 'Kontrolle'],
     relatedIds: ['t20', 't6', 't5', 't47']
+  },
+  {
+    id: 't68',
+    title: 'Insekten-Agenda ("Eat ze Bugs")',
+    shortDescription: 'Die Elite will Fleisch verbieten und die Bevölkerung zwingen, Insekten zu essen, um sie zu schwächen oder zu entmenschlichen.',
+    category: Category.HEALTH,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 85,
+    originYear: '2020',
+    tags: ['Ernährung', 'WEF', 'Kulturkampf', 'Gesundheit'],
+    relatedIds: ['t20', 't64']
+  },
+  {
+    id: 't70',
+    title: 'MedBeds',
+    shortDescription: 'Geheime, holografische Betten, die angeblich alle Krankheiten heilen, Gliedmaßen nachwachsen lassen und das Alter umkehren können, aber zurückgehalten werden.',
+    category: Category.HEALTH,
+    dangerLevel: DangerLevel.HIGH,
+    popularity: 75,
+    originYear: '2018',
+    tags: ['Technologie', 'Heilung', 'NESARA', 'Betrug'],
+    relatedIds: ['t75', 't47']
   }
 ];
 
@@ -177,7 +232,7 @@ export const ESOTERIC_THEORIES_EN: Theory[] = [
     originYear: '2003 (Bostrom)',
     tags: ['Matrix', 'Philosophy', 'Technology', 'AI'],
     videoUrl: 'https://www.youtube.com/watch?v=tlBKz9e3jXU',
-    relatedIds: ['t6', 't47', 't57']
+    relatedIds: ['t6', 't47', 't57', 't77']
   },
   {
     id: 't28',
@@ -199,7 +254,7 @@ export const ESOTERIC_THEORIES_EN: Theory[] = [
     popularity: 50,
     originYear: '1950s',
     tags: ['Aliens', 'Spirituality', 'Channeling', 'Contactee'],
-    relatedIds: ['t19', 't3']
+    relatedIds: ['t19', 't3', 't78']
   },
   {
     id: 't39',
@@ -234,6 +289,39 @@ export const ESOTERIC_THEORIES_EN: Theory[] = [
     tags: ['Spirituality', 'Memory', 'Ether', 'Metaphysics'],
     relatedIds: ['t15', 't22', 't38']
   },
+  {
+    id: 't62',
+    title: 'CERN Portals',
+    shortDescription: 'The Large Hadron Collider (LHC) is suspected of opening portals to other dimensions or hell (Shiva statue, Gotthard Tunnel ritual).',
+    category: CategoryEn.ESOTERIC,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 70,
+    originYear: '2008',
+    tags: ['Physics', 'Dimensions', 'Demons', 'Switzerland'],
+    relatedIds: ['t22', 't12']
+  },
+  {
+    id: 't77',
+    title: 'Prison Planet',
+    shortDescription: 'The theory that Earth is a spiritual trap where souls are recycled through reincarnation (the "light tunnel") to feed Archons.',
+    category: CategoryEn.ESOTERIC,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 65,
+    originYear: 'Gnosticism',
+    tags: ['Gnostic', 'Archons', 'Reincarnation', 'Matrix'],
+    relatedIds: ['t22', 't3']
+  },
+  {
+    id: 't78',
+    title: 'Starseeds',
+    shortDescription: 'Humans who believe their souls originated from other star systems (Pleiades, Sirius) to raise Earth\'s vibration.',
+    category: CategoryEn.ESOTERIC,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 80,
+    originYear: '1970s',
+    tags: ['New Age', 'Aliens', 'Ascension', 'Spirituality'],
+    relatedIds: ['t38']
+  },
   // HEALTH
   {
     id: 't29',
@@ -256,5 +344,27 @@ export const ESOTERIC_THEORIES_EN: Theory[] = [
     originYear: '2020',
     tags: ['Virus', 'Vaccine', 'Bill Gates', 'Control'],
     relatedIds: ['t20', 't6', 't5', 't47']
+  },
+  {
+    id: 't68',
+    title: 'Insect Agenda ("Eat ze Bugs")',
+    shortDescription: 'The elite supposedly wants to ban meat and force the population to eat insects to weaken or dehumanize them.',
+    category: CategoryEn.HEALTH,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 85,
+    originYear: '2020',
+    tags: ['Diet', 'WEF', 'Culture War', 'Health'],
+    relatedIds: ['t20', 't64']
+  },
+  {
+    id: 't70',
+    title: 'MedBeds',
+    shortDescription: 'Secret holographic beds that can supposedly cure all diseases, regrow limbs, and reverse aging, but are being withheld.',
+    category: CategoryEn.HEALTH,
+    dangerLevel: DangerLevelEn.HIGH,
+    popularity: 75,
+    originYear: '2018',
+    tags: ['Technology', 'Healing', 'NESARA', 'Scam'],
+    relatedIds: ['t75', 't47']
   }
 ];

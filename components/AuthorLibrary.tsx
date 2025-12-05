@@ -17,14 +17,6 @@ import { useNavigate } from 'react-router-dom';
 type ViewMode = 'GRID' | 'LIST' | 'NETWORK';
 type CategoryKey = 'ALL' | 'COSMIC' | 'SYSTEM' | 'HISTORY' | 'ESOTERIC';
 
-const CATEGORY_CONFIG: Record<CategoryKey, { label: string, icon: React.ReactNode, keywords: string[], color: string }> = {
-    ALL: { label: 'Global Index', icon: <Users size={14} />, keywords: [], color: 'text-slate-400' },
-    COSMIC: { label: 'Cosmic Origins', icon: <Rocket size={14} />, keywords: ['Aliens', 'UFOs', 'Space', 'Mars', 'Nibiru'], color: 'text-purple-400' },
-    SYSTEM: { label: 'System Control', icon: <GlobeLock size={14} />, keywords: ['NWO', 'Deep State', 'Elite', 'Globalism'], color: 'text-red-400' },
-    HISTORY: { label: 'Revisionism', icon: <Landmark size={14} />, keywords: ['History', 'Banking', 'Economics', 'Wall Street'], color: 'text-yellow-400' },
-    ESOTERIC: { label: 'Occult Knowledge', icon: <Ghost size={14} />, keywords: ['Occult', 'Spirituality', 'Cryptozoology', 'Magic'], color: 'text-cyan-400' }
-};
-
 // --- 0. Advanced UI Components ---
 
 // 3D Tilt Card Effect
@@ -297,6 +289,15 @@ const useAuthorLibraryLogic = () => {
 
     const onNavigateToDetail = (id: string) => navigate(`/authors/${id}`);
 
+    // Dynamic Category Config using translations
+    const categoryConfig = useMemo(() => ({
+        ALL: { label: t.authors.cats.all, icon: <Users size={14} />, keywords: [], color: 'text-slate-400' },
+        COSMIC: { label: t.authors.cats.cosmic, icon: <Rocket size={14} />, keywords: ['Aliens', 'UFOs', 'Space', 'Mars', 'Nibiru'], color: 'text-purple-400' },
+        SYSTEM: { label: t.authors.cats.system, icon: <GlobeLock size={14} />, keywords: ['NWO', 'Deep State', 'Elite', 'Globalism'], color: 'text-red-400' },
+        HISTORY: { label: t.authors.cats.history, icon: <Landmark size={14} />, keywords: ['History', 'Banking', 'Economics', 'Wall Street'], color: 'text-yellow-400' },
+        ESOTERIC: { label: t.authors.cats.esoteric, icon: <Ghost size={14} />, keywords: ['Occult', 'Spirituality', 'Cryptozoology', 'Magic'], color: 'text-cyan-400' }
+    }), [t]);
+
     useEffect(() => {
         const handler = setTimeout(() => setDebouncedSearch(searchTerm), 300);
         return () => clearTimeout(handler);
@@ -323,13 +324,13 @@ const useAuthorLibraryLogic = () => {
             );
         }
         if (activeCategory !== 'ALL') {
-            const config = CATEGORY_CONFIG[activeCategory];
+            const config = categoryConfig[activeCategory];
             result = result.filter(author => 
                 author.focusAreas.some(area => config.keywords.some(kw => area.toLowerCase().includes(kw.toLowerCase())))
             );
         }
         return result;
-    }, [debouncedSearch, activeCategory]);
+    }, [debouncedSearch, activeCategory, categoryConfig]);
 
     const displayAuthors = useMemo(() => filteredAuthors.slice(0, visibleCount), [filteredAuthors, visibleCount]);
 
@@ -344,7 +345,8 @@ const useAuthorLibraryLogic = () => {
         handleLoadMore: () => setVisibleCount(p => p + 12),
         allFocusAreas, onNavigateToDetail,
         handleTagClick: (tag: string) => { setSearchTerm(tag); window.scrollTo({top:0, behavior:'smooth'}); },
-        featuredAuthor
+        featuredAuthor,
+        categoryConfig
     };
 };
 
@@ -363,14 +365,14 @@ const AuthorLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 // --- 3. Main Sections ---
 
 const LibraryHeader: React.FC = () => {
-    const { t, searchTerm, setSearchTerm, viewMode, setViewMode, activeCategory, setActiveCategory, totalCount } = useAuthorLibrary();
+    const { t, searchTerm, setSearchTerm, viewMode, setViewMode, activeCategory, setActiveCategory, totalCount, categoryConfig } = useAuthorLibrary();
     
     return (
         <PageHeader 
             title={t.authors.title}
-            subtitle="ARCHITECTS OF THE UNKNOWN"
+            subtitle={t.authors.subtitle}
             icon={Feather}
-            status={`${totalCount} PROFILES`}
+            status={`${totalCount} ${t.authors.indexed}`}
             visualizerState="IDLE"
             actions={
                 <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
@@ -394,7 +396,7 @@ const LibraryHeader: React.FC = () => {
                 </div>
                 
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    {(Object.entries(CATEGORY_CONFIG) as [CategoryKey, typeof CATEGORY_CONFIG[CategoryKey]][]).map(([key, config]) => (
+                    {(Object.entries(categoryConfig) as [CategoryKey, typeof categoryConfig[CategoryKey]][]).map(([key, config]) => (
                         <button
                             key={key}
                             onClick={() => setActiveCategory(key)}
@@ -416,10 +418,10 @@ const LibraryHeader: React.FC = () => {
 };
 
 const LibraryContent: React.FC = () => {
-    const { displayAuthors, filteredAuthors, viewMode, hasMore, handleLoadMore, activeCategory, searchTerm, featuredAuthor, onNavigateToDetail } = useAuthorLibrary();
+    const { displayAuthors, filteredAuthors, viewMode, hasMore, handleLoadMore, activeCategory, searchTerm, featuredAuthor, onNavigateToDetail, t } = useAuthorLibrary();
 
     if (displayAuthors.length === 0) {
-        return <div className="py-20"><EmptyState title="NO PROFILES FOUND" description="The requested agents have been redacted or do not exist in this sector." icon={Users} /></div>;
+        return <div className="py-20"><EmptyState title={t.authors.notFound} description={t.authors.notFoundDesc} icon={Users} /></div>;
     }
 
     return (
@@ -433,7 +435,7 @@ const LibraryContent: React.FC = () => {
                     <div className="relative z-10 p-8 md:p-12 max-w-3xl">
                         <div className="flex items-center gap-3 mb-4"><Badge label={featuredAuthor.nationality} className="bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30" /><span className="text-slate-400 font-mono text-xs flex items-center gap-1"><Zap size={12} className="text-yellow-500" /> INF: {featuredAuthor.influenceLevel}%</span></div>
                         <h2 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter drop-shadow-md">{featuredAuthor.name}</h2>
-                        <Button variant="secondary" icon={<ArrowRight size={16} />}>Open Dossier</Button>
+                        <Button variant="secondary" icon={<ArrowRight size={16} />}>{t.detail.edit}</Button>
                     </div>
                 </div>
             )}
@@ -464,10 +466,10 @@ const LibraryContent: React.FC = () => {
 };
 
 const SemanticIndex: React.FC = () => {
-    const { allFocusAreas, handleTagClick } = useAuthorLibrary();
+    const { allFocusAreas, handleTagClick, t } = useAuthorLibrary();
     return (
         <div className="mt-8 pt-8 border-t border-slate-800 animate-fade-in">
-            <div className="flex items-center gap-3 mb-6"><Hash size={16} className="text-accent-cyan" /><h3 className="text-sm font-bold text-white uppercase tracking-widest">Semantic Index</h3><div className="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div></div>
+            <div className="flex items-center gap-3 mb-6"><Hash size={16} className="text-accent-cyan" /><h3 className="text-sm font-bold text-white uppercase tracking-widest">{t.authors.semantic}</h3><div className="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div></div>
             <Card className="p-6 bg-slate-950/30 border-slate-800/50"><div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">{allFocusAreas.map(area => <button key={area} onClick={() => handleTagClick(area)} className="px-3 py-1.5 rounded-md text-[10px] font-mono border border-slate-800 bg-slate-900/50 text-slate-500 hover:text-accent-cyan hover:border-accent-cyan/30 transition-all hover:-translate-y-0.5">{area}</button>)}</div></Card>
         </div>
     );

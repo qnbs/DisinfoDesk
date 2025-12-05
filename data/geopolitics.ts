@@ -11,7 +11,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     popularity: 90,
     originYear: '1990er',
     tags: ['Elite', 'Globalisierung', 'Kontrolle'],
-    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43']
+    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64']
   },
   {
     id: 't7',
@@ -23,7 +23,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     originYear: '2017',
     tags: ['Deep State', 'USA', 'Internetkultur'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4', // Generic Deep State ref
-    relatedIds: ['t5', 't9', 't16', 't30', 't48']
+    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65']
   },
   {
     id: 't9',
@@ -46,7 +46,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     originYear: '1994',
     tags: ['Hologramme', 'Religion', 'NWO', 'NASA'],
     videoUrl: 'https://www.youtube.com/watch?v=rK0K9X9_Z9M',
-    relatedIds: ['t5', 't2', 't6', 't21']
+    relatedIds: ['t5', 't2', 't6', 't21', 't39']
   },
   {
     id: 't18',
@@ -57,7 +57,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     popularity: 88,
     originYear: '2001',
     tags: ['Terror', 'False Flag', 'Stahlträger', 'Bush'],
-    relatedIds: ['t5', 't16', 't7', 't19']
+    relatedIds: ['t5', 't16', 't7', 't19', 't25']
   },
   {
     id: 't20',
@@ -68,7 +68,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     popularity: 85,
     originYear: '2020',
     tags: ['WEF', 'Klaus Schwab', 'Wirtschaft', 'Enteignung'],
-    relatedIds: ['t5', 't9', 't30', 't47', 't48']
+    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64']
   },
   {
     id: 't30',
@@ -79,7 +79,7 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     popularity: 80,
     originYear: '2016',
     tags: ['QAnon', 'Hollywood', 'Satanism', 'Blut'],
-    relatedIds: ['t7', 't5', 't3', 't46']
+    relatedIds: ['t7', 't5', 't3', 't46', 't65']
   },
   {
     id: 't35',
@@ -125,6 +125,50 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     originYear: '2000er',
     tags: ['Technologie', 'KI', 'Evolution', 'Kontrolle'],
     relatedIds: ['t6', 't20', 't22', 't48']
+  },
+  {
+    id: 't64',
+    title: 'Agenda 2030',
+    shortDescription: 'Die UN-Ziele für nachhaltige Entwicklung werden als Deckmantel für eine globale totalitäre Überwachung und Enteignung interpretiert.',
+    category: Category.GEOPOLITICS,
+    dangerLevel: DangerLevel.HIGH,
+    popularity: 82,
+    originYear: '2015',
+    tags: ['UN', 'NWO', 'Nachhaltigkeit', 'Kontrolle'],
+    relatedIds: ['t20', 't5', 't74']
+  },
+  {
+    id: 't65',
+    title: 'The Finders Cult',
+    shortDescription: 'Ein mysteriöser Kult, der 1987 in eine CIA-Untersuchung verwickelt war. Oft als Vorläufer der QAnon/Pizzagate-Erzählungen über Elite-Kinderhandel zitiert.',
+    category: Category.GEOPOLITICS,
+    dangerLevel: DangerLevel.HIGH,
+    popularity: 55,
+    originYear: '1987',
+    tags: ['CIA', 'Kult', 'Kinder', 'Deep State'],
+    relatedIds: ['t7', 't30']
+  },
+  {
+    id: 't74',
+    title: '15-Minuten-Städte',
+    shortDescription: 'Stadtplanungskonzepte für bessere Erreichbarkeit werden als Versuch gedeutet, Bürger in "Klima-Ghettos" einzusperren und Bewegungsfreiheit einzuschränken.',
+    category: Category.GEOPOLITICS,
+    dangerLevel: DangerLevel.HIGH,
+    popularity: 88,
+    originYear: '2022',
+    tags: ['Klima', 'Lockdown', 'Städtebau', 'WEF'],
+    relatedIds: ['t20', 't64']
+  },
+  {
+    id: 't75',
+    title: 'NESARA / GESARA',
+    shortDescription: 'Die Hoffnung auf ein geheimes Gesetz, das alle Schulden erlässt und ein neues Finanzsystem (oft mit BRICS/Goldstandard) einführt.',
+    category: Category.GEOPOLITICS,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 70,
+    originYear: '2000',
+    tags: ['Finanzen', 'Schulden', 'Gold', 'Utopie'],
+    relatedIds: ['t7', 't5']
   }
 ];
 
@@ -138,7 +182,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     popularity: 90,
     originYear: '1990s',
     tags: ['Elite', 'Globalization', 'Control'],
-    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43']
+    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64']
   },
   {
     id: 't7',
@@ -150,7 +194,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     originYear: '2017',
     tags: ['Deep State', 'USA', 'Internet Culture'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t5', 't9', 't16', 't30', 't48']
+    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65']
   },
   {
     id: 't9',
@@ -173,7 +217,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     originYear: '1994',
     tags: ['Holograms', 'Religion', 'NWO', 'NASA'],
     videoUrl: 'https://www.youtube.com/watch?v=rK0K9X9_Z9M',
-    relatedIds: ['t5', 't2', 't6', 't21']
+    relatedIds: ['t5', 't2', 't6', 't21', 't39']
   },
   {
     id: 't18',
@@ -184,7 +228,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     popularity: 88,
     originYear: '2001',
     tags: ['Terror', 'False Flag', 'Steel Beams', 'Bush'],
-    relatedIds: ['t5', 't16', 't7', 't19']
+    relatedIds: ['t5', 't16', 't7', 't19', 't25']
   },
   {
     id: 't20',
@@ -195,7 +239,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     popularity: 85,
     originYear: '2020',
     tags: ['WEF', 'Klaus Schwab', 'Economy', 'Expropriation'],
-    relatedIds: ['t5', 't9', 't30', 't47', 't48']
+    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64']
   },
   {
     id: 't30',
@@ -206,7 +250,7 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     popularity: 80,
     originYear: '2016',
     tags: ['QAnon', 'Hollywood', 'Satanism', 'Blood'],
-    relatedIds: ['t7', 't5', 't3', 't46']
+    relatedIds: ['t7', 't5', 't3', 't46', 't65']
   },
   {
     id: 't35',
@@ -252,5 +296,49 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     originYear: '2000s',
     tags: ['Technology', 'AI', 'Evolution', 'Control'],
     relatedIds: ['t6', 't20', 't22', 't48']
+  },
+  {
+    id: 't64',
+    title: 'Agenda 2030',
+    shortDescription: 'UN sustainable development goals are interpreted as a cover for global totalitarian surveillance, depopulation, and expropriation.',
+    category: CategoryEn.GEOPOLITICS,
+    dangerLevel: DangerLevelEn.HIGH,
+    popularity: 82,
+    originYear: '2015',
+    tags: ['UN', 'NWO', 'Sustainability', 'Control'],
+    relatedIds: ['t20', 't5', 't74']
+  },
+  {
+    id: 't65',
+    title: 'The Finders Cult',
+    shortDescription: 'A mysterious cult implicated in a 1987 CIA investigation. Often cited as a precursor to QAnon/Pizzagate narratives about elite child trafficking.',
+    category: CategoryEn.GEOPOLITICS,
+    dangerLevel: DangerLevelEn.HIGH,
+    popularity: 55,
+    originYear: '1987',
+    tags: ['CIA', 'Cult', 'Children', 'Deep State'],
+    relatedIds: ['t7', 't30']
+  },
+  {
+    id: 't74',
+    title: '15-Minute Cities',
+    shortDescription: 'Urban planning concepts for better accessibility are interpreted as an attempt to lock citizens in "climate ghettos" and restrict movement.',
+    category: CategoryEn.GEOPOLITICS,
+    dangerLevel: DangerLevelEn.HIGH,
+    popularity: 88,
+    originYear: '2022',
+    tags: ['Climate', 'Lockdown', 'Urban Planning', 'WEF'],
+    relatedIds: ['t20', 't64']
+  },
+  {
+    id: 't75',
+    title: 'NESARA / GESARA',
+    shortDescription: 'The hope for a secret law that forgives all debts and introduces a new financial system (often linked to BRICS/Gold Standard).',
+    category: CategoryEn.GEOPOLITICS,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 70,
+    originYear: '2000',
+    tags: ['Finance', 'Debt', 'Gold', 'Utopia'],
+    relatedIds: ['t7', 't5']
   }
 ];

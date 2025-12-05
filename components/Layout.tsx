@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback } from 'react';
 import { 
   LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, 
   GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, 
   Film, Database, WifiOff, Download, Power, Edit3,
-  Feather, Search as SearchIcon, Cpu, Wifi, Loader2, FileKey, Layers
+  Feather, Search as SearchIcon, Cpu, FileKey, RefreshCw
 } from 'lucide-react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { BeforeInstallPromptEvent, NavItem } from '../types';
@@ -38,6 +37,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
     useEffect(() => {
         const interval = setInterval(() => {
             setLatency(prev => {
+                // Simulate jitter
                 const noise = Math.floor(Math.random() * 6) - 3;
                 return Math.max(12, Math.min(60, prev + noise));
             });
@@ -45,7 +45,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
         return () => clearInterval(interval);
     }, []);
 
-    const handleReboot = () => window.location.reload();
+    const handleReboot = useCallback(() => window.location.reload(), []);
 
     return (
         <div className="p-4 border-t border-slate-800 bg-[#020617] relative z-10 pb-safe-bottom">
@@ -67,6 +67,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
                         onClick={handleReboot}
                         className="text-slate-600 hover:text-accent-cyan transition-colors p-2 rounded hover:bg-slate-900 active:scale-95 touch-manipulation"
                         title={t.layout.footer.reboot}
+                        aria-label="Reboot System"
                     >
                         <Power size={14} />
                     </button>
@@ -99,6 +100,8 @@ const ActiveFileIndicator: React.FC = React.memo(() => {
         <div 
             onClick={() => navigate(`/archive/${activeFileId}`)}
             className="mx-3 mt-2 mb-4 p-3 bg-slate-900/50 border border-slate-800 rounded-lg cursor-pointer hover:border-accent-cyan/50 hover:bg-slate-900 transition-all group active:scale-98"
+            role="button"
+            aria-label={`Open active file ${activeFileId}`}
         >
             <div className="flex items-center gap-2 mb-1.5">
                 <FileKey size={12} className="text-accent-cyan" />
@@ -149,50 +152,80 @@ export const Layout: React.FC = () => {
   const location = useLocation();
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<number | null>(null);
-  const savedScrollPosition = useAppSelector(state => state.ui.scrollPositions[location.pathname]);
   const isSearchOpen = useAppSelector(state => state.ui.isSearchOpen);
   const settings = useAppSelector(state => state.settings.config);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  
+  // Update State
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [wbRegistration, setWbRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
+  // Initial Sync
   useEffect(() => {
       dispatch(syncStaticData());
   }, [dispatch]);
 
+  // Service Worker Registration & Update Handling
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      // Ensure we register with relative path './sw.js' to match origin correctly
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          setWbRegistration(registration);
+          
+          // Check for waiting service worker (update ready)
+          if (registration.waiting) {
+            setUpdateAvailable(true);
+          }
+
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content is available; please refresh.
+                  setUpdateAvailable(true);
+                  dispatch(addLog({ message: 'System Update: Protocol patch detected.', type: 'info' }));
+                }
+              };
+            }
+          };
+        })
+        .catch(err => {
+          console.error('SW Registration failed:', err);
+        });
+        
+        // Listen for controller change (reload when new SW takes over)
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                window.location.reload();
+                refreshing = true;
+            }
+        });
+    }
+  }, [dispatch]);
+
+  const handleUpdateApp = useCallback(() => {
+    if (wbRegistration && wbRegistration.waiting) {
+        // Send message to SW to skip waiting
+        wbRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+        window.location.reload();
+    }
+  }, [wbRegistration]);
+
+  // Force Scroll to Top on Navigation (Overrides persistence for clean start)
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTo({
-            top: savedScrollPosition || 0,
-            left: 0,
-            behavior: 'auto'
-        });
+        // Immediate hard reset to top
+        scrollContainerRef.current.scrollTo(0, 0);
     }
   }, [location.pathname]); 
 
-  useEffect(() => {
-      const container = scrollContainerRef.current;
-      if (!container) return;
-
-      const handleScroll = () => {
-          if (scrollTimeoutRef.current !== null) {
-              window.clearTimeout(scrollTimeoutRef.current);
-          }
-          scrollTimeoutRef.current = window.setTimeout(() => {
-              dispatch(saveScrollPosition({ path: location.pathname, position: container.scrollTop }));
-          }, 300); 
-      };
-
-      container.addEventListener('scroll', handleScroll, { passive: true });
-      return () => {
-          container.removeEventListener('scroll', handleScroll);
-          if (scrollTimeoutRef.current !== null) {
-              window.clearTimeout(scrollTimeoutRef.current);
-          }
-      };
-  }, [location.pathname, dispatch]);
-
+  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -204,14 +237,22 @@ export const Layout: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [dispatch]);
 
+  // Navigation Effects
   useEffect(() => {
     dispatch(addLog({ message: `Nav: Route [${location.pathname}]`, type: 'info' }));
     setSidebarOpen(false);
   }, [location.pathname, dispatch]);
 
+  // Connectivity Listeners
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+        setIsOnline(true);
+        dispatch(addLog({ message: 'Network Uplink Restored', type: 'success' }));
+    };
+    const handleOffline = () => {
+        setIsOnline(false);
+        dispatch(addLog({ message: 'Network Uplink Lost. Switching to Offline Cache.', type: 'warning' }));
+    };
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -226,7 +267,7 @@ export const Layout: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
     };
-  }, []);
+  }, [dispatch]);
 
   const handleInstallClick = useCallback(() => {
     if (!installPrompt) return;
@@ -271,12 +312,26 @@ export const Layout: React.FC = () => {
       {/* Offline Banner */}
       {!isOnline && (
         <div className="fixed top-safe left-0 right-0 bg-red-900/90 backdrop-blur border-b border-red-500 text-white text-[10px] font-bold font-mono text-center py-1 z-[100] flex items-center justify-center gap-2">
-          <WifiOff size={10} /> OFFLINE MODE
+          <WifiOff size={10} /> OFFLINE MODE - CACHE ACTIVE
+        </div>
+      )}
+
+      {/* Update Available Banner */}
+      {updateAvailable && (
+        <div className="fixed top-safe left-0 right-0 bg-accent-cyan/90 backdrop-blur border-b border-accent-cyan text-slate-900 text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-3 animate-fade-in-up shadow-lg">
+          <RefreshCw size={12} className="animate-spin" /> 
+          <span>SYSTEM UPDATE AVAILABLE</span>
+          <button 
+            onClick={handleUpdateApp}
+            className="px-2 py-0.5 bg-slate-900 text-accent-cyan rounded hover:bg-slate-800 transition-colors uppercase border border-slate-700 hover:border-accent-cyan"
+          >
+            RELOAD
+          </button>
         </div>
       )}
 
       {/* Mobile Header */}
-      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-lg", !isOnline ? 'mt-6' : '')}>
+      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-lg transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
              <GlobeLock size={16} className="text-white" />
@@ -288,12 +343,14 @@ export const Layout: React.FC = () => {
             <button 
                 onClick={() => dispatch(setSearchOpen(true))}
                 className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
+                aria-label="Search"
             >
                 <SearchIcon size={20} />
             </button>
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)} 
               className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
+              aria-label={isSidebarOpen ? "Close Menu" : "Open Menu"}
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -307,6 +364,7 @@ export const Layout: React.FC = () => {
           isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
       />
 
       {/* Sidebar Navigation */}
@@ -316,7 +374,7 @@ export const Layout: React.FC = () => {
           "fixed inset-y-0 left-0 z-50 w-[280px] bg-[#020617] border-r border-slate-800 transform transition-transform duration-300 ease-out shadow-2xl md:shadow-none",
           "md:relative md:translate-x-0 md:w-64 md:z-0 flex flex-col pt-safe pb-safe",
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          !isOnline ? 'mt-6 md:mt-0' : ''
+          !isOnline || updateAvailable ? 'mt-8 md:mt-0' : ''
         )}
       >
         {/* Sidebar Header */}
@@ -327,7 +385,7 @@ export const Layout: React.FC = () => {
             </div>
             <div>
               <div className="font-bold font-display text-lg text-white tracking-tight leading-none">DISINFODESK</div>
-              <div className="text-[9px] font-mono text-slate-500 mt-1">v2.7.0 MODULAR</div>
+              <div className="text-[9px] font-mono text-slate-500 mt-1">v2.7.0 PWA</div>
             </div>
           </div>
           <div className="h-px w-full bg-slate-800" />
@@ -361,7 +419,8 @@ export const Layout: React.FC = () => {
             <div className="px-4 mt-4">
                <button 
                  onClick={handleInstallClick}
-                 className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95"
+                 className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95 shadow-md"
+                 aria-label="Install App"
                >
                  <Download size={16} className="text-accent-cyan" />
                  <div>
@@ -377,15 +436,10 @@ export const Layout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0", !isOnline ? 'mt-6' : '')} role="main">
+      <main className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')} role="main">
         <div 
             ref={scrollContainerRef}
-            // CRITICAL: overflow-x-hidden is removed or carefully managed. 
-            // In Tailwind, using "overflow-x-hidden" here can clip content if child elements (like tooltips or shadows) spill out.
-            // However, we want vertical scroll. overflow-y-auto is correct.
-            // overflow-x-hidden prevents body scroll, but if inner content is wider (e.g. text), it clips.
-            // Using "w-full" constrains width.
-            className="flex-1 overflow-y-auto relative z-10 custom-scrollbar overscroll-contain pb-[80px] md:pb-0"
+            className="flex-1 w-full overflow-y-auto relative z-10 custom-scrollbar overscroll-contain pb-[80px] md:pb-0"
         >
             <Suspense fallback={<ContentLoader />}>
               <Outlet />

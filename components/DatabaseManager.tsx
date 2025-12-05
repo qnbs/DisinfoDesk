@@ -52,7 +52,7 @@ const useVaultLogic = () => {
     
     const [activeTab, setActiveTab] = useState<Tab>('ANALYSES');
     const [data, setData] = useState<DatabaseRecord[]>([]);
-    const [stats, setStats] = useState<StorageStats>({ usageBytes: 0, recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0 }, totalRecords: 0 });
+    const [stats, setStats] = useState<StorageStats>({ usageBytes: 0, recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0, blob_storage: 0 }, totalRecords: 0, encrypted: true, compressionRatio: 0 });
     const [loading, setLoading] = useState(false);
     
     // Selection & Viewing
@@ -240,8 +240,8 @@ const DataBankSelector: React.FC = () => {
     const maxCount = Math.max(...(Object.values(stats.recordCounts) as number[]), 1);
 
     return (
-        <div className="flex flex-col gap-2 h-full p-4 border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl w-full md:w-64 shrink-0">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+        <div className="flex md:flex-col gap-2 p-2 md:p-4 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl w-full md:w-64 shrink-0 overflow-x-auto md:overflow-visible">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2 hidden md:flex">
                 <Server size={12} /> Data Banks
             </div>
             {banks.map(bank => {
@@ -254,7 +254,7 @@ const DataBankSelector: React.FC = () => {
                         key={bank.id}
                         onClick={() => handleTabChange(bank.id)}
                         className={`
-                            relative flex flex-col p-4 rounded-xl border transition-all duration-300 group overflow-hidden text-left
+                            relative flex flex-col p-3 md:p-4 rounded-xl border transition-all duration-300 group overflow-hidden text-left min-w-[100px] md:min-w-0 shrink-0
                             ${isActive 
                                 ? 'bg-slate-900 border-slate-600 shadow-lg' 
                                 : 'bg-slate-950/30 border-slate-800 hover:bg-slate-900 hover:border-slate-700'}
@@ -266,13 +266,13 @@ const DataBankSelector: React.FC = () => {
                             style={{ width: isActive ? '100%' : `${percent}%`, opacity: isActive ? 1 : 0.3 }}
                         />
                         
-                        <div className="flex items-center justify-between mb-2 relative z-10">
-                            <div className={`p-2 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-900 text-slate-500'}`}>
+                        <div className="flex flex-col md:flex-row items-center md:justify-between mb-1 md:mb-2 relative z-10 gap-1">
+                            <div className={`p-1.5 md:p-2 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-900 text-slate-500'}`}>
                                 <bank.icon size={16} />
                             </div>
-                            <span className="font-mono text-xs font-bold text-slate-400">{count}</span>
+                            <span className="font-mono text-[10px] md:text-xs font-bold text-slate-400">{count}</span>
                         </div>
-                        <div className={`text-xs font-bold uppercase tracking-wider relative z-10 ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                        <div className={`text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 text-center md:text-left ${isActive ? 'text-white' : 'text-slate-500'}`}>
                             {bank.label}
                         </div>
                         {isActive && <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none" />}
@@ -280,7 +280,7 @@ const DataBankSelector: React.FC = () => {
                 );
             })}
             
-            <div className="mt-auto pt-6 border-t border-slate-800">
+            <div className="mt-auto pt-6 border-t border-slate-800 hidden md:block">
                 <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800 flex items-center gap-3">
                     <ShieldCheck size={16} className="text-green-500" />
                     <div>
@@ -298,7 +298,7 @@ const HoloGrid: React.FC = () => {
     const { data, loading, selectedId, handleSelect, searchTerm, setSearchTerm, selectedIds, t } = useVault();
 
     if (loading) return (
-        <div className="flex-1 flex flex-col items-center justify-center text-accent-cyan gap-4">
+        <div className="flex-1 flex flex-col items-center justify-center text-accent-cyan gap-4 min-h-[300px]">
             <Scan size={48} className="animate-spin-slow" />
             <div className="text-xs font-mono uppercase tracking-[0.2em] animate-pulse">Decrypting Index...</div>
         </div>
@@ -404,7 +404,7 @@ const DeepInspector: React.FC = () => {
             <div className="md:hidden h-1 w-12 bg-slate-700 rounded-full mx-auto my-2" />
 
             {/* Header */}
-            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 pt-safe-top">
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div className="p-2 bg-accent-cyan/10 rounded text-accent-cyan border border-accent-cyan/20">
                         <Database size={16} />
@@ -420,6 +420,8 @@ const DeepInspector: React.FC = () => {
                     ) : (
                         <Button size="sm" variant="primary" onClick={handleSaveEdit} icon={<Save size={14}/>} />
                     )}
+                    {/* Add explicit close button for mobile overlay */}
+                    <Button size="sm" variant="ghost" onClick={() => window.history.back()} className="md:hidden" icon={<X size={14}/>} />
                 </div>
             </div>
 
@@ -440,7 +442,7 @@ const DeepInspector: React.FC = () => {
             </div>
 
             {/* Content Body */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative pb-safe-bottom">
                 {isDecrypting && (
                     <div className="absolute inset-0 z-20 bg-slate-950 flex flex-col items-center justify-center text-accent-cyan font-mono text-xs">
                         <Scan size={32} className="animate-spin mb-2" />
@@ -562,7 +564,7 @@ export const DatabaseManager: React.FC = () => {
         <VaultContext.Provider value={useVaultLogic()}>
             <PageFrame>
                 <VaultTelemetry />
-                <Card className="flex flex-col md:flex-row h-[calc(100vh-280px)] min-h-[600px] p-0 overflow-hidden bg-slate-950 border-slate-800 shadow-2xl mt-6 relative">
+                <Card className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-280px)] min-h-[600px] p-0 overflow-hidden bg-slate-950 border-slate-800 shadow-2xl mt-6 relative">
                     {/* Background Noise */}
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-5 pointer-events-none"></div>
                     

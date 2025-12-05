@@ -70,7 +70,7 @@ export const MODERN_MYTHS_THEORIES_DE: Theory[] = [
     originYear: '1969',
     tags: ['Musik', 'Beatles', 'Doppelgänger', 'Popkultur'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t4']
+    relatedIds: ['t4', 't63']
   },
   {
     id: 't31',
@@ -116,7 +116,7 @@ export const MODERN_MYTHS_THEORIES_DE: Theory[] = [
     popularity: 95,
     originYear: '1961 (Hill)',
     tags: ['Aliens', 'Entführung', 'UFO', 'Exobiologie'],
-    relatedIds: ['t17', 't13', 't3', 't41']
+    relatedIds: ['t17', 't13', 't3', 't41', 't40']
   },
   {
     id: 't41',
@@ -139,7 +139,7 @@ export const MODERN_MYTHS_THEORIES_DE: Theory[] = [
     originYear: '1955/1989',
     tags: ['Militär', 'Aliens', 'Technologie', 'Geheim'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t17', 't13', 't4']
+    relatedIds: ['t17', 't13', 't4', 'm2']
   },
   {
     id: 't44',
@@ -173,6 +173,50 @@ export const MODERN_MYTHS_THEORIES_DE: Theory[] = [
     originYear: '1908',
     tags: ['Russland', 'Explosion', 'Tesla', 'UFO'],
     relatedIds: ['t11', 't17']
+  },
+  {
+    id: 't61',
+    title: 'Dead Internet Theory',
+    shortDescription: 'Die Theorie, dass der Großteil des Internets bereits "tot" ist und nur noch Bots mit anderen Bots interagieren, um menschliche Aktivität vorzutäuschen.',
+    category: Category.MODERN_MYTHS,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 92,
+    originYear: '2016',
+    tags: ['Internet', 'KI', 'Bots', 'Manipulation'],
+    relatedIds: ['t22', 't6']
+  },
+  {
+    id: 't63',
+    title: 'Avril Lavigne Ersetzt',
+    shortDescription: 'Eine Popkultur-Legende, die besagt, die Sängerin Avril Lavigne sei 2003 gestorben und durch ein Double namens Melissa Vandella ersetzt worden.',
+    category: Category.MODERN_MYTHS,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 78,
+    originYear: '2011',
+    tags: ['Musik', 'Doppelgänger', 'Popkultur', 'Internet'],
+    relatedIds: ['t27']
+  },
+  {
+    id: 't72',
+    title: 'Walt Disney Kälteschlaf',
+    shortDescription: 'Die urbane Legende, dass Walt Disneys Körper (oder Kopf) kryonisch eingefroren unter der "Pirates of the Caribbean"-Attraktion liegt.',
+    category: Category.MODERN_MYTHS,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 85,
+    originYear: '1966',
+    tags: ['Disney', 'Kryonik', 'Hollywood', 'Tod'],
+    relatedIds: ['t30']
+  },
+  {
+    id: 't73',
+    title: 'Polybius (Arcade)',
+    shortDescription: 'Ein angebliches Arcade-Spiel aus den 80ern, das von der Regierung zur psychologischen Datenerhebung genutzt wurde und Halluzinationen verursachte.',
+    category: Category.MODERN_MYTHS,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 65,
+    originYear: '2000',
+    tags: ['Videospiele', 'CIA', 'Mind Control', 'Creepypasta'],
+    relatedIds: ['m10', 't15']
   }
 ];
 
@@ -243,7 +287,7 @@ export const MODERN_MYTHS_THEORIES_EN: Theory[] = [
     popularity: 85,
     originYear: '1969',
     tags: ['Music', 'Beatles', 'Look-alike', 'Pop Culture'],
-    relatedIds: ['t4']
+    relatedIds: ['t4', 't63']
   },
   {
     id: 't31',
@@ -287,7 +331,7 @@ export const MODERN_MYTHS_THEORIES_EN: Theory[] = [
     popularity: 95,
     originYear: '1961 (Hill)',
     tags: ['Aliens', 'Abduction', 'UFO', 'Exobiology'],
-    relatedIds: ['t17', 't13', 't3', 't41']
+    relatedIds: ['t17', 't13', 't3', 't41', 't40']
   },
   {
     id: 't41',
@@ -310,7 +354,7 @@ export const MODERN_MYTHS_THEORIES_EN: Theory[] = [
     originYear: '1955/1989',
     tags: ['Military', 'Aliens', 'Technology', 'Secret'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t17', 't13', 't4']
+    relatedIds: ['t17', 't13', 't4', 'm2']
   },
   {
     id: 't44',
@@ -344,5 +388,49 @@ export const MODERN_MYTHS_THEORIES_EN: Theory[] = [
     originYear: '1908',
     tags: ['Russia', 'Explosion', 'Tesla', 'UFO'],
     relatedIds: ['t11', 't17']
+  },
+  {
+    id: 't61',
+    title: 'Dead Internet Theory',
+    shortDescription: 'The theory that the vast majority of the internet is now "dead" and populated by bots talking to other bots to fake human engagement.',
+    category: CategoryEn.MODERN_MYTHS,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 92,
+    originYear: '2016',
+    tags: ['Internet', 'AI', 'Bots', 'Manipulation'],
+    relatedIds: ['t22', 't6']
+  },
+  {
+    id: 't63',
+    title: 'Avril Lavigne Replaced',
+    shortDescription: 'A pop culture urban legend claiming singer Avril Lavigne died in 2003 and was replaced by a look-alike named Melissa Vandella.',
+    category: CategoryEn.MODERN_MYTHS,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 78,
+    originYear: '2011',
+    tags: ['Music', 'Doppelganger', 'Pop Culture', 'Internet'],
+    relatedIds: ['t27']
+  },
+  {
+    id: 't72',
+    title: 'Walt Disney Cryogenics',
+    shortDescription: 'The urban legend that Walt Disney\'s body (or head) was cryogenically frozen and stored under the Pirates of the Caribbean ride.',
+    category: CategoryEn.MODERN_MYTHS,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 85,
+    originYear: '1966',
+    tags: ['Disney', 'Cryonics', 'Hollywood', 'Death'],
+    relatedIds: ['t30']
+  },
+  {
+    id: 't73',
+    title: 'Polybius (Arcade Game)',
+    shortDescription: 'An alleged arcade game from the 80s used by the government to collect psychological data, causing hallucinations and amnesia.',
+    category: CategoryEn.MODERN_MYTHS,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 65,
+    originYear: '2000',
+    tags: ['Video Games', 'CIA', 'Mind Control', 'Creepypasta'],
+    relatedIds: ['m10', 't15']
   }
 ];

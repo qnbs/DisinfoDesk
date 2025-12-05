@@ -12,7 +12,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '19. Jh (Wiederaufleben)',
     tags: ['NASA', 'Eiswand', 'Schwerkraft-Lüge'],
     videoUrl: 'https://www.youtube.com/watch?v=VNqNnUJVcVs',
-    relatedIds: ['t4', 't10']
+    relatedIds: ['t4', 't10', 't56']
   },
   {
     id: 't2',
@@ -24,7 +24,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '1996',
     tags: ['Geo-Engineering', 'Regierung', 'Gift'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t5', 't6', 't14', 't21']
+    relatedIds: ['t5', 't6', 't14', 't21', 't29']
   },
   {
     id: 't6',
@@ -35,7 +35,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     popularity: 60,
     originYear: '2019',
     tags: ['Technologie', 'Strahlung', 'Überwachung'],
-    relatedIds: ['t2', 't14']
+    relatedIds: ['t2', 't14', 't22']
   },
   {
     id: 't11',
@@ -47,7 +47,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '2000er (Hancock)',
     tags: ['Archäologie', 'Graham Hancock', 'Atlantis', 'Komet'],
     videoUrl: 'https://www.youtube.com/watch?v=l78s2s7xDwU',
-    relatedIds: ['t10', 't12', 't19', 't51']
+    relatedIds: ['t10', 't12', 't19', 't51', 't56']
   },
   {
     id: 't12',
@@ -59,7 +59,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '1970er',
     tags: ['Physik', 'Velikovsky', 'Plasma', 'Kosmologie'],
     videoUrl: 'https://www.youtube.com/watch?v=2g3Yc7g7gEw',
-    relatedIds: ['t11']
+    relatedIds: ['t11', 't50']
   },
   {
     id: 't19',
@@ -71,7 +71,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '1968 (Däniken)',
     tags: ['Aliens', 'Pyramiden', 'Erich von Däniken', 'Geschichte'],
     videoUrl: 'https://www.youtube.com/watch?v=k3t1q6Z7w7o',
-    relatedIds: ['t3', 't11', 't17', 't51']
+    relatedIds: ['t3', 't11', 't17', 't51', 't39']
   },
   {
     id: 't21',
@@ -95,7 +95,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '2001 (Buch)',
     tags: ['Physik', 'Waffe', 'Antike Technologie', 'Plasma', 'Farrell', 'Tesla'],
     videoUrl: '', 
-    relatedIds: ['t19', 't12', 't21', 't11', 't39']
+    relatedIds: ['t19', 't12', 't21', 't11', 't39', 't55']
   },
   {
     id: 't51',
@@ -106,7 +106,7 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     popularity: 98,
     originYear: '360 v. Chr.',
     tags: ['Archäologie', 'Platon', 'Zivilisation', 'Meer'],
-    relatedIds: ['t11', 't19', 't21', 't10']
+    relatedIds: ['t11', 't19', 't21', 't10', 't52']
   },
   {
     id: 't56',
@@ -118,6 +118,39 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     originYear: '1958 (Hapgood)',
     tags: ['Katastrophe', 'Geologie', 'Klima', 'Weltuntergang'],
     relatedIds: ['t1', 't11', 't28']
+  },
+  {
+    id: 't66',
+    title: 'Black Knight Satellit',
+    shortDescription: 'Ein mysteriöses Objekt im polaren Orbit, das angeblich seit 13.000 Jahren die Erde überwacht und außerirdischen Ursprungs ist.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 62,
+    originYear: '1950er',
+    tags: ['Aliens', 'Weltraum', 'Tesla', 'NASA'],
+    relatedIds: ['t17', 't19']
+  },
+  {
+    id: 't69',
+    title: 'Ley-Linien',
+    shortDescription: 'Hypothetische Ausrichtungen von antiken Monumenten und geografischen Merkmalen, die angeblich Bahnen von Erdenergie darstellen.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 58,
+    originYear: '1921',
+    tags: ['Energie', 'Erde', 'Geografie', 'Esoterik'],
+    relatedIds: ['t10', 't51']
+  },
+  {
+    id: 't76',
+    title: 'Wassergedächtnis',
+    shortDescription: 'Die pseudowissenschaftliche Idee, dass Wasser Informationen über Substanzen speichert, mit denen es in Kontakt war (Basis der Homöopathie).',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 72,
+    originYear: '1988 (Benveniste)',
+    tags: ['Chemie', 'Gesundheit', 'Homöopathie', 'Wasser'],
+    relatedIds: ['t29']
   }
 ];
 
@@ -132,7 +165,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '19th C (Revival)',
     tags: ['NASA', 'Ice Wall', 'Gravity Lie'],
     videoUrl: 'https://www.youtube.com/watch?v=VNqNnUJVcVs',
-    relatedIds: ['t4', 't10']
+    relatedIds: ['t4', 't10', 't56']
   },
   {
     id: 't2',
@@ -144,7 +177,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '1996',
     tags: ['Geo-Engineering', 'Government', 'Poison'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t5', 't6', 't14', 't21']
+    relatedIds: ['t5', 't6', 't14', 't21', 't29']
   },
   {
     id: 't6',
@@ -155,7 +188,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     popularity: 60,
     originYear: '2019',
     tags: ['Technology', 'Radiation', 'Surveillance'],
-    relatedIds: ['t2', 't14']
+    relatedIds: ['t2', 't14', 't22']
   },
   {
     id: 't11',
@@ -167,7 +200,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '2000s (Hancock)',
     tags: ['Archaeology', 'Graham Hancock', 'Atlantis', 'Comet'],
     videoUrl: 'https://www.youtube.com/watch?v=l78s2s7xDwU',
-    relatedIds: ['t10', 't12', 't19', 't51']
+    relatedIds: ['t10', 't12', 't19', 't51', 't56']
   },
   {
     id: 't12',
@@ -179,7 +212,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '1970s',
     tags: ['Physics', 'Velikovsky', 'Plasma', 'Cosmology'],
     videoUrl: 'https://www.youtube.com/watch?v=2g3Yc7g7gEw',
-    relatedIds: ['t11']
+    relatedIds: ['t11', 't50']
   },
   {
     id: 't19',
@@ -191,7 +224,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '1968 (Däniken)',
     tags: ['Aliens', 'Pyramids', 'Erich von Däniken', 'History'],
     videoUrl: 'https://www.youtube.com/watch?v=k3t1q6Z7w7o',
-    relatedIds: ['t3', 't11', 't17', 't51']
+    relatedIds: ['t3', 't11', 't17', 't51', 't39']
   },
   {
     id: 't21',
@@ -215,7 +248,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '2001 (Book)',
     tags: ['Physics', 'Weapon', 'Ancient Tech', 'Plasma', 'Farrell'],
     videoUrl: '', 
-    relatedIds: ['t19', 't12', 't21', 't11', 't39']
+    relatedIds: ['t19', 't12', 't21', 't11', 't39', 't55']
   },
   {
     id: 't51',
@@ -226,7 +259,7 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     popularity: 98,
     originYear: '360 BC',
     tags: ['Archaeology', 'Plato', 'Civilization', 'Ocean'],
-    relatedIds: ['t11', 't19', 't21', 't10']
+    relatedIds: ['t11', 't19', 't21', 't10', 't52']
   },
   {
     id: 't56',
@@ -238,5 +271,38 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     originYear: '1958 (Hapgood)',
     tags: ['Cataclysm', 'Geology', 'Climate', 'Doomsday'],
     relatedIds: ['t1', 't11', 't28']
+  },
+  {
+    id: 't66',
+    title: 'Black Knight Satellite',
+    shortDescription: 'A mysterious object in polar orbit allegedly monitoring Earth for 13,000 years, claimed to be of extraterrestrial origin.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 62,
+    originYear: '1950s',
+    tags: ['Aliens', 'Space', 'Tesla', 'NASA'],
+    relatedIds: ['t17', 't19']
+  },
+  {
+    id: 't69',
+    title: 'Ley Lines',
+    shortDescription: 'Hypothetical alignments of ancient monuments and geographical features believed to represent paths of earth energy.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 58,
+    originYear: '1921',
+    tags: ['Energy', 'Earth', 'Geography', 'Esoteric'],
+    relatedIds: ['t10', 't51']
+  },
+  {
+    id: 't76',
+    title: 'Water Memory',
+    shortDescription: 'The pseudoscience idea that water retains a "memory" of substances previously dissolved in it (basis of homeopathy).',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 72,
+    originYear: '1988 (Benveniste)',
+    tags: ['Chemistry', 'Health', 'Homeopathy', 'Water'],
+    relatedIds: ['t29']
   }
 ];

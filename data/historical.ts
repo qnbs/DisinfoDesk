@@ -12,7 +12,7 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     originYear: '1974',
     tags: ['NASA', 'Kalter Krieg', 'Filmstudio'],
     videoUrl: 'https://www.youtube.com/watch?v=KpuKuqc_DNc',
-    relatedIds: ['t1', 't16']
+    relatedIds: ['t1', 't16', 'm7']
   },
   {
     id: 't16',
@@ -24,7 +24,7 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     originYear: '1963',
     tags: ['CIA', 'Deep State', 'Kalter Krieg', 'Grassy Knoll'],
     videoUrl: 'https://www.youtube.com/watch?v=hZ0XJ_V-gDw',
-    relatedIds: ['t5', 't7', 't18']
+    relatedIds: ['t5', 't7', 't18', 'm6']
   },
   {
     id: 't24',
@@ -46,7 +46,7 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     popularity: 45,
     originYear: '1996 (Illig)',
     tags: ['Geschichte', 'Kalender', 'Mittelalter', 'Zeit'],
-    relatedIds: ['t11']
+    relatedIds: ['t11', 't49']
   },
   {
     id: 't34',
@@ -68,7 +68,7 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     popularity: 40,
     originYear: '16. Jh',
     tags: ['Religion', 'Kirche', 'Vatikan', 'Macht'],
-    relatedIds: ['t34', 't5']
+    relatedIds: ['t34', 't5', 'm18']
   },
   {
     id: 't45',
@@ -90,7 +90,7 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     popularity: 60,
     originYear: '2016 (Revival)',
     tags: ['Architektur', 'Revisionismus', 'Geschichte', 'Internet'],
-    relatedIds: ['t26', 't11']
+    relatedIds: ['t26', 't11', 't69']
   },
   {
     id: 't53',
@@ -112,7 +112,40 @@ export const HISTORICAL_THEORIES_DE: Theory[] = [
     popularity: 89,
     originYear: '1312',
     tags: ['Geheimbund', 'Religion', 'Mittelalter', 'Schatz'],
-    relatedIds: ['t34', 't35', 't11']
+    relatedIds: ['t34', 't35', 't11', 'm17']
+  },
+  {
+    id: 't60',
+    title: 'Shakespeare-Autorschaft',
+    shortDescription: 'Die Theorie, dass William Shakespeare aus Stratford nicht der wahre Autor seiner Werke war, sondern Francis Bacon oder Edward de Vere.',
+    category: Category.HISTORICAL,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 55,
+    originYear: '19. Jh',
+    tags: ['Literatur', 'Bacon', 'Geschichte', 'Code'],
+    relatedIds: ['t34']
+  },
+  {
+    id: 't67',
+    title: 'Lost Cosmonauts',
+    shortDescription: 'Die UdSSR soll vor Yuri Gagarin bereits Menschen ins All geschickt haben, die dort starben und aus den Geschichtsbüchern getilgt wurden.',
+    category: Category.HISTORICAL,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 65,
+    originYear: '1960er',
+    tags: ['Raumfahrt', 'Sowjetunion', 'Kalter Krieg', 'Funk'],
+    relatedIds: ['t4', 't13']
+  },
+  {
+    id: 't71',
+    title: 'Pearl Harbor Vorwissen',
+    shortDescription: 'Die US-Regierung unter FDR wusste angeblich vom japanischen Angriff und ließ ihn geschehen, um in den 2. Weltkrieg einzutreten.',
+    category: Category.HISTORICAL,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 78,
+    originYear: '1941',
+    tags: ['Krieg', 'False Flag', 'USA', 'Militär'],
+    relatedIds: ['t18', 't16']
   }
 ];
 
@@ -127,7 +160,7 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     originYear: '1974',
     tags: ['NASA', 'Cold War', 'Studio'],
     videoUrl: 'https://www.youtube.com/watch?v=KpuKuqc_DNc',
-    relatedIds: ['t1', 't16']
+    relatedIds: ['t1', 't16', 'm7']
   },
   {
     id: 't16',
@@ -139,7 +172,7 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     originYear: '1963',
     tags: ['CIA', 'Deep State', 'Cold War', 'Grassy Knoll'],
     videoUrl: 'https://www.youtube.com/watch?v=hZ0XJ_V-gDw',
-    relatedIds: ['t5', 't7', 't18']
+    relatedIds: ['t5', 't7', 't18', 'm6']
   },
   {
     id: 't24',
@@ -161,7 +194,7 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     popularity: 45,
     originYear: '1996 (Illig)',
     tags: ['History', 'Calendar', 'Middle Ages', 'Time'],
-    relatedIds: ['t11']
+    relatedIds: ['t11', 't49']
   },
   {
     id: 't34',
@@ -183,7 +216,7 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     popularity: 40,
     originYear: '16th C',
     tags: ['Religion', 'Church', 'Vatican', 'Power'],
-    relatedIds: ['t34', 't5']
+    relatedIds: ['t34', 't5', 'm18']
   },
   {
     id: 't45',
@@ -205,7 +238,7 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     popularity: 60,
     originYear: '2016 (Revival)',
     tags: ['Architecture', 'Revisionism', 'History', 'Internet'],
-    relatedIds: ['t26', 't11']
+    relatedIds: ['t26', 't11', 't69']
   },
   {
     id: 't53',
@@ -227,6 +260,39 @@ export const HISTORICAL_THEORIES_EN: Theory[] = [
     popularity: 89,
     originYear: '1312',
     tags: ['Secret Society', 'Religion', 'Middle Ages', 'Treasure'],
-    relatedIds: ['t34', 't35', 't11']
+    relatedIds: ['t34', 't35', 't11', 'm17']
+  },
+  {
+    id: 't60',
+    title: 'Shakespeare Authorship',
+    shortDescription: 'The theory that William Shakespeare of Stratford was not the true author of the works, but rather Francis Bacon or Edward de Vere.',
+    category: CategoryEn.HISTORICAL,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 55,
+    originYear: '19th C',
+    tags: ['Literature', 'Bacon', 'History', 'Code'],
+    relatedIds: ['t34']
+  },
+  {
+    id: 't67',
+    title: 'Lost Cosmonauts',
+    shortDescription: 'The USSR allegedly launched humans into space before Yuri Gagarin, who died in orbit and were erased from history records.',
+    category: CategoryEn.HISTORICAL,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 65,
+    originYear: '1960s',
+    tags: ['Space', 'USSR', 'Cold War', 'Radio'],
+    relatedIds: ['t4', 't13']
+  },
+  {
+    id: 't71',
+    title: 'Pearl Harbor Advance Knowledge',
+    shortDescription: 'The US government under FDR allegedly knew about the Japanese attack and let it happen to justify entering WWII.',
+    category: CategoryEn.HISTORICAL,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 78,
+    originYear: '1941',
+    tags: ['War', 'False Flag', 'USA', 'Military'],
+    relatedIds: ['t18', 't16']
   }
 ];

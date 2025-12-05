@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, LiveSession, LiveServerMessage, Modality } from "@google/genai";
 import { Theory, TheoryDetail, Language, SatireResponse, SourceItem, GroundingChunk, MediaItem, MediaAnalysisResponse, SatireOptions, RawTheoryAnalysisJSON } from '../types';
 import { dbService } from './dbService';
@@ -23,18 +24,19 @@ const getAiClient = () => {
 const cleanJsonOutput = (text: string): string => {
   if (!text) return "{}";
   
-  // 1. Remove Markdown code blocks if present
+  // 1. Remove Markdown code blocks if present (```json ... ```)
   let cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
   
   // 2. Find the first '{' and last '}' to strip preamble/postscript
   const firstBrace = cleaned.indexOf('{');
   const lastBrace = cleaned.lastIndexOf('}');
   
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace >= firstBrace) {
       cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
 
   // 3. Remove control characters that break JSON.parse
+  // Also handles potentially escaped newlines that confuse the parser
   cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
   
   return cleaned;
@@ -80,6 +82,7 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     const isThinkingModel = model.includes('2.5') || model.includes('3-pro');
     
     // Dynamic thinking budget based on user settings, default to higher for deep debunking
+    // IMPORTANT: thinkingBudget allows models to "reason" before answering.
     const thinkingConfig = isThinkingModel 
         ? { thinkingConfig: { thinkingBudget: configOverride?.thinkingBudget || 1024 } }
         : {};
@@ -480,9 +483,7 @@ export const streamChatWithSkeptic = async function* (history: string[], message
 
     if (!chatSession) {
         currentChatModel = modelName;
-        // Map simplified string history back to Content objects if needed, 
-        // but typically history should be managed by the Chat object itself for multi-turn.
-        // However, to support persistent Redux history across reloads, we re-hydrate here.
+        // Map simplified string history back to Content objects
         const historyContent = history.map((msg, i) => ({
             role: i % 2 === 0 ? 'user' : 'model',
             parts: [{ text: msg }],

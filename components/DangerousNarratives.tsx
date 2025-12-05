@@ -35,26 +35,21 @@ const getDangerScore = (level: string): number => {
 // TACTICAL GLOBE: A rotating wireframe globe rendered on Canvas
 const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const requestRef = useRef<number>(0);
     
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const container = containerRef.current;
+        if (!canvas || !container) return;
+
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let width = canvas.offsetWidth;
-        let height = canvas.offsetHeight;
-        
-        // Handle Retina displays
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.scale(dpr, dpr);
-
         let rotation = 0;
-        const dots: {lat: number, lon: number, size: number, color: string}[] = [];
-
+        
         // Generate random "threat nodes"
+        const dots: {lat: number, lon: number, size: number, color: string}[] = [];
         for(let i=0; i<activeNodes + 20; i++) {
             dots.push({
                 lat: (Math.random() - 0.5) * Math.PI,
@@ -65,6 +60,22 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
         }
 
         const render = () => {
+            if (!container || !canvas || !ctx) return;
+
+            // Robust Resize Handling
+            const { width, height } = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Only update width/height if dimensions changed to avoid excessive reflow
+            if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                // Important: CSS size must match display size
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                ctx.scale(dpr, dpr);
+            }
+
             ctx.clearRect(0, 0, width, height);
             
             const cx = width / 2;
@@ -94,7 +105,7 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
                     // Guard against negative radius from float precision errors or extreme projection
                     ctx.arc(x2d, y2d, Math.max(0, dot.size * scale), 0, Math.PI * 2);
                     ctx.fillStyle = dot.color;
-                    ctx.globalAlpha = alpha;
+                    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
                     ctx.fill();
                     
                     // Connection lines to center if high threat (red)
@@ -127,43 +138,59 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
             ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)';
             ctx.stroke();
 
-            requestAnimationFrame(render);
+            requestRef.current = requestAnimationFrame(render);
         };
-        const frame = requestAnimationFrame(render);
-        return () => cancelAnimationFrame(frame);
+
+        // Initialize ResizeObserver to keep canvas sharp on layout changes
+        const observer = new ResizeObserver(() => {
+            // Re-trigger is implicit via rAF loop reading dimensions
+        });
+        observer.observe(container);
+
+        requestRef.current = requestAnimationFrame(render);
+
+        return () => {
+            observer.disconnect();
+            cancelAnimationFrame(requestRef.current);
+        };
     }, [activeNodes]);
 
-    return <canvas ref={canvasRef} className="w-full h-full" />;
+    return (
+        <div ref={containerRef} className="w-full h-full relative min-h-[300px]">
+            <canvas ref={canvasRef} className="block" />
+        </div>
+    );
 };
 
 // LIVE INTERCEPT TERMINAL
 const LiveInterceptFeed: React.FC = () => {
+    const { t } = useLanguage();
     const [lines, setLines] = useState<string[]>([]);
     const codes = ["X-99", "ALPHA", "OMEGA", "ZERO", "NEMESIS"];
     const regions = ["NORAM", "EMEA", "APAC", "LATAM"];
 
     useEffect(() => {
         const interval = setInterval(() => {
-            const timestamp = new Date().toLocaleTimeString('de-DE', {hour12: false}) + "." + Math.floor(Math.random()*999);
+            const timestamp = new Date().toLocaleTimeString(undefined, {hour12: false}) + "." + Math.floor(Math.random()*999);
             const region = regions[Math.floor(Math.random() * regions.length)];
             const code = codes[Math.floor(Math.random() * codes.length)];
             const size = Math.floor(Math.random() * 5000) + "TB";
             
-            const newLine = `[${timestamp}] SRC:${region} // PKT:${code} >> SIZE:${size} [INTERCEPTED]`;
+            const newLine = `[${timestamp}] SRC:${region} // PKT:${code} >> SIZE:${size} [${t.dangerPage.charts.intercepted}]`;
             
             setLines(prev => [newLine, ...prev].slice(0, 12));
         }, 800);
         return () => clearInterval(interval);
-    }, []);
+    }, [t]);
 
     return (
-        <div className="h-full bg-black/80 font-mono text-[10px] p-4 overflow-hidden border border-slate-800 rounded-lg relative">
+        <div className="h-full bg-black/80 font-mono text-[10px] p-4 overflow-hidden border border-slate-800 rounded-lg relative min-h-[160px]">
             <div className="absolute inset-0 bg-repeat opacity-5 pointer-events-none" style={{ backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(32, 255, 77, .1) 25%, rgba(32, 255, 77, .1) 26%, transparent 27%, transparent 74%, rgba(32, 255, 77, .1) 75%, rgba(32, 255, 77, .1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(32, 255, 77, .1) 25%, rgba(32, 255, 77, .1) 26%, transparent 27%, transparent 74%, rgba(32, 255, 77, .1) 75%, rgba(32, 255, 77, .1) 76%, transparent 77%, transparent)' }}></div>
-            <div className="flex items-center justify-between mb-2 text-slate-500 border-b border-slate-800 pb-1">
-                <span className="flex items-center gap-2"><Wifi size={10} className="animate-pulse text-green-500"/> DATA_STREAM</span>
-                <span>ENCRYPTED_LVL_5</span>
+            <div className="flex items-center justify-between mb-2 text-slate-500 border-b border-slate-800 pb-1 relative z-10">
+                <span className="flex items-center gap-2"><Wifi size={10} className="animate-pulse text-green-500"/> {t.dangerPage.charts.feedTitle}</span>
+                <span>{t.dangerPage.charts.encrypted}</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 relative z-10">
                 {lines.map((l, i) => (
                     <div key={i} className={`truncate ${i === 0 ? 'text-white font-bold' : 'text-slate-500 opacity-60'}`}>
                         {l}
@@ -196,22 +223,26 @@ const useDangerousNarrativesLogic = () => {
   // Dynamic Radar Data
   const radarData = useMemo(() => {
       const vectors = {
-          'Destabilization': 0, 
-          'Bio-Security': 0,    
-          'Revisionism': 0,     
-          'Cognitive': 0,       
-          'Social': 0,          
+          [t.dangerPage.vectors.destabilization]: 0, 
+          [t.dangerPage.vectors.biosecurity]: 0,    
+          [t.dangerPage.vectors.revisionism]: 0,     
+          [t.dangerPage.vectors.cognitive]: 0,       
+          [t.dangerPage.vectors.social]: 0,          
       };
+
+      // Map categories to these keys
+      const mapCat = (cat: string): string => {
+          if (cat.includes('Geo') || cat.includes('Polit')) return t.dangerPage.vectors.destabilization;
+          if (cat.includes('Health') || cat.includes('Gesund')) return t.dangerPage.vectors.biosecurity;
+          if (cat.includes('Hist')) return t.dangerPage.vectors.revisionism;
+          if (cat.includes('Pseudo') || cat.includes('Esot')) return t.dangerPage.vectors.cognitive;
+          return t.dangerPage.vectors.social;
+      }
 
       dangerousTheories.forEach(t => {
           const score = t.popularity * getDangerScore(t.dangerLevel);
-          const cat = t.category;
-          
-          if (cat.includes('Geo') || cat.includes('Polit')) vectors['Destabilization'] += score;
-          else if (cat.includes('Health') || cat.includes('Gesund')) vectors['Bio-Security'] += score;
-          else if (cat.includes('Hist')) vectors['Revisionism'] += score;
-          else if (cat.includes('Pseudo') || cat.includes('Esot')) vectors['Cognitive'] += score;
-          else vectors['Social'] += score;
+          const key = mapCat(t.category);
+          if (vectors[key] !== undefined) vectors[key] += score;
       });
 
       const maxVal = Math.max(...Object.values(vectors), 100); 
@@ -221,7 +252,7 @@ const useDangerousNarrativesLogic = () => {
           value: Math.min(100, (val / maxVal) * 100),
           fullMark: 100
       }));
-  }, [dangerousTheories]);
+  }, [dangerousTheories, t]);
 
   const chartData = useMemo(() => {
     return dangerousTheories.map(t => ({
@@ -289,7 +320,7 @@ const useDangerousNarratives = () => {
 // --- 3. SUB-COMPONENTS ---
 
 const ThreatMatrixChart: React.FC = () => {
-  const { chartData, setHoveredId } = useDangerousNarratives();
+  const { chartData, setHoveredId, t } = useDangerousNarratives();
   return (
     <Card className="h-[300px] w-full bg-slate-900/50 border-red-900/30 p-4 relative overflow-hidden flex flex-col backdrop-blur-md">
       <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-red-500 animate-pulse">
@@ -297,7 +328,7 @@ const ThreatMatrixChart: React.FC = () => {
       </div>
       <div className="flex justify-between items-center mb-2 border-b border-red-900/20 pb-2">
           <div className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-2">
-              <BarChart2 size={12} /> Severity Scatter
+              <BarChart2 size={12} /> {t.dangerPage.charts.scatterTitle}
           </div>
           <div className="flex gap-2">
              <Badge label="Live Feed" className="bg-red-950/50 text-red-500 border-red-900 animate-pulse" />
@@ -309,7 +340,7 @@ const ThreatMatrixChart: React.FC = () => {
             <XAxis 
                 type="number" 
                 dataKey="popularity" 
-                name="Virality" 
+                name={t.dangerPage.charts.scatterX} 
                 unit="%" 
                 stroke="#64748b" 
                 tick={{fontSize: 9, fontFamily: 'monospace', fill: '#64748b'}}
@@ -319,7 +350,7 @@ const ThreatMatrixChart: React.FC = () => {
             <YAxis 
                 type="number" 
                 dataKey="severity" 
-                name="Severity" 
+                name={t.dangerPage.charts.scatterY} 
                 domain={[0, 5]} 
                 stroke="#64748b"
                 tick={{fontSize: 9, fontFamily: 'monospace', fill: '#64748b'}}
@@ -338,8 +369,8 @@ const ThreatMatrixChart: React.FC = () => {
                         <div className="text-white font-bold text-xs mb-1 uppercase tracking-wide">{d.title}</div>
                         <div className="w-full h-px bg-red-900/50 my-1"></div>
                         <div className="text-[10px] text-slate-400 font-mono">
-                           <span className="text-accent-cyan">VIRAL:</span> {d.popularity}%<br/>
-                           <span className="text-red-500">THREAT:</span> {d.severity}/4
+                           <span className="text-accent-cyan">{t.dangerPage.charts.scatterX.toUpperCase()}:</span> {d.popularity}%<br/>
+                           <span className="text-red-500">{t.dangerPage.charts.scatterY.toUpperCase()}:</span> {d.severity}/4
                         </div>
                     </div>
                     );
@@ -367,12 +398,12 @@ const ThreatMatrixChart: React.FC = () => {
 };
 
 const ImpactVectorRadar: React.FC = () => {
-    const { radarData } = useDangerousNarratives();
+    const { radarData, t } = useDangerousNarratives();
     return (
-        <Card className="h-[300px] w-full bg-slate-900/50 border-red-900/30 p-4 relative overflow-hidden flex flex-col backdrop-blur-md">
+        <Card className="h-full min-h-[300px] w-full bg-slate-900/50 border-red-900/30 p-4 relative overflow-hidden flex flex-col backdrop-blur-md">
             <div className="flex justify-between items-center mb-2 border-b border-red-900/20 pb-2">
                 <div className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-2">
-                    <Radar size={12} /> Impact Analysis
+                    <Radar size={12} /> {t.dangerPage.charts.radarTitle}
                 </div>
             </div>
             <div className="w-full relative flex-1">
@@ -415,11 +446,11 @@ const DefconStatus: React.FC = () => {
     const style = colors[activeDefcon as keyof typeof colors];
 
     return (
-        <Card className={`h-full flex flex-col items-center justify-center p-6 border-2 ${style.border} ${style.bg} relative overflow-hidden`}>
+        <Card className={`h-full flex flex-col items-center justify-center p-6 border-2 ${style.border} ${style.bg} relative overflow-hidden min-h-[160px]`}>
             {/* Blinking Background for DEFCON 1 */}
             {activeDefcon === 1 && <div className="absolute inset-0 bg-red-900/20 animate-pulse pointer-events-none"></div>}
             
-            <div className={`text-[10px] uppercase font-bold tracking-[0.3em] mb-2 opacity-80 ${style.text}`}>Global Threat Level</div>
+            <div className={`text-[10px] uppercase font-bold tracking-[0.3em] mb-2 opacity-80 ${style.text}`}>{t.dangerPage.defcon}</div>
             <div className={`text-7xl font-black tracking-tighter font-display ${style.text} drop-shadow-2xl`}>
                 {activeDefcon}
             </div>
@@ -476,17 +507,17 @@ const TacticalDossierList: React.FC = () => {
                             </div>
 
                             {/* Action Area */}
-                            <div className="bg-slate-950/50 border-l border-slate-800 p-3 flex items-center gap-2 justify-end min-w-[140px]">
+                            <div className="bg-slate-900/50 border-l border-slate-800 p-3 flex items-center gap-2 justify-end min-w-[140px]">
                                 {isDeploying ? (
                                     <div className="flex items-center gap-2 text-green-400 text-[10px] font-bold font-mono animate-pulse uppercase">
-                                        <Terminal size={12} /> Deploying...
+                                        <Terminal size={12} /> {t.dangerPage.actions.deploying}
                                     </div>
                                 ) : (
                                     <>
                                         <button 
                                             onClick={() => onNavigateTo(theory.id)}
                                             className="p-2 rounded hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
-                                            title="View Dossier"
+                                            title={t.dangerPage.actions.view}
                                         >
                                             <Microscope size={16} />
                                         </button>
@@ -494,7 +525,7 @@ const TacticalDossierList: React.FC = () => {
                                             onClick={() => onInitiateContainment(theory)}
                                             className="flex items-center gap-1 px-3 py-1.5 bg-red-900/20 hover:bg-red-600 border border-red-900/50 hover:border-red-500 text-red-400 hover:text-white rounded text-[10px] font-bold uppercase tracking-wider transition-all shadow-lg shadow-red-900/10 hover:shadow-red-600/20"
                                         >
-                                            <ShieldAlert size={12} /> Counter
+                                            <ShieldAlert size={12} /> {t.dangerPage.actions.counter}
                                         </button>
                                     </>
                                 )}
@@ -516,10 +547,10 @@ export const DangerousNarratives: React.FC = () => {
       <DangerousNarrativesContext.Provider value={logic}>
         <PageFrame>
           <PageHeader 
-            title="PROTOCOL OMEGA"
-            subtitle="THREAT ASSESSMENT & CONTAINMENT"
+            title={logic.t.dangerPage.title}
+            subtitle={logic.t.dangerPage.subtitle}
             icon={Siren}
-            status="CRITICAL"
+            status={logic.t.dangerPage.status}
             statusColor="bg-red-600"
             visualizerState="ALERT"
             actions={
@@ -529,26 +560,28 @@ export const DangerousNarratives: React.FC = () => {
             }
           />
           
-          {/* Top Row: Visualizations */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 h-auto lg:h-[320px]">
+          {/* Top Row: Visualizations - Robust Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
              {/* Defcon & Feed */}
-             <div className="lg:col-span-1 flex flex-col gap-4 h-full">
-                <div className="flex-1 min-h-[140px]"><DefconStatus /></div>
-                <div className="flex-1 min-h-[140px]"><LiveInterceptFeed /></div>
+             <div className="flex flex-col gap-6 h-full min-h-[340px]">
+                <div className="flex-1 min-h-[160px]"><DefconStatus /></div>
+                <div className="flex-1 min-h-[160px]"><LiveInterceptFeed /></div>
              </div>
 
              {/* 3D Globe */}
-             <Card className="lg:col-span-2 p-0 bg-slate-950 border-slate-800 relative overflow-hidden group min-h-[300px]">
-                <div className="absolute top-4 left-4 z-10 bg-slate-900/80 backdrop-blur px-2 py-1 rounded border border-slate-700 text-[10px] font-mono text-accent-cyan flex items-center gap-2">
-                    <GlobeIcon size={12} className="animate-spin-slow" /> GLOBAL_THREAT_MAP_V2
-                </div>
-                <TacticalGlobe activeNodes={logic.dangerousTheories.length} />
-                {/* Decorative Grid Overlay */}
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
-             </Card>
+             <div className="md:col-span-2 relative min-h-[340px] h-full">
+                <Card className="w-full h-full p-0 bg-slate-950 border-slate-800 relative overflow-hidden group">
+                    <div className="absolute top-4 left-4 z-10 bg-slate-900/80 backdrop-blur px-2 py-1 rounded border border-slate-700 text-[10px] font-mono text-accent-cyan flex items-center gap-2">
+                        <GlobeIcon size={12} className="animate-spin-slow" /> {logic.t.dangerPage.charts.globeLabel}
+                    </div>
+                    <TacticalGlobe activeNodes={logic.dangerousTheories.length} />
+                    {/* Decorative Grid Overlay */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+                </Card>
+             </div>
 
              {/* Radar */}
-             <div className="lg:col-span-1 h-full min-h-[300px]">
+             <div className="h-full min-h-[340px]">
                 <ImpactVectorRadar />
              </div>
           </div>
@@ -565,9 +598,9 @@ export const DangerousNarratives: React.FC = () => {
                 <div className="p-4 rounded-lg bg-red-950/20 border border-red-900/50 flex gap-4 items-start">
                     <AlertOctagon className="text-red-500 shrink-0 mt-1" size={24} />
                     <div>
-                        <h4 className="text-sm font-bold text-red-400 uppercase tracking-wider mb-1">Advisory Notice</h4>
+                        <h4 className="text-sm font-bold text-red-400 uppercase tracking-wider mb-1">{logic.t.dangerPage.advisory.title}</h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            High-level memetic pathogens detected. Engagement without activated cognitive shielding is not recommended. Use AI containment protocols.
+                            {logic.t.dangerPage.advisory.text}
                         </p>
                     </div>
                 </div>

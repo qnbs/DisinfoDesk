@@ -1,81 +1,114 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
 if (workbox) {
-  console.log(`[DisinfoDesk] Workbox is loaded`);
+    console.log(`[DisinfoDesk] Workbox Core loaded. PWA Protocol initiated.`);
 
-  // 1. Cache External CDNs (React, Tailwind, Lucide, GenAI)
-  // Strategy: StaleWhileRevalidate - Fast render, background update
-  workbox.routing.registerRoute(
-    ({url}) => url.origin === 'https://cdn.tailwindcss.com' || url.origin === 'https://aistudiocdn.com',
-    new workbox.strategies.StaleWhileRevalidate({
-      cacheName: 'cdn-libraries',
-      plugins: [
-        new workbox.cacheableResponse.CacheableResponsePlugin({
-          statuses: [0, 200],
-        }),
-      ],
-    })
-  );
+    // --- CONFIGURATION ---
+    workbox.setConfig({ debug: false });
+    
+    // Force immediate takeover of the page once installed
+    // This allows the app to control the page immediately without a reload
+    self.skipWaiting();
+    workbox.core.clientsClaim();
 
-  // 2. Cache Google Fonts
-  // Strategy: CacheFirst - Fonts rarely change
-  workbox.routing.registerRoute(
-    ({url}) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
-    new workbox.strategies.CacheFirst({
-      cacheName: 'google-fonts',
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 30,
-          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-        }),
-      ],
-    })
-  );
+    // --- CONSTANTS ---
+    const CACHE_PREFIX = 'disinfodesk-cache';
+    const CACHE_SUFFIX = 'v4'; // Increment this to force cache purge on update
 
-  // 3. Cache Local Code (.tsx, .ts, .html) for this specific Dev Environment
-  // Strategy: NetworkFirst - We want the latest code updates, but fallback to cache if offline.
-  // Note: In a production build, this would be Pre-caching.
-  workbox.routing.registerRoute(
-    ({request, url}) => 
-      request.destination === 'document' || 
-      request.destination === 'script' ||
-      url.pathname.endsWith('.tsx') ||
-      url.pathname.endsWith('.ts'),
-    new workbox.strategies.NetworkFirst({
-      cacheName: 'app-code',
-      networkTimeoutSeconds: 3,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50,
-        }),
-      ],
-    })
-  );
+    // --- 1. STRATEGIES ---
 
-  // 4. Cache Images
-  // Strategy: CacheFirst
-  workbox.routing.registerRoute(
-    ({request}) => request.destination === 'image',
-    new workbox.strategies.CacheFirst({
-      cacheName: 'images',
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 60,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
-        }),
-      ],
-    })
-  );
+    // IMAGES: Cache First (Serve from cache, update only if missing/expired)
+    // Keep up to 60 images for 30 days.
+    workbox.routing.registerRoute(
+        ({request}) => request.destination === 'image',
+        new workbox.strategies.CacheFirst({
+            cacheName: `${CACHE_PREFIX}-images-${CACHE_SUFFIX}`,
+            plugins: [
+                new workbox.expiration.ExpirationPlugin({
+                    maxEntries: 60,
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                    purgeOnQuotaError: true,
+                }),
+            ],
+        })
+    );
+
+    // FONTS: Cache First (Google Fonts & Static)
+    workbox.routing.registerRoute(
+        ({url}) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
+        new workbox.strategies.CacheFirst({
+            cacheName: `${CACHE_PREFIX}-fonts-${CACHE_SUFFIX}`,
+            plugins: [
+                new workbox.cacheableResponse.CacheableResponsePlugin({
+                    statuses: [0, 200],
+                }),
+                new workbox.expiration.ExpirationPlugin({
+                    maxAgeSeconds: 60 * 60 * 24 * 365, // 1 Year
+                }),
+            ],
+        })
+    );
+
+    // JS/CSS/CDN LIBS: Stale While Revalidate
+    // Serve fast from cache, then check network for updates in background.
+    workbox.routing.registerRoute(
+        ({request, url}) => 
+            request.destination === 'script' || 
+            request.destination === 'style' ||
+            url.origin === 'https://cdn.tailwindcss.com' ||
+            url.origin === 'https://aistudiocdn.com',
+        new workbox.strategies.StaleWhileRevalidate({
+            cacheName: `${CACHE_PREFIX}-assets-${CACHE_SUFFIX}`,
+            plugins: [
+                new workbox.cacheableResponse.CacheableResponsePlugin({
+                    statuses: [0, 200],
+                }),
+            ]
+        })
+    );
+
+    // API REQUESTS: Network First (Fresh data preferred), fallback to cache
+    // This allows cached API responses if offline
+    workbox.routing.registerRoute(
+        ({url}) => url.href.includes('generativelanguage.googleapis.com'),
+        new workbox.strategies.NetworkFirst({
+            cacheName: `${CACHE_PREFIX}-api-${CACHE_SUFFIX}`,
+            networkTimeoutSeconds: 3,
+            plugins: [
+                new workbox.expiration.ExpirationPlugin({
+                    maxEntries: 50,
+                    maxAgeSeconds: 60 * 60, // 1 Hour cache for API
+                }),
+            ],
+        })
+    );
+
+    // --- 2. OFFLINE FALLBACK (SPA NAVIGATION) ---
+    
+    // For Single Page Apps: Return index.html for navigation requests
+    // This ensures reloading any route works offline.
+    const handler = workbox.strategies.strategyWrapper(
+        new workbox.strategies.NetworkFirst({
+            cacheName: `${CACHE_PREFIX}-html-${CACHE_SUFFIX}`,
+        })
+    );
+
+    workbox.routing.registerRoute(
+        ({request}) => request.mode === 'navigate',
+        ({event}) => {
+            return handler.handle({event}).catch(() => {
+                return caches.match('index.html');
+            });
+        }
+    );
 
 } else {
-  console.log(`[DisinfoDesk] Workbox didn't load`);
+    console.log(`[DisinfoDesk] Workbox failed to load.`);
 }
 
-// Force immediate activation
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+// Listen to "SKIP_WAITING" message to force update from UI
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });

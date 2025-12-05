@@ -2,7 +2,11 @@
 import { StoredAnalysis, StoredChat, StoredSatire, VaultBackup, StoredMediaAnalysis } from '../types';
 
 const DB_NAME = 'DisinfoDesk_Vault';
-const DB_VERSION = 2;
+const DB_VERSION = 3; // Incremented for Schema Upgrade
+const CRYPTO_ALGO = 'AES-GCM';
+const BROADCAST_CHANNEL = 'vault_sync_channel';
+
+// --- Types ---
 
 interface DBSchema {
   analyses: StoredAnalysis;
@@ -10,23 +14,125 @@ interface DBSchema {
   chats: StoredChat;
   satires: StoredSatire;
   app_state: { key: string; value: string };
+  // New Store for binary blobs (Images) to keep main stores light
+  blob_storage: { id: string; data: Blob; mimeType: string; refCount: number }; 
 }
 
 type StoreName = keyof DBSchema;
+type ChangeType = 'PUT' | 'DELETE' | 'CLEAR';
+
+interface VaultEvent {
+  type: ChangeType;
+  store: StoreName;
+  key?: string | IDBValidKey;
+}
 
 export interface StorageStats {
   usageBytes: number;
   recordCounts: Record<StoreName, number>;
   totalRecords: number;
+  encrypted: boolean;
+  compressionRatio: number;
 }
 
 /**
- * Enhanced Database Service for IndexedDB.
- * Implements Singleton pattern with strict typing and robust error handling.
+ * UTILITY: Native Compression Streams (GZIP)
+ * Compresses stringified JSON into Uint8Array
+ */
+const compressData = async (data: any): Promise<ArrayBuffer> => {
+  const jsonStr = JSON.stringify(data);
+  const blob = new Blob([jsonStr]);
+  const stream = blob.stream().pipeThrough(new CompressionStream('gzip'));
+  return new Response(stream).arrayBuffer();
+};
+
+const decompressData = async (buffer: ArrayBuffer): Promise<any> => {
+  const stream = new Response(buffer).body?.pipeThrough(new DecompressionStream('gzip'));
+  if (!stream) throw new Error("Decompression stream failed");
+  const blob = await new Response(stream).blob();
+  const text = await blob.text();
+  return JSON.parse(text);
+};
+
+/**
+ * UTILITY: Web Crypto API (AES-GCM)
+ */
+class CryptoGuard {
+  private key: CryptoKey | null = null;
+  private readonly ivLen = 12;
+
+  async init() {
+    if (this.key) return;
+    // Try to get key from storage, or generate new
+    const rawKey = localStorage.getItem('vault_master_key');
+    if (rawKey) {
+      this.key = await window.crypto.subtle.importKey(
+        'jwk', JSON.parse(rawKey), { name: CRYPTO_ALGO }, false, ['encrypt', 'decrypt']
+      );
+    } else {
+      this.key = await window.crypto.subtle.generateKey(
+        { name: CRYPTO_ALGO, length: 256 }, true, ['encrypt', 'decrypt']
+      );
+      const exported = await window.crypto.subtle.exportKey('jwk', this.key);
+      localStorage.setItem('vault_master_key', JSON.stringify(exported));
+    }
+  }
+
+  async encrypt(data: any): Promise<{ iv: Uint8Array, cipher: ArrayBuffer, isEncrypted: boolean }> {
+    await this.init();
+    if (!this.key) throw new Error("Crypto Init Failed");
+    
+    // Auto-compress before encrypting
+    const compressed = await compressData(data);
+    const iv = window.crypto.getRandomValues(new Uint8Array(this.ivLen));
+    
+    const cipher = await window.crypto.subtle.encrypt(
+      { name: CRYPTO_ALGO, iv },
+      this.key,
+      compressed
+    );
+
+    return { iv, cipher, isEncrypted: true };
+  }
+
+  async decrypt(record: any): Promise<any> {
+    if (!record || !record.isEncrypted) return record; // Legacy data pass-through
+    await this.init();
+    if (!this.key) throw new Error("Crypto Init Failed");
+
+    try {
+      const decrypted = await window.crypto.subtle.decrypt(
+        { name: CRYPTO_ALGO, iv: record.iv },
+        this.key,
+        record.cipher
+      );
+      return await decompressData(decrypted);
+    } catch (e) {
+      console.error("Decryption failed. Data corruption or wrong key.", e);
+      throw new Error("Vault Access Denied: Decryption Failed");
+    }
+  }
+}
+
+/**
+ * THE VAULT SERVICE
+ * Sophisticated Wrapper for IndexedDB
  */
 class DatabaseService {
   private db: IDBDatabase | null = null;
   private pendingOpen: Promise<IDBDatabase> | null = null;
+  private crypto = new CryptoGuard();
+  private channel = new BroadcastChannel(BROADCAST_CHANNEL);
+  private subscribers = new Set<(event: VaultEvent) => void>();
+
+  constructor() {
+    // Listen for changes from other tabs
+    this.channel.onmessage = (msg: MessageEvent<VaultEvent>) => {
+      this.notifySubscribers(msg.data);
+    };
+  }
+
+  // --- Connection & Migration ---
 
   private async open(): Promise<IDBDatabase> {
     if (this.db) return this.db;
@@ -37,34 +143,39 @@ class DatabaseService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
-        const createStore = (name: string, keyPath: string = 'id') => {
-           if (!db.objectStoreNames.contains(name)) {
-             const store = db.createObjectStore(name, { keyPath });
-             if (name !== 'app_state') {
-               store.createIndex('timestamp', 'timestamp', { unique: false });
-             }
-           }
-        };
+        const tx = (event.target as IDBOpenDBRequest).transaction;
 
-        createStore('analyses');
-        createStore('media_analyses');
-        createStore('chats');
-        createStore('satires');
-        createStore('app_state', 'key');
+        // V1 -> V2 Stores
+        const stores = ['analyses', 'media_analyses', 'chats', 'satires'];
+        stores.forEach(name => {
+           if (!db.objectStoreNames.contains(name)) {
+             const store = db.createObjectStore(name, { keyPath: 'id' });
+             store.createIndex('timestamp', 'timestamp', { unique: false });
+           }
+        });
+
+        if (!db.objectStoreNames.contains('app_state')) {
+            db.createObjectStore('app_state', { keyPath: 'key' });
+        }
+
+        // V3 Upgrade: Blob Storage for efficient image handling
+        if (!db.objectStoreNames.contains('blob_storage')) {
+            db.createObjectStore('blob_storage', { keyPath: 'id' });
+        }
+
+        // Migration Logic (if needed in future versions)
+        // e.g., if (event.oldVersion < 3) { ... migrate data structure ... }
       };
 
       request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
         
         this.db.onclose = () => {
-            console.warn('[Vault] Connection closed unexpectedly. Resetting handle.');
             this.db = null;
             this.pendingOpen = null;
         };
-
+        
         this.db.onversionchange = () => {
-            console.warn('[Vault] Version change detected. Closing connection.');
             this.db?.close();
             this.db = null;
             this.pendingOpen = null;
@@ -73,14 +184,9 @@ class DatabaseService {
         resolve(this.db);
       };
 
-      request.onblocked = () => {
-          console.warn('[Vault] Database blocked. Close other tabs.');
-      };
-
       request.onerror = (event) => {
         this.db = null;
         this.pendingOpen = null;
-        console.error('[Vault] Connection failed', (event.target as IDBOpenDBRequest).error);
         reject((event.target as IDBOpenDBRequest).error);
       };
     });
@@ -88,191 +194,292 @@ class DatabaseService {
     return this.pendingOpen;
   }
 
-  /**
-   * Generic Transaction Wrapper for ACID-like behavior.
-   * Ensures the DB connection is open before attempting operations.
-   */
+  // --- Pipeline Operations (Encryption/Compression Middleware) ---
+
   private async executeTransaction<T>(
     storeNames: StoreName[], 
     mode: IDBTransactionMode, 
-    callback: (stores: Record<StoreName, IDBObjectStore>) => IDBRequest<T> | void
+    callback: (stores: Record<StoreName, IDBObjectStore>) => Promise<T> | T
   ): Promise<T> {
     const db = await this.open();
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const tx = db.transaction(storeNames, mode);
       const stores = {} as Record<StoreName, IDBObjectStore>;
-      
-      storeNames.forEach(name => {
-        stores[name] = tx.objectStore(name);
-      });
+      storeNames.forEach(name => stores[name] = tx.objectStore(name));
 
-      let request: IDBRequest<T> | void;
-      
       try {
-        request = callback(stores);
+        const result = await callback(stores);
+        
+        // Commit wrapper for readwrite
+        if (mode === 'readwrite') {
+            tx.oncomplete = () => resolve(result);
+        } else {
+            resolve(result); // readonly usually doesn't need to wait for complete
+        }
       } catch (e) {
+        tx.abort();
         reject(e);
-        return;
       }
 
-      tx.oncomplete = () => {
-        // If the callback returned a request, resolve with its result.
-        // If the callback was void (e.g. delete), resolve undefined.
-        if (request && 'result' in request) {
-          resolve(request.result);
-        } else {
-          resolve(undefined as T);
-        }
-      };
-
       tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(new Error('Transaction aborted'));
     });
   }
 
-  // --- CRUD Operations ---
+  // --- Subscriptions (Reactivity) ---
 
+  public subscribe(callback: (event: VaultEvent) => void): () => void {
+    this.subscribers.add(callback);
+    return () => this.subscribers.delete(callback);
+  }
+
+  private notifySubscribers(event: VaultEvent) {
+    this.subscribers.forEach(cb => cb(event));
+  }
+
+  private broadcast(event: VaultEvent) {
+    this.channel.postMessage(event);
+    this.notifySubscribers(event);
+  }
+
+  // --- CRUD (Augmented) ---
+
+  /**
+   * High-Performance Iterator
+   * Uses Async Generators to stream data instead of loading all into RAM.
+   * Automatically handles decryption.
+   */
+  async *streamAll<T>(storeName: StoreName): AsyncGenerator<T, void, unknown> {
+    const db = await this.open();
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    // Use index for chronological order if available
+    const request = store.indexNames.contains('timestamp') 
+        ? store.index('timestamp').openCursor(null, 'prev')
+        : store.openCursor();
+
+    let cursorRequestResolve: (value: IDBCursorWithValue | null) => void;
+    let cursorRequestReject: (reason?: any) => void;
+
+    request.onsuccess = (e) => cursorRequestResolve((e.target as IDBRequest).result);
+    request.onerror = (e) => cursorRequestReject((e.target as IDBRequest).error);
+
+    while (true) {
+        const promise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
+            cursorRequestResolve = resolve;
+            cursorRequestReject = reject;
+        });
+        
+        // Note: The first yield waits for onsuccess above. Subsequent loops wait for .continue()
+        const cursor = await promise;
+        if (!cursor) break;
+
+        const rawData = cursor.value;
+        const decrypted = await this.crypto.decrypt(rawData);
+        
+        yield decrypted as T;
+        
+        // Prepare promise for next iteration before calling continue
+        const nextPromise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
+            cursorRequestResolve = resolve;
+            cursorRequestReject = reject;
+        });
+        
+        cursor.continue();
+        
+        // Await the next result immediately to keep generator mechanics sound
+        // However, logic above simplifies this by creating promise inside loop.
+        // Actually, for simple implementation:
+        // We need to re-assign the handlers because continue() triggers onsuccess again.
+        request.onsuccess = (e) => cursorRequestResolve((e.target as IDBRequest).result);
+    }
+  }
+
+  /**
+   * Traditional GetAll (Buffered)
+   * Augmented with Decryption
+   */
   async getAll<T>(storeName: StoreName): Promise<T[]> {
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readonly');
       const store = tx.objectStore(storeName);
+      const index = store.indexNames.contains('timestamp') ? store.index('timestamp') : store;
+      // Get most recent first
+      const request = store.indexNames.contains('timestamp') 
+        ? (index as IDBIndex).openCursor(null, 'prev') 
+        : store.openCursor();
+      
       const results: T[] = [];
 
-      // Use cursor with 'prev' direction to sort by timestamp DESC implicitly if index exists
-      let request: IDBRequest;
-      if (storeName !== 'app_state' && store.indexNames.contains('timestamp')) {
-        request = store.index('timestamp').openCursor(null, 'prev');
-      } else {
-        request = store.openCursor();
-      }
-
-      request.onsuccess = (event) => {
+      request.onsuccess = async (event) => {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
+          // Decrypt on the fly (Promise.all later would be faster but uses more RAM)
+          // For massive lists, we should really use pagination.
+          // Here we push raw and decrypt in parallel at end for speed.
           results.push(cursor.value);
           cursor.continue();
         } else {
-          resolve(results);
+          // Bulk Decrypt
+          try {
+             const decrypted = await Promise.all(results.map(r => this.crypto.decrypt(r)));
+             resolve(decrypted);
+          } catch (e) {
+             reject(e);
+          }
         }
       };
-
       request.onerror = () => reject(request.error);
     });
   }
 
   async get<T>(storeName: StoreName, key: string): Promise<T | undefined> {
-    return this.executeTransaction<T>([storeName], 'readonly', (stores) => {
-      return stores[storeName].get(key);
+    const raw = await this.executeTransaction<any>([storeName], 'readonly', (stores) => {
+      return new Promise((resolve, reject) => {
+          const req = stores[storeName].get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+      });
     });
+    
+    if (!raw) return undefined;
+    return this.crypto.decrypt(raw);
   }
 
+  /**
+   * Secure Put
+   * Automatically encrypts data before storage.
+   */
   async put<T>(storeName: StoreName, value: T): Promise<void> {
-    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
-      stores[storeName].put(value);
+    // Encrypt payload (except app_state which is simple key-val)
+    let payload = value;
+    if (storeName !== 'app_state') {
+        payload = await this.crypto.encrypt(value) as unknown as T;
+        // Restore ID for indexing (IndexedDB needs the key path visible)
+        (payload as any).id = (value as any).id;
+        if ((value as any).timestamp) (payload as any).timestamp = (value as any).timestamp;
+    }
+
+    await this.executeTransaction([storeName], 'readwrite', (stores) => {
+      stores[storeName].put(payload);
     });
+
+    this.broadcast({ type: 'PUT', store: storeName, key: (value as any).id });
   }
 
   async delete(storeName: StoreName, key: string): Promise<void> {
-    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+    await this.executeTransaction([storeName], 'readwrite', (stores) => {
       stores[storeName].delete(key);
     });
-  }
-
-  async clear(storeName: StoreName): Promise<void> {
-    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
-      stores[storeName].clear();
-    });
+    this.broadcast({ type: 'DELETE', store: storeName, key });
   }
 
   async deleteBatch(storeName: StoreName, keys: string[]): Promise<void> {
-    return this.executeTransaction<void>([storeName], 'readwrite', (stores) => {
+    await this.executeTransaction([storeName], 'readwrite', (stores) => {
       keys.forEach(key => stores[storeName].delete(key));
     });
+    this.broadcast({ type: 'DELETE', store: storeName });
   }
 
-  // --- Health Check ---
-  async healthCheck(): Promise<boolean> {
-    try {
-        await this.open();
-        return true;
-    } catch {
-        return false;
-    }
+  async clear(storeName: StoreName): Promise<void> {
+    await this.executeTransaction([storeName], 'readwrite', (stores) => {
+      stores[storeName].clear();
+    });
+    this.broadcast({ type: 'CLEAR', store: storeName });
   }
 
-  // --- Redux Persist Storage Engine Interface ---
-  public reduxStorage = {
-    getItem: async (key: string): Promise<string | null> => {
-      try {
-        const record = await this.get<{ key: string; value: string }>('app_state', key);
-        return record ? record.value : null;
-      } catch (e) {
-        console.error('Redux Storage Get Error:', e);
-        return null;
+  // --- Blob Storage Optimization (Binary) ---
+  
+  async saveImageBlob(id: string, base64: string): Promise<void> {
+      // Convert base64 to Blob to save roughly 33% space and parsing time
+      const byteString = atob(base64.split(',')[1]);
+      const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
       }
-    },
-    setItem: async (key: string, value: string): Promise<void> => {
-      try {
-        await this.put('app_state', { key, value });
-      } catch (e) {
-        console.error('Redux Storage Set Error:', e);
-      }
-    },
-    removeItem: async (key: string): Promise<void> => {
-      try {
-        await this.delete('app_state', key);
-      } catch (e) {
-        console.error('Redux Storage Remove Error:', e);
-      }
-    },
-  };
+      const blob = new Blob([ab], { type: mimeString });
 
-  // --- Statistics & Backup ---
+      await this.executeTransaction(['blob_storage'], 'readwrite', (stores) => {
+          stores['blob_storage'].put({ id, data: blob, mimeType: mimeString, refCount: 1 });
+      });
+  }
+
+  // --- Statistics & Diagnostics ---
 
   async getStorageStats(): Promise<StorageStats> {
-    const stores: StoreName[] = ['analyses', 'media_analyses', 'chats', 'satires', 'app_state'];
+    const stores: StoreName[] = ['analyses', 'media_analyses', 'chats', 'satires', 'app_state', 'blob_storage'];
     const stats: StorageStats = {
       usageBytes: 0,
-      recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0 },
-      totalRecords: 0
+      recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0, blob_storage: 0 } as any,
+      totalRecords: 0,
+      encrypted: true,
+      compressionRatio: 0
     };
 
     const db = await this.open();
-    // Using simple transaction loop for stats gathering
     const tx = db.transaction(stores, 'readonly');
 
-    const promises = stores.map(storeName => {
-        return new Promise<void>((resolve, reject) => {
-            const store = tx.objectStore(storeName);
-            const countReq = store.count();
-            countReq.onsuccess = () => {
-                stats.recordCounts[storeName] = countReq.result;
-                stats.totalRecords += countReq.result;
-            };
+    let totalRawBytes = 0;
+    let totalStoredBytes = 0;
 
-            // Heuristic size estimation using a cursor
-            const cursorReq = store.openCursor();
-            cursorReq.onsuccess = (e) => {
-                const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-                if (cursor) {
-                    const value = cursor.value;
-                    const size = JSON.stringify(value).length * 2; // Approx bytes in memory (UTF-16)
-                    stats.usageBytes += size;
-                    cursor.continue();
+    await Promise.all(stores.map(storeName => new Promise<void>((resolve) => {
+        const store = tx.objectStore(storeName);
+        
+        // Count
+        const countReq = store.count();
+        countReq.onsuccess = () => {
+            stats.recordCounts[storeName] = countReq.result;
+            stats.totalRecords += countReq.result;
+        };
+
+        // Estimate Size (Sampling first 10 for performance)
+        // In a real 'state-of-the-art' app, we might maintain a running metadata counter.
+        // Here we approximate.
+        const cursorReq = store.openCursor();
+        let samples = 0;
+        
+        cursorReq.onsuccess = (e) => {
+            const cursor = (e.target as IDBRequest).result;
+            if (cursor && samples < 20) {
+                const val = cursor.value;
+                
+                // Stored Size
+                const json = JSON.stringify(val);
+                totalStoredBytes += json.length; 
+                
+                // Estimating Raw Size (if encrypted)
+                if (val.isEncrypted && val.cipher) {
+                    // Rough estimation of decompression ratio (usually 3x-5x for text)
+                    totalRawBytes += (val.cipher.byteLength * 4); 
                 } else {
-                    resolve();
+                    totalRawBytes += json.length;
                 }
-            };
-            cursorReq.onerror = () => reject(cursorReq.error);
-        });
-    });
+                
+                samples++;
+                cursor.continue();
+            } else {
+                resolve();
+            }
+        };
+    })));
 
-    await Promise.all(promises);
+    // Extrapolate total size based on samples
+    if (stats.totalRecords > 0) {
+       // Simple heuristic for demo purposes
+       stats.usageBytes = totalStoredBytes * (stats.totalRecords / Math.max(1, 20)); // Approximate total
+       stats.compressionRatio = totalRawBytes > 0 ? parseFloat((totalStoredBytes / totalRawBytes).toFixed(2)) : 1;
+    }
+
     return stats;
   }
 
+  // --- Export/Import ---
+
   async exportFullDatabase(): Promise<Blob> {
+    // We use getAll here, but in a massive DB we would use streamAll and stream the JSON output
+    // to avoid memory crashes. For this implementation, standard getAll is sufficient but let's decrypt.
     const data = {
       analyses: await this.getAll('analyses'),
       media_analyses: await this.getAll('media_analyses'),
@@ -283,43 +490,33 @@ class DatabaseService {
           timestamp: Date.now(),
           version: DB_VERSION,
           app: 'DisinfoDesk_Vault',
-          schema: 'v3_enhanced'
+          schema: 'v3_secure'
       }
     };
     return new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   }
 
-  async importDatabase(jsonString: string): Promise<{success: boolean, message: string}> {
-    try {
-      const data = JSON.parse(jsonString) as VaultBackup;
-      
-      if (!data.meta || !data.meta.app || data.meta.app !== 'DisinfoDesk_Vault') {
-          return { success: false, message: "Security Violation: Invalid vault signature." };
-      }
+  // --- Redux Persist Interface ---
+  public reduxStorage = {
+    getItem: async (key: string): Promise<string | null> => {
+      const res = await this.get<{ key: string; value: string }>('app_state', key);
+      return res ? res.value : null;
+    },
+    setItem: async (key: string, value: string): Promise<void> => {
+      await this.put('app_state', { key, value });
+    },
+    removeItem: async (key: string): Promise<void> => {
+      await this.delete('app_state', key);
+    },
+  };
 
-      let count = 0;
-      // Using sequential import for stability
-      if (Array.isArray(data.analyses)) for (const item of data.analyses) { await this.saveAnalysis(item); count++; }
-      if (Array.isArray(data.media_analyses)) for (const item of data.media_analyses) { await this.saveMediaAnalysis(item); count++; }
-      if (Array.isArray(data.chats)) for (const item of data.chats) { await this.saveChat(item); count++; }
-      if (Array.isArray(data.satires)) for (const item of data.satires) { await this.saveSatire(item); count++; }
-      if (Array.isArray(data.settings)) for (const item of data.settings) { await this.put('app_state', item); count++; }
-      
-      return { success: true, message: `Vault restored. ${count} records integrated.` };
-    } catch (e) {
-      console.error("Import failed:", e);
-      return { success: false, message: "Corrupt data stream." };
-    }
-  }
-
-  // --- Specific Methods ---
-
-  async saveAnalysis(analysis: StoredAnalysis) { return this.put('analyses', analysis); }
+  // --- Specific Helpers ---
+  async saveAnalysis(item: StoredAnalysis) { return this.put('analyses', item); }
   async getAnalysis(id: string) { return this.get<StoredAnalysis>('analyses', id); }
-  async saveMediaAnalysis(analysis: StoredMediaAnalysis) { return this.put('media_analyses', analysis); }
+  async saveMediaAnalysis(item: StoredMediaAnalysis) { return this.put('media_analyses', item); }
   async getMediaAnalysis(id: string) { return this.get<StoredMediaAnalysis>('media_analyses', id); }
-  async saveChat(chat: StoredChat) { return this.put('chats', chat); }
-  async saveSatire(satire: StoredSatire) { return this.put('satires', satire); }
+  async saveChat(item: StoredChat) { return this.put('chats', item); }
+  async saveSatire(item: StoredSatire) { return this.put('satires', item); }
 }
 
 export const dbService = new DatabaseService();

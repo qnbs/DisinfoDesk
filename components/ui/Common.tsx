@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, forwardRef } from 'react';
+import React, { useRef, useEffect, forwardRef, useState } from 'react';
 import { Loader2, Search, Terminal } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSearchOpen } from '../../store/slices/uiSlice';
@@ -12,19 +12,36 @@ interface VisualizerProps {
   state?: 'IDLE' | 'BUSY' | 'ALERT' | 'LISTENING';
 }
 
-// --- Visualizer Component (Optimized) ---
+// --- Visualizer Component (High Performance) ---
 const HeaderVisualizer: React.FC<VisualizerProps> = React.memo(({ state = 'IDLE' }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const frameRef = useRef<number>(0);
     const reducedMotion = useAppSelector(state => state.settings.config.reducedMotion);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // 1. Performance: Intersection Observer to pause rendering when off-screen
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsVisible(entry.isIntersecting),
+            { threshold: 0.1 }
+        );
+        
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
-        // Immediate bailout for reduced motion or idle state
-        if (state === 'IDLE' || reducedMotion) {
+        // Immediate bailout: Reduced motion, Idle state, or Off-screen
+        if (state === 'IDLE' || reducedMotion || !isVisible) {
             const canvas = canvasRef.current;
             if (canvas) {
                 const ctx = canvas.getContext('2d');
                 ctx?.clearRect(0, 0, canvas.width, canvas.height);
+                if (frameRef.current) cancelAnimationFrame(frameRef.current);
             }
             return;
         }
@@ -32,6 +49,7 @@ const HeaderVisualizer: React.FC<VisualizerProps> = React.memo(({ state = 'IDLE'
         const canvas = canvasRef.current;
         if (!canvas) return;
         
+        // 2. Performance: Desynchronized hint for lower latency (if supported)
         const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
         if (!ctx) return;
 
@@ -101,15 +119,16 @@ const HeaderVisualizer: React.FC<VisualizerProps> = React.memo(({ state = 'IDLE'
             window.removeEventListener('resize', resize);
             if (frameRef.current) cancelAnimationFrame(frameRef.current);
         };
-    }, [state, reducedMotion]);
+    }, [state, reducedMotion, isVisible]);
 
     return (
-        <canvas 
-            ref={canvasRef} 
-            className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-screen pointer-events-none"
-            style={{ willChange: state !== 'IDLE' ? 'contents' : 'auto' }}
-            aria-hidden="true" 
-        />
+        <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+            <canvas 
+                ref={canvasRef} 
+                className="w-full h-full object-cover opacity-80 mix-blend-screen"
+                style={{ willChange: isVisible && state !== 'IDLE' ? 'contents' : 'auto' }}
+            />
+        </div>
     );
 });
 
@@ -195,11 +214,8 @@ export const PageHeader: React.FC<PageHeaderProps> = React.memo(({ title, subtit
 interface CardProps extends React.HTMLAttributes<HTMLElement> { variant?: 'glass' | 'cyber' | 'solid'; as?: React.ElementType; }
 export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, className = '', onClick, variant = 'glass', as: Component = 'div', ...props }, ref) => {
   const variants = {
-    // Glass: Highly transparent, used for overlays or content on top of complex backgrounds
     glass: "bg-slate-900/60 backdrop-blur-xl border-white/10 hover:border-white/20 hover:shadow-2xl hover:bg-slate-900/70",
-    // Cyber: The standard content card. Darker, technological feel.
     cyber: "bg-slate-950/80 backdrop-blur-md border-slate-800 hover:border-accent-cyan/30 hover:shadow-neon-cyan shadow-lg",
-    // Solid: Opaque, high contrast, used for dense data or modals
     solid: "bg-slate-950 border-slate-800 hover:border-slate-700 shadow-xl"
   };
   
@@ -225,7 +241,6 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
         role={onClick ? "button" : undefined}
         {...props}
     >
-      {/* Subtle Noise Texture on all cards */}
       <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none mix-blend-overlay" />
       <div className="relative z-10 h-full">{children}</div>
     </Component>
@@ -235,7 +250,6 @@ Card.displayName = 'Card';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; size?: 'sm' | 'md' | 'lg'; isLoading?: boolean; icon?: React.ReactNode; }
 export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ children, variant = 'primary', size = 'md', isLoading = false, icon, className = '', disabled, ...props }, ref) => {
-  // Mechanical UI: Distinct borders, clear states, mono typography
   const variants = {
     primary: "bg-accent-cyan text-slate-950 hover:bg-cyan-400 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]",
     secondary: "bg-slate-800 text-slate-200 border border-slate-700 hover:border-slate-500 hover:bg-slate-700 hover:text-white shadow-sm",
@@ -243,9 +257,8 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
     danger: "bg-danger-red/10 text-danger-red border border-danger-red/50 hover:bg-danger-red hover:text-white hover:border-danger-red shadow-[0_0_10px_rgba(239,68,68,0.1)]"
   };
   
-  // Adjusted sizes for better mobile touch targets (44px min height logic)
   const sizes = { 
-      sm: "px-3 py-1.5 text-[10px] h-8 gap-1.5", // Slightly taller than before
+      sm: "px-3 py-1.5 text-[10px] h-8 gap-1.5", 
       md: "px-4 py-2 text-xs h-10 gap-2", 
       lg: "px-6 py-3 text-sm h-12 gap-2.5" 
   };
@@ -260,6 +273,7 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
             className
         )} 
         disabled={disabled || isLoading} 
+        aria-busy={isLoading}
         {...props}
     >
       {isLoading && <Loader2 size={size === 'sm' ? 12 : 16} className="animate-spin absolute" />}

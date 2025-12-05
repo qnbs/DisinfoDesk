@@ -156,7 +156,7 @@ const useDebunkChatLogic = () => {
   const [liveState, setLiveState] = useState<'LISTENING' | 'SPEAKING' | 'IDLE'>('IDLE');
   
   const abortControllerRef = useRef<AbortController | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const liveSessionRef = useRef<LiveSession | null>(null);
   
   // Audio Context Refs for Live Mode
@@ -173,10 +173,15 @@ const useDebunkChatLogic = () => {
     };
   }, []);
 
-  // Scroll to bottom on new message
+  // Scroll to bottom on new message (Internal Container only)
   useEffect(() => {
-      if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (chatContainerRef.current) {
+          // Use scrollTop instead of scrollIntoView to prevent page jumps
+          const container = chatContainerRef.current;
+          container.scrollTo({
+              top: container.scrollHeight,
+              behavior: 'smooth'
+          });
       }
   }, [messages, loading]);
 
@@ -185,13 +190,16 @@ const useDebunkChatLogic = () => {
   const initAudioContext = () => {
       if (!audioContextRef.current) {
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      } else if (audioContextRef.current.state === 'suspended') {
-          audioContextRef.current.resume();
       }
   };
 
   const playAudioChunk = async (base64Data: string) => {
       if (!audioContextRef.current) return;
+      
+      // Critical fix: Ensure context is running (browsers suspend it by default until interaction)
+      if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+      }
       
       try {
           const arrayBuffer = base64ToUint8Array(base64Data).buffer;
@@ -229,6 +237,11 @@ const useDebunkChatLogic = () => {
       setMode('LIVE');
       setLiveStatus('CONNECTING');
       initAudioContext();
+
+      // Ensure AudioContext is active immediately on user interaction
+      if (audioContextRef.current?.state === 'suspended') {
+          await audioContextRef.current.resume();
+      }
 
       try {
           streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -395,7 +408,7 @@ const useDebunkChatLogic = () => {
       handleInputChange: (val: string) => dispatch(setChatInput(val)), 
       loading, 
       handleSend, handleKeyDown, handleReset, handleSaveSession, 
-      messagesEndRef, t, 
+      chatContainerRef, t, 
       activeContextId,
       mode, liveStatus, liveState, startLiveSession, stopLiveSession,
       quickActions, triggerQuickAction
@@ -482,7 +495,7 @@ const ChatContext = createContext<ReturnType<typeof useDebunkChatLogic> | undefi
 
 export const DebunkChat: React.FC = () => {
     const logic = useDebunkChatLogic();
-    const { messages, input, handleInputChange, handleKeyDown, handleSend, loading, mode, liveStatus, liveState, startLiveSession, stopLiveSession, t, messagesEndRef, activeContextId, quickActions, triggerQuickAction } = logic;
+    const { messages, input, handleInputChange, handleKeyDown, handleSend, loading, mode, liveStatus, liveState, startLiveSession, stopLiveSession, t, chatContainerRef, activeContextId, quickActions, triggerQuickAction } = logic;
 
     return (
     <ChatContext.Provider value={logic}>
@@ -539,7 +552,10 @@ export const DebunkChat: React.FC = () => {
                 {/* --- TEXT MODE UI --- */}
                 <div className="flex-1 flex flex-col relative z-10 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
                     {/* Message Stream */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
+                    <div 
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-slate-800"
+                    >
                         {messages.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">
                                 <Bot size={64} className="mb-4 text-accent-cyan opacity-20" />
@@ -552,7 +568,6 @@ export const DebunkChat: React.FC = () => {
                         {messages.map((msg, index) => (
                             <TextMessageBubble key={index} msg={msg} />
                         ))}
-                        <div ref={messagesEndRef} className="h-2" />
                     </div>
 
                     {/* Quick Actions Bar */}

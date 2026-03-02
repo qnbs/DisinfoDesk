@@ -1,476 +1,480 @@
 
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
-  CartesianGrid, BarChart, Bar, Cell
+  AreaChart, Area, XAxis, YAxis, Tooltip, 
+  ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 import { 
   Globe, Activity, ShieldAlert, Zap, Radio, 
   Terminal, Cpu, Map as MapIcon, ChevronRight, 
-  AlertTriangle, Crosshair, ArrowUpRight, Signal, 
+  AlertTriangle, Crosshair, Signal, 
   Lock, Share2, Wifi, BookOpen, Film, Feather, MessageSquare, 
-  Skull, Edit3, Database, Settings, HelpCircle, HardDrive, LayoutDashboard
+  Skull, Edit3, Database, Settings, HelpCircle, HardDrive, 
+  LayoutGrid, Power, Fingerprint, Eye, Server, Layers,
+  Brain
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Card, PageFrame, PageHeader, Button, Badge, cn } from './ui/Common';
+import { Card, PageFrame, PageHeader, Badge, cn } from './ui/Common';
 import { useAppSelector } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { useNavigate } from 'react-router-dom';
-import { DangerLevel } from '../types';
 
-// --- 1. UTILITY COMPONENTS ---
+// --- 1. SOPHISTICATED UTILS ---
 
-// Scrambling Text Effect for "Decryption" visuals
-const ScrambleText: React.FC<{ text: string, className?: string, delay?: number }> = React.memo(({ text, className, delay = 0 }) => {
-    const [display, setDisplay] = useState(text.replace(/./g, '█')); // Start obscured
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+const useLiveTelemetry = (initialData: number[]) => {
+    const [data, setData] = useState(initialData);
     
     useEffect(() => {
-        let timeout: ReturnType<typeof setTimeout>;
-        let interval: ReturnType<typeof setInterval>;
+        const interval = setInterval(() => {
+            setData(prev => {
+                const next = [...prev.slice(1), Math.max(10, Math.min(100, prev[prev.length - 1] + (Math.random() - 0.5) * 20))];
+                return next;
+            });
+        }, 800);
+        return () => clearInterval(interval);
+    }, []);
+    
+    return data;
+};
 
-        timeout = setTimeout(() => {
-            let iter = 0;
-            interval = setInterval(() => {
-                setDisplay(
-                    text.split('').map((char, index) => {
-                        if (index < iter) return char;
-                        return chars[Math.floor(Math.random() * chars.length)];
-                    }).join('')
-                );
-                if (iter >= text.length) clearInterval(interval);
-                iter += 1/2; 
-            }, 30);
-        }, delay);
-
-        return () => { clearTimeout(timeout); clearInterval(interval); };
-    }, [text, delay]);
+// Decryption Text Effect
+const CipherText: React.FC<{ text: string, className?: string, reveal?: boolean }> = React.memo(({ text, className, reveal = true }) => {
+    const [display, setDisplay] = useState(text.replace(/./g, '0')); 
+    const chars = '0123456789ABCDEF!@#$%^&*';
+    
+    useEffect(() => {
+        if(!reveal) return;
+        let iter = 0;
+        const interval = setInterval(() => {
+            setDisplay(
+                text.split('').map((char, index) => {
+                    if (index < iter) return char;
+                    return chars[Math.floor(Math.random() * chars.length)];
+                }).join('')
+            );
+            if (iter >= text.length) clearInterval(interval);
+            iter += 1/2; 
+        }, 30);
+        return () => clearInterval(interval);
+    }, [text, reveal]);
 
     return <span className={className}>{display}</span>;
 });
 
-// Mini Sparkline for Cards
-const Sparkline: React.FC<{ data: number[], color: string }> = ({ data, color }) => {
-    const chartData = data.map((val, i) => ({ i, val }));
-    return (
-        <div className="h-8 w-24">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                <AreaChart data={chartData}>
-                    <defs>
-                        <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={color} stopOpacity={0.4}/>
-                            <stop offset="100%" stopColor={color} stopOpacity={0}/>
-                        </linearGradient>
-                    </defs>
-                    <Area type="monotone" dataKey="val" stroke={color} strokeWidth={2} fill={`url(#grad-${color})`} isAnimationActive={false} />
-                </AreaChart>
-            </ResponsiveContainer>
-        </div>
-    );
-};
+// --- 2. HIGH-FIDELITY VISUALIZERS ---
 
-// --- 2. COMPLEX WIDGETS ---
-
-// Mission Control / Launchpad (New Component)
-const MissionLaunchpad: React.FC = () => {
-    const { t } = useLanguage();
-    const navigate = useNavigate();
-
-    const sections = [
-        {
-            title: t.dashboard.launchpad.sections.intel,
-            items: [
-                { id: 'dang', icon: ShieldAlert, label: t.nav.dangerous, desc: t.dashboard.launchpad.desc.dangerous, path: '/dangerous', color: 'text-red-500' },
-                { id: 'vir', icon: Activity, label: t.nav.virality, desc: t.dashboard.launchpad.desc.virality, path: '/virality', color: 'text-orange-400' },
-                { id: 'chat', icon: MessageSquare, label: t.nav.chat, desc: t.dashboard.launchpad.desc.chat, path: '/chat', color: 'text-accent-purple' },
-            ]
-        },
-        {
-            title: t.dashboard.launchpad.sections.archives,
-            items: [
-                { id: 'arch', icon: BookOpen, label: t.nav.archive, desc: t.dashboard.launchpad.desc.archive, path: '/archive', color: 'text-blue-400' },
-                { id: 'med', icon: Film, label: t.nav.media, desc: t.dashboard.launchpad.desc.media, path: '/media', color: 'text-cyan-400' },
-                { id: 'auth', icon: Feather, label: t.nav.authors, desc: t.dashboard.launchpad.desc.authors, path: '/authors', color: 'text-yellow-400' },
-            ]
-        },
-        {
-            title: t.dashboard.launchpad.sections.system,
-            items: [
-                { id: 'edit', icon: Edit3, label: t.nav.editor, desc: t.dashboard.launchpad.desc.editor, path: '/editor', color: 'text-green-400' },
-                { id: 'sat', icon: Skull, label: t.nav.generator, desc: t.dashboard.launchpad.desc.satire, path: '/satire', color: 'text-pink-400' },
-                { id: 'vault', icon: HardDrive, label: t.nav.database, desc: t.dashboard.launchpad.desc.vault, path: '/database', color: 'text-slate-400' },
-                { id: 'set', icon: Settings, label: t.nav.settings, desc: t.dashboard.launchpad.desc.settings, path: '/settings', color: 'text-slate-500' },
-                { id: 'help', icon: HelpCircle, label: t.nav.help, desc: t.dashboard.launchpad.desc.help, path: '/help', color: 'text-slate-500' },
-            ]
-        }
-    ];
-
-    return (
-        <div className="mb-8 space-y-6">
-            <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
-                <LayoutDashboard className="text-accent-cyan" size={18} />
-                <h2 className="text-sm font-bold text-white uppercase tracking-widest">{t.dashboard.launchpad.title}</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sections.map((section, idx) => (
-                    <div key={idx} className="space-y-3">
-                        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">{section.title}</h3>
-                        <div className="grid grid-cols-1 gap-2">
-                            {section.items.map(item => (
-                                <button 
-                                    key={item.id}
-                                    onClick={() => navigate(item.path)}
-                                    className="group flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-800 hover:border-slate-600 rounded-lg text-left transition-all hover:bg-slate-900 active:scale-[0.99] relative overflow-hidden"
-                                >
-                                    <div className={`p-2 rounded-md bg-slate-950 border border-slate-800 group-hover:border-slate-700 transition-colors ${item.color}`}>
-                                        <item.icon size={16} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">{item.label}</div>
-                                        <div className="text-[10px] text-slate-500 font-mono truncate">{item.desc}</div>
-                                    </div>
-                                    <ChevronRight size={14} className="text-slate-700 group-hover:text-accent-cyan transition-colors" />
-                                    
-                                    {/* Hover Shine */}
-                                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-// World Map Projection (SVG)
-const GlobalIncidentMap: React.FC<{ data: any[], onSelect: (id: string) => void, label: string, liveLabel: string }> = ({ data, onSelect, label, liveLabel }) => {
-    // Simulated coords for demo purposes since we don't have real LatLong in Theory model yet
-    // In a real app, we'd map countries/cities to coords. Here we use deterministic random based on ID.
-    const getCoords = (id: string) => {
-        let hash = 0;
-        for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-        const x = Math.abs(Math.sin(hash) * 800) + 50; // Map width approx
-        const y = Math.abs(Math.cos(hash) * 400) + 50; // Map height approx
-        return { x, y };
-    };
-
-    return (
-        <div className="relative w-full h-full overflow-hidden bg-[#020617] rounded-xl border border-slate-800 group">
-            {/* Map Background (Abstract Grid/Continents placeholder) */}
-            <div className="absolute inset-0 opacity-20 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg')] bg-cover bg-center mix-blend-overlay grayscale invert"></div>
-            <div className="absolute inset-0 bg-cyber-grid opacity-10"></div>
-            
-            {/* Radar Scan Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-cyan/10 to-transparent w-[50%] h-full animate-[marquee_4s_linear_infinite] pointer-events-none mix-blend-screen"></div>
-
-            {/* Data Points */}
-            <svg viewBox="0 0 1000 500" className="w-full h-full absolute inset-0 preserve-3d">
-                {data.map((item) => {
-                    const { x, y } = getCoords(item.id);
-                    const isCritical = item.dangerLevel.includes('High') || item.dangerLevel.includes('Extreme');
-                    return (
-                        <g key={item.id} onClick={() => onSelect(item.id)} className="cursor-pointer hover:opacity-100 transition-opacity">
-                            <circle cx={x} cy={y} r={isCritical ? 6 : 3} fill={isCritical ? '#ef4444' : '#06b6d4'} className="animate-pulse" opacity="0.6">
-                                <animate attributeName="r" values={isCritical ? "6;10;6" : "3;6;3"} dur="3s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite" />
-                            </circle>
-                            <circle cx={x} cy={y} r={2} fill="#fff" />
-                        </g>
-                    );
-                })}
-            </svg>
-
-            {/* HUD Overlay */}
-            <div className="absolute bottom-4 left-4 text-[9px] font-mono text-accent-cyan bg-slate-900/80 px-2 py-1 rounded border border-accent-cyan/30 backdrop-blur">
-                <span className="animate-pulse">●</span> {liveLabel}: {data.length} {label}
-            </div>
-        </div>
-    );
-};
-
-// Intelligence Feed (Scrolling Terminal)
-const IntelFeed: React.FC = () => {
-    const { t } = useLanguage();
-    const [lines, setLines] = useState<string[]>([]);
-    
-    // Dynamic messages based on translation
-    const msgs = [
-        t.dashboard.feed.intercept,
-        t.dashboard.feed.sentiment,
-        t.dashboard.feed.ref,
-        t.dashboard.feed.node,
-        t.dashboard.feed.cluster,
-        t.dashboard.feed.context,
-        t.dashboard.feed.heuristic,
-        t.dashboard.feed.botnet
-    ];
+// WebGL-Style Canvas Globe (Performance Optimized)
+const HoloGlobe: React.FC<{ active: boolean, markers: {id: string, color: string}[] }> = ({ active, markers }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const parentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setLines(prev => {
-                const next = [...prev, `[${new Date().toLocaleTimeString()}] ${msgs[Math.floor(Math.random() * msgs.length)]}...`];
-                return next.slice(-8); // Keep last 8
+        const canvas = canvasRef.current;
+        const parent = parentRef.current;
+        if (!canvas || !parent) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let width = 0, height = 0, cx = 0, cy = 0;
+        let rotation = 0;
+        let animationFrameId: number;
+
+        // Generate Pseudo-3D Points
+        const spherePoints: {x: number, y: number, z: number}[] = [];
+        for (let i = 0; i < 400; i++) {
+            const phi = Math.acos(-1 + (2 * i) / 400);
+            const theta = Math.sqrt(400 * Math.PI) * phi;
+            spherePoints.push({
+                x: Math.cos(theta) * Math.sin(phi),
+                y: Math.sin(theta) * Math.sin(phi),
+                z: Math.cos(phi)
             });
-        }, 2500);
-        return () => clearInterval(interval);
-    }, [t]);
+        }
+
+        const resize = () => {
+            const rect = parent.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            ctx.scale(dpr, dpr);
+            cx = width / 2;
+            cy = height / 2;
+        };
+
+        const render = () => {
+            if (!active) return;
+            ctx.clearRect(0, 0, width, height);
+            
+            const radius = Math.min(width, height) * 0.4;
+            rotation += 0.003;
+
+            // Draw Connection Arcs (Threat Vectors)
+            if (Math.random() > 0.8) {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(6, 182, 212, ${Math.random() * 0.2})`;
+                ctx.lineWidth = 1;
+                ctx.moveTo(cx, cy);
+                const rVec = Math.random() * Math.PI * 2;
+                ctx.lineTo(cx + Math.cos(rVec) * radius * 1.2, cy + Math.sin(rVec) * radius * 1.2);
+                ctx.stroke();
+            }
+
+            // Draw Sphere
+            spherePoints.forEach(p => {
+                // Rotate Y
+                const x1 = p.x * Math.cos(rotation) - p.z * Math.sin(rotation);
+                const z1 = p.z * Math.cos(rotation) + p.x * Math.sin(rotation);
+                
+                // 3D Projection
+                const scale = 300 / (300 - z1 * radius); // Perspective
+                const x2D = x1 * radius + cx;
+                const y2D = p.y * radius + cy;
+                const alpha = (z1 + 1) / 2; // Fade back points
+
+                if (alpha > 0) {
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(100, 116, 139, ${alpha * 0.5})`;
+                    ctx.arc(x2D, y2D, 1.5 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw "Markers" (Fake hot zones)
+            markers.slice(0, 5).forEach((m, i) => {
+                const offset = (i * Math.PI / 2);
+                const mx = Math.cos(rotation * 1.5 + offset) * radius;
+                const mz = Math.sin(rotation * 1.5 + offset) * radius;
+                
+                if (mz < 0) { // Only draw if on front
+                    const mx2D = mx + cx;
+                    const my2D = cy + Math.sin(rotation + offset) * (radius * 0.5);
+                    
+                    ctx.beginPath();
+                    ctx.fillStyle = m.color === 'red' ? '#ef4444' : '#06b6d4';
+                    ctx.shadowColor = m.color === 'red' ? '#ef4444' : '#06b6d4';
+                    ctx.shadowBlur = 10;
+                    ctx.arc(mx2D, my2D, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Ping ring
+                    ctx.beginPath();
+                    ctx.strokeStyle = m.color === 'red' ? '#ef4444' : '#06b6d4';
+                    ctx.globalAlpha = (Math.sin(Date.now() / 200) + 1) / 4;
+                    ctx.arc(mx2D, my2D, 12, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            });
+
+            // HUD Elements
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius + 20, 0, Math.PI * 2);
+            ctx.setLineDash([2, 10]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            animationFrameId = requestAnimationFrame(render);
+        };
+
+        window.addEventListener('resize', resize);
+        resize();
+        render();
+
+        return () => {
+            window.removeEventListener('resize', resize);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [active, markers]);
+
+    return <div ref={parentRef} className="w-full h-full absolute inset-0"><canvas ref={canvasRef} className="block" /></div>;
+};
+
+// SVG Threat Gauge
+const ThreatGauge: React.FC<{ value: number }> = ({ value }) => {
+    // Value 1-5. 
+    // 5 = Low Threat (Full bar green), 1 = Critical (Low bar red? Or inverse?)
+    // Let's do: 1 = Critical (Red, Full), 5 = Safe (Green, Low)
+    // Actually, usually Defcon 1 is Highest Threat.
+    // Let's visualize intensity: 1 (Max) -> 5 (Low)
+    
+    // Map 5->1 to 20%->100% fill
+    const percentage = (6 - value) * 20; 
+    const color = value === 1 ? '#ef4444' : value <= 3 ? '#f59e0b' : '#10b981';
+    
+    const radius = 36;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-        <div className="h-full bg-black font-mono text-[10px] p-3 overflow-hidden flex flex-col justify-end border-l border-slate-800/50">
-            <div className="mb-2 text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                <Terminal size={10} /> {t.dashboard.feed.title}
-            </div>
-            <div className="space-y-1">
-                {lines.map((line, i) => (
-                    <div key={i} className="text-green-500/80 truncate animate-fade-in-up">
-                        {line}
-                    </div>
-                ))}
-                <div className="w-2 h-3 bg-green-500 animate-pulse mt-1"></div>
+        <div className="relative w-24 h-24 flex items-center justify-center">
+            <svg className="transform -rotate-90 w-full h-full">
+                <circle cx="48" cy="48" r={radius} stroke="#1e293b" strokeWidth="8" fill="transparent" />
+                <circle 
+                    cx="48" cy="48" r={radius} 
+                    stroke={color} 
+                    strokeWidth="8" 
+                    fill="transparent" 
+                    strokeDasharray={circumference} 
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-1000 ease-out"
+                />
+            </svg>
+            <div className="absolute flex flex-col items-center">
+                <span className="text-[10px] font-mono text-slate-500">LEVEL</span>
+                <span className={`text-2xl font-black font-display ${value === 1 ? 'animate-pulse text-red-500' : 'text-white'}`}>{value}</span>
             </div>
         </div>
     );
 };
 
-// --- 3. MAIN DASHBOARD COMPONENT ---
+// --- 3. WIDGETS ---
 
-const useDashboardLogic = () => {
-    const { t } = useLanguage();
-    const navigate = useNavigate();
-    const theories = useAppSelector(selectAllTheories);
+const MetricTile: React.FC<{ 
+    title: string, 
+    value: string | number, 
+    trend?: 'up' | 'down' | 'stable',
+    icon: React.ElementType, 
+    color: string, 
+    sparkData: number[] 
+}> = ({ title, value, trend, icon: Icon, color, sparkData }) => {
+    const chartData = useMemo(() => sparkData.map((val, i) => ({ i, val })), [sparkData]);
+    
+    return (
+        <Card variant="solid" className="p-4 flex flex-col h-32 relative overflow-hidden group border-slate-800 bg-slate-900/40 hover:bg-slate-900 transition-colors">
+            {/* Header */}
+            <div className="flex justify-between items-start z-10">
+                <div className="flex items-center gap-2">
+                    <div className={`p-1.5 rounded bg-slate-950 border border-slate-800 ${color.replace('text-', 'text-')}`}>
+                        <Icon size={14} />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{title}</span>
+                </div>
+                {trend && (
+                    <div className={`text-[9px] font-mono px-1.5 rounded ${trend === 'up' ? 'text-red-400 bg-red-950/30' : 'text-green-400 bg-green-950/30'}`}>
+                        {trend === 'up' ? '▲' : '▼'} {Math.floor(Math.random() * 10)}%
+                    </div>
+                )}
+            </div>
 
-    // --- Statistics Calculation ---
-    const stats = useMemo(() => {
-        const total = theories.length;
-        const critical = theories.filter(t => t.dangerLevel.includes('High') || t.dangerLevel.includes('Extreme')).length;
-        const avgViral = Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (total || 1));
-        
-        // Mock historical data for sparklines
-        const history = new Array(10).fill(0).map(() => Math.floor(Math.random() * 100));
-        
-        return { total, critical, avgViral, history };
-    }, [theories]);
+            {/* Value */}
+            <div className="mt-2 z-10">
+                <div className="text-2xl font-black text-white font-display tracking-tight"><CipherText text={String(value)} /></div>
+            </div>
 
-    // --- Radar Data ---
-    const radarData = useMemo(() => {
-        const categories = theories.reduce((acc, t) => {
-            const cat = t.category.split(' ')[0]; // Shorten name
-            acc[cat] = (acc[cat] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-        
-        return Object.entries(categories).map(([subject, A]) => ({ subject, A, fullMark: theories.length })).slice(0, 6);
-    }, [theories]);
-
-    // --- Trend Data (Simulated Time Series) ---
-    const trendData = useMemo(() => {
-        return new Array(7).fill(0).map((_, i) => ({
-            day: `Day ${i+1}`,
-            scans: Math.floor(Math.random() * 500) + 200,
-            threats: Math.floor(Math.random() * 50) + 10,
-        }));
-    }, []);
-
-    return { stats, radarData, trendData, theories, navigate, t };
+            {/* Sparkline */}
+            <div className="absolute bottom-0 left-0 right-0 h-12 opacity-30 group-hover:opacity-50 transition-opacity">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                        <defs>
+                            <linearGradient id={`grad-${title}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={color === 'text-red-500' ? '#ef4444' : color === 'text-accent-cyan' ? '#06b6d4' : '#8b5cf6'} stopOpacity={0.5}/>
+                                <stop offset="100%" stopColor={color === 'text-red-500' ? '#ef4444' : color === 'text-accent-cyan' ? '#06b6d4' : '#8b5cf6'} stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Area 
+                            type="monotone" 
+                            dataKey="val" 
+                            stroke={color === 'text-red-500' ? '#ef4444' : color === 'text-accent-cyan' ? '#06b6d4' : '#8b5cf6'} 
+                            strokeWidth={2} 
+                            fill={`url(#grad-${title})`} 
+                            isAnimationActive={false} 
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+        </Card>
+    );
 };
 
-const MetricCard: React.FC<{ 
-    title: string, value: string | number, sub: string, 
-    icon: React.ElementType, color: string, sparklineData?: number[],
-    onClick?: () => void
-}> = ({ title, value, sub, icon: Icon, color, sparklineData, onClick }) => (
-    <Card 
-        onClick={onClick}
-        className={cn(
-            "p-5 flex flex-col justify-between relative overflow-hidden group cursor-pointer border-slate-800 bg-slate-950/50 hover:bg-slate-900 transition-all active:scale-[0.98]",
-            "hover:border-l-4 hover:border-l-[color:var(--highlight)]" // Dynamic border handled via style or simpler class
-        )}
-        style={{ '--highlight': color } as React.CSSProperties}
-    >
-        <div className="flex justify-between items-start z-10 relative">
-            <div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    <Icon size={12} className={cn(color.replace('text-', 'text-'))} /> {title}
-                </div>
-                <div className="text-3xl font-black text-white font-display tracking-tight mt-1">
-                    <ScrambleText text={String(value)} />
-                </div>
-            </div>
-            {sparklineData && <Sparkline data={sparklineData} color={color === 'text-red-500' ? '#ef4444' : color === 'text-accent-cyan' ? '#06b6d4' : '#8b5cf6'} />}
-        </div>
-        
-        <div className="mt-4 pt-3 border-t border-slate-800/50 flex justify-between items-center z-10 relative">
-            <span className="text-[10px] font-mono text-slate-400">{sub}</span>
-            <ChevronRight size={14} className="text-slate-600 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100" />
-        </div>
+const CommandDeck: React.FC = () => {
+    const navigate = useNavigate();
+    const { t } = useLanguage();
 
-        {/* Decor */}
-        <div className={cn("absolute -bottom-4 -right-4 w-24 h-24 rounded-full opacity-5 group-hover:opacity-10 transition-opacity blur-xl", color.replace('text-', 'bg-'))} />
-    </Card>
-);
+    const commands = [
+        { id: 'scan', label: 'Threat Scan', sub: 'Protocol Omega', icon: ShieldAlert, path: '/dangerous', color: 'border-red-500/30 text-red-400 hover:bg-red-950/20' },
+        { id: 'sim', label: 'Simulation', sub: 'Viral Vector', icon: Globe, path: '/virality', color: 'border-orange-500/30 text-orange-400 hover:bg-orange-950/20' },
+        { id: 'uplink', label: 'AI Uplink', sub: 'Dr. Veritas', icon: MessageSquare, path: '/chat', color: 'border-purple-500/30 text-accent-purple hover:bg-purple-950/20' },
+        { id: 'arch', label: 'Archives', sub: 'Main Database', icon: Database, path: '/archive', color: 'border-blue-500/30 text-blue-400 hover:bg-blue-950/20' },
+        { id: 'fab', label: 'Fabricator', sub: 'Satire Engine', icon: Skull, path: '/satire', color: 'border-pink-500/30 text-pink-400 hover:bg-pink-950/20' },
+        { id: 'sys', label: 'System', sub: 'Configuration', icon: Settings, path: '/settings', color: 'border-slate-500/30 text-slate-400 hover:bg-slate-800' },
+    ];
+
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {commands.map(cmd => (
+                <button
+                    key={cmd.id}
+                    onClick={() => navigate(cmd.path)}
+                    className={`
+                        relative flex flex-col items-center justify-center p-4 rounded-xl border bg-slate-900/40 backdrop-blur-sm transition-all duration-300 group
+                        ${cmd.color} hover:border-opacity-100 hover:scale-[1.02] active:scale-[0.98]
+                    `}
+                >
+                    <div className="mb-2 p-2 rounded-full bg-slate-950 shadow-inner group-hover:scale-110 transition-transform">
+                        <cmd.icon size={18} />
+                    </div>
+                    <div className="text-xs font-bold uppercase tracking-wider">{cmd.label}</div>
+                    <div className="text-[9px] opacity-60 font-mono mt-0.5">{cmd.sub}</div>
+                    
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-current opacity-30 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-current opacity-30 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+            ))}
+        </div>
+    );
+};
+
+// --- 4. MAIN DASHBOARD ---
 
 export const Dashboard: React.FC = () => {
-    const { stats, radarData, trendData, theories, navigate, t } = useDashboardLogic();
+    const { t } = useLanguage();
+    const theories = useAppSelector(selectAllTheories);
+    
+    // Derived Stats
+    const totalFiles = theories.length;
+    const criticalThreats = theories.filter(t => t.dangerLevel.includes('High') || t.dangerLevel.includes('Extreme')).length;
+    const avgVirality = Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (totalFiles || 1));
+    const sysLoad = useLiveTelemetry(Array(20).fill(20));
+    
+    // Map Markers
+    const markers = useMemo(() => theories.map(t => ({
+        id: t.id,
+        color: t.dangerLevel.includes('High') ? 'red' : 'cyan'
+    })), [theories]);
 
     return (
         <PageFrame>
             <PageHeader 
-                title={t.dashboard.title}
-                subtitle={t.dashboard.subtitle}
-                icon={Activity}
-                status={t.common.online}
+                title="SITUATION REPORT"
+                subtitle="GLOBAL DISINFORMATION MONITORING GRID"
+                icon={LayoutGrid}
+                status="ONLINE"
                 visualizerState="BUSY"
             >
-                <div className="flex items-center gap-4 text-[10px] font-mono text-slate-500 mt-2">
-                    <span className="flex items-center gap-1"><Cpu size={10} /> {t.dashboard.load}: 14%</span>
-                    <span className="flex items-center gap-1"><Wifi size={10} /> {t.dashboard.latency}: 24ms</span>
-                    <span className="flex items-center gap-1"><Lock size={10} /> {t.dashboard.vault}: {t.dashboard.secure}</span>
+                <div className="flex gap-4 text-[10px] font-mono text-slate-500 mt-2">
+                    <span className="flex items-center gap-1"><Wifi size={10} className="text-green-500"/> UPLINK: STABLE</span>
+                    <span className="flex items-center gap-1"><Lock size={10} className="text-accent-cyan"/> ENCRYPTION: AES-256</span>
+                    <span className="flex items-center gap-1"><Server size={10} className="text-accent-purple"/> NODE: GEMINI-PRO</span>
                 </div>
             </PageHeader>
 
-            {/* --- NEW MISSION CONTROL --- */}
-            <MissionLaunchpad />
-
-            {/* --- TOP ROW: KPI GRID --- */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <MetricCard 
-                    title={t.dashboard.total} 
-                    value={stats.total} 
-                    sub="TOTAL ARCHIVED FILES" 
-                    icon={Terminal} 
-                    color="text-slate-400" 
-                    sparklineData={stats.history}
-                    onClick={() => navigate('/archive')}
-                />
-                <MetricCard 
-                    title={t.dashboard.critical}
-                    value={stats.critical} 
-                    sub="PROTOCOL OMEGA TARGETS" 
-                    icon={ShieldAlert} 
-                    color="text-red-500" 
-                    sparklineData={stats.history.map(x => x * 0.4)}
-                    onClick={() => navigate('/dangerous')}
-                />
-                <MetricCard 
-                    title={t.dashboard.virality}
-                    value={`${stats.avgViral}%`} 
-                    sub="GLOBAL INFECTION RATE" 
-                    icon={Radio} 
-                    color="text-accent-cyan" 
-                    sparklineData={stats.history.map(x => x + 20)}
-                    onClick={() => navigate('/virality')}
-                />
-                <MetricCard 
-                    title={t.dashboard.sources}
-                    value="ONLINE" 
-                    sub="AI SKEPTIC ACTIVE" 
-                    icon={Zap} 
-                    color="text-accent-purple" 
-                    onClick={() => navigate('/chat')}
-                />
-            </div>
-
-            {/* --- MIDDLE ROW: MAP & INTEL --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 min-h-[400px]">
-                {/* Global Map */}
-                <Card className="lg:col-span-2 p-0 flex flex-col bg-slate-950 border-slate-800 shadow-2xl relative">
-                    <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur">
-                        <div className="text-xs font-bold text-white flex items-center gap-2">
-                            <Globe size={14} className="text-accent-cyan" /> {t.dashboard.mapLabel}
-                        </div>
-                        <div className="flex gap-2">
-                            <Badge label="LIVE" className="bg-red-500/10 text-red-500 border-red-500/50 animate-pulse" />
+            {/* --- BENTO GRID LAYOUT --- */}
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8 auto-rows-[minmax(140px,auto)]">
+                
+                {/* 1. Global Map (Large Hero) */}
+                <Card className="col-span-1 md:col-span-2 lg:col-span-4 row-span-2 relative bg-slate-950 border-slate-800 p-0 overflow-hidden shadow-2xl group">
+                    <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+                        <div className="px-2 py-1 bg-slate-900/80 backdrop-blur rounded border border-slate-700 text-xs font-mono text-accent-cyan flex items-center gap-2">
+                            <Globe size={12} className="animate-spin-slow" /> LIVE TRACKING
                         </div>
                     </div>
-                    <div className="flex-1 relative">
-                        <GlobalIncidentMap 
-                            data={theories} 
-                            onSelect={(id) => navigate(`/archive/${id}`)} 
-                            label={t.dashboard.signals}
-                            liveLabel={t.dashboard.live}
-                        />
+                    <HoloGlobe active={true} markers={markers} />
+                    {/* Overlay Grid */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+                    <div className="absolute bottom-4 left-4 z-10 text-[10px] font-mono text-slate-500">
+                        <div>ACTIVE_NODES: {totalFiles}</div>
+                        <div>LATENCY: 24ms</div>
                     </div>
                 </Card>
 
-                {/* Side Panel: Defcon & Feed */}
-                <div className="flex flex-col gap-6 h-full">
-                    {/* Defcon Gauge */}
-                    <Card className="flex-1 p-0 bg-slate-900/50 border-red-900/30 overflow-hidden relative flex flex-col items-center justify-center text-center">
-                        <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-transparent pointer-events-none"></div>
-                        <AlertTriangle size={48} className="text-red-500 mb-2 animate-pulse" />
-                        <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.2em] mb-1">{t.dashboard.status}</div>
-                        <div className="text-5xl font-black text-white font-display tracking-tighter">{t.dashboard.defcon} 4</div>
-                        <div className="mt-4 w-full px-8">
-                            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-red-500 w-[20%] animate-pulse"></div>
-                            </div>
-                        </div>
-                    </Card>
-
-                    {/* Intel Feed */}
-                    <Card className="flex-[2] p-0 border-slate-800 overflow-hidden">
-                        <IntelFeed />
-                    </Card>
-                </div>
-            </div>
-
-            {/* --- BOTTOM ROW: ANALYTICS --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Temporal Activity */}
-                <Card className="lg:col-span-2 p-0 bg-slate-950 border-slate-800">
-                    <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-                        <Signal size={14} className="text-accent-purple" />
-                        <span className="text-xs font-bold text-white uppercase tracking-widest">{t.dashboard.temporal}</span>
+                {/* 2. Defcon Status */}
+                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 flex items-center justify-between p-6">
+                    <div>
+                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Global Status</div>
+                        <div className="text-xl font-black text-white font-display tracking-tight">DEFCON 4</div>
+                        <div className="text-[10px] text-green-400 mt-1 font-mono uppercase">Readiness: Normal</div>
                     </div>
-                    <div className="h-64 w-full p-4">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                            <AreaChart data={trendData}>
+                    <ThreatGauge value={4} />
+                </Card>
+
+                {/* 3. System Load (Live Chart) */}
+                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 p-4 flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                            <Cpu size={12} /> Sys Load
+                        </div>
+                        <div className="text-xs font-mono text-accent-purple">{sysLoad[sysLoad.length-1]}%</div>
+                    </div>
+                    <div className="flex-1 w-full min-h-[80px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={sysLoad.map((v, i) => ({ i, v }))}>
                                 <defs>
-                                    <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                    <linearGradient id="gradLoad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.5}/>
+                                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                <XAxis dataKey="day" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
-                                    itemStyle={{ color: '#fff' }}
-                                />
-                                <Area type="monotone" dataKey="scans" stroke="#8b5cf6" strokeWidth={2} fillOpacity={1} fill="url(#colorScans)" />
+                                <Area type="monotone" dataKey="v" stroke="#8b5cf6" strokeWidth={2} fill="url(#gradLoad)" isAnimationActive={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </Card>
 
-                {/* Threat Vector Radar */}
-                <Card className="p-0 bg-slate-950 border-slate-800">
-                    <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-                        <Crosshair size={14} className="text-accent-cyan" />
-                        <span className="text-xs font-bold text-white uppercase tracking-widest">{t.dangerPage.vector}</span>
+                {/* 4. Metrics Row */}
+                <div className="col-span-1 md:col-span-4 lg:col-span-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <MetricTile 
+                        title="Archived" 
+                        value={totalFiles} 
+                        icon={HardDrive} 
+                        color="text-slate-400" 
+                        sparkData={sysLoad.map(n => n * 0.5)}
+                    />
+                    <MetricTile 
+                        title="Threats" 
+                        value={criticalThreats} 
+                        trend="up"
+                        icon={ShieldAlert} 
+                        color="text-red-500" 
+                        sparkData={sysLoad.map(n => n * 1.2)}
+                    />
+                    <MetricTile 
+                        title="Viral Vel." 
+                        value={`${avgVirality}%`} 
+                        icon={Radio} 
+                        color="text-accent-cyan" 
+                        sparkData={sysLoad.map(n => n * 0.8)}
+                    />
+                    <MetricTile 
+                        title="Intel AI" 
+                        value="ACTIVE" 
+                        icon={Brain} 
+                        color="text-accent-purple" 
+                        sparkData={sysLoad}
+                    />
+                </div>
+
+                {/* 5. Command Deck */}
+                <div className="col-span-1 md:col-span-4 lg:col-span-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Terminal size={16} className="text-accent-cyan" />
+                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Command Interface</h3>
+                        <div className="h-px bg-slate-800 flex-1 ml-4"></div>
                     </div>
-                    <div className="h-64 w-full relative">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                                <PolarGrid stroke="#334155" />
-                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                                <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={false} axisLine={false} />
-                                <Radar name="Threats" dataKey="A" stroke="#06b6d4" strokeWidth={2} fill="#06b6d4" fillOpacity={0.3} />
-                                <Tooltip 
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#06b6d4', fontSize: '12px' }}
-                                    itemStyle={{ color: '#06b6d4' }}
-                                />
-                            </RadarChart>
-                        </ResponsiveContainer>
-                        {/* Overlay Scan Effect */}
-                        <div className="absolute inset-0 pointer-events-none rounded-full border border-accent-cyan/10 scale-75 animate-[ping_3s_linear_infinite]"></div>
-                    </div>
-                </Card>
+                    <CommandDeck />
+                </div>
+
             </div>
+            
+            {/* Live Feed Footer */}
+            <Card className="mt-6 p-3 bg-black border-slate-800 flex items-center gap-4 font-mono text-xs overflow-hidden">
+                <div className="text-green-500 font-bold whitespace-nowrap flex items-center gap-2">
+                    <Activity size={12} className="animate-pulse" /> LIVE FEED
+                </div>
+                <div className="flex-1 overflow-hidden relative h-4">
+                    <div className="absolute whitespace-nowrap animate-marquee text-slate-500">
+                        Analyzing node 0x89A... Sector 7 clear... New narrative detected in vector [Q]... Intercepting packet stream... Decrypting [AES-256]... Uplink secure...
+                    </div>
+                </div>
+            </Card>
+
         </PageFrame>
     );
 };

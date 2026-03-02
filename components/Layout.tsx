@@ -65,7 +65,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
                     
                     <button 
                         onClick={handleReboot}
-                        className="text-slate-600 hover:text-accent-cyan transition-colors p-2 rounded hover:bg-slate-900 active:scale-95 touch-manipulation"
+                        className="text-slate-600 hover:text-accent-cyan transition-colors p-2 rounded hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
                         title={t.layout.footer.reboot}
                         aria-label="Reboot System"
                     >
@@ -99,8 +99,10 @@ const ActiveFileIndicator: React.FC = React.memo(() => {
     return (
         <div 
             onClick={() => navigate(`/archive/${activeFileId}`)}
-            className="mx-3 mt-2 mb-4 p-3 bg-slate-900/50 border border-slate-800 rounded-lg cursor-pointer hover:border-accent-cyan/50 hover:bg-slate-900 transition-all group active:scale-98"
+            className="mx-3 mt-2 mb-4 p-3 bg-slate-900/50 border border-slate-800 rounded-lg cursor-pointer hover:border-accent-cyan/50 hover:bg-slate-900 transition-all group active:scale-98 focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
             role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate(`/archive/${activeFileId}`)}
             aria-label={`Open active file ${activeFileId}`}
         >
             <div className="flex items-center gap-2 mb-1.5">
@@ -114,7 +116,7 @@ const ActiveFileIndicator: React.FC = React.memo(() => {
     );
 });
 
-// --- Nav Button ---
+// --- Nav Button (Memoized) ---
 const NavButton: React.FC<{ item: NavItem & { path: string }, id?: string, onClick?: () => void }> = React.memo(({ item, id, onClick }) => {
   return (
     <NavLink
@@ -170,62 +172,69 @@ export const Layout: React.FC = () => {
   // Service Worker Registration & Update Handling
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      // Ensure we register with relative path './sw.js' to match origin correctly
-      navigator.serviceWorker.register('./sw.js')
-        .then(registration => {
-          setWbRegistration(registration);
-          
-          // Check for waiting service worker (update ready)
-          if (registration.waiting) {
-            setUpdateAvailable(true);
-          }
-
-          registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            if (installingWorker) {
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New content is available; please refresh.
-                  setUpdateAvailable(true);
-                  dispatch(addLog({ message: 'System Update: Protocol patch detected.', type: 'info' }));
-                }
-              };
-            }
-          };
-        })
-        .catch(err => {
-          console.error('SW Registration failed:', err);
-        });
+      try {
+        let swUrl = './sw.js';
         
-        // Listen for controller change (reload when new SW takes over)
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!refreshing) {
-                window.location.reload();
-                refreshing = true;
+        try {
+            if (window.location.href && window.location.href.startsWith('http')) {
+                swUrl = new URL('sw.js', window.location.href).href;
             }
-        });
+        } catch (urlError) {
+            console.warn("Failed to construct absolute SW URL, falling back to relative:", urlError);
+        }
+
+        navigator.serviceWorker.register(swUrl)
+            .then(registration => {
+            setWbRegistration(registration);
+            
+            if (registration.waiting) {
+                setUpdateAvailable(true);
+            }
+
+            registration.onupdatefound = () => {
+                const installingWorker = registration.installing;
+                if (installingWorker) {
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    setUpdateAvailable(true);
+                    dispatch(addLog({ message: 'System Update: Protocol patch detected.', type: 'info' }));
+                    }
+                };
+                }
+            };
+            })
+            .catch(err => {
+            console.error('SW Registration failed:', err);
+            dispatch(addLog({ message: `SW Error: ${err.message || 'Registration failed'}`, type: 'warning' }));
+            });
+            
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    window.location.reload();
+                    refreshing = true;
+                }
+            });
+      } catch (e) {
+          console.error("Critical SW Error", e);
+      }
     }
   }, [dispatch]);
 
   const handleUpdateApp = useCallback(() => {
     if (wbRegistration && wbRegistration.waiting) {
-        // Send message to SW to skip waiting
         wbRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
     } else {
         window.location.reload();
     }
   }, [wbRegistration]);
 
-  // Force Scroll to Top on Navigation (Overrides persistence for clean start)
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
-        // Immediate hard reset to top
         scrollContainerRef.current.scrollTo(0, 0);
     }
   }, [location.pathname]); 
 
-  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -237,13 +246,11 @@ export const Layout: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [dispatch]);
 
-  // Navigation Effects
   useEffect(() => {
     dispatch(addLog({ message: `Nav: Route [${location.pathname}]`, type: 'info' }));
     setSidebarOpen(false);
   }, [location.pathname, dispatch]);
 
-  // Connectivity Listeners
   useEffect(() => {
     const handleOnline = () => {
         setIsOnline(true);
@@ -394,7 +401,7 @@ export const Layout: React.FC = () => {
         {/* Mobile Sidebar Close */}
         <div className="md:hidden p-4 flex justify-between items-center border-b border-slate-800/50">
              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2">System Menu</span>
-             <button onClick={() => setSidebarOpen(false)} className="text-slate-500 hover:text-white p-2 rounded-lg hover:bg-slate-900"><X size={20}/></button>
+             <button onClick={() => setSidebarOpen(false)} className="text-slate-500 hover:text-white p-2 rounded-lg hover:bg-slate-900" aria-label="Close sidebar"><X size={20}/></button>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 space-y-6 relative z-10 scrollbar-thin scrollbar-thumb-slate-800">
@@ -419,7 +426,7 @@ export const Layout: React.FC = () => {
             <div className="px-4 mt-4">
                <button 
                  onClick={handleInstallClick}
-                 className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95 shadow-md"
+                 className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95 shadow-md focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
                  aria-label="Install App"
                >
                  <Download size={16} className="text-accent-cyan" />
@@ -455,7 +462,7 @@ export const Layout: React.FC = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) => cn(
-                "flex flex-col items-center justify-center w-full h-full gap-1 transition-all active:scale-90",
+                "flex flex-col items-center justify-center w-full h-full gap-1 transition-all active:scale-90 outline-none focus-visible:text-accent-cyan",
                 isActive ? 'text-accent-cyan' : 'text-slate-500 hover:text-slate-300'
               )}
             >

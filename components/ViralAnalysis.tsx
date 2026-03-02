@@ -1,4 +1,3 @@
-
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import { SimulationParams } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -122,12 +121,22 @@ const AdvancedPropagationNetwork: React.FC<{
 }> = React.memo(({ params, mode, tool, paused, onStatsUpdate }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
     
     // Mutable Simulation State (Ref-based for performance)
     const agentsRef = useRef<Agent[]>([]);
     const particlesRef = useRef<Particle[]>([]);
     const frameRef = useRef<number>(0);
     const lastUpdateRef = useRef<number>(0);
+
+    // Visibility Check
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsVisible(entry.isIntersecting);
+        }, { threshold: 0.1 });
+        if (containerRef.current) observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, []);
 
     // Initialize Agents
     const initAgents = (w: number, h: number) => {
@@ -211,7 +220,10 @@ const AdvancedPropagationNetwork: React.FC<{
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        if (!canvas || !container) return;
+        if (!canvas || !container || !isVisible) {
+            if (frameRef.current) cancelAnimationFrame(frameRef.current);
+            return;
+        }
 
         const resize = () => {
             const parent = canvas.parentElement;
@@ -400,7 +412,7 @@ const AdvancedPropagationNetwork: React.FC<{
             window.removeEventListener('resize', resize);
             cancelAnimationFrame(frameRef.current);
         };
-    }, [params, mode, paused]);
+    }, [params, mode, paused, isVisible]);
 
     return (
         <div ref={containerRef} className="absolute inset-0 z-0">

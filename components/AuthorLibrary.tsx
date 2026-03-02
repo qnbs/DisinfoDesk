@@ -1,5 +1,4 @@
-
-import React, { useState, useMemo, createContext, useContext, useEffect, useRef } from 'react';
+import React, { useState, useMemo, createContext, useContext, useEffect, useRef, useCallback } from 'react';
 import { AUTHORS_FULL } from '../data/enriched';
 import { Author } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -19,30 +18,47 @@ type CategoryKey = 'ALL' | 'COSMIC' | 'SYSTEM' | 'HISTORY' | 'ESOTERIC';
 
 // --- 0. Advanced UI Components ---
 
-// 3D Tilt Card Effect
-const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = ({ author, onClick }) => {
+// 3D Tilt Card Effect (Optimized)
+const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React.memo(({ author, onClick }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const { language } = useLanguage();
+    const rafRef = useRef<number | null>(null);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!cardRef.current) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        cardRef.current.style.setProperty('--x', `${x}px`);
-        cardRef.current.style.setProperty('--y', `${y}px`);
         
-        const rotateX = (y / rect.height - 0.5) * -10; // Max 10deg rotation
-        const rotateY = (x / rect.width - 0.5) * 10;
-        cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    };
+        // Capture event data immediately for use in rAF
+        const clientX = e.clientX;
+        const clientY = e.clientY;
 
-    const handleMouseLeave = () => {
-        if (!cardRef.current) return;
-        cardRef.current.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-        cardRef.current.style.setProperty('--x', `-100%`);
-        cardRef.current.style.setProperty('--y', `-100%`);
-    };
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+        rafRef.current = requestAnimationFrame(() => {
+            if (!cardRef.current) return;
+            const rect = cardRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            cardRef.current.style.setProperty('--x', `${x}px`);
+            cardRef.current.style.setProperty('--y', `${y}px`);
+            
+            // Reduced rotation for smoother feel and less layout thrashing
+            const rotateX = (y / rect.height - 0.5) * -5; 
+            const rotateY = (x / rect.width - 0.5) * 5;
+            
+            cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+        });
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+            if (!cardRef.current) return;
+            cardRef.current.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            cardRef.current.style.setProperty('--x', `-100%`);
+            cardRef.current.style.setProperty('--y', `-100%`);
+        });
+    }, []);
 
     return (
         <div 
@@ -50,8 +66,11 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = ({ au
             onClick={onClick}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="group relative h-[420px] rounded-xl bg-slate-900 border border-slate-800 cursor-pointer overflow-hidden transition-all duration-200 ease-out shadow-lg hover:shadow-2xl hover:border-accent-cyan/50 select-none"
+            className="group relative h-[420px] rounded-xl bg-slate-900 border border-slate-800 cursor-pointer overflow-hidden transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:border-accent-cyan/50 select-none transform-gpu will-change-transform"
             style={{ transformStyle: 'preserve-3d' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && onClick()}
         >
             {/* Holographic Sheen Layer */}
             <div 
@@ -63,7 +82,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = ({ au
 
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
-                <img src={author.imageUrl} alt="" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700 grayscale group-hover:grayscale-0 scale-105" />
+                <img src={author.imageUrl} alt="" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700 grayscale group-hover:grayscale-0 scale-105" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/80 to-slate-950" />
             </div>
 
@@ -71,7 +90,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = ({ au
             <div className="relative z-10 p-6 h-full flex flex-col transform translate-z-10">
                 <div className="flex justify-between items-start mb-4">
                     <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 shadow-xl overflow-hidden group-hover:border-accent-cyan transition-colors">
-                        <img src={author.imageUrl} alt={author.name} className="w-full h-full object-cover rounded-full grayscale group-hover:grayscale-0 transition-all" />
+                        <img src={author.imageUrl} alt={author.name} className="w-full h-full object-cover rounded-full grayscale group-hover:grayscale-0 transition-all" loading="lazy" />
                     </div>
                     <div className="flex flex-col items-end gap-1">
                         <div className="text-[9px] font-mono text-slate-500 border border-slate-800 px-1.5 rounded bg-black/40 backdrop-blur">
@@ -127,10 +146,10 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = ({ au
             </div>
         </div>
     );
-};
+});
 
 // Network Graph Component
-const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void }> = ({ authors, onSelect }) => {
+const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void }> = React.memo(({ authors, onSelect }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -274,7 +293,7 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
             </div>
         </div>
     );
-};
+});
 
 // --- 1. Logic Hook ---
 
@@ -364,7 +383,7 @@ const AuthorLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 // --- 3. Main Sections ---
 
-const LibraryHeader: React.FC = () => {
+const LibraryHeader: React.FC = React.memo(() => {
     const { t, searchTerm, setSearchTerm, viewMode, setViewMode, activeCategory, setActiveCategory, totalCount, categoryConfig } = useAuthorLibrary();
     
     return (
@@ -376,9 +395,9 @@ const LibraryHeader: React.FC = () => {
             visualizerState="IDLE"
             actions={
                 <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
-                    <button onClick={() => setViewMode('GRID')} className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><LayoutGrid size={16} /></button>
-                    <button onClick={() => setViewMode('LIST')} className={`p-2 rounded transition-colors ${viewMode === 'LIST' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><List size={16} /></button>
-                    <button onClick={() => setViewMode('NETWORK')} className={`p-2 rounded transition-colors ${viewMode === 'NETWORK' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Network size={16} /></button>
+                    <button onClick={() => setViewMode('GRID')} aria-label="Grid View" className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><LayoutGrid size={16} /></button>
+                    <button onClick={() => setViewMode('LIST')} aria-label="List View" className={`p-2 rounded transition-colors ${viewMode === 'LIST' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><List size={16} /></button>
+                    <button onClick={() => setViewMode('NETWORK')} aria-label="Network View" className={`p-2 rounded transition-colors ${viewMode === 'NETWORK' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Network size={16} /></button>
                 </div>
             }
         >
@@ -392,7 +411,7 @@ const LibraryHeader: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-900/50 border border-slate-700 text-white pl-12 pr-10 py-4 rounded-xl focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-all text-sm font-mono shadow-inner placeholder-slate-600"
                     />
-                    {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded-full hover:bg-slate-800"><X size={14} /></button>}
+                    {searchTerm && <button onClick={() => setSearchTerm('')} aria-label="Clear Search" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded-full hover:bg-slate-800"><X size={14} /></button>}
                 </div>
                 
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -415,7 +434,7 @@ const LibraryHeader: React.FC = () => {
             </div>
         </PageHeader>
     );
-};
+});
 
 const LibraryContent: React.FC = () => {
     const { displayAuthors, filteredAuthors, viewMode, hasMore, handleLoadMore, activeCategory, searchTerm, featuredAuthor, onNavigateToDetail, t } = useAuthorLibrary();
@@ -428,7 +447,13 @@ const LibraryContent: React.FC = () => {
         <div className="animate-fade-in pb-12">
             {/* Conditional Spotlight */}
             {viewMode !== 'NETWORK' && activeCategory === 'ALL' && !searchTerm && (
-                <div className="relative w-full rounded-2xl overflow-hidden mb-12 border border-slate-800 shadow-2xl group cursor-pointer animate-fade-in bg-slate-950" onClick={() => onNavigateToDetail(featuredAuthor.id)}>
+                <div 
+                    className="relative w-full rounded-2xl overflow-hidden mb-12 border border-slate-800 shadow-2xl group cursor-pointer animate-fade-in bg-slate-950" 
+                    onClick={() => onNavigateToDetail(featuredAuthor.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && onNavigateToDetail(featuredAuthor.id)}
+                >
                     <div className="absolute inset-0 bg-slate-900 opacity-50"><img src={featuredAuthor.imageUrl} alt="" className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000 grayscale group-hover:grayscale-0" /></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent" />
                     <div className="absolute top-4 right-4 bg-black/60 backdrop-blur border border-accent-purple/30 px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest text-accent-purple flex items-center gap-2"><Star size={12} className="fill-accent-purple" /> Archivist Choice</div>
@@ -448,7 +473,14 @@ const LibraryContent: React.FC = () => {
                         viewMode === 'GRID' 
                             ? <HolographicCard key={author.id} author={author} onClick={() => onNavigateToDetail(author.id)} />
                             : (
-                                <div key={author.id} onClick={() => onNavigateToDetail(author.id)} className="flex items-center gap-4 p-4 bg-slate-900/30 border border-slate-800 rounded-lg hover:bg-slate-800 hover:border-slate-600 cursor-pointer transition-all active:scale-[0.99] group">
+                                <div 
+                                    key={author.id} 
+                                    onClick={() => onNavigateToDetail(author.id)} 
+                                    className="flex items-center gap-4 p-4 bg-slate-900/30 border border-slate-800 rounded-lg hover:bg-slate-800 hover:border-slate-600 cursor-pointer transition-all active:scale-[0.99] group outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => e.key === 'Enter' && onNavigateToDetail(author.id)}
+                                >
                                     <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-700 overflow-hidden shrink-0 group-hover:border-accent-cyan/50"><img src={author.imageUrl} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" /></div>
                                     <div className="flex-1 min-w-0"><h3 className="text-sm font-bold text-white group-hover:text-accent-cyan transition-colors">{author.name}</h3><div className="text-[10px] text-slate-500 font-mono">{author.lifespan} • {author.nationality}</div></div>
                                     <div className="text-[9px] font-mono text-slate-600 group-hover:text-accent-purple">{author.influenceLevel}% INF</div>
@@ -465,7 +497,7 @@ const LibraryContent: React.FC = () => {
     );
 };
 
-const SemanticIndex: React.FC = () => {
+const SemanticIndex: React.FC = React.memo(() => {
     const { allFocusAreas, handleTagClick, t } = useAuthorLibrary();
     return (
         <div className="mt-8 pt-8 border-t border-slate-800 animate-fade-in">
@@ -473,7 +505,7 @@ const SemanticIndex: React.FC = () => {
             <Card className="p-6 bg-slate-950/30 border-slate-800/50"><div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto custom-scrollbar">{allFocusAreas.map(area => <button key={area} onClick={() => handleTagClick(area)} className="px-3 py-1.5 rounded-md text-[10px] font-mono border border-slate-800 bg-slate-900/50 text-slate-500 hover:text-accent-cyan hover:border-accent-cyan/30 transition-all hover:-translate-y-0.5">{area}</button>)}</div></Card>
         </div>
     );
-};
+});
 
 export const AuthorLibrary: React.FC = () => (
     <AuthorLibraryProvider>

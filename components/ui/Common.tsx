@@ -18,13 +18,15 @@ const HeaderVisualizer: React.FC<VisualizerProps> = React.memo(({ state = 'IDLE'
     const containerRef = useRef<HTMLDivElement>(null);
     const frameRef = useRef<number>(0);
     const reducedMotion = useAppSelector(state => state.settings.config.reducedMotion);
-    const [isVisible, setIsVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false); // Default off until observed
 
     // 1. Performance: Intersection Observer to pause rendering when off-screen
     useEffect(() => {
         const observer = new IntersectionObserver(
-            ([entry]) => setIsVisible(entry.isIntersecting),
-            { threshold: 0.1 }
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { threshold: 0.01 } // Trigger as soon as 1% is visible
         );
         
         if (containerRef.current) {
@@ -36,21 +38,21 @@ const HeaderVisualizer: React.FC<VisualizerProps> = React.memo(({ state = 'IDLE'
 
     useEffect(() => {
         // Immediate bailout: Reduced motion, Idle state, or Off-screen
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+
         if (state === 'IDLE' || reducedMotion || !isVisible) {
-            const canvas = canvasRef.current;
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx?.clearRect(0, 0, canvas.width, canvas.height);
-                if (frameRef.current) cancelAnimationFrame(frameRef.current);
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            if (frameRef.current) {
+                cancelAnimationFrame(frameRef.current);
+                frameRef.current = 0;
             }
             return;
         }
 
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        
-        // 2. Performance: Desynchronized hint for lower latency (if supported)
-        const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
         if (!ctx) return;
 
         let t = 0;
@@ -141,7 +143,7 @@ interface PageFrameProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const PageFrame = React.memo(forwardRef<HTMLDivElement, PageFrameProps>(({ children, className = '', as: Component = 'div', ...props }, ref) => (
     <Component ref={ref} className={cn("relative min-h-full w-full", className)} {...props}>
-      <div className="relative z-10 p-4 md:p-6 lg:p-8 max-w-[1920px] mx-auto pb-safe-bottom md:pb-12 animate-fade-in-up">
+      <div className="relative z-10 p-4 md:p-6 lg:p-8 max-w-[1920px] mx-auto pb-safe-bottom md:pb-24 animate-fade-in-up">
         {children}
       </div>
     </Component>
@@ -267,7 +269,7 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
     <button 
         ref={ref} 
         className={cn(
-            "font-bold font-mono uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center justify-center relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation", 
+            "font-bold font-mono uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center justify-center relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-accent-cyan disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation select-none", 
             variants[variant], 
             sizes[size], 
             className

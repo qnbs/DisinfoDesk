@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, createContext, useContext, useCallback } from 'react';
 import { Theory, Category, CategoryEn, DangerLevel, DangerLevelEn, SortOption } from '../types';
 import { 
@@ -123,7 +122,7 @@ const useTheoryList = () => {
 
 // --- 2. Components ---
 
-const DataTelemetryRibbon: React.FC = () => {
+const DataTelemetryRibbon: React.FC = React.memo(() => {
     const { totalCount, stats } = useTheoryList();
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
@@ -153,7 +152,7 @@ const DataTelemetryRibbon: React.FC = () => {
             </div>
         </div>
     );
-};
+});
 
 const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(({ theory, index }) => {
   const { onSelect, handleToggleFavorite, favorites } = useTheoryList();
@@ -163,8 +162,11 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
   return (
     <div 
       onClick={() => onSelect(theory)}
-      className="group relative h-[340px] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-accent-cyan/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 animate-fade-in-up active:scale-[0.98]"
+      className="group relative h-[340px] bg-slate-900 border border-slate-800 rounded-xl overflow-hidden cursor-pointer hover:border-accent-cyan/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 animate-fade-in-up active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
       style={{ animationDelay: `${index * 50}ms` }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect(theory)}
     >
       {/* Dynamic Border Glow */}
       <div className="absolute inset-0 bg-accent-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0"></div>
@@ -185,7 +187,8 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
 
         <button
           onClick={(e) => { e.stopPropagation(); handleToggleFavorite(theory.id); }}
-          className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-white text-white hover:text-red-600 transition-colors backdrop-blur-md border border-white/10 z-20 group/btn"
+          className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-white text-white hover:text-red-600 transition-colors backdrop-blur-md border border-white/10 z-20 group/btn focus-visible:ring-2 focus-visible:ring-white outline-none"
+          aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart size={14} className={isFav ? "fill-red-600 text-red-600" : ""} />
         </button>
@@ -236,8 +239,11 @@ const ArchiveListRow: React.FC<{ theory: Theory, index: number }> = React.memo((
   return (
     <div 
       onClick={() => onSelect(theory)}
-      className="group flex flex-col md:flex-row items-center gap-4 p-4 bg-slate-950/50 border border-slate-800 hover:border-slate-600 rounded-lg cursor-pointer transition-all active:bg-slate-900 animate-fade-in-up"
+      className="group flex flex-col md:flex-row items-center gap-4 p-4 bg-slate-950/50 border border-slate-800 hover:border-slate-600 rounded-lg cursor-pointer transition-all active:bg-slate-900 animate-fade-in-up outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan"
       style={{ animationDelay: `${index * 30}ms` }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect(theory)}
     >
       <div className="w-full md:w-32 h-32 md:h-20 rounded-md overflow-hidden flex-shrink-0 bg-black relative border border-slate-800">
          <TheoryImage src={theory.imageUrl || ''} alt={theory.title} className="w-full h-full opacity-80 group-hover:opacity-100 transition-all duration-500" />
@@ -286,8 +292,11 @@ const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.me
   return (
     <div 
       onClick={() => onSelect(theory)}
-      className="grid grid-cols-12 gap-2 p-2 border-b border-slate-800/50 hover:bg-accent-cyan/5 cursor-pointer text-[11px] items-center font-mono animate-fade-in group"
+      className="grid grid-cols-12 gap-2 p-2 border-b border-slate-800/50 hover:bg-accent-cyan/5 cursor-pointer text-[11px] items-center font-mono animate-fade-in group outline-none focus-visible:bg-slate-900 focus-visible:text-white"
       style={{ animationDelay: `${index * 10}ms` }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect(theory)}
     >
        <div className="col-span-2 md:col-span-1 text-slate-600">#{theory.id.substring(0,6).toUpperCase()}</div>
        <div className="col-span-6 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase py-1 leading-normal">{theory.title}</div>
@@ -302,7 +311,7 @@ const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.me
   );
 });
 
-const FilterHUD: React.FC = () => {
+const FilterHUD: React.FC = React.memo(() => {
   const { 
       isFilterOpen, setIsFilterOpen, language, t, 
       selectedCategories, handleToggleCategory, 
@@ -413,14 +422,16 @@ const FilterHUD: React.FC = () => {
       <div 
         onClick={() => setIsFilterOpen(false)}
         className="h-4 bg-slate-900 border-t border-slate-800 flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors"
+        role="button"
+        aria-label="Close Filter"
       >
           <ChevronUp size={12} className="text-slate-500" />
       </div>
     </div>
   );
-};
+});
 
-const HeaderSection: React.FC = () => {
+const HeaderSection: React.FC = React.memo(() => {
     const { t, localSearch, setLocalSearch, isFilterOpen, setIsFilterOpen, viewMode, setViewMode, sortOption, handleSetSort } = useTheoryList();
 
     return (
@@ -449,6 +460,7 @@ const HeaderSection: React.FC = () => {
                                 <button 
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     className={`p-2 rounded-md transition-all ${isFilterOpen ? 'text-accent-cyan bg-accent-cyan/10' : 'text-slate-500 hover:text-white'}`}
+                                    aria-label="Toggle Filters"
                                 >
                                     {isFilterOpen ? <ChevronUp size={18} /> : <SlidersHorizontal size={18} />}
                                 </button>
@@ -465,6 +477,7 @@ const HeaderSection: React.FC = () => {
                                         onClick={() => setViewMode(mode)}
                                         className={`p-2 rounded-md transition-all ${viewMode === mode ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                                         title={mode}
+                                        aria-label={`View mode: ${mode}`}
                                     >
                                         {mode === 'GRID' && <LayoutGrid size={16} />}
                                         {mode === 'LIST' && <List size={16} />}
@@ -496,7 +509,7 @@ const HeaderSection: React.FC = () => {
             <DataTelemetryRibbon />
         </div>
     );
-};
+});
 
 // --- 3. Main List Renderer ---
 

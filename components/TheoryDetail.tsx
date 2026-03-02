@@ -17,16 +17,27 @@ import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { setTheoryTab, injectChatContext, setActiveFile } from '../store/slices/uiSlice';
 import { addLog } from '../store/slices/settingsSlice';
 
-// --- INTERACTIVE FORCE GRAPH ---
+// --- INTERACTIVE FORCE GRAPH (Optimized) ---
 const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick: (id: string) => void }> = ({ nodes: initialNodes, links: initialLinks, onNodeClick }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [draggingNode, setDraggingNode] = useState<any | null>(null);
     const [isInteractive, setIsInteractive] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
 
     // Physics Simulation State
     const nodesRef = useRef(initialNodes.map(n => ({ ...n, x: Math.random() * 800, y: Math.random() * 600, vx: 0, vy: 0 })));
     const reqRef = useRef<number | null>(null);
+
+    // Intersection Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsVisible(entry.isIntersecting);
+        }, { threshold: 0.1 });
+        
+        if (containerRef.current) observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         // Reset nodes when data changes
@@ -36,9 +47,11 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        if (!canvas || !container) return;
+        if (!canvas || !container || !isVisible) {
+            if (reqRef.current) cancelAnimationFrame(reqRef.current);
+            return;
+        }
 
-        // Use ResizeObserver for robust sizing (handles sidebar toggles etc.)
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 const { width, height } = entry.contentRect;
@@ -98,18 +111,7 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
             // Draw Links
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1.5;
-            initialLinks.forEach(link => {
-                const source = nodes.find(n => n.id === link.sourceId); // Assuming data structure maps IDs
-                const target = nodes.find(n => n.id === link.targetId);
-                
-                if (source && target) {
-                    ctx.beginPath();
-                    ctx.moveTo(source.x, source.y);
-                    ctx.lineTo(target.x, target.y);
-                    ctx.stroke();
-                }
-            });
-            // Simple Star Topology Render for this demo since we know structure
+            // Simple Star Topology Render
             const center = nodes.find(n => n.type === 'MAIN');
             if (center) {
                 nodes.forEach(n => {
@@ -148,7 +150,7 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
             resizeObserver.disconnect();
             if (reqRef.current) cancelAnimationFrame(reqRef.current);
         };
-    }, [draggingNode, initialLinks]);
+    }, [draggingNode, initialLinks, isVisible]);
 
     const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
         if (!isInteractive) return;

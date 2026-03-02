@@ -442,9 +442,15 @@ const SearchFooter: React.FC = () => {
 };
 
 const OmniSearchLayout: React.FC = () => {
-    const { onClose } = useOmniSearch();
+    const { onClose, t } = useOmniSearch();
     return (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" onClick={onClose}>
+        <div 
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" 
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.search.title || "Search"}
+        >
             <div 
                 className="w-full max-w-2xl bg-[#0B0F19] border border-slate-700 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[70vh] ring-1 ring-white/10"
                 onClick={e => e.stopPropagation()}

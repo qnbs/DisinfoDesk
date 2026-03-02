@@ -440,7 +440,7 @@ export const Layout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')} role="main">
+      <main id="main-content" className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')} role="main" aria-label="Hauptinhalt">
         <div 
             ref={scrollContainerRef}
             className="flex-1 w-full overflow-y-auto relative z-10 custom-scrollbar overscroll-contain pb-[80px] md:pb-0"

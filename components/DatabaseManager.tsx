@@ -421,7 +421,7 @@ const DeepInspector: React.FC = () => {
                         <Button size="sm" variant="primary" onClick={handleSaveEdit} icon={<Save size={14}/>} />
                     )}
                     {/* Add explicit close button for mobile overlay */}
-                    <Button size="sm" variant="ghost" onClick={() => window.history.back()} className="md:hidden" icon={<X size={14}/>} />
+                    <Button size="sm" variant="ghost" onClick={() => window.history.back()} className="md:hidden" icon={<X size={14}/>} aria-label="Close panel" />
                 </div>
             </div>
 

@@ -298,8 +298,8 @@ const DetailContent: React.FC = () => {
             {/* Right Column: Tabs & Content */}
             <div className="lg:col-span-8">
                 <div className="flex gap-1 mb-6 border-b border-slate-800">
-                    <button onClick={() => setActiveTab('BIO')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeTab === 'BIO' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabBiography}</button>
-                    <button onClick={() => setActiveTab('PSYCH')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeTab === 'PSYCH' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabPsych}</button>
+                    <button onClick={() => setActiveTab('BIO')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'BIO' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabBiography}</button>
+                    <button onClick={() => setActiveTab('PSYCH')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent-purple focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'PSYCH' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabPsych}</button>
                 </div>
 
                 {activeTab === 'BIO' && (

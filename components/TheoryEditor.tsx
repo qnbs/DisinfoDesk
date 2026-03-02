@@ -546,7 +546,7 @@ const MetadataPanel: React.FC = () => {
                         className="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:border-accent-purple outline-none"
                         placeholder="Add tag..."
                     />
-                    <button onClick={handleAddTag} className="bg-slate-800 border border-slate-700 text-slate-400 hover:text-white px-3 rounded hover:bg-slate-700">+</button>
+                    <button onClick={handleAddTag} className="bg-slate-800 border border-slate-700 text-slate-400 hover:text-white px-3 rounded hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-accent-purple outline-none" aria-label="Add tag">+</button>
                 </div>
                 <div className="flex flex-wrap gap-2 min-h-[60px] content-start">
                     {formState.tags.map(tag => (
@@ -555,7 +555,7 @@ const MetadataPanel: React.FC = () => {
                             label={tag} 
                             className="bg-slate-800 text-slate-300 border-slate-700 pr-1 flex items-center gap-1 group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10"
                         >
-                            <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-400 p-0.5 rounded-full"><X size={10}/></button>
+                            <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-400 p-0.5 rounded-full focus-visible:ring-2 focus-visible:ring-red-400 outline-none" aria-label={`Remove tag ${tag}`}><X size={10}/></button>
                         </Badge>
                     ))}
                 </div>
@@ -572,7 +572,7 @@ const CoverArtTerminal: React.FC = () => {
             {/* Preview Area */}
             <div className="aspect-video relative overflow-hidden bg-slate-900">
                 {formState.imageUrl ? (
-                    <img src={formState.imageUrl} alt="Preview" className="w-full h-full object-cover transition-all duration-700" />
+                    <img src={formState.imageUrl} alt={formState.titleDe || formState.titleEn || 'Theory cover image preview'} className="w-full h-full object-cover transition-all duration-700" />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-600 flex-col gap-2">
                         <Sparkles size={32} opacity={0.5} className="animate-pulse" />

@@ -37,7 +37,28 @@ export enum CategoryEn {
 
 export type SortOption = 'POPULARITY_DESC' | 'POPULARITY_ASC' | 'YEAR_DESC' | 'YEAR_ASC' | 'TITLE_ASC';
 export type Language = 'de' | 'en';
-export type MediaType = 'MOVIE' | 'BOOK' | 'SERIES' | 'GAME' | 'COMIC';
+export type MediaType = 'MOVIE' | 'BOOK' | 'SERIES' | 'GAME' | 'COMIC' | 'IMAGE' | 'VIDEO' | 'ARTICLE';
+export type FactCheckVerdict = 'VERIFIED' | 'MISLEADING' | 'UNVERIFIED' | 'SATIRE' | 'FICTION';
+
+export interface DebunkingEvent {
+  year: string;
+  eventDe: string;
+  eventEn: string;
+  source?: string;
+}
+
+export interface AuthorTimelineEntry {
+  year: string;
+  event: string;
+  significance: string;
+}
+
+export interface InfluenceMetrics {
+  mainPlatforms: string[];
+  peakReach: string;
+  estimatedAudience: string;
+  peakYear?: number;
+}
 
 // --- Entities ---
 
@@ -61,13 +82,39 @@ export interface Author {
   id: string;
   name: string;
   lifespan: string;
+  birthYear?: number;
   nationality: string;
   imagePlaceholder: string;
   bioDe: string;
   bioEn: string;
+  fullBio: string;
+  fullBioDe?: string;
+  fullBioEn?: string;
   focusAreas: string[];
+  occupation: string[];
   keyWorks: string[];
+  notableWorks: string[];
   influenceLevel: number; // 1-100
+  influenceScore?: number;
+  keyClaims: string[];
+  affiliations?: string[];
+  affiliatedMedia: string[];
+  relatedMediaIds: string[];
+  timeline: AuthorTimelineEntry[];
+  influenceMetrics: InfluenceMetrics;
+  rhetoricalStyle: string;
+  controversiesAndDebunkings: string[];
+  educationalInsights: string;
+  sources: string[];
+  debunkingTimeline?: DebunkingEvent[];
+  factCheckNoteDe?: string;
+  factCheckNoteEn?: string;
+  whyItSpreadsDe?: string;
+  whyItSpreadsEn?: string;
+  learningPromptDe?: string;
+  learningPromptEn?: string;
+  disclaimerDe?: string;
+  disclaimerEn?: string;
   website?: string;
   imageUrl?: string; // Generated art URL
 }
@@ -84,6 +131,20 @@ export interface MediaItem {
   realityScore: number;
   complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'MINDBENDING';
   relatedTheoryTags: string[];
+  sourceUrl?: string;
+  factCheckVerdict?: FactCheckVerdict;
+  satiricalCounterpartTitle?: string;
+  satiricalPreviewDe?: string;
+  satiricalPreviewEn?: string;
+  linkedAuthorIds?: string[];
+  factCheckNoteDe?: string;
+  factCheckNoteEn?: string;
+  whyItSpreadsDe?: string;
+  whyItSpreadsEn?: string;
+  learningPromptDe?: string;
+  learningPromptEn?: string;
+  disclaimerDe?: string;
+  disclaimerEn?: string;
   imageUrl?: string; // Generated art URL
 }
 

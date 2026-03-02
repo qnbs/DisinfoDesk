@@ -6,7 +6,7 @@ import {
   MessageSquare, Skull, Globe, Eye, RefreshCw, Download,
   Terminal, Command, ChevronRight, Cpu
 } from 'lucide-react';
-import { THEORIES_DE_FULL as THEORIES_DE, MEDIA_ITEMS } from '../constants';
+import { THEORIES_DE_FULL, THEORIES_EN_FULL, MEDIA_ITEMS } from '../constants';
 import { AUTHORS_FULL } from '../data/enriched';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -111,18 +111,38 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
 
     const lowerQ = query.toLowerCase();
     const res: SearchResult[] = [];
+    const seen = new Set<string>();
+    const pushUnique = (entry: SearchResult) => {
+      const key = `${entry.type}:${entry.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        res.push(entry);
+      }
+    };
+
+    const matchedTheoryIds = new Set<string>();
+    const matchedTheoryTags = new Set<string>();
+    const matchedAuthorIds = new Set<string>();
+    const matchedMediaIds = new Set<string>();
+    const theories = language === 'de' ? THEORIES_DE_FULL : THEORIES_EN_FULL;
 
     // Filter Nav & Actions
     [...navItems, ...actionItems].forEach(item => {
         if (item.title.toLowerCase().includes(lowerQ) || item.subtitle.toLowerCase().includes(lowerQ)) {
-            res.push(item);
+            pushUnique(item);
         }
     });
 
     // Filter Theories
-    THEORIES_DE.forEach(t => {
-      if (t.title.toLowerCase().includes(lowerQ) || t.tags.some(tag => tag.toLowerCase().includes(lowerQ))) {
-        res.push({
+    theories.forEach(t => {
+      if (
+        t.title.toLowerCase().includes(lowerQ) ||
+        t.shortDescription.toLowerCase().includes(lowerQ) ||
+        t.tags.some(tag => tag.toLowerCase().includes(lowerQ))
+      ) {
+        matchedTheoryIds.add(t.id);
+        t.tags.forEach((tag) => matchedTheoryTags.add(tag.toLowerCase()));
+        pushUnique({
           id: t.id,
           type: 'THEORY',
           title: t.title,
@@ -135,8 +155,19 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
 
     // Filter Authors
     AUTHORS_FULL.forEach(a => {
-      if (a.name.toLowerCase().includes(lowerQ)) {
-        res.push({
+      const authorText = [
+        a.name,
+        a.nationality,
+        ...(a.focusAreas || []),
+        ...(a.keyWorks || []),
+        ...(a.keyClaims || []),
+        ...(a.affiliations || []),
+        language === 'de' ? a.bioDe : a.bioEn
+      ].join(' ').toLowerCase();
+
+      if (authorText.includes(lowerQ)) {
+        matchedAuthorIds.add(a.id);
+        pushUnique({
           id: a.id,
           type: 'AUTHOR',
           title: a.name,
@@ -149,19 +180,67 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
 
     // Filter Media
     MEDIA_ITEMS.forEach(m => {
-      if (m.title.toLowerCase().includes(lowerQ)) {
-        res.push({
+      const mediaText = [
+        m.title,
+        m.type,
+        String(m.year),
+        m.creator,
+        language === 'de' ? m.descriptionDe : m.descriptionEn,
+        ...(m.tags || []),
+        ...(m.relatedTheoryTags || []),
+        ...(m.linkedAuthorIds || []),
+        m.factCheckVerdict || ''
+      ].join(' ').toLowerCase();
+
+      if (mediaText.includes(lowerQ)) {
+        matchedMediaIds.add(m.id);
+        pushUnique({
           id: m.id,
           type: 'MEDIA',
           title: m.title,
-          subtitle: `${m.type} (${m.year})`,
+          subtitle: `${m.type} (${m.year})${m.factCheckVerdict ? ` · ${m.factCheckVerdict}` : ''}`,
           link: `/media/${m.id}`,
           icon: <Film size={14} />
         });
       }
     });
 
-    return res.slice(0, 15); // Limit results
+    // Auto-link related media for matched authors/theory tags
+    MEDIA_ITEMS.forEach((m) => {
+      const linkedByAuthor = (m.linkedAuthorIds || []).some((authorId) => matchedAuthorIds.has(authorId));
+      const linkedByTheory = (m.relatedTheoryTags || []).some((tag) => matchedTheoryTags.has(tag.toLowerCase()));
+
+      if (linkedByAuthor || linkedByTheory) {
+        matchedMediaIds.add(m.id);
+        pushUnique({
+          id: m.id,
+          type: 'MEDIA',
+          title: m.title,
+          subtitle: language === 'de' ? 'Auto-Link: Theorie/Autor-Bezug' : 'Auto-link: theory/author relation',
+          link: `/media/${m.id}`,
+          icon: <Film size={14} />
+        });
+      }
+    });
+
+    // Auto-link related authors for matched media/theory tags
+    AUTHORS_FULL.forEach((a) => {
+      const linkedByMedia = (a.relatedMediaIds || []).some((mediaId) => matchedMediaIds.has(mediaId));
+      const linkedByTheory = (a.focusAreas || []).some((focus) => matchedTheoryTags.has(focus.toLowerCase()));
+
+      if (linkedByMedia || linkedByTheory) {
+        pushUnique({
+          id: a.id,
+          type: 'AUTHOR',
+          title: a.name,
+          subtitle: language === 'de' ? 'Auto-Link: Medien/Theorie-Bezug' : 'Auto-link: media/theory relation',
+          link: `/authors/${a.id}`,
+          icon: <User size={14} />
+        });
+      }
+    });
+
+    return res.slice(0, 24); // Limit results
   }, [query, t, language, settings.highContrast, handleToggleLanguage, handleToggleContrast, handleExport]);
 
   // Group Results for Display

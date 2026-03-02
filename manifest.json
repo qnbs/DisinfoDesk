@@ -2,7 +2,8 @@
   "short_name": "DisinfoDesk",
   "name": "DisinfoDesk: Das Lexikon",
   "description": "Ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse.",
-  "start_url": ".",
+  "start_url": "/DisinfoDesk/",
+  "scope": "/DisinfoDesk/",
   "display": "standalone",
   "theme_color": "#020617",
   "background_color": "#020617",
@@ -46,14 +47,14 @@
       "name": "Das Archiv",
       "short_name": "Archiv",
       "description": "Öffne die Datenbank",
-      "url": "/#/archive",
+      "url": "/DisinfoDesk/#/archive",
       "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
     },
     {
       "name": "KI Chat",
       "short_name": "Dr. Veritas",
       "description": "Starte den Debunk-Bot",
-      "url": "/#/chat",
+      "url": "/DisinfoDesk/#/chat",
       "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
     }
   ]

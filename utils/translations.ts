@@ -31,6 +31,20 @@ export const translations = {
       code: 'Quellcode'
     },
     layout: {
+      loadingModule: 'Lade Modul',
+      openFile: 'Datei öffnen',
+      activeFileAriaPrefix: 'Aktive Datei öffnen',
+      updateAvailable: 'SYSTEM-UPDATE VERFÜGBAR',
+      reload: 'NEU LADEN',
+      searchAria: 'Suche',
+      openMenu: 'Menü öffnen',
+      closeMenu: 'Menü schließen',
+      systemMenu: 'Systemmenü',
+      closeSidebar: 'Seitenleiste schließen',
+      operations: 'Operationen',
+      systemSection: 'System',
+      installAppAria: 'App installieren',
+      nativeApp: 'NATIVE_APP',
       footer: {
         stable: 'Uplink Stabil',
         offline: 'Offline Modus',
@@ -85,15 +99,56 @@ export const translations = {
         subtitle: 'Architekten des Unbekannten',
         filter: 'Fokus',
         all: 'Alle Profile',
+      viewGrid: 'Rasteransicht',
+      viewList: 'Listenansicht',
+      viewNetwork: 'Netzwerkansicht',
+      clearSearch: 'Suche leeren',
         searchPlaceholder: 'Suche Autor, Buch oder Thema...',
         bio: 'Biografie',
         works: 'Schlüsselwerke',
         influence: 'Einfluss-Index',
+      influenceShort: 'INF',
+      influenceIndexShort: 'INF-INDEX',
         focus: 'Kerngebiete',
         indexed: 'PROFILE INDEXIERT',
         notFound: 'KEINE PROFILE GEFUNDEN',
         notFoundDesc: 'Die angeforderten Agenten wurden geschwärzt oder existieren in diesem Sektor nicht.',
         semantic: 'Semantischer Index',
+      featuredChoice: 'Archivarsauswahl',
+      loadMoreProfiles: 'Mehr Profile laden',
+      highImpact: 'HOHER IMPACT',
+      standardNode: 'STANDARDKNOTEN',
+      highInfluenceNode: 'HOHER EINFLUSS',
+      viewDossier: 'Dossier ansehen',
+        detail: {
+          dossierPrefix: 'DOSSIER',
+          classifiedStatus: 'KLASSIFIZIERT STUFE 3',
+          fileMissing: 'DATEI BESCHÄDIGT ODER FEHLT',
+          temporalActivity: 'Zeitliche Aktivität',
+          now: 'JETZT',
+          neuralRequired: 'NEURALES PROFILING ERFORDERLICH',
+          neuralRequiredDesc: 'Aktiviere Gemini-Forensikalgorithmen zur Analyse von Rhetorikmustern und kognitiven Verzerrungen.',
+          initiateScan: 'SCAN STARTEN',
+          cognitiveForensics: 'Kognitive Forensik',
+          rhetoricIntensity: 'Rhetorische Intensität',
+          logicalConsistency: 'Logische Konsistenz',
+          emotionalManipulation: 'Emotionale Manipulation',
+          detectedPatterns: 'Erkannte Muster',
+          profileInsightQuote: 'Subjekt zeigt hohe Fähigkeit zur narrativen Verflechtung. Ein lokalisiertes Realitätsverzerrungsfeld um Schlüsselwerke ist wahrscheinlich aktiv.',
+          influenceRadar: 'Einflussradar',
+          rhetoric: 'Rhetorik',
+          reach: 'Reichweite',
+          persistence: 'Persistenz',
+          controversy: 'Kontroverse',
+          relatedMedia: 'Verknüpfte Medien',
+          influence: 'Einfluss',
+          tabBiography: 'Biografie',
+          tabPsych: 'Psych-Profil',
+          profileSummary: 'Profilzusammenfassung',
+          focusAreas: 'Fokusbereiche',
+          searchDatabaseForAuthor: 'Datenbank nach Autor durchsuchen',
+          factCheckLearning: 'Faktencheck & Lernen'
+        },
         cats: {
             all: 'Alle Profile',
             cosmic: 'Kosmos & Ursprung',
@@ -203,6 +258,12 @@ export const translations = {
         advisory: {
             title: 'Warnhinweis',
             text: 'Hochgradig ansteckende memetische Erreger erkannt. Interaktion ohne kognitive Schutzmaßnahmen nicht empfohlen. Nutzen Sie KI-Eindämmungsprotokolle.'
+        },
+        heatmap: {
+          title: 'Author-Media Heatmap',
+          empty: 'Keine aktiven Überschneidungen erkannt.',
+          openAuthor: 'Autorprofil öffnen',
+          openMedia: 'Medium öffnen'
         }
     },
     viralPage: {
@@ -252,13 +313,40 @@ export const translations = {
       status: 'DECODIERE...',
       noSignal: 'Kein Signal',
       access: 'Akte öffnen',
+      searchPlaceholder: 'Suche (z.B. Film, Buch, Meme)...',
+      featuredSelection: 'Ausgewählte Datei',
+      analyzeFile: 'Datei analysieren',
+      verdictLabel: 'Urteil',
+      allVerdicts: 'Alle Urteile',
+      allAuthors: 'Alle Autoren',
+      allTheoryLinks: 'Alle Theorie-Links',
+      dropMediaJson: 'Media-JSON hier ablegen',
+      importedSuffix: 'importiert',
+      noMediaRecords: 'Keine Medieneinträge passend zur Suche gefunden.',
+      loadMoreEntries: 'Mehr Einträge laden',
+      detail: {
+        databaseTitle: 'MEDIA DATENBANK',
+        filePrefix: 'DATEI',
+        decoding: 'DECODIERE...',
+        itemNotFound: 'Medium nicht gefunden.',
+        satiricalCounterpart: 'Satirisches Gegenstück',
+        levelSuffix: 'STUFE',
+        analysisUnavailable: 'Analysedaten nicht verfügbar.',
+        linkedAuthors: 'Verknüpfte Autoren',
+        factCheckLearning: 'Faktencheck & Lernen',
+        sourceLabel: 'Quelle',
+        archiveTag: 'Archiv-Tag'
+      },
       filter: {
         all: 'Alle Medien',
         movie: 'Filme',
         book: 'Literatur',
         series: 'TV-Serien',
         game: 'Spiele',
-        comic: 'Comics'
+        comic: 'Comics',
+        video: 'Videos',
+        article: 'Artikel',
+        image: 'Bilder'
       },
       labels: {
         realityScore: 'Realitäts-Index',
@@ -276,17 +364,73 @@ export const translations = {
         MEDIUM: 'Vielschichtig',
         HIGH: 'Komplex',
         MINDBENDING: 'Mindbending'
+      },
+      stats: {
+        itemsIndexed: 'Einträge indiziert',
+        avgReality: 'Ø Realität',
+        topComplexity: 'Top-Komplexität',
+        avgYear: 'Ø Jahr'
+      },
+      charts: {
+        fictionReality: 'Fiktion vs. Realitäts-Index',
+        distribution: 'Medienverteilung',
+        axisYear: 'Jahr',
+        axisRealityScore: 'Realitäts-Index',
+        seriesMedia: 'Medien'
       }
     },
     list: {
       title: 'Das Archiv',
       subtitle: 'Durchsuchen Sie die Datenbank nach Schlüsselwörtern, Namen und Themen.',
+      secureAccessSubtitle: 'SICHERER DATENBANK-ZUGANG // STUFE 4',
       searchPlaceholder: 'Suche (z.B. NASA, Echsen)...',
       allCategories: 'Alle Kategorien',
       threatMatrix: 'Bedrohungs-Matrix',
       keywords: 'Metadaten Keywords',
       filterTags: 'Filtern nach Tags:',
       allTags: 'Alle Tags',
+      localBadge: 'LOKAL',
+      viralLoad: 'Viral-Last',
+      toggleFilters: 'Filter umschalten',
+      closeFilter: 'Filter schließen',
+      resetQueryParameters: 'Abfrageparameter zurücksetzen',
+      loadAdditionalRecords: 'Weitere Datensätze laden',
+      databaseQueryNull: 'DATENBANKABFRAGE: NULL',
+      telemetry: {
+        totalRecords: 'Datensätze gesamt',
+        avgVirality: 'Ø Viralität',
+        activeThreats: 'Aktive Bedrohungen',
+        systemStatus: 'Systemstatus',
+        online: 'ONLINE'
+      },
+      labels: {
+        category: 'Kategorie',
+        origin: 'Ursprung',
+        virality: 'Viralität'
+      },
+      compact: {
+        id: 'ID',
+        subject: 'Betreff',
+        class: 'Klasse',
+        status: 'Status',
+        integrity: 'Integrität'
+      },
+      status: {
+        critical: 'KRITISCH',
+        stable: 'STABIL'
+      },
+      filterHud: {
+        parameterConfiguration: 'Parameterkonfiguration',
+        resetAll: 'Alles zurücksetzen',
+        sectorAnalysis: 'Sektoranalyse',
+        threatMatrix: 'Bedrohungsmatrix',
+        metadataIndex: 'Metadaten-Index'
+      },
+      favorites: {
+        add: 'Zu Favoriten hinzufügen',
+        remove: 'Aus Favoriten entfernen'
+      },
+      viewModePrefix: 'Ansichtsmodus',
       noResults: 'Keine Ergebnisse gefunden.',
       noResultsSub: 'Vielleicht wurde diese Theorie von den Mächtigen bereits gelöscht?',
       view: {
@@ -322,14 +466,35 @@ export const translations = {
             tags: 'Tag hinzufügen...',
             image: 'Bild-URL einfügen...'
         },
-        info: 'Vom Benutzer erstellte Theorien werden lokal in Ihrem Browser-Cache gespeichert.'
+        info: 'Vom Benutzer erstellte Theorien werden lokal in Ihrem Browser-Cache gespeichert.',
+        crossLinks: {
+          title: 'Auto-Verknüpfungen',
+          subtitle: 'Passende Autoren- und Medienknoten aus Tags/Titel',
+          relatedAuthors: 'Verknüpfte Autoren',
+          relatedMedia: 'Verknüpfte Medien',
+          none: 'Keine passenden Cross-Links gefunden.',
+          openAuthor: 'Autor öffnen',
+          openMedia: 'Medium öffnen'
+        }
     },
     detail: {
       back: 'Zurück',
+      backToLibrary: 'Zurück zur Bibliothek',
       analyzing: 'Analysiere Geheimdaten...',
       accessing: 'Zugriff auf Gemini 2.5 Node',
       generateImage: 'Visualisierung generieren',
       generating: 'Generiere Bild...',
+      report: 'Report',
+      references: 'Referenzen',
+      discussTheory: 'Theorie diskutieren',
+      initiateContextAnalysis: 'Kontextanalyse mit Dr. Veritas starten',
+      theoryNotFound: 'THEORIE NICHT GEFUNDEN',
+      tapToInteract: 'Tippen zum Interagieren',
+      releaseLock: 'Sperre lösen',
+      present: 'Heute',
+      sourceMatrix: 'Quellen-Matrix',
+      noReferences: 'Keine Referenzen verfügbar.',
+      mediaReferences: 'Medien-Referenzen',
       theory: 'Die Theorie',
       origin: 'Ursprung',
       danger: 'Gefahrenstufe',
@@ -361,10 +526,33 @@ export const translations = {
       botName: 'Dr. Veritas',
       botStatus: 'Skeptiker-KI • Online',
       welcome: 'Hallo. Ich bin Dr. Veritas.',
+      headerTitle: 'NEURALER UPLINK',
+      subtitleForensic: 'FORENSIK-ANALYSETERMINAL',
+      contextPrefix: 'KONTEXT',
+      active: 'AKTIV',
+      statusEncrypted: 'VERSCHLÜSSELT',
       placeholder: 'Frage etwas...',
       reset: 'Reset Uplink',
       save: 'Sitzung archivieren',
       voice: 'Sprachausgabe',
+      quickActions: {
+        factCheck: 'Faktencheck',
+        fallacies: 'Fehlschlüsse finden',
+        sources: 'Quellen'
+      },
+      live: {
+        signalStrength: 'SIGNALSTÄRKE',
+        encryptionAes: 'VERSCHLÜSSELUNG: AES-256',
+        establishingUplink: 'UPLINK WIRD HERGESTELLT',
+        neuralBridgeActive: 'NEURALBRÜCKE AKTIV',
+        handshaking: 'Handshake mit Gemini-Kern...',
+        voiceIntercept: 'Sprachabgriff aktiv. Für Analyse narrativer Vektoren deutlich sprechen.',
+        terminateConnection: 'VERBINDUNG TRENNEN',
+        secureLineReady: 'Sichere Leitung bereit',
+        waitingForInput: 'Warte auf Eingabe...',
+        footerEncryption: 'Verschlüsselung',
+        footerLatency: 'Latenz'
+      },
       verdict: {
         true: 'WAHRHEIT',
         false: 'WIDERLEGT',
@@ -376,6 +564,9 @@ export const translations = {
     satire: {
       title: 'Der Aluhut-Generator',
       subtitle: 'KI-generierte Verschwörungstheorien.',
+      pageTitle: 'REALITÄTS-ENGINE',
+      pageSubtitle: 'MEMETISCHES FABRIKATIONSPROTOKOLL',
+      pageStatus: 'UNREGULIERT',
       instruction: 'Klicke auf den Button.',
       loading1: 'Verbinde Punkte...',
       loading2: 'Interpretiere Kornkreise...',
@@ -396,6 +587,21 @@ export const translations = {
           angry: 'Wütend',
           scientific: 'Pseudo-Wissenschaftlich',
           mystical: 'Mystisch'
+      },
+      ui: {
+        entropySource: 'Entropiequelle',
+        outputFormat: 'Ausgabeformat',
+        initiateFabrication: 'FABRIKATION STARTEN',
+        awaitingEntropy: 'WARTE AUF ENTROPIE...',
+        fabricationComplete: 'FABRIKATION ABGESCHLOSSEN',
+        fabricatingReality: 'REALITÄT WIRD FABRIZIERT',
+        outputBufferEmpty: 'Ausgabepuffer leer',
+        outputBufferHint: 'Parameter konfigurieren und Entropie injizieren, um die Synthese zu starten.',
+        rational: 'Rational',
+        skeptical: 'Skeptisch',
+        unhinged: 'Enthemmt',
+        authOmega: 'Auth: OMEGA-9',
+        destructionProtocol: 'Zerstörungsprotokoll: AKTIV'
       },
       params: {
         subject: 'Zielobjekt',
@@ -444,6 +650,11 @@ export const translations = {
     },
     settings: {
       title: 'Systemkonfiguration',
+      headerTitle: 'SYSTEMKONFIG',
+      headerSubtitle: 'ZENTRALE KONTROLLDECK // STUFE 5',
+      headerStatus: 'BEARBEITBAR',
+      sidebarConfig: 'Konfiguration',
+      generalTitle: 'Systemkern-Parameter',
       tabs: {
         GENERAL: 'Allgemein',
         INTELLIGENCE: 'Intelligenz',
@@ -461,6 +672,30 @@ export const translations = {
       labels: {
         modelSelect: 'Modell',
         temp: 'Temperatur',
+        reasoningBudget: 'Reasoning-Budget (Tokens)',
+        currentSafetyProtocol: 'Aktuelles Sicherheitsprotokoll',
+        activeCore: 'Aktiver Kern',
+        synapticConfiguration: 'Synaptische Konfiguration',
+        uiDensity: 'UI-Dichte',
+        densityComfortable: 'Komfortabel',
+        densityCompact: 'Kompakt',
+        localization: 'Lokalisierung',
+        languageGerman: 'DEUTSCH',
+        languageEnglish: 'ENGLISH',
+        localVault: 'LOKALER TRESOR',
+        indexedDbEncrypted: 'INDEXED_DB VERSCHLÜSSELT',
+        autoArchiveChats: 'Chats auto-archivieren',
+        autoArchiveDesc: 'Sitzungen automatisch im Tresor speichern.',
+        exportEncryptedShard: 'VERSCHLÜSSELTEN SHARD EXPORTIEREN (JSON)',
+        dangerZone: 'Gefahrenbereich',
+        initiateSystemPurge: 'SYSTEM-PURGE STARTEN',
+        purgeIrreversibleSub: 'Irreversibel. Löscht alle lokalen Daten.',
+        liveTelemetry: 'Live-Telemetrie',
+        systemOutputStream: 'System-Ausgabestream',
+        kernel: 'KERNEL',
+        react: 'REACT',
+        geminiSdk: 'GEMINI SDK',
+        uptime: 'UPTIME',
         contrast: 'Kontrast',
         motion: 'Bewegung',
         sound: 'Töne',
@@ -471,7 +706,9 @@ export const translations = {
         contrastDesc: 'Erhöht Sichtbarkeit.',
         motionDesc: 'Reduziert Animationen.',
         soundDesc: 'Interface Töne.',
-        incognitoDesc: 'Kein Verlauf.'
+        incognitoDesc: 'Kein Verlauf.',
+        protocolExecuted: 'PROTOKOLL AUSGEFÜHRT',
+        confirming: 'BESTÄTIGE...'
       },
       models: {
           flash: { title: 'Gemini 2.5 Flash', desc: 'Ausgewogen.' },
@@ -485,7 +722,42 @@ export const translations = {
       howItWorksText: 'Wählen Sie eine Theorie für die Analyse.',
       dangerLevels: 'Gefahrenstufen',
       disclaimer: 'Haftungsausschluss',
-      disclaimerText: 'Bildungszwecke.'
+      disclaimerText: 'Bildungszwecke.',
+      pageTitle: 'SYSTEM-WISSENSDATENBANK',
+      pageSubtitle: 'LEITFADEN FÜR WAHRHEITSSUCHENDE // STUFE-1-ZUGANG',
+      pageStatus: 'ONLINE',
+      moduleIndex: 'Modulindex',
+      buildInfo: 'BUILD-INFO',
+      diagnostics: {
+        vaultIntegrity: 'Vault-Integrität',
+        indexedDbConnected: 'INDEXED_DB: VERBUNDEN',
+        geminiNeuralLink: 'Gemini-Neural-Link',
+        apiAuthenticated: 'API: AUTHENTIFIZIERT',
+        deepScanProgress: 'Deep-Scan-Fortschritt',
+        checkingLogicGates: 'Prüfe Logik-Gates...',
+        latency: 'LATENZ',
+        load: 'LAST'
+      },
+      glossary: {
+        filterTerminology: 'Terminologie filtern...',
+        jumpToModule: 'Zum Modul springen',
+        noMatchesFound: 'KEINE TREFFER IM INDEX GEFUNDEN'
+      },
+      faq: {
+        requireAdvancedAnalysis: 'Erweiterte Analyse erforderlich?',
+        drVeritasReady: 'Dr. Veritas ist online und bereit zum Verhör.',
+        initiateUplink: 'Uplink initiieren'
+      },
+      guide: {
+        verified: 'VERIFIZIERT',
+        trainingComplete: 'TRAINING ABGESCHLOSSEN',
+        trainingCompleteDesc: 'Agentenautorisierung auf Stufe 2 erhöht.'
+      },
+      protocol: {
+        activeProtocol: 'Aktives Protokoll',
+        awaitingInput: 'Warte auf Eingabe... Bewege den Mauszeiger über eine Bedrohungsstufe, um Protokolle zu prüfen'
+      },
+      quote: '"Die Wahrheit ist selten rein und niemals einfach." — O. Wilde'
     },
     search: {
       placeholder: 'Suche...',
@@ -535,6 +807,20 @@ export const translations = {
       code: 'Source Code'
     },
     layout: {
+      loadingModule: 'Loading Module',
+      openFile: 'Open File',
+      activeFileAriaPrefix: 'Open active file',
+      updateAvailable: 'SYSTEM UPDATE AVAILABLE',
+      reload: 'RELOAD',
+      searchAria: 'Search',
+      openMenu: 'Open Menu',
+      closeMenu: 'Close Menu',
+      systemMenu: 'System Menu',
+      closeSidebar: 'Close sidebar',
+      operations: 'Operations',
+      systemSection: 'System',
+      installAppAria: 'Install App',
+      nativeApp: 'NATIVE_APP',
       footer: {
         stable: 'Uplink Stable',
         offline: 'Offline Mode',
@@ -589,15 +875,56 @@ export const translations = {
         subtitle: 'Architects of the Unknown',
         filter: 'Focus',
         all: 'All Authors',
+      viewGrid: 'Grid View',
+      viewList: 'List View',
+      viewNetwork: 'Network View',
+      clearSearch: 'Clear Search',
         searchPlaceholder: 'Search author, book, or topic...',
         bio: 'Biography',
         works: 'Key Works',
         influence: 'Influence Index',
+      influenceShort: 'INF',
+      influenceIndexShort: 'INF-INDEX',
         focus: 'Focus Areas',
         indexed: 'PROFILES INDEXED',
         notFound: 'NO PROFILES FOUND',
         notFoundDesc: 'The requested agents have been redacted or do not exist in this sector.',
         semantic: 'Semantic Index',
+      featuredChoice: 'Archivist Choice',
+      loadMoreProfiles: 'Load More Profiles',
+      highImpact: 'HIGH IMPACT',
+      standardNode: 'STANDARD NODE',
+      highInfluenceNode: 'HIGH INFLUENCE',
+      viewDossier: 'View Dossier',
+        detail: {
+          dossierPrefix: 'DOSSIER',
+          classifiedStatus: 'CLASSIFIED LEVEL 3',
+          fileMissing: 'FILE CORRUPTED OR MISSING',
+          temporalActivity: 'Temporal Activity',
+          now: 'NOW',
+          neuralRequired: 'NEURAL PROFILING REQUIRED',
+          neuralRequiredDesc: 'Activate Gemini forensic algorithms to analyze rhetorical patterns and cognitive biases.',
+          initiateScan: 'INITIATE SCAN',
+          cognitiveForensics: 'Cognitive Forensics',
+          rhetoricIntensity: 'Rhetoric Intensity',
+          logicalConsistency: 'Logical Consistency',
+          emotionalManipulation: 'Emotional Manipulation',
+          detectedPatterns: 'Detected Patterns',
+          profileInsightQuote: 'Subject demonstrates high capability in narrative weaving. A localized reality distortion field around key works is likely active.',
+          influenceRadar: 'Influence Radar',
+          rhetoric: 'Rhetoric',
+          reach: 'Reach',
+          persistence: 'Persistence',
+          controversy: 'Controversy',
+          relatedMedia: 'Related Media',
+          influence: 'Influence',
+          tabBiography: 'Biography',
+          tabPsych: 'Psych Profile',
+          profileSummary: 'Profile Summary',
+          focusAreas: 'Focus Areas',
+          searchDatabaseForAuthor: 'Search Database for Author',
+          factCheckLearning: 'Fact-Check & Learning'
+        },
         cats: {
             all: 'All Profiles',
             cosmic: 'Cosmic & Origins',
@@ -707,6 +1034,12 @@ export const translations = {
         advisory: {
             title: 'Advisory Notice',
             text: 'High-level memetic pathogens detected. Engagement without activated cognitive shielding is not recommended. Use AI containment protocols.'
+        },
+        heatmap: {
+          title: 'Author-Media Heatmap',
+          empty: 'No active overlaps detected.',
+          openAuthor: 'Open author profile',
+          openMedia: 'Open media entry'
         }
     },
     viralPage: {
@@ -756,13 +1089,40 @@ export const translations = {
       status: 'DECODING...',
       noSignal: 'No Signal',
       access: 'Access File',
+      searchPlaceholder: 'Search (e.g. movie, book, meme)...',
+      featuredSelection: 'Featured Selection',
+      analyzeFile: 'Analyze File',
+      verdictLabel: 'Verdict',
+      allVerdicts: 'All Verdicts',
+      allAuthors: 'All Authors',
+      allTheoryLinks: 'All Theory Links',
+      dropMediaJson: 'Drop media JSON here',
+      importedSuffix: 'imported',
+      noMediaRecords: 'No media records found matching your query.',
+      loadMoreEntries: 'Load More Entries',
+      detail: {
+        databaseTitle: 'MEDIA DATABASE',
+        filePrefix: 'FILE',
+        decoding: 'DECODING...',
+        itemNotFound: 'Item not found.',
+        satiricalCounterpart: 'Satirical Counterpart',
+        levelSuffix: 'LEVEL',
+        analysisUnavailable: 'Analysis data unavailable.',
+        linkedAuthors: 'Linked Authors',
+        factCheckLearning: 'Fact-Check & Learning',
+        sourceLabel: 'Source',
+        archiveTag: 'Archive Tag'
+      },
       filter: {
         all: 'All Media',
         movie: 'Movies',
         book: 'Literature',
         series: 'TV Series',
         game: 'Games',
-        comic: 'Comics'
+        comic: 'Comics',
+        video: 'Videos',
+        article: 'Articles',
+        image: 'Images'
       },
       labels: {
         realityScore: 'Reality Index',
@@ -780,17 +1140,73 @@ export const translations = {
         MEDIUM: 'Layered',
         HIGH: 'Complex',
         MINDBENDING: 'Mindbending'
+      },
+      stats: {
+        itemsIndexed: 'Items Indexed',
+        avgReality: 'Avg Reality',
+        topComplexity: 'Top Complexity',
+        avgYear: 'Avg Year'
+      },
+      charts: {
+        fictionReality: 'Fiction vs. Reality Index',
+        distribution: 'Media Distribution',
+        axisYear: 'Year',
+        axisRealityScore: 'Reality Index',
+        seriesMedia: 'Media'
       }
     },
     list: {
       title: 'The Archive',
       subtitle: 'Search the database for keywords, names, and topics.',
+      secureAccessSubtitle: 'SECURE DATABASE ACCESS // LEVEL 4',
       searchPlaceholder: 'Search (e.g. NASA, Lizards)...',
       allCategories: 'All Categories',
       threatMatrix: 'Threat Matrix',
       keywords: 'Metadata Keywords',
       filterTags: 'Filter by Tags:',
       allTags: 'All Tags',
+      localBadge: 'LOCAL',
+      viralLoad: 'Viral Load',
+      toggleFilters: 'Toggle Filters',
+      closeFilter: 'Close Filter',
+      resetQueryParameters: 'Reset Query Parameters',
+      loadAdditionalRecords: 'Load Additional Records',
+      databaseQueryNull: 'DATABASE QUERY: NULL',
+      telemetry: {
+        totalRecords: 'Total Records',
+        avgVirality: 'Avg. Virality',
+        activeThreats: 'Active Threats',
+        systemStatus: 'System Status',
+        online: 'ONLINE'
+      },
+      labels: {
+        category: 'Category',
+        origin: 'Origin',
+        virality: 'Virality'
+      },
+      compact: {
+        id: 'ID',
+        subject: 'Subject',
+        class: 'Class',
+        status: 'Status',
+        integrity: 'Integrity'
+      },
+      status: {
+        critical: 'CRITICAL',
+        stable: 'STABLE'
+      },
+      filterHud: {
+        parameterConfiguration: 'Parameter Configuration',
+        resetAll: 'Reset All',
+        sectorAnalysis: 'Sector Analysis',
+        threatMatrix: 'Threat Matrix',
+        metadataIndex: 'Metadata Index'
+      },
+      favorites: {
+        add: 'Add to favorites',
+        remove: 'Remove from favorites'
+      },
+      viewModePrefix: 'View mode',
       noResults: 'No results found.',
       noResultsSub: 'Maybe this theory was already deleted by the powers that be?',
       view: {
@@ -806,12 +1222,55 @@ export const translations = {
         az: 'A-Z'
       }
     },
+    editor: {
+        titleNew: 'NEW THEORY',
+        titleEdit: 'EDIT FILE',
+        subtitle: 'THEORY LAB // EDITOR',
+        labels: {
+            title: 'Title / Subject',
+            desc: 'Short Description (Summary)',
+            category: 'Category',
+            threat: 'Threat Level',
+            origin: 'Year of Origin',
+            tags: 'Meta Tags',
+            cover: 'Cover Visualization',
+            virality: 'Virality Index'
+        },
+        placeholders: {
+            title: 'e.g. The Moon is made of cheese',
+            desc: 'Describe the theory in 1-2 sentences...',
+            tags: 'Add tag...',
+            image: 'Paste image URL...'
+        },
+        info: 'User-created theories are stored locally in your browser cache.',
+        crossLinks: {
+          title: 'Auto Links',
+          subtitle: 'Matching author and media nodes from tags/title',
+          relatedAuthors: 'Related Authors',
+          relatedMedia: 'Related Media',
+          none: 'No matching cross-links found.',
+          openAuthor: 'Open author',
+          openMedia: 'Open media'
+        }
+    },
     detail: {
       back: 'Back',
+      backToLibrary: 'Back to Library',
       analyzing: 'Analyzing secret data...',
       accessing: 'Accessing Gemini 2.5 Node',
       generateImage: 'Generate Visualization',
       generating: 'Generating Image...',
+      report: 'Report',
+      references: 'References',
+      discussTheory: 'Discuss Theory',
+      initiateContextAnalysis: 'Initiate contextual analysis with Dr. Veritas',
+      theoryNotFound: 'THEORY NOT FOUND',
+      tapToInteract: 'Tap to Interact',
+      releaseLock: 'Release Lock',
+      present: 'Present',
+      sourceMatrix: 'Source Matrix',
+      noReferences: 'No references available.',
+      mediaReferences: 'Media References',
       theory: 'The Theory',
       origin: 'Origin',
       danger: 'Danger Level',
@@ -843,10 +1302,33 @@ export const translations = {
       botName: 'Dr. Veritas',
       botStatus: 'Skeptical AI • Online',
       welcome: 'Hello. I am Dr. Veritas.',
+      headerTitle: 'NEURAL UPLINK',
+      subtitleForensic: 'FORENSIC ANALYSIS TERMINAL',
+      contextPrefix: 'CONTEXT',
+      active: 'ACTIVE',
+      statusEncrypted: 'ENCRYPTED',
       placeholder: 'Ask something...',
       reset: 'Reset Uplink',
       save: 'Archive Session',
       voice: 'Voice Output',
+      quickActions: {
+        factCheck: 'Fact Check',
+        fallacies: 'Find Fallacies',
+        sources: 'Sources'
+      },
+      live: {
+        signalStrength: 'SIGNAL_STRENGTH',
+        encryptionAes: 'ENCRYPTION: AES-256',
+        establishingUplink: 'ESTABLISHING UPLINK',
+        neuralBridgeActive: 'NEURAL BRIDGE ACTIVE',
+        handshaking: 'Handshaking with Gemini Core...',
+        voiceIntercept: 'Voice interception enabled. Speak clearly to analyze narrative vectors.',
+        terminateConnection: 'TERMINATE CONNECTION',
+        secureLineReady: 'Secure Line Ready',
+        waitingForInput: 'Waiting for Input...',
+        footerEncryption: 'Encryption',
+        footerLatency: 'Latency'
+      },
       verdict: {
         true: 'TRUTH',
         false: 'DEBUNKED',
@@ -858,6 +1340,9 @@ export const translations = {
     satire: {
       title: 'Tinfoil Hat Generator',
       subtitle: 'AI-generated conspiracy theories.',
+      pageTitle: 'REALITY ENGINE',
+      pageSubtitle: 'MEMETIC FABRICATION PROTOCOL',
+      pageStatus: 'UNREGULATED',
       instruction: 'Click the button.',
       loading1: 'Connecting dots...',
       loading2: 'Interpretiere crop circles...',
@@ -878,6 +1363,21 @@ export const translations = {
           angry: 'Angry',
           scientific: 'Pseudo-Scientific',
           mystical: 'Mystical'
+      },
+      ui: {
+        entropySource: 'Entropy Source',
+        outputFormat: 'Output Format',
+        initiateFabrication: 'INITIATE FABRICATION',
+        awaitingEntropy: 'AWAITING ENTROPY...',
+        fabricationComplete: 'FABRICATION COMPLETE',
+        fabricatingReality: 'FABRICATING REALITY',
+        outputBufferEmpty: 'Output Buffer Empty',
+        outputBufferHint: 'Configure parameters and inject entropy to begin synthesis.',
+        rational: 'Rational',
+        skeptical: 'Skeptical',
+        unhinged: 'Unhinged',
+        authOmega: 'Auth: OMEGA-9',
+        destructionProtocol: 'Destruction Protocol: ACTIVE'
       },
       params: {
         subject: 'Target Subject',
@@ -926,6 +1426,11 @@ export const translations = {
     },
     settings: {
       title: 'System Configuration',
+      headerTitle: 'SYSTEM CONFIG',
+      headerSubtitle: 'CENTRAL CONTROL DECK // LEVEL 5',
+      headerStatus: 'EDITABLE',
+      sidebarConfig: 'Configuration',
+      generalTitle: 'System Core Parameters',
       tabs: {
         GENERAL: 'General',
         INTELLIGENCE: 'Intelligence',
@@ -943,6 +1448,30 @@ export const translations = {
       labels: {
         modelSelect: 'Model',
         temp: 'Temperature',
+        reasoningBudget: 'Reasoning Budget (Tokens)',
+        currentSafetyProtocol: 'Current Safety Protocol',
+        activeCore: 'Active Core',
+        synapticConfiguration: 'Synaptic Configuration',
+        uiDensity: 'UI Density',
+        densityComfortable: 'Comfortable',
+        densityCompact: 'Compact',
+        localization: 'Localization',
+        languageGerman: 'GERMAN',
+        languageEnglish: 'ENGLISH',
+        localVault: 'LOCAL VAULT',
+        indexedDbEncrypted: 'INDEXED_DB ENCRYPTED',
+        autoArchiveChats: 'Auto-Archive Chats',
+        autoArchiveDesc: 'Automatically save sessions to Vault.',
+        exportEncryptedShard: 'EXPORT ENCRYPTED SHARD (JSON)',
+        dangerZone: 'Danger Zone',
+        initiateSystemPurge: 'INITIATE SYSTEM PURGE',
+        purgeIrreversibleSub: 'Irreversible. Wipes all local data.',
+        liveTelemetry: 'Live Telemetry',
+        systemOutputStream: 'System Output Stream',
+        kernel: 'KERNEL',
+        react: 'REACT',
+        geminiSdk: 'GEMINI SDK',
+        uptime: 'UPTIME',
         contrast: 'Contrast',
         motion: 'Motion',
         sound: 'Sounds',
@@ -953,7 +1482,9 @@ export const translations = {
         contrastDesc: 'Increases visibility.',
         motionDesc: 'Disables animations.',
         soundDesc: 'Interface cues.',
-        incognitoDesc: 'No history.'
+        incognitoDesc: 'No history.',
+        protocolExecuted: 'PROTOCOL EXECUTED',
+        confirming: 'CONFIRMING...'
       },
       models: {
           flash: { title: 'Gemini 2.5 Flash', desc: 'Balanced.' },
@@ -967,7 +1498,42 @@ export const translations = {
       howItWorksText: 'Select a theory.',
       dangerLevels: 'Danger Levels',
       disclaimer: 'Disclaimer',
-      disclaimerText: 'Educational purposes.'
+      disclaimerText: 'Educational purposes.',
+      pageTitle: 'SYSTEM KNOWLEDGE BASE',
+      pageSubtitle: 'GUIDE FOR TRUTH SEEKERS // LEVEL 1 ACCESS',
+      pageStatus: 'ONLINE',
+      moduleIndex: 'Module Index',
+      buildInfo: 'BUILD INFO',
+      diagnostics: {
+        vaultIntegrity: 'Vault Integrity',
+        indexedDbConnected: 'INDEXED_DB: CONNECTED',
+        geminiNeuralLink: 'Gemini Neural Link',
+        apiAuthenticated: 'API: AUTHENTICATED',
+        deepScanProgress: 'Deep Scan Progress',
+        checkingLogicGates: 'Checking logic gates...',
+        latency: 'LATENCY',
+        load: 'LOAD'
+      },
+      glossary: {
+        filterTerminology: 'Filter terminology...',
+        jumpToModule: 'Jump to Module',
+        noMatchesFound: 'NO_MATCHES_FOUND_IN_INDEX'
+      },
+      faq: {
+        requireAdvancedAnalysis: 'Require Advanced Analysis?',
+        drVeritasReady: 'Dr. Veritas is online and ready for interrogation.',
+        initiateUplink: 'Initiate Uplink'
+      },
+      guide: {
+        verified: 'VERIFIED',
+        trainingComplete: 'TRAINING COMPLETE',
+        trainingCompleteDesc: 'Agent authorization upgraded to Level 2.'
+      },
+      protocol: {
+        activeProtocol: 'Active Protocol',
+        awaitingInput: 'Awaiting Input... Hover over a threat level to inspect protocols'
+      },
+      quote: '"The truth is rarely pure and never simple." — O. Wilde'
     },
     search: {
       placeholder: 'Search...',

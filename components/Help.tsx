@@ -357,7 +357,7 @@ const HelpNavigation: React.FC = () => {
 // --- DIAGNOSTICS VIEW ---
 
 const DiagnosticsView: React.FC = () => {
-    const { metrics } = useHelp();
+  const { metrics, t } = useHelp();
     const [scanProgress, setScanProgress] = useState(0);
 
     useEffect(() => {
@@ -396,8 +396,8 @@ const DiagnosticsView: React.FC = () => {
                         </ResponsiveContainer>
                     </div>
                     <div className="flex justify-between text-[9px] font-mono text-slate-500 mt-2">
-                        <span>LATENCY: {metrics[metrics.length-1]?.ping}ms</span>
-                        <span>LOAD: {metrics[metrics.length-1]?.load}%</span>
+                      <span>{t.help.diagnostics.latency}: {metrics[metrics.length-1]?.ping}ms</span>
+                      <span>{t.help.diagnostics.load}: {metrics[metrics.length-1]?.load}%</span>
                     </div>
                 </Card>
 
@@ -406,28 +406,28 @@ const DiagnosticsView: React.FC = () => {
                     <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
                         <div className="p-2 bg-green-500/10 rounded-lg text-green-500 border border-green-500/30"><Server size={20} /></div>
                         <div>
-                            <div className="text-xs font-bold text-white uppercase">Vault Integrity</div>
-                            <div className="text-[10px] text-slate-400 font-mono">INDEXED_DB: CONNECTED</div>
+                          <div className="text-xs font-bold text-white uppercase">{t.help.diagnostics.vaultIntegrity}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{t.help.diagnostics.indexedDbConnected}</div>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
                         <div className="p-2 bg-accent-purple/10 rounded-lg text-accent-purple border border-accent-purple/30"><Wifi size={20} /></div>
                         <div>
-                            <div className="text-xs font-bold text-white uppercase">Gemini Neural Link</div>
-                            <div className="text-[10px] text-slate-400 font-mono">API: AUTHENTICATED</div>
+                          <div className="text-xs font-bold text-white uppercase">{t.help.diagnostics.geminiNeuralLink}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{t.help.diagnostics.apiAuthenticated}</div>
                         </div>
                     </div>
 
                     <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-mono text-slate-400 uppercase">
-                            <span>Deep Scan Progress</span>
+                          <span>{t.help.diagnostics.deepScanProgress}</span>
                             <span>{scanProgress}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800">
                             <div className="h-full bg-accent-cyan shadow-[0_0_10px_cyan]" style={{ width: `${scanProgress}%` }}></div>
                         </div>
-                        <div className="text-[9px] text-slate-600 font-mono">Checking logic gates...</div>
+                        <div className="text-[9px] text-slate-600 font-mono">{t.help.diagnostics.checkingLogicGates}</div>
                     </div>
                 </Card>
             </div>
@@ -438,7 +438,7 @@ const DiagnosticsView: React.FC = () => {
 // --- DOCS VIEW ---
 
 const DocumentationView: React.FC = () => {
-  const { data, activeDocSection, setActiveDocSection } = useHelp();
+  const { data, activeDocSection, setActiveDocSection, t } = useHelp();
   
   const currentSection = data.docs.find(d => d.id === activeDocSection);
 
@@ -447,7 +447,7 @@ const DocumentationView: React.FC = () => {
       {/* Sidebar / TOC */}
       <div className="md:w-64 shrink-0 space-y-2">
         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 pl-2 flex items-center gap-2">
-          <Layers size={12} /> Module Index
+          <Layers size={12} /> {t.help.moduleIndex}
         </div>
         {data.docs.map(doc => (
           <button
@@ -469,7 +469,7 @@ const DocumentationView: React.FC = () => {
         
         <div className="mt-8 p-4 bg-black/40 rounded-xl border border-slate-800 text-[10px] text-slate-500 font-mono">
           <div className="font-bold text-slate-400 mb-2 flex justify-between items-center">
-              BUILD INFO
+              {t.help.buildInfo}
               <Binary size={10} />
           </div>
           <div>Ver: 2.7.0-modular</div>
@@ -528,7 +528,7 @@ const DocumentationView: React.FC = () => {
 };
 
 const GuideView: React.FC = () => {
-  const { data, completedSteps, toggleStep } = useHelp();
+  const { data, completedSteps, toggleStep, t } = useHelp();
   
   const allComplete = completedSteps.length === data.guide.steps.length;
 
@@ -576,7 +576,7 @@ const GuideView: React.FC = () => {
                 </div>
 
                 <div className={`text-xs font-bold uppercase tracking-widest font-mono ${isComplete ? 'text-green-500' : 'text-slate-600 group-hover:text-slate-400'}`}>
-                    {isComplete ? 'VERIFIED' : `STEP_0${step.id}`}
+                  {isComplete ? t.help.guide.verified : `STEP_0${step.id}`}
                 </div>
                 
                 {/* Progress bar line for uncompleted */}
@@ -590,8 +590,8 @@ const GuideView: React.FC = () => {
 
       {allComplete && (
           <div className="text-center p-8 border border-green-500/30 bg-green-500/5 rounded-xl animate-fade-in-up backdrop-blur-sm">
-              <h3 className="text-green-400 font-bold text-lg mb-2 flex items-center justify-center gap-2"><CheckCircle2/> TRAINING COMPLETE</h3>
-              <p className="text-slate-400 text-sm font-mono">Agent authorization upgraded to Level 2.</p>
+              <h3 className="text-green-400 font-bold text-lg mb-2 flex items-center justify-center gap-2"><CheckCircle2/> {t.help.guide.trainingComplete}</h3>
+              <p className="text-slate-400 text-sm font-mono">{t.help.guide.trainingCompleteDesc}</p>
           </div>
       )}
     </div>
@@ -599,7 +599,7 @@ const GuideView: React.FC = () => {
 };
 
 const DangerMatrixView: React.FC = () => {
-  const { data, hoveredThreat, setHoveredThreat } = useHelp();
+  const { data, hoveredThreat, setHoveredThreat, t } = useHelp();
   
   // Logic to get the description of the currently hovered item (or null)
   const activeProtocol = hoveredThreat ? data.dangerProtocols[hoveredThreat as keyof typeof data.dangerProtocols] : null;
@@ -641,13 +641,13 @@ const DangerMatrixView: React.FC = () => {
             {activeProtocol ? (
                 <div className="relative z-10 text-center animate-fade-in max-w-2xl">
                     <div className={`text-xs font-mono uppercase tracking-[0.2em] mb-3 ${activeProtocol.color} border border-current px-2 py-1 inline-block rounded`}>
-                        Active Protocol: {activeProtocol.protocol}
+                      {t.help.protocol.activeProtocol}: {activeProtocol.protocol}
                     </div>
                     <p className="text-lg text-slate-200 font-medium leading-relaxed">{activeProtocol.desc}</p>
                 </div>
             ) : (
                 <div className="relative z-10 text-slate-600 font-mono text-xs uppercase tracking-widest flex items-center gap-2 animate-pulse">
-                    <Activity size={16} /> Awaiting Input... Hover over a threat level to inspect protocols
+                  <Activity size={16} /> {t.help.protocol.awaitingInput}
                 </div>
             )}
         </Card>
@@ -656,7 +656,7 @@ const DangerMatrixView: React.FC = () => {
 };
 
 const GlossaryView: React.FC = () => {
-  const { searchTerm, setSearchTerm, filteredGlossary, navigateTo } = useHelp();
+  const { searchTerm, setSearchTerm, filteredGlossary, navigateTo, t } = useHelp();
   
   return (
     <div className="animate-fade-in space-y-6">
@@ -666,7 +666,7 @@ const GlossaryView: React.FC = () => {
             <Search className="absolute left-4 top-3.5 text-slate-500" size={16} />
             <input 
             type="text" 
-            placeholder="Filter terminology..." 
+            placeholder={t.help.glossary.filterTerminology}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-950 border border-slate-800 text-white pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-0 transition-all text-sm font-mono shadow-xl placeholder-slate-600"
@@ -693,7 +693,7 @@ const GlossaryView: React.FC = () => {
                     onClick={() => navigateTo(item.relatedRoute!)}
                     className="mt-auto w-full py-2 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-slate-950 hover:bg-accent-cyan/10 border border-slate-800 hover:border-accent-cyan/30 text-slate-500 hover:text-accent-cyan rounded-lg transition-all"
                   >
-                      Jump to Module <ArrowUpRight size={12} />
+                        {t.help.glossary.jumpToModule} <ArrowUpRight size={12} />
                   </button>
               )}
             </div>
@@ -703,7 +703,7 @@ const GlossaryView: React.FC = () => {
              <div className="bg-slate-900/50 inline-block p-4 rounded-full mb-4 border border-slate-800">
                 <Search size={32} className="opacity-50" />
              </div>
-             <p className="font-mono text-xs uppercase tracking-widest">NO_MATCHES_FOUND_IN_INDEX</p>
+             <p className="font-mono text-xs uppercase tracking-widest">{t.help.glossary.noMatchesFound}</p>
           </div>
         )}
       </div>
@@ -712,7 +712,7 @@ const GlossaryView: React.FC = () => {
 };
 
 const FAQView: React.FC = () => {
-  const { data, expandedFAQ, toggleFAQ, navigateTo } = useHelp();
+  const { data, expandedFAQ, toggleFAQ, navigateTo, t } = useHelp();
   
   return (
     <div className="animate-fade-in space-y-3 max-w-3xl mx-auto">
@@ -752,8 +752,8 @@ const FAQView: React.FC = () => {
               <Brain size={24} className="text-accent-purple" />
            </div>
            <div>
-             <h4 className="font-bold text-white mb-1 text-sm">Require Advanced Analysis?</h4>
-             <p className="text-xs text-slate-400">Dr. Veritas is online and ready for interrogation.</p>
+             <h4 className="font-bold text-white mb-1 text-sm">{t.help.faq.requireAdvancedAnalysis}</h4>
+             <p className="text-xs text-slate-400">{t.help.faq.drVeritasReady}</p>
            </div>
          </div>
          <Button 
@@ -762,7 +762,7 @@ const FAQView: React.FC = () => {
             onClick={() => navigateTo('/chat')}
             className="text-xs border-slate-700 hover:border-accent-purple hover:text-white"
         >
-           Initiate Uplink
+           {t.help.faq.initiateUplink}
          </Button>
       </div>
     </div>
@@ -772,14 +772,15 @@ const FAQView: React.FC = () => {
 // --- 5. Main Component ---
 
 export const Help: React.FC = () => {
+  const { t } = useLanguage();
   return (
     <HelpProvider>
       <div className="max-w-7xl mx-auto pb-20 pt-4">
         <PageHeader 
-            title="SYSTEM KNOWLEDGE BASE"
-            subtitle="GUIDE FOR TRUTH SEEKERS // LEVEL 1 ACCESS"
+            title={t.help.pageTitle}
+            subtitle={t.help.pageSubtitle}
             icon={Network}
-            status="ONLINE"
+            status={t.help.pageStatus}
             visualizerState="IDLE"
         />
         
@@ -791,7 +792,7 @@ export const Help: React.FC = () => {
         
         <div className="mt-16 text-center border-t border-slate-800 pt-8 opacity-50 hover:opacity-100 transition-opacity">
            <p className="text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em]">
-             "The truth is rarely pure and never simple." — O. Wilde
+             {t.help.quote}
            </p>
         </div>
       </div>

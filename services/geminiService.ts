@@ -2,6 +2,7 @@
 import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, LiveSession, LiveServerMessage, Modality } from "@google/genai";
 import { Theory, TheoryDetail, Language, SatireResponse, SourceItem, GroundingChunk, MediaItem, MediaAnalysisResponse, SatireOptions, RawTheoryAnalysisJSON } from '../types';
 import { dbService } from './dbService';
+import { secureApiKeyService } from './secureApiKeyService';
 
 interface AIConfig {
     model?: string;
@@ -10,12 +11,10 @@ interface AIConfig {
     forceRefresh?: boolean;
 }
 
-// Strictly use process.env.API_KEY as per best practices
-const getAiClient = () => {
-  const apiKey = process.env.API_KEY;
+const getAiClient = async () => {
+  const apiKey = await secureApiKeyService.getApiKey();
   if (!apiKey) {
-    console.error("CRITICAL: API_KEY is missing. AI features will not function.");
-    throw new Error("API Key missing. Check .env configuration.");
+    throw new Error("MISSING_GEMINI_API_KEY: Please add your Gemini API key in Settings > Privacy.");
   }
   return new GoogleGenAI({ apiKey });
 };
@@ -77,7 +76,7 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
   }
 
   try {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const model = configOverride?.model || 'gemini-2.5-flash'; 
     const isThinkingModel = model.includes('2.5') || model.includes('3-pro');
     
@@ -184,7 +183,7 @@ export const enhanceTheoryContent = async (
     mode: 'EXPAND' | 'RED_TEAM' | 'TAGS', 
     language: Language
 ): Promise<string | string[]> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const langLabel = language === 'de' ? 'German' : 'English';
 
     let prompt = "";
@@ -234,7 +233,7 @@ export const enhanceTheoryContent = async (
 };
 
 export const draftTheoryContent = async (title: string, category: string, language: Language): Promise<{ description: string, tags: string[] }> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     
     const schema: Schema = {
         type: Type.OBJECT,
@@ -275,7 +274,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
   }
 
   try {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const model = configOverride?.model || 'gemini-3-pro-preview';
 
     const schema: Schema = {
@@ -323,7 +322,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
 
 export const generateSatireTheory = async (language: Language, options?: SatireOptions): Promise<SatireResponse> => {
   try {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const topic = options?.topic || 'Office Supplies';
     const level = options?.paranoiaLevel || 50;
     const archetype = options?.archetype || 'General';
@@ -362,7 +361,7 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
 
 export const generateTheoryImage = async (theory: Theory, language: Language, customPrompt?: string): Promise<string | null> => {
   try {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     // Allow custom prompting for the editor, fallback to automatic for viewing
     const prompt = customPrompt || (language === 'de'
         ? `Düstere, cineastische Illustration für Verschwörungstheorie: "${theory.title}". Stil: Akte X, 8k, fotorealistisch.`
@@ -391,9 +390,10 @@ export const generateTheoryImage = async (theory: Theory, language: Language, cu
 export const connectLiveSession = async (
     onAudioData: (base64: string) => void,
     onClose: () => void,
-    language: Language
+  language: Language,
+  contextBrief?: string
 ): Promise<LiveSession> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     
     const config = {
         model: 'gemini-2.5-flash-native-audio-preview-09-2025',
@@ -402,9 +402,9 @@ export const connectLiveSession = async (
             speechConfig: {
                 voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
             },
-            systemInstruction: language === 'de' 
-                ? "Du bist 'Dr. Veritas', eine skeptische KI. Antworte kurz, prägnant und wissenschaftlich fundiert." 
-                : "You are 'Dr. Veritas', a skeptical AI. Respond concisely and scientifically."
+            systemInstruction: language === 'de'
+              ? `Du bist 'Dr. Veritas', eine skeptische KI. Antworte kurz, prägnant und wissenschaftlich fundiert.${contextBrief ? `\n\nKontextpaket:\n${contextBrief}` : ''}`
+              : `You are 'Dr. Veritas', a skeptical AI. Respond concisely and scientifically.${contextBrief ? `\n\nContext package:\n${contextBrief}` : ''}`
         }
     };
 
@@ -458,13 +458,20 @@ export function base64ToUint8Array(base64: string) {
 
 let chatSession: Chat | null = null; 
 let currentChatModel: string | null = null;
+let currentChatContext: string | null = null;
 
 /**
  * Streams chat response. Handles session reset if model changes.
  */
-export const streamChatWithSkeptic = async function* (history: string[], message: string, language: Language, configOverride?: AIConfig) {
+export const streamChatWithSkeptic = async function* (
+  history: string[],
+  message: string,
+  language: Language,
+  configOverride?: AIConfig,
+  contextBrief?: string
+) {
   try {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const modelName = configOverride?.model || 'gemini-2.5-flash';
     
     const isThinkingModel = modelName.includes('2.5') || modelName.includes('3-pro');
@@ -472,17 +479,22 @@ export const streamChatWithSkeptic = async function* (history: string[], message
         ? { thinkingConfig: { thinkingBudget: configOverride?.thinkingBudget || 1024 } } 
         : {};
 
-    const systemInstruction = language === 'de' 
-        ? "Du bist 'Dr. Veritas', eine skeptische KI. Bewerte Behauptungen mit [VERDICT: WAHR/FALSCH/UNBELEGT] am Anfang." 
-        : "You are 'Dr. Veritas', a skeptical AI. Rate claims with [VERDICT: TRUE/FALSE/UNVERIFIED] at the start.";
+    const systemInstruction = language === 'de'
+      ? `Du bist 'Dr. Veritas', eine skeptische KI. Bewerte Behauptungen mit [VERDICT: WAHR/FALSCH/UNBELEGT] am Anfang.${contextBrief ? `\n\nKontextpaket:\n${contextBrief}` : ''}`
+      : `You are 'Dr. Veritas', a skeptical AI. Rate claims with [VERDICT: TRUE/FALSE/UNVERIFIED] at the start.${contextBrief ? `\n\nContext package:\n${contextBrief}` : ''}`;
 
     // IMPORTANT: If model changes, we MUST recreate the chat to apply new config/model
     if (chatSession && currentChatModel !== modelName) {
         chatSession = null;
     }
 
+    if (chatSession && currentChatContext !== (contextBrief || null)) {
+      chatSession = null;
+    }
+
     if (!chatSession) {
         currentChatModel = modelName;
+      currentChatContext = contextBrief || null;
         // Map simplified string history back to Content objects
         const historyContent = history.map((msg, i) => ({
             role: i % 2 === 0 ? 'user' : 'model',
@@ -514,4 +526,5 @@ export const streamChatWithSkeptic = async function* (history: string[], message
 export const resetChatSession = () => {
     chatSession = null;
     currentChatModel = null;
+  currentChatContext = null;
 };

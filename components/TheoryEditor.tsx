@@ -8,11 +8,13 @@ import { PageFrame, PageHeader, Card, Button, Badge } from './ui/Common';
 import { GenerationHUD, HUDMode } from './ui/GenerationHUD';
 import { draftTheoryContent, enhanceTheoryContent, generateTheoryImage } from '../services/geminiService';
 import { generateArt } from '../utils/artEngine';
+import { MEDIA_ITEMS } from '../constants';
+import { AUTHORS_FULL } from '../data/enriched';
 import { 
     Save, X, Edit3, Tag, AlertTriangle, Image as ImageIcon, 
     Eye, CheckCircle2, Sparkles, RefreshCw, Wand2, Hash,
     Brain, ShieldAlert, FileText, Share2, ImagePlus, ChevronRight,
-    Play
+    Play, User, Film
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -56,6 +58,43 @@ const useTheoryEditorLogic = () => {
 
     // Image Gen State
     const [imagePrompt, setImagePrompt] = useState('');
+
+    const relatedMedia = useMemo(() => {
+        const queryTokens = [formState.title, ...formState.tags]
+            .join(' ')
+            .toLowerCase()
+            .split(/\s+/)
+            .filter((token) => token.length > 2);
+
+        if (!queryTokens.length) return [];
+
+        return MEDIA_ITEMS.filter((item) => {
+            const haystack = [
+                item.title,
+                language === 'de' ? item.descriptionDe : item.descriptionEn,
+                ...(item.tags || []),
+                ...(item.relatedTheoryTags || []),
+            ].join(' ').toLowerCase();
+
+            return queryTokens.some((token) => haystack.includes(token));
+        }).slice(0, 6);
+    }, [formState.title, formState.tags, language]);
+
+    const relatedAuthors = useMemo(() => {
+        const mediaAuthorIds = new Set(relatedMedia.flatMap((item) => item.linkedAuthorIds || []));
+        const queryTokens = [formState.title, ...formState.tags]
+            .join(' ')
+            .toLowerCase()
+            .split(/\s+/)
+            .filter((token) => token.length > 2);
+
+        return AUTHORS_FULL.filter((author) => {
+            const authorText = [author.name, ...(author.focusAreas || []), ...(author.keyWorks || [])].join(' ').toLowerCase();
+            const matchesQuery = queryTokens.some((token) => authorText.includes(token));
+            const matchesMedia = mediaAuthorIds.has(author.id);
+            return matchesQuery || matchesMedia;
+        }).slice(0, 6);
+    }, [formState.title, formState.tags, relatedMedia]);
 
     // Reset when theory changes
     useEffect(() => {
@@ -208,6 +247,10 @@ const useTheoryEditorLogic = () => {
         aiAction,
         redTeamAnalysis,
         imagePrompt, setImagePrompt,
+        relatedAuthors,
+        relatedMedia,
+        onOpenAuthor: (authorId: string) => navigate(`/authors/${authorId}`),
+        onOpenMedia: (mediaId: string) => navigate(`/media/${mediaId}`),
         handleChange,
         handleAddTag,
         handleRemoveTag,
@@ -398,6 +441,47 @@ const VulnerabilityAssessment: React.FC = () => {
     );
 };
 
+const CrossLinkPanel: React.FC = () => {
+    const { t, relatedAuthors, relatedMedia, onOpenAuthor, onOpenMedia } = useTheoryEditor();
+
+    return (
+        <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 space-y-4">
+            <div>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest">{t.editor.crossLinks.title}</h3>
+                <p className="text-[10px] text-slate-500 mt-1">{t.editor.crossLinks.subtitle}</p>
+            </div>
+
+            {relatedAuthors.length === 0 && relatedMedia.length === 0 ? (
+                <div className="text-xs text-slate-500">{t.editor.crossLinks.none}</div>
+            ) : (
+                <>
+                    <div>
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><User size={12} /> {t.editor.crossLinks.relatedAuthors}</div>
+                        <div className="flex flex-wrap gap-2">
+                            {relatedAuthors.map((author) => (
+                                <button key={author.id} onClick={() => onOpenAuthor(author.id)} className="px-2 py-1 text-[10px] border border-slate-700 rounded bg-slate-950 text-slate-300 hover:border-accent-cyan hover:text-accent-cyan transition-colors">
+                                    {author.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-2 flex items-center gap-2"><Film size={12} /> {t.editor.crossLinks.relatedMedia}</div>
+                        <div className="flex flex-wrap gap-2">
+                            {relatedMedia.map((media) => (
+                                <button key={media.id} onClick={() => onOpenMedia(media.id)} className="px-2 py-1 text-[10px] border border-slate-700 rounded bg-slate-950 text-slate-300 hover:border-accent-purple hover:text-accent-purple transition-colors">
+                                    {media.title}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
 const MetadataPanel: React.FC = () => {
     const { formState, handleChange, categories, dangerLevels, tagInput, setTagInput, handleAddTag, handleRemoveTag, t } = useTheoryEditor();
 
@@ -565,6 +649,7 @@ export const TheoryEditor: React.FC = () => {
                             <div className="flex flex-col justify-between">
                                 <PredictiveMetrics />
                                 <VulnerabilityAssessment />
+                                <CrossLinkPanel />
                             </div>
                         </div>
 

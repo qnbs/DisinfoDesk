@@ -337,9 +337,9 @@ const ParanoiaSlider: React.FC = () => {
             />
             
             <div className="flex justify-between mt-2 text-[9px] font-mono text-slate-600 uppercase">
-                <span>Rational</span>
-                <span>Skeptical</span>
-                <span className="text-red-500 font-bold">Unhinged</span>
+                <span>{t.satire.ui.rational}</span>
+                <span>{t.satire.ui.skeptical}</span>
+                <span className="text-red-500 font-bold">{t.satire.ui.unhinged}</span>
             </div>
         </div>
     );
@@ -347,7 +347,10 @@ const ParanoiaSlider: React.FC = () => {
 
 // --- 5. ARTIFACT RENDERERS ---
 
-const ClassifiedArtifact: React.FC<{ title: string, content: string }> = ({ title, content }) => (
+const ClassifiedArtifact: React.FC<{ title: string, content: string }> = ({ title, content }) => {
+    const { t } = useLanguage();
+
+    return (
     <div className="relative bg-[#e5e5e5] text-black p-8 md:p-12 font-mono shadow-2xl transform rotate-1 rounded-sm border border-slate-400 min-h-[600px] overflow-hidden">
         {/* Paper Texture */}
         <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: `url("${PAPER_TEXTURE}")` }}></div>
@@ -371,8 +374,8 @@ const ClassifiedArtifact: React.FC<{ title: string, content: string }> = ({ titl
 
         {/* Footer */}
         <div className="mt-12 pt-4 border-t border-black flex justify-between text-[10px] uppercase font-bold tracking-widest relative z-10">
-            <span>Auth: OMEGA-9</span>
-            <span>Destruction Protocol: ACTIVE</span>
+            <span>{t.satire.ui.authOmega}</span>
+            <span>{t.satire.ui.destructionProtocol}</span>
         </div>
 
         {/* Watermark */}
@@ -380,7 +383,8 @@ const ClassifiedArtifact: React.FC<{ title: string, content: string }> = ({ titl
             CONFIDENTIAL
         </div>
     </div>
-);
+    );
+};
 
 const DarkNetArtifact: React.FC<{ title: string, content: string }> = ({ title, content }) => (
     <div className="relative bg-[#1a1b1e] text-[#b0b3b8] p-6 rounded-md shadow-2xl font-sans min-h-[600px] border-l-4 border-accent-purple">
@@ -455,7 +459,7 @@ const TabloidArtifact: React.FC<{ title: string, content: string }> = ({ title, 
 // --- 6. MAIN LAYOUT ---
 
 const FabricationTerminal: React.FC = () => {
-    const { isFabricating, fabricationStep, LOG_STEPS } = useSatire();
+    const { isFabricating, fabricationStep, LOG_STEPS, t } = useSatire();
 
     if (!isFabricating) return null;
 
@@ -464,7 +468,7 @@ const FabricationTerminal: React.FC = () => {
             <div className="w-full max-w-md space-y-4">
                 <div className="text-accent-cyan animate-pulse text-center text-4xl mb-8">
                     <Cpu size={64} className="mx-auto mb-4" />
-                    FABRICATING REALITY
+                    {t.satire.ui.fabricatingReality}
                 </div>
                 
                 <div className="bg-black border border-slate-800 rounded-lg p-4 h-48 overflow-hidden relative shadow-2xl">
@@ -500,7 +504,7 @@ const ConfigDeck: React.FC = () => {
             <div className="space-y-2">
                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Fingerprint size={12} className={entropyReady ? "text-green-500" : "text-slate-400"} />
-                    Entropy Source
+                    {t.satire.ui.entropySource}
                 </div>
                 <EntropyCanvas active={!entropyReady} onEntropyFull={() => setEntropyReady(true)} />
             </div>
@@ -528,7 +532,7 @@ const ConfigDeck: React.FC = () => {
                 <ParanoiaSlider />
                 <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-3">
-                        <Newspaper size={12} /> Output Format
+                        <Newspaper size={12} /> {t.satire.ui.outputFormat}
                     </div>
                     <div className="flex gap-2">
                         {['LEAK', 'FORUM', 'ARTICLE'].map(fmt => (
@@ -542,7 +546,7 @@ const ConfigDeck: React.FC = () => {
                                         : 'bg-slate-950 border-slate-700 text-slate-500 hover:text-slate-300'}
                                 `}
                             >
-                                {fmt}
+                                {fmt === 'LEAK' ? t.satire.formats.leak : fmt === 'FORUM' ? t.satire.formats.forum : t.satire.formats.article}
                             </button>
                         ))}
                     </div>
@@ -557,14 +561,14 @@ const ConfigDeck: React.FC = () => {
                 size="lg" 
                 className={`w-full py-6 text-lg font-black tracking-[0.2em] shadow-[0_0_30px_rgba(6,182,212,0.3)] transition-all ${!entropyReady ? 'opacity-50 grayscale' : 'hover:scale-[1.01]'}`}
             >
-                {entropyReady ? "INITIATE FABRICATION" : "AWAITING ENTROPY..."}
+                {entropyReady ? t.satire.ui.initiateFabrication : t.satire.ui.awaitingEntropy}
             </Button>
         </div>
     );
 };
 
 const ResultViewer: React.FC = () => {
-    const { result, format, handleReset, handleSave } = useSatire();
+    const { result, format, handleReset, handleSave, t } = useSatire();
 
     if (!result) return null;
 
@@ -572,11 +576,11 @@ const ResultViewer: React.FC = () => {
         <div className="animate-fade-in space-y-6">
             <div className="flex justify-between items-center bg-slate-900/80 backdrop-blur p-4 rounded-xl border border-slate-800 shadow-2xl">
                 <div className="text-xs font-mono text-green-400 flex items-center gap-2">
-                    <Check size={14} /> FABRICATION_COMPLETE
+                    <Check size={14} /> {t.satire.ui.fabricationComplete}
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" onClick={handleSave} icon={<Save size={14} />}>VAULT</Button>
-                    <Button variant="ghost" size="sm" onClick={handleReset} icon={<RefreshCw size={14} />}>RESET</Button>
+                    <Button variant="secondary" size="sm" onClick={handleSave} icon={<Save size={14} />}>{t.satire.saveVault}</Button>
+                    <Button variant="ghost" size="sm" onClick={handleReset} icon={<RefreshCw size={14} />}>{t.common.reset}</Button>
                 </div>
             </div>
 
@@ -596,10 +600,10 @@ export const SatireGenerator: React.FC = () => {
         <SatireContext.Provider value={logic}>
             <PageFrame>
                 <PageHeader 
-                    title="REALITY ENGINE"
-                    subtitle="MEMETIC FABRICATION PROTOCOL"
+                    title={logic.t.satire.pageTitle}
+                    subtitle={logic.t.satire.pageSubtitle}
                     icon={Globe}
-                    status="UNREGULATED"
+                    status={logic.t.satire.pageStatus}
                     statusColor="bg-red-500"
                 />
 
@@ -614,8 +618,8 @@ export const SatireGenerator: React.FC = () => {
                         {!logic.result && !logic.isFabricating && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
                                 <ShieldAlert size={64} className="text-slate-700 mb-4" />
-                                <h3 className="text-xl font-bold text-slate-500 uppercase tracking-widest mb-2">Output Buffer Empty</h3>
-                                <p className="text-slate-600 text-xs font-mono">Configure parameters and inject entropy to begin synthesis.</p>
+                                <h3 className="text-xl font-bold text-slate-500 uppercase tracking-widest mb-2">{logic.t.satire.ui.outputBufferEmpty}</h3>
+                                <p className="text-slate-600 text-xs font-mono">{logic.t.satire.ui.outputBufferHint}</p>
                             </div>
                         )}
                         <ResultViewer />

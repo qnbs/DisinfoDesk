@@ -123,31 +123,31 @@ const useTheoryList = () => {
 // --- 2. Components ---
 
 const DataTelemetryRibbon: React.FC = React.memo(() => {
-    const { totalCount, stats } = useTheoryList();
+    const { totalCount, stats, t } = useTheoryList();
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
             <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-lg flex items-center justify-between shadow-inner">
-                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">Total Records</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">{t.list.telemetry.totalRecords}</div>
                 <div className="text-xl font-display font-bold text-white flex items-center gap-2">
                     <Database size={14} className="text-accent-cyan" /> {totalCount}
                 </div>
             </div>
             <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-lg flex items-center justify-between shadow-inner">
-                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">Avg. Virality</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">{t.list.telemetry.avgVirality}</div>
                 <div className="text-xl font-display font-bold text-white flex items-center gap-2">
                     <Activity size={14} className="text-accent-purple" /> {stats.avgViral}%
                 </div>
             </div>
             <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-lg flex items-center justify-between shadow-inner">
-                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">Active Threats</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">{t.list.telemetry.activeThreats}</div>
                 <div className="text-xl font-display font-bold text-white flex items-center gap-2">
                     <ShieldAlert size={14} className={stats.criticalCount > 0 ? "text-red-500 animate-pulse" : "text-green-500"} /> {stats.criticalCount}
                 </div>
             </div>
             <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-lg flex items-center justify-between shadow-inner">
-                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">System Status</div>
+                <div className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">{t.list.telemetry.systemStatus}</div>
                 <div className="text-xs font-mono font-bold text-accent-cyan animate-pulse">
-                    ONLINE
+                    {t.list.telemetry.online}
                 </div>
             </div>
         </div>
@@ -155,7 +155,7 @@ const DataTelemetryRibbon: React.FC = React.memo(() => {
 });
 
 const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(({ theory, index }) => {
-  const { onSelect, handleToggleFavorite, favorites } = useTheoryList();
+    const { onSelect, handleToggleFavorite, favorites, t } = useTheoryList();
   const isFav = favorites.includes(theory.id);
   const isDanger = theory.dangerLevel.includes('High') || theory.dangerLevel.includes('Extreme');
 
@@ -182,13 +182,13 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
         {/* Floating Badges */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
            <Badge label={theory.category.split(' ')[0]} className="bg-slate-950/90 text-white border-slate-700 backdrop-blur-md shadow-lg" />
-           {theory.isUserCreated && <Badge label="LOCAL" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/50" />}
+           {theory.isUserCreated && <Badge label={t.list.localBadge} className="bg-yellow-500/20 text-yellow-400 border-yellow-500/50" />}
         </div>
 
         <button
           onClick={(e) => { e.stopPropagation(); handleToggleFavorite(theory.id); }}
           className="absolute top-3 right-3 p-2 rounded-full bg-black/50 hover:bg-white text-white hover:text-red-600 transition-colors backdrop-blur-md border border-white/10 z-20 group/btn focus-visible:ring-2 focus-visible:ring-white outline-none"
-          aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+          aria-label={isFav ? t.list.favorites.remove : t.list.favorites.add}
         >
           <Heart size={14} className={isFav ? "fill-red-600 text-red-600" : ""} />
         </button>
@@ -218,7 +218,7 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
         <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
             <div className="flex flex-col gap-0.5 w-full mr-4">
                 <div className="flex justify-between text-[9px] font-mono text-slate-500 uppercase tracking-wider">
-                    <span>Viral Load</span>
+                    <span>{t.list.viralLoad}</span>
                     <span className="text-accent-purple">{theory.popularity}%</span>
                 </div>
                 <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
@@ -235,7 +235,7 @@ const ArchiveGridCard: React.FC<{ theory: Theory, index: number }> = React.memo(
 });
 
 const ArchiveListRow: React.FC<{ theory: Theory, index: number }> = React.memo(({ theory, index }) => {
-  const { onSelect, favorites } = useTheoryList();
+    const { onSelect, favorites, t } = useTheoryList();
   return (
     <div 
       onClick={() => onSelect(theory)}
@@ -262,17 +262,17 @@ const ArchiveListRow: React.FC<{ theory: Theory, index: number }> = React.memo((
          </div>
          
          <div className="md:col-span-2 flex flex-col md:items-start">
-            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">Category</span>
+            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">{t.list.labels.category}</span>
             <span className="text-xs text-slate-300 truncate w-full bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{theory.category.split(' ')[0]}</span>
          </div>
          
          <div className="md:col-span-2 flex flex-col md:items-start">
-            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">Origin</span>
+            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">{t.list.labels.origin}</span>
             <span className="text-xs text-slate-300 font-mono">{theory.originYear}</span>
          </div>
 
          <div className="md:col-span-2 flex flex-col md:items-end">
-            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">Virality</span>
+            <span className="text-[9px] text-slate-600 uppercase font-mono font-bold tracking-wider">{t.list.labels.virality}</span>
             <div className="flex items-center gap-2">
                 <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-accent-purple" style={{ width: `${theory.popularity}%` }}></div>
@@ -286,7 +286,7 @@ const ArchiveListRow: React.FC<{ theory: Theory, index: number }> = React.memo((
 });
 
 const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.memo(({ theory, index }) => {
-  const { onSelect } = useTheoryList();
+    const { onSelect, t } = useTheoryList();
   const isDanger = theory.dangerLevel.includes('High') || theory.dangerLevel.includes('Extreme');
   
   return (
@@ -302,7 +302,7 @@ const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.me
        <div className="col-span-6 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase py-1 leading-normal">{theory.title}</div>
        <div className="col-span-4 md:col-span-2 text-slate-500 truncate">{theory.category.split(' ')[0]}</div>
        <div className="col-span-3 md:col-span-2 text-right md:text-left">
-           <span className={`${isDanger ? 'text-red-500' : 'text-green-500'}`}>{isDanger ? 'CRITICAL' : 'STABLE'}</span>
+           <span className={`${isDanger ? 'text-red-500' : 'text-green-500'}`}>{isDanger ? t.list.status.critical : t.list.status.stable}</span>
        </div>
        <div className="hidden md:block col-span-2 text-right text-slate-500">
           [{Array.from({length: Math.ceil(theory.popularity/10)}).map(() => '|').join('')}]
@@ -332,10 +332,10 @@ const FilterHUD: React.FC = React.memo(() => {
       <div className="p-6 md:p-8 relative z-10">
           <div className="flex justify-between items-center mb-6 pb-2 border-b border-slate-800">
               <h3 className="text-sm font-bold text-accent-cyan uppercase tracking-widest flex items-center gap-2">
-                  <SlidersHorizontal size={16} /> Parameter Configuration
+                  <SlidersHorizontal size={16} /> {t.list.filterHud.parameterConfiguration}
               </h3>
               <button onClick={handleResetFilters} className="text-[10px] flex items-center gap-1 text-red-400 hover:text-red-300 uppercase tracking-wider font-bold">
-                  <RefreshCw size={10} /> Reset All
+                  <RefreshCw size={10} /> {t.list.filterHud.resetAll}
               </button>
           </div>
 
@@ -343,7 +343,7 @@ const FilterHUD: React.FC = React.memo(() => {
             {/* Column 1: Category Vector */}
             <div className="space-y-3">
                 <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-2">
-                    <Database size={10} /> Sector Analysis
+                    <Database size={10} /> {t.list.filterHud.sectorAnalysis}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                     {categories.map(cat => (
@@ -366,7 +366,7 @@ const FilterHUD: React.FC = React.memo(() => {
             {/* Column 2: Threat Matrix */}
             <div className="space-y-3">
                 <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-2">
-                    <ShieldAlert size={10} /> Threat Matrix
+                    <ShieldAlert size={10} /> {t.list.filterHud.threatMatrix}
                 </h4>
                 <div className="flex flex-col gap-2">
                     {dangerLevels.map(lvl => {
@@ -396,7 +396,7 @@ const FilterHUD: React.FC = React.memo(() => {
             {/* Column 3: Semantic Tags */}
             <div className="space-y-3">
                 <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-2">
-                    <Hash size={10} /> Metadata Index
+                    <Hash size={10} /> {t.list.filterHud.metadataIndex}
                 </h4>
                 <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar p-2">
                     {tagData.uniqueTags.map(tag => (
@@ -423,7 +423,7 @@ const FilterHUD: React.FC = React.memo(() => {
         onClick={() => setIsFilterOpen(false)}
         className="h-4 bg-slate-900 border-t border-slate-800 flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors"
         role="button"
-        aria-label="Close Filter"
+                aria-label={t.list.closeFilter}
       >
           <ChevronUp size={12} className="text-slate-500" />
       </div>
@@ -438,7 +438,7 @@ const HeaderSection: React.FC = React.memo(() => {
         <div className="mb-6">
             <PageHeader 
                 title={t.list.title}
-                subtitle="SECURE DATABASE ACCESS // LEVEL 4"
+                subtitle={t.list.secureAccessSubtitle}
                 icon={Cloud}
                 visualizerState="BUSY"
             >
@@ -460,7 +460,7 @@ const HeaderSection: React.FC = React.memo(() => {
                                 <button 
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     className={`p-2 rounded-md transition-all ${isFilterOpen ? 'text-accent-cyan bg-accent-cyan/10' : 'text-slate-500 hover:text-white'}`}
-                                    aria-label="Toggle Filters"
+                                    aria-label={t.list.toggleFilters}
                                 >
                                     {isFilterOpen ? <ChevronUp size={18} /> : <SlidersHorizontal size={18} />}
                                 </button>
@@ -476,8 +476,8 @@ const HeaderSection: React.FC = React.memo(() => {
                                         key={mode}
                                         onClick={() => setViewMode(mode)}
                                         className={`p-2 rounded-md transition-all ${viewMode === mode ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
-                                        title={mode}
-                                        aria-label={`View mode: ${mode}`}
+                                        title={mode === 'GRID' ? t.list.view.grid : mode === 'LIST' ? t.list.view.list : t.list.view.compact}
+                                        aria-label={`${t.list.viewModePrefix}: ${mode === 'GRID' ? t.list.view.grid : mode === 'LIST' ? t.list.view.list : t.list.view.compact}`}
                                     >
                                         {mode === 'GRID' && <LayoutGrid size={16} />}
                                         {mode === 'LIST' && <List size={16} />}
@@ -493,11 +493,11 @@ const HeaderSection: React.FC = React.memo(() => {
                                     onChange={(e) => handleSetSort(e.target.value as SortOption)}
                                     className="w-full h-full appearance-none bg-slate-950/50 border border-slate-700 text-slate-400 pl-3 pr-8 rounded-lg text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-accent-cyan cursor-pointer hover:bg-slate-900 transition-colors"
                                 >
-                                    <option value="POPULARITY_DESC">Viral (High)</option>
-                                    <option value="POPULARITY_ASC">Viral (Low)</option>
-                                    <option value="YEAR_DESC">Newest</option>
-                                    <option value="YEAR_ASC">Oldest</option>
-                                    <option value="TITLE_ASC">A-Z</option>
+                                    <option value="POPULARITY_DESC">{t.list.sort.viralHigh}</option>
+                                    <option value="POPULARITY_ASC">{t.list.sort.viralLow}</option>
+                                    <option value="YEAR_DESC">{t.list.sort.newest}</option>
+                                    <option value="YEAR_ASC">{t.list.sort.oldest}</option>
+                                    <option value="TITLE_ASC">{t.list.sort.az}</option>
                                 </select>
                                 <ArrowUpDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                             </div>
@@ -520,10 +520,10 @@ const TheoryListContent: React.FC = () => {
         return (
             <div className="py-20">
                 <EmptyState 
-                    title="DATABASE QUERY: NULL"
+                    title={t.list.databaseQueryNull}
                     description={t.list.noResultsSub}
                     icon={Database}
-                    action={<Button variant="secondary" onClick={handleResetFilters} icon={<RefreshCw size={14}/>}>Reset Query Parameters</Button>}
+                    action={<Button variant="secondary" onClick={handleResetFilters} icon={<RefreshCw size={14}/>}>{t.list.resetQueryParameters}</Button>}
                 />
             </div>
         );
@@ -546,11 +546,11 @@ const TheoryListContent: React.FC = () => {
             {viewMode === 'COMPACT' && (
                 <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950 shadow-2xl">
                     <div className="grid grid-cols-12 gap-2 p-3 bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
-                        <div className="col-span-2 md:col-span-1">ID</div>
-                        <div className="col-span-6 md:col-span-5">Subject</div>
-                        <div className="col-span-4 md:col-span-2">Class</div>
-                        <div className="col-span-3 md:col-span-2 text-right md:text-left">Status</div>
-                        <div className="hidden md:block col-span-2 text-right">Integrity</div>
+                        <div className="col-span-2 md:col-span-1">{t.list.compact.id}</div>
+                        <div className="col-span-6 md:col-span-5">{t.list.compact.subject}</div>
+                        <div className="col-span-4 md:col-span-2">{t.list.compact.class}</div>
+                        <div className="col-span-3 md:col-span-2 text-right md:text-left">{t.list.compact.status}</div>
+                        <div className="hidden md:block col-span-2 text-right">{t.list.compact.integrity}</div>
                     </div>
                     <div className="divide-y divide-slate-800/50">
                         {visibleTheories.map((t, i) => <ArchiveTerminalRow key={t.id} theory={t} index={i} />)}
@@ -566,7 +566,7 @@ const TheoryListContent: React.FC = () => {
                         className="w-full md:w-auto min-w-[200px] py-4 border-slate-700 hover:border-accent-cyan bg-slate-900"
                         icon={<ArrowDownCircle size={16} />}
                     >
-                        Load Additional Records
+                        {t.list.loadAdditionalRecords}
                     </Button>
                 </div>
             )}

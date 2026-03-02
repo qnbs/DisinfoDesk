@@ -10,6 +10,7 @@ import undoable, { excludeAction } from 'redux-undo';
 // Slices
 import settingsReducer from './slices/settingsSlice';
 import theoriesReducer from './slices/theoriesSlice';
+import authorsReducer from './slices/authorsSlice';
 import simulationReducer, { resetParams } from './slices/simulationSlice';
 import satireReducer from './slices/satireSlice';
 import uiReducer from './slices/uiSlice';
@@ -53,6 +54,7 @@ const uiPersistConfig = {
 const appReducer = combineReducers({
     settings: persistReducer(rootPersistConfig, settingsReducer),
     theories: persistReducer(theoriesPersistConfig, theoriesReducer),
+  authors: authorsReducer,
     ui: persistReducer(uiPersistConfig, uiReducer),
     simulation: undoable(simulationReducer, {
         limit: 50, 

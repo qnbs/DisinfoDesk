@@ -67,7 +67,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
                         onClick={handleReboot}
                         className="text-slate-600 hover:text-accent-cyan transition-colors p-2 rounded hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
                         title={t.layout.footer.reboot}
-                        aria-label="Reboot System"
+                      aria-label={t.layout.footer.reboot}
                     >
                         <Power size={14} />
                     </button>
@@ -77,22 +77,27 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
     );
 });
 
-const ContentLoader = () => (
-  <div className="flex h-full w-full items-center justify-center min-h-[400px]">
-    <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-            <div className="w-12 h-12 border-2 border-slate-800 rounded-full"></div>
-            <div className="absolute inset-0 border-t-2 border-accent-cyan rounded-full animate-spin"></div>
-        </div>
-        <div className="text-[10px] font-mono text-slate-500 animate-pulse tracking-[0.2em] uppercase">Loading Module</div>
+const ContentLoader = () => {
+  const { t } = useLanguage();
+
+  return (
+    <div className="flex h-full w-full items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+              <div className="w-12 h-12 border-2 border-slate-800 rounded-full"></div>
+              <div className="absolute inset-0 border-t-2 border-accent-cyan rounded-full animate-spin"></div>
+          </div>
+          <div className="text-[10px] font-mono text-slate-500 animate-pulse tracking-[0.2em] uppercase">{t.layout.loadingModule}</div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- Active File Component ---
 const ActiveFileIndicator: React.FC = React.memo(() => {
     const activeFileId = useAppSelector(selectActiveFile);
     const navigate = useNavigate();
+  const { t } = useLanguage();
     
     if (!activeFileId) return null;
 
@@ -103,11 +108,11 @@ const ActiveFileIndicator: React.FC = React.memo(() => {
             role="button"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && navigate(`/archive/${activeFileId}`)}
-            aria-label={`Open active file ${activeFileId}`}
+            aria-label={`${t.layout.activeFileAriaPrefix} ${activeFileId}`}
         >
             <div className="flex items-center gap-2 mb-1.5">
                 <FileKey size={12} className="text-accent-cyan" />
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-accent-cyan transition-colors">Open File</span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-accent-cyan transition-colors">{t.layout.openFile}</span>
             </div>
             <div className="text-xs font-mono text-slate-300 truncate font-bold group-hover:text-white transition-colors">
                 {activeFileId.toUpperCase()}
@@ -173,17 +178,9 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       try {
-        let swUrl = './sw.js';
-        
-        try {
-            if (window.location.href && window.location.href.startsWith('http')) {
-                swUrl = new URL('sw.js', window.location.href).href;
-            }
-        } catch (urlError) {
-            console.warn("Failed to construct absolute SW URL, falling back to relative:", urlError);
-        }
+      const swUrl = `${import.meta.env.BASE_URL}sw.js`;
 
-        navigator.serviceWorker.register(swUrl)
+      navigator.serviceWorker.register(swUrl, { scope: import.meta.env.BASE_URL })
             .then(registration => {
             setWbRegistration(registration);
             
@@ -303,11 +300,11 @@ export const Layout: React.FC = () => {
   ], [t]);
 
   const mobileNavItems = useMemo(() => [
-    { label: 'Dash', icon: <LayoutDashboard size={22} />, path: '/' },
-    { label: 'Files', icon: <BookOpen size={22} />, path: '/archive' },
-    { label: 'Chat', icon: <MessageSquare size={22} />, path: '/chat' },
-    { label: 'Vault', icon: <Database size={22} />, path: '/database' },
-  ], []);
+    { label: t.nav.dashboard, icon: <LayoutDashboard size={22} />, path: '/' },
+    { label: t.nav.archive, icon: <BookOpen size={22} />, path: '/archive' },
+    { label: t.nav.chat, icon: <MessageSquare size={22} />, path: '/chat' },
+    { label: t.nav.database, icon: <Database size={22} />, path: '/database' },
+  ], [t]);
 
   return (
     <div className={cn("h-[100dvh] bg-[#020617] text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-accent-cyan/30 selection:text-white", settings.reducedMotion ? 'motion-reduce' : '')}>
@@ -327,12 +324,12 @@ export const Layout: React.FC = () => {
       {updateAvailable && (
         <div className="fixed top-safe left-0 right-0 bg-accent-cyan/90 backdrop-blur border-b border-accent-cyan text-slate-900 text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-3 animate-fade-in-up shadow-lg">
           <RefreshCw size={12} className="animate-spin" /> 
-          <span>SYSTEM UPDATE AVAILABLE</span>
+          <span>{t.layout.updateAvailable}</span>
           <button 
             onClick={handleUpdateApp}
             className="px-2 py-0.5 bg-slate-900 text-accent-cyan rounded hover:bg-slate-800 transition-colors uppercase border border-slate-700 hover:border-accent-cyan"
           >
-            RELOAD
+            {t.layout.reload}
           </button>
         </div>
       )}
@@ -350,14 +347,14 @@ export const Layout: React.FC = () => {
             <button 
                 onClick={() => dispatch(setSearchOpen(true))}
                 className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
-                aria-label="Search"
+                aria-label={t.layout.searchAria}
             >
                 <SearchIcon size={20} />
             </button>
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)} 
               className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
-              aria-label={isSidebarOpen ? "Close Menu" : "Open Menu"}
+              aria-label={isSidebarOpen ? t.layout.closeMenu : t.layout.openMenu}
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -400,8 +397,8 @@ export const Layout: React.FC = () => {
         
         {/* Mobile Sidebar Close */}
         <div className="md:hidden p-4 flex justify-between items-center border-b border-slate-800/50">
-             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2">System Menu</span>
-             <button onClick={() => setSidebarOpen(false)} className="text-slate-500 hover:text-white p-2 rounded-lg hover:bg-slate-900" aria-label="Close sidebar"><X size={20}/></button>
+             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2">{t.layout.systemMenu}</span>
+             <button onClick={() => setSidebarOpen(false)} className="text-slate-500 hover:text-white p-2 rounded-lg hover:bg-slate-900" aria-label={t.layout.closeSidebar}><X size={20}/></button>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 space-y-6 relative z-10 scrollbar-thin scrollbar-thumb-slate-800">
@@ -409,14 +406,14 @@ export const Layout: React.FC = () => {
           <ActiveFileIndicator />
 
           <div className="space-y-1">
-            <div className="px-6 mb-2 text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">Operations</div>
+            <div className="px-6 mb-2 text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">{t.layout.operations}</div>
             {navItems.map((item) => (
               <NavButton key={item.id} item={item} id={item.id === 'CHAT' ? 'nav-chat' : undefined} onClick={() => setSidebarOpen(false)} />
             ))}
           </div>
 
           <div className="space-y-1">
-            <div className="px-6 mb-2 text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">System</div>
+            <div className="px-6 mb-2 text-[9px] font-bold text-slate-600 uppercase tracking-widest font-mono">{t.layout.systemSection}</div>
             {bottomItems.map((item) => (
                <NavButton key={item.id} item={item} onClick={() => setSidebarOpen(false)} />
             ))}
@@ -427,12 +424,12 @@ export const Layout: React.FC = () => {
                <button 
                  onClick={handleInstallClick}
                  className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95 shadow-md focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
-                 aria-label="Install App"
+                 aria-label={t.layout.installAppAria}
                >
                  <Download size={16} className="text-accent-cyan" />
                  <div>
                     <div className="text-[10px] font-bold text-white uppercase tracking-wider">{t.layout.sidebar.install}</div>
-                    <div className="text-[9px] text-slate-500 font-mono">NATIVE_APP</div>
+                    <div className="text-[9px] text-slate-500 font-mono">{t.layout.nativeApp}</div>
                  </div>
                </button>
             </div>

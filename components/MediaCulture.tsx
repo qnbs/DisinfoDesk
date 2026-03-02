@@ -3,12 +3,13 @@ import React, { useState, useMemo, useCallback, createContext, useContext, useEf
 import { useLanguage } from '../contexts/LanguageContext';
 import { MEDIA_ITEMS } from '../constants';
 import { MediaItem, MediaType } from '../types';
+import { AUTHORS_FULL } from '../data/enriched';
 import { 
   Film, Book, Gamepad2, Tv, LayoutGrid, 
   Search, ExternalLink, Zap, BarChart2,
   PieChart, Activity, Sliders, 
   X, Clapperboard, FilterX, Star, Trophy, Clock, ArrowDownCircle,
-  Play
+    Play, Upload
 } from 'lucide-react';
 import { 
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
@@ -25,8 +26,12 @@ const useMediaCultureLogic = () => {
     const navigate = useNavigate();
     const [viewMode, setViewMode] = useState<'GRID' | 'ANALYTICS'>('GRID');
     const [filter, setFilter] = useState<MediaType | 'ALL'>('ALL');
+    const [verdictFilter, setVerdictFilter] = useState<NonNullable<MediaItem['factCheckVerdict']> | 'ALL'>('ALL');
+    const [authorFilter, setAuthorFilter] = useState<string>('ALL');
+    const [theoryTagFilter, setTheoryTagFilter] = useState<string>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [importedMedia, setImportedMedia] = useState<MediaItem[]>([]);
     
     // Pagination
     const [visibleCount, setVisibleCount] = useState(12);
@@ -40,16 +45,36 @@ const useMediaCultureLogic = () => {
     // Reset pagination on filter change
     useEffect(() => {
         setVisibleCount(12);
-    }, [filter, debouncedSearch]);
+    }, [filter, verdictFilter, authorFilter, theoryTagFilter, debouncedSearch]);
+
+    const allMedia = useMemo(() => [...MEDIA_ITEMS, ...importedMedia], [importedMedia]);
+
+    const allTheoryTags = useMemo(() => {
+        const tagSet = new Set<string>();
+        allMedia.forEach((item) => item.relatedTheoryTags.forEach((tag) => tagSet.add(tag)));
+        return Array.from(tagSet).sort((a, b) => a.localeCompare(b)).slice(0, 80);
+    }, [allMedia]);
+
+    const allAuthors = useMemo(() => {
+        const set = new Set<string>();
+        allMedia.forEach((item) => (item.linkedAuthorIds || []).forEach((authorId) => set.add(authorId)));
+        return Array.from(set)
+            .map((authorId) => ({ authorId, name: AUTHORS_FULL.find((author) => author.id === authorId)?.name || authorId }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .slice(0, 120);
+    }, [allMedia]);
 
     const filteredMedia = useMemo(() => {
-        return MEDIA_ITEMS.filter(item => {
+        return allMedia.filter(item => {
             const matchesType = filter === 'ALL' || item.type === filter;
+            const matchesVerdict = verdictFilter === 'ALL' || item.factCheckVerdict === verdictFilter;
+            const matchesAuthor = authorFilter === 'ALL' || (item.linkedAuthorIds || []).includes(authorFilter);
+            const matchesTheoryTag = theoryTagFilter === 'ALL' || item.relatedTheoryTags.includes(theoryTagFilter);
             const matchesSearch = item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
                                   (language === 'de' ? item.descriptionDe : item.descriptionEn).toLowerCase().includes(debouncedSearch.toLowerCase());
-            return matchesType && matchesSearch;
+            return matchesType && matchesVerdict && matchesAuthor && matchesTheoryTag && matchesSearch;
         });
-    }, [filter, debouncedSearch, language]);
+    }, [allMedia, filter, verdictFilter, authorFilter, theoryTagFilter, debouncedSearch, language]);
 
     const displayedMedia = useMemo(() => {
         return filteredMedia.slice(0, visibleCount);
@@ -77,7 +102,36 @@ const useMediaCultureLogic = () => {
 
     const handleClearFilters = useCallback(() => {
         setFilter('ALL');
+        setVerdictFilter('ALL');
+        setAuthorFilter('ALL');
+        setTheoryTagFilter('ALL');
         setSearchTerm('');
+    }, []);
+
+    const handleDropImport = useCallback(async (file: File) => {
+        try {
+            const text = await file.text();
+            const parsed = JSON.parse(text) as MediaItem[];
+            if (!Array.isArray(parsed)) return;
+
+            const normalized = parsed
+                .filter((item): item is MediaItem => !!item?.id && !!item?.title && !!item?.type)
+                .map((item, idx) => ({
+                    ...item,
+                    id: item.id || `import_${Date.now()}_${idx}`,
+                    tags: item.tags || ['Imported'],
+                    relatedTheoryTags: item.relatedTheoryTags || ['Imported'],
+                    factCheckVerdict: item.factCheckVerdict || 'UNVERIFIED',
+                }));
+
+            setImportedMedia((prev) => {
+                const existing = new Set(prev.map((m) => m.id));
+                const fresh = normalized.filter((item) => !existing.has(item.id));
+                return [...prev, ...fresh];
+            });
+        } catch {
+            // silent fail in UI flow
+        }
     }, []);
 
     const handleLoadMore = () => setVisibleCount(prev => prev + 12);
@@ -88,6 +142,9 @@ const useMediaCultureLogic = () => {
         { id: 'SERIES', label: t.mediaPage.filter.series, icon: <Tv size={14} /> },
         { id: 'BOOK', label: t.mediaPage.filter.book, icon: <Book size={14} /> },
         { id: 'GAME', label: t.mediaPage.filter.game, icon: <Gamepad2 size={14} /> },
+        { id: 'VIDEO', label: t.mediaPage.filter.video, icon: <Play size={14} /> },
+        { id: 'ARTICLE', label: t.mediaPage.filter.article, icon: <ExternalLink size={14} /> },
+        { id: 'IMAGE', label: t.mediaPage.filter.image, icon: <LayoutGrid size={14} /> },
     ];
 
     const onNavigateToArchive = (tag: string) => navigate(`/archive?filter=${encodeURIComponent(tag)}`);
@@ -102,6 +159,16 @@ const useMediaCultureLogic = () => {
         setFilter,
         searchTerm,
         setSearchTerm,
+        verdictFilter,
+        setVerdictFilter,
+        authorFilter,
+        setAuthorFilter,
+        allAuthors,
+        theoryTagFilter,
+        setTheoryTagFilter,
+        allTheoryTags,
+        importedCount: importedMedia.length,
+        handleDropImport,
         filteredMedia,
         displayedMedia,
         spotlightItem,
@@ -176,13 +243,13 @@ const SpotlightHero: React.FC = () => {
     return (
         <div className="relative w-full h-[350px] md:h-[400px] rounded-2xl overflow-hidden mb-12 group border border-slate-800 shadow-2xl animate-fade-in cursor-pointer" onClick={() => onNavigateToDetail(spotlightItem.id)}>
             <div className="absolute inset-0">
-                <img src={spotlightItem.imageUrl} alt="" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60" />
+                <img src={spotlightItem.imageUrl} alt={`Artwork: ${spotlightItem.title}`} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/60 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-transparent to-transparent"></div>
             </div>
 
             <div className="absolute top-4 right-4 bg-black/50 backdrop-blur border border-white/10 px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest text-accent-cyan flex items-center gap-2">
-                <Star size={12} className="fill-accent-cyan" /> Featured Selection
+                <Star size={12} className="fill-accent-cyan" /> {t.mediaPage.featuredSelection}
             </div>
 
             <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-2/3 lg:w-1/2 z-10">
@@ -198,7 +265,7 @@ const SpotlightHero: React.FC = () => {
                 </p>
                 <div className="flex gap-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                     <Button variant="primary" icon={<Play size={16} fill="currentColor" />} onClick={() => onNavigateToDetail(spotlightItem.id)}>
-                        Analyze File
+                        {t.mediaPage.analyzeFile}
                     </Button>
                 </div>
             </div>
@@ -218,7 +285,7 @@ const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => vo
         >
             <div className="h-48 relative overflow-hidden shrink-0">
                  {item.imageUrl && (
-                    <img src={item.imageUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
+                    <img src={item.imageUrl} alt={`Cover: ${item.title}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
                  )}
                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
                  <div className="absolute top-2 right-2 p-2 bg-black/50 backdrop-blur rounded-lg border border-white/10 text-slate-300">
@@ -232,12 +299,20 @@ const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => vo
             
             <div className="flex-1 p-4 flex flex-col relative bg-slate-900">
                 <div className="flex justify-between items-center mb-3 text-[10px] font-mono text-slate-500 border-b border-slate-800 pb-2">
-                    <span className="flex items-center gap-1"><Activity size={12} className="text-accent-cyan"/> REALITY: {item.realityScore}%</span>
+                    <span className="flex items-center gap-1"><Activity size={12} className="text-accent-cyan"/> {t.mediaPage.labels.realityScore.toUpperCase()}: {item.realityScore}%</span>
                     <span className={`px-1.5 py-0.5 rounded border ${getComplexityColor(item.complexity)}`}>{item.complexity}</span>
                 </div>
+                {item.factCheckVerdict && (
+                    <div className="mb-2 text-[10px] font-mono text-yellow-300 uppercase">{t.mediaPage.verdictLabel}: {item.factCheckVerdict}</div>
+                )}
                 <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-4 flex-1">
                     {language === 'de' ? item.descriptionDe : item.descriptionEn}
                 </p>
+                {(item.satiricalPreviewDe || item.satiricalPreviewEn) && (
+                    <p className="text-[11px] text-accent-purple mb-3 line-clamp-2">
+                        {language === 'de' ? item.satiricalPreviewDe : item.satiricalPreviewEn}
+                    </p>
+                )}
                 <div className="flex flex-wrap gap-1.5 mt-auto">
                     {item.relatedTheoryTags.slice(0, 2).map(tag => (
                         <button
@@ -268,7 +343,7 @@ const StatsCard: React.FC<{ label: string, value: string | number, icon: React.R
 );
 
 const MediaAnalytics: React.FC = () => {
-    const { filteredMedia, stats } = useMediaCulture();
+    const { filteredMedia, stats, t } = useMediaCulture();
     
     // Prepare Data
     const scatterData = useMemo(() => filteredMedia.map(m => ({
@@ -289,30 +364,30 @@ const MediaAnalytics: React.FC = () => {
         <div className="animate-fade-in space-y-6">
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <StatsCard label="Items Indexed" value={stats.total} icon={<DatabaseIcon size={20} />} color="text-slate-300" />
-                    <StatsCard label="Avg Reality" value={`${stats.avgReality}%`} icon={<Activity size={20} />} color="text-accent-cyan" />
-                    <StatsCard label="Top Complexity" value={stats.topComplexity} icon={<BrainIcon size={20} />} color="text-accent-purple" />
-                    <StatsCard label="Avg Year" value={Math.round(filteredMedia.reduce((acc, i) => acc + i.year, 0) / stats.total) || '-'} icon={<Clock size={20} />} color="text-yellow-500" />
+                    <StatsCard label={t.mediaPage.stats.itemsIndexed} value={stats.total} icon={<DatabaseIcon size={20} />} color="text-slate-300" />
+                    <StatsCard label={t.mediaPage.stats.avgReality} value={`${stats.avgReality}%`} icon={<Activity size={20} />} color="text-accent-cyan" />
+                    <StatsCard label={t.mediaPage.stats.topComplexity} value={stats.topComplexity} icon={<BrainIcon size={20} />} color="text-accent-purple" />
+                    <StatsCard label={t.mediaPage.stats.avgYear} value={Math.round(filteredMedia.reduce((acc, i) => acc + i.year, 0) / stats.total) || '-'} icon={<Clock size={20} />} color="text-yellow-500" />
                 </div>
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="min-h-[400px] flex flex-col">
                     <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                        <Activity size={16} className="text-accent-cyan" /> Fiction vs. Reality Index
+                        <Activity size={16} className="text-accent-cyan" /> {t.mediaPage.charts.fictionReality}
                     </h3>
                     <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
                             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                                <XAxis type="number" dataKey="x" name="Year" domain={['auto', 'auto']} stroke="#64748b" tick={{fontSize: 10}} />
-                                <YAxis type="number" dataKey="y" name="Reality Score" unit="%" stroke="#64748b" tick={{fontSize: 10}} />
+                                <XAxis type="number" dataKey="x" name={t.mediaPage.charts.axisYear} domain={['auto', 'auto']} stroke="#64748b" tick={{fontSize: 10}} />
+                                <YAxis type="number" dataKey="y" name={t.mediaPage.charts.axisRealityScore} unit="%" stroke="#64748b" tick={{fontSize: 10}} />
                                 <ZAxis type="number" dataKey="z" range={[50, 400]} />
                                 <Tooltip 
                                     cursor={{ strokeDasharray: '3 3' }}
                                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '12px' }}
                                 />
-                                <Scatter name="Media" data={scatterData} fill="#8884d8">
+                                <Scatter name={t.mediaPage.charts.seriesMedia} data={scatterData} fill="#8884d8">
                                     {scatterData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.type === 'MOVIE' ? '#06b6d4' : entry.type === 'BOOK' ? '#8b5cf6' : '#ef4444'} />
                                     ))}
@@ -324,7 +399,7 @@ const MediaAnalytics: React.FC = () => {
 
                 <Card className="min-h-[400px] flex flex-col">
                     <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                        <PieChart size={16} className="text-accent-purple" /> Media Distribution
+                        <PieChart size={16} className="text-accent-purple" /> {t.mediaPage.charts.distribution}
                     </h3>
                     <div className="flex-1 w-full" style={{ minHeight: '300px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height="100%" debounce={200} minWidth={0}>
@@ -351,12 +426,21 @@ const DatabaseIcon = ({ size }: { size: number }) => <svg width={size} height={s
 const BrainIcon = ({ size }: { size: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>;
 
 const MediaHeader: React.FC = () => {
-    const { t, filters, filter, setFilter, searchTerm, setSearchTerm, handleClearFilters, viewMode, setViewMode } = useMediaCulture();
+    const {
+        t, filters, filter, setFilter, searchTerm, setSearchTerm, handleClearFilters, viewMode, setViewMode,
+        verdictFilter, setVerdictFilter, authorFilter, setAuthorFilter, allAuthors, theoryTagFilter, setTheoryTagFilter, allTheoryTags, importedCount, handleDropImport
+    } = useMediaCulture();
+
+    const onDropFile: React.DragEventHandler<HTMLDivElement> = async (event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files?.[0];
+        if (file) await handleDropImport(file);
+    };
 
     return (
         <PageHeader 
             title={t.mediaPage.title}
-            subtitle="POP CULTURE ARCHIVE"
+            subtitle={t.mediaPage.subtitle}
             icon={Clapperboard}
             actions={
                 <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
@@ -383,7 +467,7 @@ const MediaHeader: React.FC = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                     <input 
                         type="text" 
-                        placeholder={t.authors.searchPlaceholder}
+                        placeholder={t.mediaPage.searchPlaceholder}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-900/50 border border-slate-700 text-white pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-all text-sm font-mono shadow-inner"
@@ -421,6 +505,47 @@ const MediaHeader: React.FC = () => {
                         </button>
                     )}
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <select
+                        value={verdictFilter}
+                        onChange={(e) => setVerdictFilter(e.target.value as NonNullable<MediaItem['factCheckVerdict']> | 'ALL')}
+                        className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200"
+                    >
+                        <option value="ALL">{t.mediaPage.allVerdicts}</option>
+                        <option value="VERIFIED">VERIFIED</option>
+                        <option value="MISLEADING">MISLEADING</option>
+                        <option value="UNVERIFIED">UNVERIFIED</option>
+                        <option value="SATIRE">SATIRE</option>
+                        <option value="FICTION">FICTION</option>
+                    </select>
+
+                    <select
+                        value={authorFilter}
+                        onChange={(e) => setAuthorFilter(e.target.value)}
+                        className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200"
+                    >
+                        <option value="ALL">{t.mediaPage.allAuthors}</option>
+                        {allAuthors.map((author) => <option key={author.authorId} value={author.authorId}>{author.name}</option>)}
+                    </select>
+
+                    <select
+                        value={theoryTagFilter}
+                        onChange={(e) => setTheoryTagFilter(e.target.value)}
+                        className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-200"
+                    >
+                        <option value="ALL">{t.mediaPage.allTheoryLinks}</option>
+                        {allTheoryTags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                    </select>
+
+                    <div
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={onDropFile}
+                        className="border border-dashed border-slate-600 rounded px-3 py-2 text-xs text-slate-400 flex items-center gap-2"
+                    >
+                        <Upload size={14} /> {t.mediaPage.dropMediaJson} ({importedCount} {t.mediaPage.importedSuffix})
+                    </div>
+                </div>
             </div>
         </PageHeader>
     );
@@ -447,7 +572,7 @@ const ContentSwitcher: React.FC = () => {
             <div className="min-h-[400px] flex items-center justify-center">
                 <EmptyState 
                     title={t.list.noResults}
-                    description="No media records found matching your query." 
+                    description={t.mediaPage.noMediaRecords}
                     icon={Search} 
                 />
             </div>
@@ -482,7 +607,7 @@ const ContentSwitcher: React.FC = () => {
                         className="w-full md:w-auto min-w-[200px] py-4 border-slate-700 hover:border-accent-cyan"
                         icon={<ArrowDownCircle size={16} />}
                     >
-                        Load More Entries
+                        {t.mediaPage.loadMoreEntries}
                     </Button>
                 </div>
             )}

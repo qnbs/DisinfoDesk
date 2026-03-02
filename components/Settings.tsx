@@ -17,6 +17,7 @@ import { setLanguage as setReduxLanguage } from '../store/slices/settingsSlice';
 import { AppSettings, Language, AccentColor } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { secureApiKeyService } from '../services/secureApiKeyService';
 
 // --- 1. Logic Hook ---
 
@@ -27,6 +28,9 @@ const useSettingsPageLogic = () => {
 
     // Simulated Real-time Metrics
     const [systemMetrics, setSystemMetrics] = useState<{time: number, cpu: number, mem: number, net: number}[]>([]);
+    const [apiKeyInput, setApiKeyInput] = useState('');
+    const [apiKeySaved, setApiKeySaved] = useState(false);
+    const [apiKeyStatus, setApiKeyStatus] = useState('');
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -43,6 +47,12 @@ const useSettingsPageLogic = () => {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        secureApiKeyService.hasApiKey()
+            .then((hasKey) => setApiKeySaved(hasKey))
+            .catch(() => setApiKeySaved(false));
+    }, []);
+
     const handleUpdate = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
         contextUpdate(key, value);
     }, [contextUpdate]);
@@ -57,6 +67,23 @@ const useSettingsPageLogic = () => {
         dispatch({ type: 'settings/systemPurge' });
     }, [dispatch, clearData]);
 
+    const saveGeminiKey = useCallback(async () => {
+        try {
+            await secureApiKeyService.setApiKey(apiKeyInput);
+            setApiKeySaved(true);
+            setApiKeyInput('');
+            setApiKeyStatus(language === 'de' ? 'API-Key verschlüsselt gespeichert.' : 'API key stored encrypted.');
+        } catch {
+            setApiKeyStatus(language === 'de' ? 'Speichern fehlgeschlagen. Bitte API-Key prüfen.' : 'Save failed. Please verify API key.');
+        }
+    }, [apiKeyInput, language]);
+
+    const clearGeminiKey = useCallback(async () => {
+        await secureApiKeyService.clearApiKey();
+        setApiKeySaved(false);
+        setApiKeyStatus(language === 'de' ? 'API-Key entfernt.' : 'API key removed.');
+    }, [language]);
+
     return {
         activeTab,
         settings,
@@ -68,7 +95,13 @@ const useSettingsPageLogic = () => {
         handleExportData: exportData,
         handleSetLanguage,
         handleSetActiveTab: contextSetActiveTab,
-        handleSystemPurge
+        handleSystemPurge,
+        apiKeyInput,
+        setApiKeyInput,
+        apiKeySaved,
+        apiKeyStatus,
+        saveGeminiKey,
+        clearGeminiKey
     };
 };
 
@@ -82,6 +115,7 @@ const useSettingsPage = () => {
 // --- 2. Advanced UI Primitives ---
 
 const HoldButton: React.FC<{ onComplete: () => void, label: string, icon?: React.ReactNode, color?: string, sub?: string }> = ({ onComplete, label, icon, color = "bg-red-600", sub }) => {
+    const { t } = useLanguage();
     const [progress, setProgress] = useState(0);
     const intervalRef = useRef<number | null>(null);
     const [isComplete, setIsComplete] = useState(false);
@@ -123,7 +157,7 @@ const HoldButton: React.FC<{ onComplete: () => void, label: string, icon?: React
                 <div>
                     <div className="text-red-500 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
                         {isComplete ? <CheckCircle2 size={14} /> : (icon || <AlertOctagon size={14} />)}
-                        {isComplete ? "PROTOCOL EXECUTED" : (progress > 0 ? `CONFIRMING... ${progress}%` : label)}
+                        {isComplete ? t.settings.labels.protocolExecuted : (progress > 0 ? `${t.settings.labels.confirming} ${progress}%` : label)}
                     </div>
                     {sub && <div className="text-[10px] text-red-400/60 mt-1 font-mono">{sub}</div>}
                 </div>
@@ -188,11 +222,11 @@ const NeuralEngineConfig: React.FC = () => {
                 >
                     <div className="flex justify-between items-start mb-2 relative z-10">
                         <Zap size={24} className={settings.aiModelVersion.includes('flash') ? 'text-accent-cyan' : 'text-slate-600'} />
-                        {settings.aiModelVersion.includes('flash') && <div className="px-2 py-0.5 bg-accent-cyan/10 border border-accent-cyan/30 rounded text-[9px] font-bold text-accent-cyan uppercase">Active Core</div>}
+                        {settings.aiModelVersion.includes('flash') && <div className="px-2 py-0.5 bg-accent-cyan/10 border border-accent-cyan/30 rounded text-[9px] font-bold text-accent-cyan uppercase">{t.settings.labels.activeCore}</div>}
                     </div>
                     <div className="relative z-10">
-                        <div className="font-bold text-white text-sm mb-1">Gemini 2.5 Flash</div>
-                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">High-velocity inference engine. Optimized for rapid debunking and low-latency chat interactions.</div>
+                        <div className="font-bold text-white text-sm mb-1">{t.settings.models.flash.title}</div>
+                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">{t.settings.models.flash.desc}</div>
                     </div>
                     {settings.aiModelVersion.includes('flash') && <div className="absolute inset-0 bg-accent-cyan/5 pointer-events-none animate-pulse-slow"></div>}
                 </button>
@@ -203,11 +237,11 @@ const NeuralEngineConfig: React.FC = () => {
                 >
                     <div className="flex justify-between items-start mb-2 relative z-10">
                         <Brain size={24} className={settings.aiModelVersion.includes('pro') ? 'text-accent-purple' : 'text-slate-600'} />
-                        {settings.aiModelVersion.includes('pro') && <div className="px-2 py-0.5 bg-accent-purple/10 border border-accent-purple/30 rounded text-[9px] font-bold text-accent-purple uppercase">Active Core</div>}
+                        {settings.aiModelVersion.includes('pro') && <div className="px-2 py-0.5 bg-accent-purple/10 border border-accent-purple/30 rounded text-[9px] font-bold text-accent-purple uppercase">{t.settings.labels.activeCore}</div>}
                     </div>
                     <div className="relative z-10">
-                        <div className="font-bold text-white text-sm mb-1">Gemini 3.0 Pro</div>
-                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">Advanced reasoning capabilities. Unlocks deep-logic chains and complex pattern recognition.</div>
+                        <div className="font-bold text-white text-sm mb-1">{t.settings.models.pro.title}</div>
+                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">{t.settings.models.pro.desc}</div>
                     </div>
                     {settings.aiModelVersion.includes('pro') && <div className="absolute inset-0 bg-accent-purple/5 pointer-events-none animate-pulse-slow"></div>}
                 </button>
@@ -218,7 +252,7 @@ const NeuralEngineConfig: React.FC = () => {
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Cpu size={120} /></div>
                 
                 <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <Activity size={14} className="text-accent-cyan" /> Synaptic Configuration
+                    <Activity size={14} className="text-accent-cyan" /> {t.settings.labels.synapticConfiguration}
                 </h4>
 
                 <div className="space-y-6 relative z-10">
@@ -232,7 +266,7 @@ const NeuralEngineConfig: React.FC = () => {
 
                     <div className={`transition-all duration-500 ${isPro ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
                         <RangeSlider 
-                            label="Reasoning Budget (Tokens)"
+                            label={t.settings.labels.reasoningBudget}
                             value={settings.thinkingBudget} 
                             min={0} max={8192} step={128} 
                             onChange={(v) => handleUpdate('thinkingBudget', v)}
@@ -260,7 +294,7 @@ const NeuralEngineConfig: React.FC = () => {
                         ))}
                     </div>
                     <div className="text-[9px] text-center font-mono text-slate-500 uppercase">
-                        Current Safety Protocol: {settings.safetyLevel}
+                        {t.settings.labels.currentSafetyProtocol}: {settings.safetyLevel}
                     </div>
                 </div>
             </div>
@@ -323,7 +357,7 @@ const InterfaceMatrix: React.FC = () => {
                 {/* Density Switcher */}
                 <div className="flex flex-col justify-center p-4 rounded-xl border bg-slate-950/30 border-slate-800">
                     <div className="flex items-center gap-2 mb-3 text-slate-400 font-bold text-xs uppercase tracking-wide">
-                        <Grid size={16} /> UI Density
+                        <Grid size={16} /> {t.settings.labels.uiDensity}
                     </div>
                     <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
                         {(['comfortable', 'compact'] as const).map(d => (
@@ -332,7 +366,7 @@ const InterfaceMatrix: React.FC = () => {
                                 onClick={() => handleUpdate('uiDensity', d)}
                                 className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${settings.uiDensity === d ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
                             >
-                                {d}
+                                {d === 'comfortable' ? t.settings.labels.densityComfortable : t.settings.labels.densityCompact}
                             </button>
                         ))}
                     </div>
@@ -341,14 +375,14 @@ const InterfaceMatrix: React.FC = () => {
 
             {/* Language */}
             <div className="pt-4 border-t border-slate-800">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Localization</h4>
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">{t.settings.labels.localization}</h4>
                 <div className="flex gap-4">
                     <button onClick={() => handleSetLanguage('de')} className={`flex-1 p-4 border rounded-xl flex items-center justify-between transition-all ${language === 'de' ? 'bg-accent-cyan/10 border-accent-cyan text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
-                        <div className="flex items-center gap-3"><span className="text-2xl">🇩🇪</span> <span className="font-mono font-bold text-sm">DEUTSCH</span></div>
+                        <div className="flex items-center gap-3"><span className="text-2xl">🇩🇪</span> <span className="font-mono font-bold text-sm">{t.settings.labels.languageGerman}</span></div>
                         {language === 'de' && <div className="w-2 h-2 rounded-full bg-accent-cyan shadow-[0_0_8px_cyan]"></div>}
                     </button>
                     <button onClick={() => handleSetLanguage('en')} className={`flex-1 p-4 border rounded-xl flex items-center justify-between transition-all ${language === 'en' ? 'bg-accent-cyan/10 border-accent-cyan text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}`}>
-                        <div className="flex items-center gap-3"><span className="text-2xl">🇺🇸</span> <span className="font-mono font-bold text-sm">ENGLISH</span></div>
+                        <div className="flex items-center gap-3"><span className="text-2xl">🇺🇸</span> <span className="font-mono font-bold text-sm">{t.settings.labels.languageEnglish}</span></div>
                         {language === 'en' && <div className="w-2 h-2 rounded-full bg-accent-cyan shadow-[0_0_8px_cyan]"></div>}
                     </button>
                 </div>
@@ -358,7 +392,7 @@ const InterfaceMatrix: React.FC = () => {
 };
 
 const DataSovereignty: React.FC = () => {
-    const { settings, handleUpdate, handleExportData, handleSystemPurge, t } = useSettingsPage();
+    const { settings, handleUpdate, handleExportData, handleSystemPurge, t, language, apiKeyInput, setApiKeyInput, apiKeySaved, apiKeyStatus, saveGeminiKey, clearGeminiKey } = useSettingsPage();
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -367,8 +401,8 @@ const DataSovereignty: React.FC = () => {
                 <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6 flex flex-col justify-center items-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-transparent pointer-events-none"></div>
                     <HardDrive size={48} className="text-blue-500 mb-4 opacity-80" />
-                    <div className="text-2xl font-black text-white font-display">LOCAL VAULT</div>
-                    <div className="text-xs text-blue-400 font-mono mt-2">INDEXED_DB ENCRYPTED</div>
+                    <div className="text-2xl font-black text-white font-display">{t.settings.labels.localVault}</div>
+                    <div className="text-xs text-blue-400 font-mono mt-2">{t.settings.labels.indexedDbEncrypted}</div>
                 </div>
                 <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6 space-y-4">
                     <ControlToggle 
@@ -379,8 +413,8 @@ const DataSovereignty: React.FC = () => {
                         icon={<Smartphone size={18}/>}
                     />
                     <ControlToggle 
-                        label="Auto-Archive Chats"
-                        description="Automatically save sessions to Vault."
+                        label={t.settings.labels.autoArchiveChats}
+                        description={t.settings.labels.autoArchiveDesc}
                         checked={settings.autoArchive}
                         onChange={(v) => handleUpdate('autoArchive', v)}
                         icon={<Server size={18}/>}
@@ -390,17 +424,51 @@ const DataSovereignty: React.FC = () => {
 
             {/* Actions */}
             <div className="space-y-4 pt-4 border-t border-slate-800">
+                <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block">
+                        Gemini API Key
+                    </label>
+                    <p className="text-[11px] text-yellow-300 mb-3 leading-relaxed">
+                        {language === 'de'
+                            ? 'Sicherheitshinweis: API-Key wird nur lokal und verschlüsselt in IndexedDB gespeichert. Niemals im Quellcode, in .env oder in localStorage ablegen.'
+                            : 'Security notice: The API key is stored only locally and encrypted in IndexedDB. Never place it in source code, .env, or localStorage.'}
+                    </p>
+                    <input
+                        type="password"
+                        value={apiKeyInput}
+                        onChange={(e) => setApiKeyInput(e.target.value)}
+                        placeholder={language === 'de' ? 'AIza...' : 'AIza...'}
+                        aria-label="Gemini API Key"
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500"
+                    />
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                        <Button variant="secondary" size="sm" onClick={saveGeminiKey} icon={<Lock size={14} />}>
+                            {language === 'de' ? 'Key speichern' : 'Save key'}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={clearGeminiKey} icon={<Trash2 size={14} />}>
+                            {language === 'de' ? 'Key löschen' : 'Delete key'}
+                        </Button>
+                        <Badge label={apiKeySaved ? (language === 'de' ? 'Verschlüsselt gespeichert' : 'Stored encrypted') : (language === 'de' ? 'Nicht gesetzt' : 'Not configured')} className={apiKeySaved ? 'bg-green-900/30 text-green-400 border-green-700/40' : 'bg-slate-900 text-slate-400 border-slate-700'} />
+                    </div>
+                    {apiKeyStatus && <p className="text-[11px] text-slate-400 mt-2">{apiKeyStatus}</p>}
+                    <p className="text-[10px] text-slate-500 mt-2">
+                        {language === 'de'
+                            ? 'Empfehlung: Beschränke den Key in Google AI Studio auf deine Domain (*.github.io) und aktiviere Rate-Limits.'
+                            : 'Recommendation: Restrict the key in Google AI Studio to your domain (*.github.io) and enable rate limits.'}
+                    </p>
+                </div>
+
                 <Button onClick={handleExportData} variant="secondary" icon={<Download size={16}/>} className="w-full h-12 bg-slate-900 hover:border-accent-cyan text-sm tracking-widest">
-                    EXPORT ENCRYPTED SHARD (JSON)
+                    {t.settings.labels.exportEncryptedShard}
                 </Button>
                 
                 <div className="pt-4">
                     <label className="text-xs font-bold text-red-500 uppercase tracking-widest mb-4 block flex items-center gap-2">
-                        <AlertOctagon size={12} /> Danger Zone
+                        <AlertOctagon size={12} /> {t.settings.labels.dangerZone}
                     </label>
                     <HoldButton 
-                        label="INITIATE SYSTEM PURGE" 
-                        sub="Irreversible. Wipes all local data."
+                        label={t.settings.labels.initiateSystemPurge}
+                        sub={t.settings.labels.purgeIrreversibleSub}
                         onComplete={handleSystemPurge} 
                         icon={<Trash2 size={16} />} 
                     />
@@ -419,7 +487,7 @@ const SystemDiagnostics: React.FC = () => {
             <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 h-64 flex flex-col">
                 <div className="flex justify-between items-center mb-4 px-2">
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Activity size={14} className="text-green-500 animate-pulse" /> Live Telemetry
+                        <Activity size={14} className="text-green-500 animate-pulse" /> {t.settings.labels.liveTelemetry}
                     </h4>
                     <div className="flex gap-2">
                         <span className="text-[9px] font-mono text-blue-400">CPU</span>
@@ -453,19 +521,19 @@ const SystemDiagnostics: React.FC = () => {
             {/* Spec Sheet */}
             <div className="grid grid-cols-2 gap-4 text-xs font-mono">
                 <div className="bg-slate-900/50 p-3 rounded border border-slate-800 flex justify-between">
-                    <span className="text-slate-500">KERNEL</span>
+                    <span className="text-slate-500">{t.settings.labels.kernel}</span>
                     <span className="text-white">v2.7.0</span>
                 </div>
                 <div className="bg-slate-900/50 p-3 rounded border border-slate-800 flex justify-between">
-                    <span className="text-slate-500">REACT</span>
+                    <span className="text-slate-500">{t.settings.labels.react}</span>
                     <span className="text-blue-400">v19.2.0</span>
                 </div>
                 <div className="bg-slate-900/50 p-3 rounded border border-slate-800 flex justify-between">
-                    <span className="text-slate-500">GEMINI SDK</span>
+                    <span className="text-slate-500">{t.settings.labels.geminiSdk}</span>
                     <span className="text-purple-400">v1.30.0</span>
                 </div>
                 <div className="bg-slate-900/50 p-3 rounded border border-slate-800 flex justify-between">
-                    <span className="text-slate-500">UPTIME</span>
+                    <span className="text-slate-500">{t.settings.labels.uptime}</span>
                     <span className="text-green-400">99.9%</span>
                 </div>
             </div>
@@ -476,20 +544,20 @@ const SystemDiagnostics: React.FC = () => {
 // --- 4. Main Components ---
 
 const SettingsSidebar: React.FC = () => {
-  const { activeTab, handleSetActiveTab } = useSettingsPage();
+    const { activeTab, handleSetActiveTab, t } = useSettingsPage();
   
   const tabs = [
-    { id: 'GENERAL', label: 'System Core', icon: <Cpu size={16} />, color: 'text-blue-400' },
-    { id: 'INTELLIGENCE', label: 'Neural Engine', icon: <Brain size={16} />, color: 'text-purple-400' },
-    { id: 'INTERFACE', label: 'Interface Matrix', icon: <Layout size={16} />, color: 'text-cyan-400' },
-    { id: 'PRIVACY', label: 'Data Sovereignty', icon: <Shield size={16} />, color: 'text-green-400' },
-    { id: 'SYSTEM', label: 'Diagnostics', icon: <Activity size={16} />, color: 'text-red-400' },
+        { id: 'GENERAL', label: t.settings.tabs.GENERAL, icon: <Cpu size={16} />, color: 'text-blue-400' },
+        { id: 'INTELLIGENCE', label: t.settings.tabs.INTELLIGENCE, icon: <Brain size={16} />, color: 'text-purple-400' },
+        { id: 'INTERFACE', label: t.settings.tabs.INTERFACE, icon: <Layout size={16} />, color: 'text-cyan-400' },
+        { id: 'PRIVACY', label: t.settings.tabs.PRIVACY, icon: <Shield size={16} />, color: 'text-green-400' },
+        { id: 'SYSTEM', label: t.settings.tabs.SYSTEM, icon: <Activity size={16} />, color: 'text-red-400' },
   ];
 
   return (
     <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-2 pb-4 md:pb-0 md:pr-6 md:w-64 flex-shrink-0 scrollbar-hide">
       <div className="hidden md:block mb-4 pl-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-        Configuration
+                {t.settings.sidebarConfig}
       </div>
       {tabs.map(tab => (
         <button
@@ -511,9 +579,9 @@ const SettingsSidebar: React.FC = () => {
 };
 
 const SettingsContent: React.FC = () => {
-    const { activeTab } = useSettingsPage();
+    const { activeTab, t } = useSettingsPage();
     switch (activeTab) {
-        case 'GENERAL': return <div className="p-2"><h3 className="text-xl font-bold text-white mb-6">System Core Parameters</h3><div className="space-y-6"><InterfaceMatrix /><DataSovereignty /></div></div>; // Combined for "General" feel
+        case 'GENERAL': return <div className="p-2"><h3 className="text-xl font-bold text-white mb-6">{t.settings.generalTitle}</h3><div className="space-y-6"><InterfaceMatrix /><DataSovereignty /></div></div>; // Combined for "General" feel
         case 'INTELLIGENCE': return <NeuralEngineConfig />;
         case 'INTERFACE': return <InterfaceMatrix />;
         case 'PRIVACY': return <DataSovereignty />;
@@ -523,7 +591,7 @@ const SettingsContent: React.FC = () => {
 };
 
 const LogTerminal: React.FC = () => {
-    const { logs } = useSettingsPage();
+    const { logs, t } = useSettingsPage();
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -537,7 +605,7 @@ const LogTerminal: React.FC = () => {
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
             <div className="flex items-center justify-between bg-slate-900/90 px-4 py-2 border-b border-slate-800">
                 <div className="flex items-center gap-2 text-slate-500 font-bold uppercase tracking-widest">
-                    <Terminal size={12} /> System Output Stream
+                    <Terminal size={12} /> {t.settings.labels.systemOutputStream}
                 </div>
                 <div className="flex gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-slate-700"></div>
@@ -566,14 +634,16 @@ const SettingsPageProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 export const Settings: React.FC = () => {
+    const { t } = useLanguage();
+
     return (
         <SettingsPageProvider>
             <div className="max-w-6xl mx-auto animate-fade-in pb-20">
                 <PageHeader 
-                    title="SYSTEM CONFIG" 
-                    subtitle="CENTRAL CONTROL DECK // LEVEL 5" 
+                    title={t.settings.headerTitle}
+                    subtitle={t.settings.headerSubtitle}
                     icon={SettingsIcon}
-                    status="EDITABLE"
+                    status={t.settings.headerStatus}
                     visualizerState="IDLE"
                 />
                 

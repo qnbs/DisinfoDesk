@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DisinfoDesk – Redirect</title>
+    <meta http-equiv="refresh" content="0; url=/DisinfoDesk/" />
+    <script>
+      (function () {
+        var l = window.location;
+        var base = '/DisinfoDesk';
+        var path = l.pathname.startsWith(base) ? l.pathname.slice(base.length) : l.pathname;
+        var target = base + '/#' + path + l.search + l.hash;
+        window.location.replace(target);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <p>Redirecting to <a href="/DisinfoDesk/">DisinfoDesk</a>…</p>
+    </noscript>
+  </body>
+</html>

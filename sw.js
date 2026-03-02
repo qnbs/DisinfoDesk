@@ -13,7 +13,12 @@ if (workbox) {
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v4'; // Increment this to force cache purge on update
+    const CACHE_SUFFIX = 'v5'; // Increment this to force cache purge on update
+
+        workbox.precaching.precacheAndRoute([
+            { url: 'index.html', revision: CACHE_SUFFIX },
+            { url: 'manifest.json', revision: CACHE_SUFFIX },
+        ]);
 
     // --- 1. STRATEGIES ---
 
@@ -97,7 +102,8 @@ if (workbox) {
         ({request}) => request.mode === 'navigate',
         ({event}) => {
             return handler.handle({event}).catch(() => {
-                return caches.match('index.html');
+                const fallbackUrl = new URL('index.html', self.registration.scope).toString();
+                return caches.match(fallbackUrl) || caches.match('index.html');
             });
         }
     );

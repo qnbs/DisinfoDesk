@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
 import { streamChatWithSkeptic, resetChatSession, connectLiveSession, base64ToUint8Array } from '../services/geminiService';
 import { dbService } from '../services/dbService';
+import { THEORIES_DE_FULL, THEORIES_EN_FULL, MEDIA_ITEMS } from '../constants';
+import { AUTHORS_FULL } from '../data/enriched';
 import { 
     Send, Bot, Trash2, Mic, Cpu, Save, Volume2, VolumeX, 
     MicOff, ShieldCheck, AlertTriangle, XCircle, 
@@ -16,6 +18,38 @@ import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
 import { LiveSession } from '@google/genai';
+
+const buildContextBrief = (contextId: string | null, language: 'de' | 'en') => {
+    if (!contextId) return undefined;
+
+    const theories = language === 'de' ? THEORIES_DE_FULL : THEORIES_EN_FULL;
+    const theory = theories.find((entry) => entry.id === contextId);
+    if (!theory) return `Context ID: ${contextId}`;
+
+    const theoryTagSet = new Set([theory.title, ...theory.tags].map((tag) => tag.toLowerCase()));
+
+    const relatedMedia = MEDIA_ITEMS.filter((item) =>
+        item.relatedTheoryTags.some((tag) => theoryTagSet.has(tag.toLowerCase())) ||
+        item.tags.some((tag) => theoryTagSet.has(tag.toLowerCase()))
+    ).slice(0, 8);
+
+    const mediaIdSet = new Set(relatedMedia.map((item) => item.id));
+    const relatedAuthors = AUTHORS_FULL.filter((author) =>
+        (author.relatedMediaIds || []).some((id) => mediaIdSet.has(id)) ||
+        (author.focusAreas || []).some((focus) => theoryTagSet.has(focus.toLowerCase()))
+    ).slice(0, 8);
+
+    const mediaLines = relatedMedia.map((item) => `- ${item.title} (${item.type}, ${item.year})`).join('\n');
+    const authorLines = relatedAuthors.map((author) => `- ${author.name} (${author.nationality})`).join('\n');
+
+    return [
+        `Active theory: ${theory.title}`,
+        `Short description: ${theory.shortDescription}`,
+        `Tags: ${theory.tags.join(', ')}`,
+        mediaLines ? `Related media:\n${mediaLines}` : '',
+        authorLines ? `Related authors:\n${authorLines}` : '',
+    ].filter(Boolean).join('\n\n');
+};
 
 // --- 1. ADVANCED VISUALIZERS ---
 
@@ -249,7 +283,8 @@ const useDebunkChatLogic = () => {
           const session = await connectLiveSession(
               (audio) => playAudioChunk(audio),
               () => stopLiveSession(),
-              language
+              language,
+              buildContextBrief(activeContextId, language)
           );
           liveSessionRef.current = session;
           
@@ -343,7 +378,7 @@ const useDebunkChatLogic = () => {
         const stream = streamChatWithSkeptic(history, textToSend, language, { 
             model: settings.aiModelVersion, 
             temperature: settings.aiTemperature 
-        });
+        }, buildContextBrief(activeContextId, language));
         
         for await (const chunk of stream) {
             if (abortControllerRef.current?.signal.aborted) break;
@@ -372,7 +407,7 @@ const useDebunkChatLogic = () => {
         }
         abortControllerRef.current = null;
     }
-  }, [input, loading, messages, language, settings.aiModelVersion, settings.aiTemperature, dispatch]);
+    }, [input, loading, messages, language, settings.aiModelVersion, settings.aiTemperature, dispatch, activeContextId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
   
@@ -396,9 +431,9 @@ const useDebunkChatLogic = () => {
 
   // Quick Action Prompts
   const quickActions = [
-      { label: "Fact Check", prompt: "Fact check the previous claim strictly." },
-      { label: "Find Fallacies", prompt: "Identify any logical fallacies in this argument." },
-      { label: "Sources", prompt: "Provide reputable sources for this topic." }
+      { label: t.chat.quickActions.factCheck, prompt: "Fact check the previous claim strictly." },
+      { label: t.chat.quickActions.fallacies, prompt: "Identify any logical fallacies in this argument." },
+      { label: t.chat.quickActions.sources, prompt: "Provide reputable sources for this topic." }
   ];
 
   const triggerQuickAction = (prompt: string) => handleSend(prompt);
@@ -418,18 +453,18 @@ const useDebunkChatLogic = () => {
 // --- COMPONENTS ---
 
 const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | null }> = ({ status, mode, contextId }) => {
-  const { handleSaveSession, handleReset } = useContext(ChatContext)!;
+    const { handleSaveSession, handleReset, t } = useContext(ChatContext)!;
   return (
     <PageHeader 
-        title="NEURAL UPLINK" 
-        subtitle={contextId ? `CONTEXT: ${contextId.toUpperCase()} // ACTIVE` : "FORENSIC ANALYSIS TERMINAL"} 
+                title={t.chat.headerTitle}
+                subtitle={contextId ? `${t.chat.contextPrefix}: ${contextId.toUpperCase()} // ${t.chat.active}` : t.chat.subtitleForensic}
         icon={Cpu} 
-        status={mode === 'LIVE' ? status : "ENCRYPTED"} 
+                status={mode === 'LIVE' ? status : t.chat.statusEncrypted}
         statusColor={mode === 'LIVE' && status === 'CONNECTED' ? "bg-red-500" : "bg-green-500"}
         visualizerState={mode === 'LIVE' ? 'LISTENING' : 'IDLE'}
         actions={
             <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleSaveSession} icon={<Save size={16}/>} className="border-slate-700 hover:border-accent-cyan">ARCHIVE</Button>
+                                <Button variant="ghost" size="sm" onClick={handleSaveSession} icon={<Save size={16}/>} className="border-slate-700 hover:border-accent-cyan">{t.chat.save}</Button>
                 <button onClick={handleReset} className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-slate-900 rounded-lg"><Trash2 size={18} /></button>
             </div>
         } 
@@ -514,8 +549,8 @@ export const DebunkChat: React.FC = () => {
                         {/* Top HUD */}
                         <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start text-xs font-mono text-red-500/70 pointer-events-none">
                             <div>
-                                <div>SIGNAL_STRENGTH: -42dBm</div>
-                                <div>ENCRYPTION: AES-256</div>
+                                <div>{t.chat.live.signalStrength}: -42dBm</div>
+                                <div>{t.chat.live.encryptionAes}</div>
                             </div>
                             <div className="text-right">
                                 <div>UPTIME: {new Date().toISOString().split('T')[1].split('.')[0]}</div>
@@ -536,15 +571,15 @@ export const DebunkChat: React.FC = () => {
 
                         {/* Status Text */}
                         <h2 className="text-3xl font-black text-white mb-2 tracking-[0.2em] font-display uppercase drop-shadow-glow">
-                            {liveStatus === 'CONNECTING' ? 'ESTABLISHING UPLINK' : 'NEURAL BRIDGE ACTIVE'}
+                            {liveStatus === 'CONNECTING' ? t.chat.live.establishingUplink : t.chat.live.neuralBridgeActive}
                         </h2>
                         <p className="text-slate-500 font-mono text-sm mb-12 max-w-md text-center">
-                            {liveStatus === 'CONNECTING' ? 'Handshaking with Gemini Core...' : 'Voice interception enabled. Speak clearly to analyze narrative vectors.'}
+                            {liveStatus === 'CONNECTING' ? t.chat.live.handshaking : t.chat.live.voiceIntercept}
                         </p>
 
                         {/* Terminate Button */}
                         <Button variant="danger" size="lg" onClick={stopLiveSession} icon={<StopCircle size={20} />} className="px-10 py-5 text-base tracking-widest shadow-[0_0_30px_rgba(239,68,68,0.4)] border-red-500 hover:bg-red-600 hover:text-white">
-                            TERMINATE CONNECTION
+                            {t.chat.live.terminateConnection}
                         </Button>
                     </div>
                 )}
@@ -560,8 +595,8 @@ export const DebunkChat: React.FC = () => {
                             <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">
                                 <Bot size={64} className="mb-4 text-accent-cyan opacity-20" />
                                 <div className="text-sm font-mono uppercase tracking-widest text-center">
-                                    Secure Line Ready<br/>
-                                    Waiting for Input...
+                                    {t.chat.live.secureLineReady}<br/>
+                                    {t.chat.live.waitingForInput}
                                 </div>
                             </div>
                         )}
@@ -591,7 +626,7 @@ export const DebunkChat: React.FC = () => {
                             <Button 
                                 onClick={startLiveSession}
                                 className="bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white h-[50px] w-[50px] flex items-center justify-center p-0 rounded-lg shrink-0 transition-all hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]"
-                                title="Switch to Live Voice Intercept"
+                                title={t.chat.voice}
                             >
                                 <Radio size={22} className={mode === 'LIVE' ? 'animate-pulse' : ''} />
                             </Button>
@@ -626,8 +661,8 @@ export const DebunkChat: React.FC = () => {
                         
                         {/* Footer Status */}
                         <div className="mt-2 flex justify-between text-[9px] font-mono text-slate-600 uppercase tracking-wider px-1">
-                            <span>Encryption: TLS 1.3</span>
-                            <span>Latency: 24ms</span>
+                            <span>{t.chat.live.footerEncryption}: TLS 1.3</span>
+                            <span>{t.chat.live.footerLatency}: 24ms</span>
                         </div>
                     </div>
                 </div>

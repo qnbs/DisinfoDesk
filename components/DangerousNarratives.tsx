@@ -20,6 +20,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { injectChatContext } from '../store/slices/uiSlice';
+import { MEDIA_ITEMS } from '../constants';
+import { AUTHORS_FULL } from '../data/enriched';
 
 // --- 0. HELPER: 3D MATH & UTILS ---
 
@@ -265,6 +267,49 @@ const useDangerousNarrativesLogic = () => {
     }));
   }, [dangerousTheories]);
 
+    const authorMediaHeatmap = useMemo(() => {
+        const dangerTagSet = new Set(
+            dangerousTheories.flatMap((theory) => [theory.title, ...theory.tags]).map((entry) => entry.toLowerCase())
+        );
+
+        const authorScores = new Map<string, number>();
+        const authorMediaLinks = new Map<string, Set<string>>();
+
+        MEDIA_ITEMS.forEach((media) => {
+            const overlap = media.relatedTheoryTags.some((tag) => dangerTagSet.has(tag.toLowerCase()));
+            if (!overlap) return;
+
+            (media.linkedAuthorIds || []).forEach((authorId) => {
+                authorScores.set(authorId, (authorScores.get(authorId) || 0) + 1);
+                if (!authorMediaLinks.has(authorId)) {
+                    authorMediaLinks.set(authorId, new Set<string>());
+                }
+                authorMediaLinks.get(authorId)?.add(media.id);
+            });
+        });
+
+        return Array.from(authorScores.entries())
+            .map(([authorId, score]) => {
+                const author = AUTHORS_FULL.find((a) => a.id === authorId);
+                const linkedMediaIds = Array.from(authorMediaLinks.get(authorId) || []).slice(0, 3);
+                const linkedMedia = linkedMediaIds
+                    .map((mediaId) => MEDIA_ITEMS.find((media) => media.id === mediaId))
+                    .filter((media): media is (typeof MEDIA_ITEMS)[number] => Boolean(media))
+                    .map((media) => ({ id: media.id, title: media.title }));
+
+                return {
+                    authorId,
+                    name: author?.name || authorId,
+                    score,
+                    influence: author?.influenceLevel || 0,
+                    intensity: Math.min(100, score * 12 + Math.round((author?.influenceLevel || 0) * 0.4)),
+                    linkedMedia
+                };
+            })
+            .sort((a, b) => b.intensity - a.intensity)
+            .slice(0, 8);
+    }, [dangerousTheories]);
+
   const activeDefcon = useMemo(() => {
       const count = dangerousTheories.length;
       if (count > 8) return 1;
@@ -275,6 +320,8 @@ const useDangerousNarrativesLogic = () => {
   }, [dangerousTheories]);
 
   const onNavigateTo = (id: string) => navigate(`/archive/${id}`);
+    const onNavigateToAuthor = (id: string) => navigate(`/authors/${id}`);
+    const onNavigateToMedia = (id: string) => navigate(`/media/${id}`);
   
   const onInitiateContainment = (theory: Theory) => {
       setDeploying(theory.id);
@@ -303,7 +350,10 @@ const useDangerousNarrativesLogic = () => {
     hoveredId,
     setHoveredId,
     activeDefcon,
+    authorMediaHeatmap,
     onNavigateTo,
+        onNavigateToAuthor,
+        onNavigateToMedia,
     onInitiateContainment,
     onBack,
     deploying
@@ -538,6 +588,56 @@ const TacticalDossierList: React.FC = () => {
     );
 };
 
+const AuthorMediaHeatmapCard: React.FC = () => {
+    const { authorMediaHeatmap, onNavigateToAuthor, onNavigateToMedia, t } = useDangerousNarratives();
+
+    return (
+        <Card className="p-4 bg-slate-900/50 border-red-900/30">
+            <div className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-2 mb-3">
+                <Brain size={12} /> {t.dangerPage.heatmap.title}
+            </div>
+
+            {authorMediaHeatmap.length === 0 ? (
+                <div className="text-xs text-slate-500">{t.dangerPage.heatmap.empty}</div>
+            ) : (
+                <div className="space-y-2">
+                    {authorMediaHeatmap.map((row) => (
+                        <div key={row.authorId} className="space-y-1">
+                            <div className="flex items-center justify-between text-[11px]">
+                                <button
+                                    onClick={() => onNavigateToAuthor(row.authorId)}
+                                    className="text-slate-300 truncate pr-2 hover:text-accent-cyan transition-colors text-left"
+                                    title={t.dangerPage.heatmap.openAuthor}
+                                >
+                                    {row.name}
+                                </button>
+                                <span className="font-mono text-slate-500">{row.intensity}</span>
+                            </div>
+                            <div className="h-1.5 rounded bg-slate-800 overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-accent-cyan to-red-500" style={{ width: `${row.intensity}%` }} />
+                            </div>
+                            {row.linkedMedia.length > 0 && (
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                    {row.linkedMedia.map((media) => (
+                                        <button
+                                            key={media.id}
+                                            onClick={() => onNavigateToMedia(media.id)}
+                                            className="px-1.5 py-0.5 rounded border border-slate-700 text-[9px] text-slate-400 hover:text-accent-purple hover:border-accent-purple/40 transition-colors"
+                                            title={t.dangerPage.heatmap.openMedia}
+                                        >
+                                            {media.title}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </Card>
+    );
+};
+
 // --- 4. MAIN LAYOUT ---
 
 export const DangerousNarratives: React.FC = () => {
@@ -593,6 +693,7 @@ export const DangerousNarratives: React.FC = () => {
              </div>
              <div className="lg:col-span-1 space-y-6">
                 <ThreatMatrixChart />
+                     <AuthorMediaHeatmapCard />
                 
                 {/* Alert Box */}
                 <div className="p-4 rounded-lg bg-red-950/20 border border-red-900/50 flex gap-4 items-start">

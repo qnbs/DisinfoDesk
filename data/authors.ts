@@ -1,7 +1,20 @@
 
 import { Author } from '../types';
 
-export const AUTHORS_DATA: Author[] = [
+type SeedAuthor = Pick<Author,
+  'id' |
+  'name' |
+  'lifespan' |
+  'nationality' |
+  'imagePlaceholder' |
+  'bioDe' |
+  'bioEn' |
+  'focusAreas' |
+  'keyWorks' |
+  'influenceLevel'
+>;
+
+const RAW_AUTHORS_DATA: SeedAuthor[] = [
   {
     id: 'a1',
     name: 'Antony C. Sutton',
@@ -677,3 +690,419 @@ export const AUTHORS_DATA: Author[] = [
     influenceLevel: 65
   }
 ];
+
+const EXPANDED_AUTHORS_DATA: SeedAuthor[] = [
+  {
+    id: 'a51',
+    name: 'Jim Keith',
+    lifespan: '1949–1999',
+    nationality: 'American',
+    imagePlaceholder: 'JKt',
+    bioDe: 'Autor und Herausgeber, der in den 1990ern über Technokratie, Überwachung und soziale Kontrolle publizierte. Seine Arbeiten werden häufig in Debatten über „Silent Weapons“-Narrative zitiert.',
+    bioEn: 'Author and editor who published on technocracy, surveillance, and social control in the 1990s. His work is often cited in debates around “Silent Weapons” narratives.',
+    focusAreas: ['Technocracy', 'Surveillance', 'Social Engineering'],
+    keyWorks: ['Mind Control, World Control (1997)', 'Mass Control: Engineering Human Consciousness (1999)'],
+    influenceLevel: 77
+  },
+  {
+    id: 'a52',
+    name: 'Mark Dice',
+    lifespan: '1977–Present',
+    nationality: 'American',
+    imagePlaceholder: 'MD',
+    bioDe: 'Medienkommentator, der Popkultur, Werbung und Elitenarrative mit satirischem Stil kritisiert. Seine Inhalte zirkulieren stark in Online-Ökosystemen der Gegenöffentlichkeit.',
+    bioEn: 'Media commentator who critiques pop culture, advertising, and elite narratives with a satirical style. His content circulates widely in alternative online ecosystems.',
+    focusAreas: ['Media Critique', 'Pop Culture', 'Elite Narratives'],
+    keyWorks: ['The New World Order: Facts & Fiction (2009)', 'The Resistance Manifesto (2019)'],
+    influenceLevel: 73
+  },
+  {
+    id: 'a53',
+    name: 'James Corbett',
+    lifespan: '1979–Present',
+    nationality: 'Canadian',
+    imagePlaceholder: 'JCb',
+    bioDe: 'Unabhängiger Podcaster und Produzent des „Corbett Report“. Er kuratiert geopolitische und medienkritische Narrativcluster mit Fokus auf Quellenarchivierung.',
+    bioEn: 'Independent podcaster and producer of “The Corbett Report”. He curates geopolitical and media-critique narrative clusters with strong source archiving focus.',
+    focusAreas: ['Geopolitics', 'Media Literacy', 'OSINT Curation'],
+    keyWorks: ['The Corbett Report (Series)', 'How Big Oil Conquered the World (Documentary)'],
+    influenceLevel: 79
+  },
+  {
+    id: 'a54',
+    name: 'Rosa Koire',
+    lifespan: '1966–2021',
+    nationality: 'American',
+    imagePlaceholder: 'RK',
+    bioDe: 'Aktivistin, die „Agenda 21“-Interpretationen in lokale Politikdebatten einbrachte. Ihre Vorträge beeinflussten kommunale Netzwerke und Anti-Planungs-Narrative.',
+    bioEn: 'Activist who introduced “Agenda 21” interpretations into local policy debates. Her talks influenced municipal networks and anti-planning narratives.',
+    focusAreas: ['Agenda 21', 'Urban Planning', 'Governance Narratives'],
+    keyWorks: ['Behind the Green Mask (2011)'],
+    influenceLevel: 68
+  },
+  {
+    id: 'a55',
+    name: 'Judy Mikovits',
+    lifespan: '1958–Present',
+    nationality: 'American',
+    imagePlaceholder: 'JMv',
+    bioDe: 'Biomedizinische Akteurin, deren Aussagen in Pandemie- und Impfdebatten stark polarisierten. Ihre Narrative wurden in vielen Plattform-Fact-Checks als problematisch markiert.',
+    bioEn: 'Biomedical figure whose statements became highly polarizing in pandemic and vaccine debates. Her narratives were flagged as problematic across many platform fact-checks.',
+    focusAreas: ['Health Claims', 'Pandemic Narratives', 'Vaccine Discourse'],
+    keyWorks: ['Plague of Corruption (2020)'],
+    influenceLevel: 81
+  },
+  {
+    id: 'a56',
+    name: 'Andrew Wakefield',
+    lifespan: '1957–Present',
+    nationality: 'British',
+    imagePlaceholder: 'AW',
+    bioDe: 'Ehemaliger Mediziner, zentral in modernen Impf-Fehlinformationsnetzwerken. Sein Fall ist ein Kernbeispiel für wissenschaftsethische Kontroversen und langfristige Narrativwirkung.',
+    bioEn: 'Former physician central to modern vaccine misinformation networks. His case is a core example of research ethics controversy and long-term narrative impact.',
+    focusAreas: ['Vaccine Narratives', 'Public Health', 'Scientific Controversy'],
+    keyWorks: ['Callous Disregard (2010)', 'Vaxxed (2016)'],
+    influenceLevel: 90
+  },
+  {
+    id: 'a57',
+    name: 'Del Bigtree',
+    lifespan: '1970s–Present',
+    nationality: 'American',
+    imagePlaceholder: 'DB',
+    bioDe: 'Produzent und Moderator, der Gesundheitsnarrative über Livestream-Formate verbreitet. Hohe Reichweite über Event- und Campaign-Infrastruktur.',
+    bioEn: 'Producer and host who amplifies health narratives via livestream formats. High reach through event and campaign infrastructure.',
+    focusAreas: ['Health Media', 'Livestream Activism', 'Campaign Networks'],
+    keyWorks: ['The HighWire (Series)', 'Vaxxed (Producer)'],
+    influenceLevel: 78
+  },
+  {
+    id: 'a58',
+    name: 'Joseph Mercola',
+    lifespan: '1954–Present',
+    nationality: 'American',
+    imagePlaceholder: 'JMe',
+    bioDe: 'Unternehmer und Publizist im Health-Wellness-Sektor, häufig in Desinformationsanalysen zu Medizin- und Ernährungsclaims erwähnt.',
+    bioEn: 'Entrepreneur and publisher in the health-wellness sector, frequently cited in misinformation analyses around medical and nutrition claims.',
+    focusAreas: ['Alternative Health', 'Nutrition Claims', 'Medical Misinformation'],
+    keyWorks: ['Mercola.com (Platform)'],
+    influenceLevel: 82
+  },
+  {
+    id: 'a59',
+    name: 'Mike Adams',
+    lifespan: '1967–Present',
+    nationality: 'American',
+    imagePlaceholder: 'MA',
+    bioDe: 'Betreiber eines alternativen Mediennetzwerks mit Fokus auf Krisen-, Gesundheits- und Systemkollaps-Narrative.',
+    bioEn: 'Operator of an alternative media network focused on crisis, health, and system-collapse narratives.',
+    focusAreas: ['Alternative Media', 'Crisis Narratives', 'Prepper Culture'],
+    keyWorks: ['NaturalNews (Platform)'],
+    influenceLevel: 76
+  },
+  {
+    id: 'a60',
+    name: 'Brigitte Hamann',
+    lifespan: '1960s–Present',
+    nationality: 'German',
+    imagePlaceholder: 'BH',
+    bioDe: 'Akteurin in deutschsprachigen Milieus rund um globale Elitenarrative und alternative Finanzdeutungen. Wirksam vor allem über Eventformate.',
+    bioEn: 'Figure in German-speaking milieus around global elite narratives and alternative financial framing. Influence is mainly event-driven.',
+    focusAreas: ['German Alt-Media', 'Elite Narratives', 'Finance Frames'],
+    keyWorks: ['Lecture Circuit Archives'],
+    influenceLevel: 63
+  },
+  {
+    id: 'a61',
+    name: 'Udo Ulfkotte',
+    lifespan: '1960–2017',
+    nationality: 'German',
+    imagePlaceholder: 'UU',
+    bioDe: 'Journalist, dessen Medienkritik-These über Einflussnetzwerke in Nachrichtenredaktionen in vielen alternativen Kanälen verbreitet wurde.',
+    bioEn: 'Journalist whose media-critique thesis about influence networks in newsrooms spread widely across alternative channels.',
+    focusAreas: ['Media Critique', 'Influence Networks', 'Press Trust'],
+    keyWorks: ['Gekaufte Journalisten (2014)'],
+    influenceLevel: 74
+  },
+  {
+    id: 'a62',
+    name: 'Ken Jebsen',
+    lifespan: '1966–Present',
+    nationality: 'German',
+    imagePlaceholder: 'KJ',
+    bioDe: 'Medienakteur mit starkem Fokus auf geopolitische Meta-Erzählungen. Hohe Viralität über Video- und Interviewformate.',
+    bioEn: 'Media figure with strong focus on geopolitical meta-narratives. High virality through video and long-form interview formats.',
+    focusAreas: ['Geopolitics', 'Longform Interviews', 'Alternative Video Media'],
+    keyWorks: ['KenFM / Apolut (Platform Archive)'],
+    influenceLevel: 77
+  },
+  {
+    id: 'a63',
+    name: 'Daniele Ganser',
+    lifespan: '1972–Present',
+    nationality: 'Swiss',
+    imagePlaceholder: 'DG',
+    bioDe: 'Historiker und Referent, bekannt für geopolitische Gegenlesarten und 9/11-bezogene Debatten. Starkes Event-Publikum im DACH-Raum.',
+    bioEn: 'Historian and speaker known for geopolitical counter-readings and 9/11-related debate framing. Strong event audience in the DACH region.',
+    focusAreas: ['9/11 Debate', 'NATO/Geopolitics', 'Public Lectures'],
+    keyWorks: ['NATO’s Secret Armies (2005)', 'Illegale Kriege (2016)'],
+    influenceLevel: 84
+  },
+  {
+    id: 'a64',
+    name: 'Stefan Lanka',
+    lifespan: '1963–Present',
+    nationality: 'German',
+    imagePlaceholder: 'SL',
+    bioDe: 'Akteur in virologiekritischen Netzwerken, häufig zitiert in Debatten über medizinische Grundlagen und Evidenzstandards.',
+    bioEn: 'Figure in virology-skeptic networks, frequently cited in debates over medical fundamentals and evidence standards.',
+    focusAreas: ['Virology Skepticism', 'Evidence Debate', 'Health Narratives'],
+    keyWorks: ['Public Debate Archives'],
+    influenceLevel: 69
+  },
+  {
+    id: 'a65',
+    name: 'Sherri Tenpenny',
+    lifespan: '1950s–Present',
+    nationality: 'American',
+    imagePlaceholder: 'ST',
+    bioDe: 'Ärztliche Akteurin in anti-impfbezogenen Communities, mit starker Event- und Social-Media-Präsenz.',
+    bioEn: 'Medical figure in anti-vaccine communities with strong event and social media presence.',
+    focusAreas: ['Vaccine Narratives', 'Health Events', 'Social Amplification'],
+    keyWorks: ['Public Talks and Webcasts'],
+    influenceLevel: 72
+  },
+  {
+    id: 'a66',
+    name: 'Stew Peters',
+    lifespan: '1980s–Present',
+    nationality: 'American',
+    imagePlaceholder: 'SP',
+    bioDe: 'Host und Multiplikator in digitalen Ökosystemen mit stark polarisierenden Gesundheits- und Politnarrativen.',
+    bioEn: 'Host and amplifier in digital ecosystems with highly polarizing health and political narratives.',
+    focusAreas: ['Alt-Video Platforms', 'Political Polarization', 'Health Narratives'],
+    keyWorks: ['Stew Peters Network (Archive)'],
+    influenceLevel: 71
+  },
+  {
+    id: 'a67',
+    name: 'Harald Kautz-Vella',
+    lifespan: '1970s–Present',
+    nationality: 'German',
+    imagePlaceholder: 'HKV',
+    bioDe: 'Akteur in deutschsprachigen Narrativen zu Geoengineering, Nanotechnologie und Biowaffen-Deutungen.',
+    bioEn: 'Figure in German-speaking narratives around geoengineering, nanotechnology, and bioweapon framing.',
+    focusAreas: ['Geoengineering', 'Nanotech Narratives', 'Biosecurity Claims'],
+    keyWorks: ['Lecture and Interview Archives'],
+    influenceLevel: 67
+  },
+  {
+    id: 'a68',
+    name: 'Anatoly Fomenko',
+    lifespan: '1945–Present',
+    nationality: 'Russian',
+    imagePlaceholder: 'AF',
+    bioDe: 'Mathematiker und Urheber der „Neuen Chronologie“, die große Teile der etablierten Weltgeschichte als Fälschung neu datiert.',
+    bioEn: 'Mathematician and author of the “New Chronology”, re-dating large parts of established world history as fabricated.',
+    focusAreas: ['Historical Revisionism', 'Chronology Theories', 'Alternative Historiography'],
+    keyWorks: ['History: Fiction or Science? (Series)'],
+    influenceLevel: 75
+  },
+  {
+    id: 'a69',
+    name: 'Annie Jacobsen',
+    lifespan: '1967–Present',
+    nationality: 'American',
+    imagePlaceholder: 'AJa',
+    bioDe: 'Journalistin, deren Bücher über geheime Programme (Area 51, DARPA, MKUltra-Kontexte) häufig als Einstieg in Sicherheitsnarrative genutzt werden.',
+    bioEn: 'Journalist whose books on classified programs (Area 51, DARPA, MKUltra contexts) are often used as entry points into security narratives.',
+    focusAreas: ['Classified Programs', 'Defense History', 'Intelligence Narratives'],
+    keyWorks: ['Area 51 (2011)', 'The Pentagon’s Brain (2015)'],
+    influenceLevel: 70
+  },
+  {
+    id: 'a70',
+    name: 'Laura Knight-Jadczyk',
+    lifespan: '1952–Present',
+    nationality: 'American',
+    imagePlaceholder: 'LKJ',
+    bioDe: 'Autorin in esoterisch-politischen Mischmilieus mit narrativen Clustern zu Hyperdimensionen, Geopolitik und Informationskrieg.',
+    bioEn: 'Author in esoteric-political hybrid milieus with narrative clusters on hyperdimensions, geopolitics, and information warfare.',
+    focusAreas: ['Esoteric Geopolitics', 'Hyperdimensional Narratives', 'Info-Warfare'],
+    keyWorks: ['The Wave (Series)', 'Political Ponerology (Promotion)'],
+    influenceLevel: 66
+  }
+];
+
+const DEFAULT_DISCLAIMER_DE = 'Nur für Bildungszwecke – keine medizinische, rechtliche oder psychologische Beratung. Immer eigenständig verifizieren.';
+const DEFAULT_DISCLAIMER_EN = 'Educational simulation tool only – not medical, legal or psychological advice. Always verify independently.';
+
+const ALL_AUTHORS = [...RAW_AUTHORS_DATA, ...EXPANDED_AUTHORS_DATA];
+
+const inferBirthYear = (lifespan: string): number | undefined => {
+  const start = lifespan.split('–')[0]?.trim();
+  if (!start) return undefined;
+  const year = Number.parseInt(start, 10);
+  return Number.isFinite(year) ? year : undefined;
+};
+
+const inferOccupations = (focusAreas: string[]): string[] => {
+  const occupationMap: Record<string, string> = {
+    history: 'Historian / Public Commentator',
+    journalism: 'Journalist / Broadcaster',
+    geopolitics: 'Geopolitical Analyst',
+    politics: 'Political Commentator',
+    economics: 'Economic Commentator',
+    spirituality: 'Spiritual Author / Lecturer',
+    ufos: 'Paranormal Research Author',
+    archaeology: 'Popular History Author',
+    media: 'Media Personality',
+    health: 'Health Narrative Commentator'
+  };
+
+  const inferred = focusAreas
+    .map((area) => {
+      const key = area.toLowerCase();
+      return Object.entries(occupationMap).find(([match]) => key.includes(match))?.[1];
+    })
+    .filter((value): value is string => Boolean(value));
+
+  return Array.from(new Set(inferred.length ? inferred : ['Author / Public Speaker']));
+};
+
+const createTimeline = (author: SeedAuthor): Author['timeline'] => {
+  const birth = inferBirthYear(author.lifespan);
+  const firstWorkYear = author.keyWorks
+    .map((work) => Number.parseInt((work.match(/\((\d{4})\)/)?.[1] || ''), 10))
+    .find((year) => Number.isFinite(year));
+  const peakYear = (firstWorkYear || (birth ? birth + 40 : 2005)) + 8;
+
+  return [
+    {
+      year: birth ? `${birth}` : 'Early Career',
+      event: `Early formation phase of ${author.name}`,
+      significance: 'Background context is useful for understanding later framing strategies and audience fit.'
+    },
+    {
+      year: firstWorkYear ? `${firstWorkYear}` : 'Publication Era',
+      event: `Breakthrough publication cycle begins (${author.keyWorks[0] || 'major public work'})`,
+      significance: 'Marks transition from niche commentary to broader narrative circulation and citation.'
+    },
+    {
+      year: `${peakYear}`,
+      event: 'Cross-platform amplification and remixing by adjacent communities',
+      significance: 'Claims become detached from original context and spread through clips, reposts, and derivative commentary.'
+    },
+    {
+      year: 'Recent',
+      event: 'Ongoing fact-checking, contextualization, and archival debate',
+      significance: 'Demonstrates how narratives persist even when specific claims are revised, challenged, or debunked.'
+    }
+  ];
+};
+
+const createRichBio = (author: SeedAuthor, lang: 'de' | 'en'): string => {
+  const baseBio = lang === 'de' ? author.bioDe : author.bioEn;
+  const works = author.keyWorks.slice(0, 3).join('; ');
+  const focus = author.focusAreas.join(', ');
+  const opening = lang === 'de'
+    ? `Frühes Leben: ${author.name} wird in Quellen häufig in Verbindung mit den Themenfeldern ${focus} genannt. Die frühe Karrierephase ist für die Einordnung entscheidend, weil biografische Übergänge (Beruf, Milieu, Publikationszugang) oft direkt mit der späteren Erzählstrategie verknüpft sind. ${baseBio}`
+    : `Early Life: ${author.name} is frequently discussed in relation to ${focus}. The early-career phase matters for analysis because biographical transitions (profession, milieu, publishing access) often shape later narrative strategy. ${baseBio}`;
+
+  const rise = lang === 'de'
+    ? `Aufstieg zur Prominenz: Sichtbarkeit entstand typischerweise über Buchpublikationen, Vortragskreise und später über digitale Distribution. Wiederkehrende Trigger waren Krisenkommunikation, institutionelles Misstrauen und vereinfachende Deutungsrahmen. Relevante Veröffentlichungsphase: ${works}.`
+    : `Rise to Prominence: Visibility typically scaled through books, lecture circuits, and later digital distribution. Recurring triggers were crisis communication cycles, institutional distrust, and simplification frames. Notable release cycle: ${works}.`;
+
+  const claims = lang === 'de'
+    ? `Kern-Claims: Im Diskurs werden Kernthesen häufig als evidenzgestufte Behauptungen bewertet (Strong/Limited/Weak/Debunked). Für didaktische Zwecke ist wichtig, einzelne Claims zu trennen, Primärquellen zu prüfen und zwischen belegten Fakten, plausiblen Hypothesen und spekulativen Schlüssen zu unterscheiden.`
+    : `Core Claims: In public discourse, core propositions are often best handled with evidence tiers (Strong/Limited/Weak/Debunked). For educational use, separate each claim, verify primary sources, and distinguish confirmed facts from plausible hypotheses and speculative inference.`;
+
+  const methods = lang === 'de'
+    ? `Einflussmethoden: Typische Mechanismen sind narrative Verdichtung, selektive Quellenwahl, rhetorische Fragen, moralische Dringlichkeit und die Verknüpfung heterogener Ereignisse zu einem kohärent wirkenden Gesamtbild. Plattformdynamik verstärkt diese Muster durch Wiederholung, visuelle Kurzformate und Community-Bestätigung.`
+    : `Methods of Influence: Typical mechanisms include narrative compression, selective sourcing, rhetorical questioning, moral urgency, and linking heterogeneous events into a coherent master frame. Platform dynamics amplify these patterns through repetition, visual short formats, and community reinforcement.`;
+
+  const impact = lang === 'de'
+    ? `Wirkung & Kontroversen: Wirkung zeigt sich in Reichweite, Wiederverwendung durch Drittakteure und langfristiger Anschlussfähigkeit an neue Ereignisse. Kontroversen entstehen oft dort, wo kausale Behauptungen die verfügbare Evidenz übersteigen. Debunkings adressieren dann Datenlücken, Fehlzitate, Kontextverlust oder methodische Fehlschlüsse.`
+    : `Impact & Controversies: Impact appears in audience reach, downstream reuse by third parties, and long-term adaptability to new events. Controversies often emerge where causal claims exceed available evidence. Debunking work then targets data gaps, quotation errors, context loss, or methodological overreach.`;
+
+  const legacy = lang === 'de'
+    ? `Vermächtnis: Das Profil ist nicht als Bewertung der Person gedacht, sondern als Lernmaterial zur Analyse moderner Informationsökologien. Relevanz entsteht aus der Rolle im Netzwerk: Wer zitiert wen, in welchem Kontext, mit welcher Evidenzqualität und über welche Kanäle?`
+    : `Legacy: This profile is not intended as personal judgment; it is educational material for analyzing modern information ecosystems. Relevance comes from network position: who cites whom, in what context, with what evidence quality, and through which channels?`;
+
+  const insights = lang === 'de'
+    ? `Lern-Insights: Medienkompetenz steigt, wenn Nutzer:innen Behauptungen in überprüfbare Teilfragen zerlegen, Primärquellen vor Sekundärkommentaren priorisieren, Datums-/Kontextbrüche markieren und emotionale Trigger erkennen. Fact-Checking-Hinweis: Einzelne zutreffende Beobachtungen validieren nicht automatisch den gesamten Deutungsrahmen.`
+    : `Educational Insights: Media literacy improves when users decompose claims into verifiable sub-questions, prioritize primary sources over commentary, track date/context shifts, and detect emotional triggers. Fact-checking note: isolated accurate observations do not automatically validate the broader framework.`;
+
+  return [opening, rise, claims, methods, impact, legacy, insights].join('\n\n');
+};
+
+export const AUTHORS_DATA: Author[] = ALL_AUTHORS.map((author, index) => {
+  const relatedMediaIds = [`m${(index % 30) + 1}`, `m${400 + (index % 30)}`];
+  const birthYear = inferBirthYear(author.lifespan);
+  const fullBioDe = createRichBio(author, 'de');
+  const fullBioEn = createRichBio(author, 'en');
+  const peakYear = birthYear ? birthYear + 45 : 2012;
+
+  return {
+    ...author,
+    birthYear,
+    fullBio: fullBioEn,
+    fullBioDe,
+    fullBioEn,
+    occupation: inferOccupations(author.focusAreas),
+    notableWorks: author.keyWorks,
+    influenceScore: author.influenceLevel,
+    affiliations: [
+      `${author.nationality} media ecosystem`,
+      'Lecture circuits / alternative publishing'
+    ],
+    keyClaims: [
+      `${author.name} is frequently cited in narratives around ${author.focusAreas[0] ?? 'system control'}.`,
+      `Recurring claim cluster: ${author.focusAreas.slice(0, 2).join(' + ')}.`
+    ],
+    affiliatedMedia: relatedMediaIds,
+    relatedMediaIds,
+    timeline: createTimeline(author),
+    influenceMetrics: {
+      mainPlatforms: ['Books', 'Long-form Interviews', 'Social Media Clips'],
+      peakReach: `${Math.max(20, Math.round(author.influenceLevel * 0.85))}% cross-platform visibility index`,
+      estimatedAudience: `${Math.max(1, Math.round(author.influenceLevel / 8))}M cumulative exposures (estimated)`,
+      peakYear
+    },
+    rhetoricalStyle: `Analytical-assertive framing with recurring emphasis on ${author.focusAreas.slice(0, 2).join(' and ')}; relies on pattern linkage, source reinterpretation, and high-certainty language in controversial domains.`,
+    controversiesAndDebunkings: [
+      'Core claims have been repeatedly reviewed by fact-checking and academic commentary with mixed to critical assessments depending on claim scope.',
+      'Frequent critique points include selective source use, causality leaps, and low evidentiary thresholds in high-impact claims.',
+      'Educational recommendation: verify timeline consistency, primary documents, and independent corroboration before accepting synthesis claims.'
+    ],
+    educationalInsights: 'Influence typically rises when uncertainty, identity pressure, and platform virality converge. High-engagement narratives often simplify complexity and reward certainty. Media-literacy practice: separate facts from interpretation, compare independent sources, and actively test falsifiable parts of each claim.',
+    sources: [
+      'Primary publications and interviews by the author',
+      'Independent fact-check organizations (methodology + verdict archives)',
+      'Peer-reviewed or institutional background references where available',
+      'Media-literacy frameworks on misinformation spread and cognitive bias'
+    ],
+    debunkingTimeline: [
+      {
+        year: '1990s',
+        eventDe: 'Frühe Gegenanalysen in Fachmedien markieren zentrale Behauptungen als unbelegt oder verkürzt.',
+        eventEn: 'Early counter-analysis in specialist media marks key claims as unverified or oversimplified.',
+        source: 'Media literacy archives'
+      },
+      {
+        year: '2010s',
+        eventDe: 'Fact-Checking-Plattformen ordnen Kernthesen in Kategorien wie „unbelegt“, „irreführend“ oder „Satire“ ein.',
+        eventEn: 'Fact-check platforms classify core claims as unverified, misleading, or satire.',
+        source: 'Public fact-check portals'
+      }
+    ],
+    factCheckNoteDe: 'Hinweis: Dieses Profil dokumentiert Erzählmuster, nicht deren Wahrheitsgehalt.',
+    factCheckNoteEn: 'Note: This profile documents narrative patterns, not factual validity.',
+    whyItSpreadsDe: 'Die Erzählung kombiniert Identität, Kontrollverlust und einfache Erklärungen für komplexe Ereignisse.',
+    whyItSpreadsEn: 'The narrative combines identity, loss-of-control framing, and simple explanations for complex events.',
+    learningPromptDe: 'Welche Primärquelle würdest du zuerst prüfen, und warum?',
+    learningPromptEn: 'Which primary source would you verify first, and why?',
+    disclaimerDe: DEFAULT_DISCLAIMER_DE,
+    disclaimerEn: DEFAULT_DISCLAIMER_EN,
+  };
+});

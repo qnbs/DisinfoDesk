@@ -4,21 +4,24 @@ import { analyzeTheoryWithGemini, generateTheoryImage } from '../services/gemini
 import { 
     ArrowLeft, ShieldCheck, History, FileText, ExternalLink, Link, 
     Youtube, FileKey, GitBranch, Edit3, BookOpen, Quote, AlertTriangle, 
-    CheckCircle2, Clock, RefreshCw, MessageSquare
+    CheckCircle2, Clock, RefreshCw, MessageSquare, Download
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
 import { Button, Card, Badge, PageFrame, PageHeader } from './ui/Common';
 import { GenerationHUD } from './ui/GenerationHUD';
+import { ReferencesModal } from './ui/ReferencesModal';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { setTheoryTab, injectChatContext, setActiveFile } from '../store/slices/uiSlice';
 import { addLog } from '../store/slices/settingsSlice';
+import { downloadFactCheckReport } from '../utils/factCheckReport';
 
 // --- INTERACTIVE FORCE GRAPH (Optimized) ---
 const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick: (id: string) => void }> = ({ nodes: initialNodes, links: initialLinks, onNodeClick }) => {
+    const { t } = useLanguage();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [draggingNode, setDraggingNode] = useState<any | null>(null);
@@ -203,7 +206,7 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
                     onClick={() => setIsInteractive(true)}
                 >
                     <div className="px-4 py-2 bg-slate-900 border border-slate-700 rounded-full text-xs font-bold text-white shadow-lg pointer-events-auto animate-pulse">
-                        Tap to Interact
+                        {t.detail.tapToInteract}
                     </div>
                 </div>
             )}
@@ -212,7 +215,7 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
                     className="absolute top-4 right-4 p-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
                     onClick={() => setIsInteractive(false)}
                 >
-                    Release Lock
+                    {t.detail.releaseLock}
                 </button>
             )}
             <div className="absolute bottom-4 right-4 text-[9px] text-slate-500 font-mono pointer-events-none">
@@ -238,6 +241,7 @@ const useTheoryDetailLogic = () => {
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+    const [isReferencesOpen, setIsReferencesOpen] = useState(false);
   
   const { t, language } = useLanguage();
   const { settings } = useSettings();
@@ -350,6 +354,39 @@ const useTheoryDetailLogic = () => {
       navigate('/chat');
   };
 
+    const handleExportReport = () => {
+        if (!theory || !details) return;
+
+        const findings = [details.scientificConsensus, details.debunking].filter(Boolean);
+        const disclaimer = language === 'de'
+            ? 'Educational simulation tool only – not medical, legal or psychological advice. Always verify independently.'
+            : 'Educational simulation tool only – not medical, legal or psychological advice. Always verify independently.';
+
+        downloadFactCheckReport({
+            generatedAt: new Date().toISOString(),
+            reportType: 'THEORY',
+            id: theory.id,
+            title: theory.title,
+            language,
+            summary: details.fullDescription,
+            findings,
+            references: details.sources.map((source) => ({
+                title: source.title,
+                url: source.url,
+                sourceType: source.sourceType,
+            })),
+            disclaimer,
+            metadata: {
+                dangerLevel: theory.dangerLevel,
+                popularity: theory.popularity,
+                category: theory.category,
+                relatedTheoryCount: relatedTheories.length,
+            },
+        });
+
+        showToast(language === 'de' ? 'Fact-Check-Report exportiert.' : 'Fact-check report exported.', 'success');
+    };
+
   return {
     theory,
     details,
@@ -359,7 +396,10 @@ const useTheoryDetailLogic = () => {
     handleGenerateImage,
     handleRefreshAnalysis,
     handleInterrogate,
+    handleExportReport,
     relatedTheories,
+    isReferencesOpen,
+    setIsReferencesOpen,
     activeTab,
     setActiveTab,
     networkNodes,
@@ -388,7 +428,7 @@ const HeroSection: React.FC = () => {
     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl mb-8 group">
       <div className="h-64 md:h-96 relative bg-slate-900 transition-all">
         <GenerationHUD mode="IMAGE" isVisible={imageLoading} variant="overlay" className="z-30" />
-        <img src={generatedImage || theory.imageUrl} alt="" className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoading ? 'opacity-20' : 'opacity-70'}`} />
+        <img src={generatedImage || theory.imageUrl} alt={`Visualisierung zur Theorie: ${theory.title}`} className={`w-full h-full object-cover transition-opacity duration-700 ${imageLoading ? 'opacity-20' : 'opacity-70'}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/60 to-transparent"></div>
         <div className="absolute top-4 right-4 z-20 flex flex-col md:flex-row gap-2">
            {theory.videoUrl && <a href={theory.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold font-mono transition-all shadow-neon-red uppercase tracking-wider"><Youtube size={16} /> Deep Dive</a>}
@@ -461,10 +501,10 @@ const TimelineView: React.FC = () => {
     const { theory, t } = useTheoryDetail();
     if (!theory) return null;
     const events = [
-        { year: theory.originYear || 'Unknown', title: t.detail.timelineEvents.inception.title, desc: t.detail.timelineEvents.inception.desc },
+        { year: theory.originYear || t.common.unknown, title: t.detail.timelineEvents.inception.title, desc: t.detail.timelineEvents.inception.desc },
         { year: parseInt(theory.originYear?.match(/\d{4}/)?.[0] || '2000') + 5, title: t.detail.timelineEvents.threshold.title, desc: t.detail.timelineEvents.threshold.desc },
         { year: parseInt(theory.originYear?.match(/\d{4}/)?.[0] || '2000') + 10, title: t.detail.timelineEvents.mainstream.title, desc: t.detail.timelineEvents.mainstream.desc },
-        { year: 'Present', title: t.detail.timelineEvents.current.title, desc: `${t.detail.timelineEvents.current.desc} (${theory.popularity}%)` }
+        { year: t.detail.present, title: t.detail.timelineEvents.current.title, desc: `${t.detail.timelineEvents.current.desc} (${theory.popularity}%)` }
     ];
     return (
         <div className="lg:col-span-2 pl-4 md:pl-0">
@@ -503,7 +543,7 @@ const StatsCard: React.FC = () => {
         <button onClick={handleInterrogate} className="w-full p-4 rounded-xl bg-gradient-to-r from-accent-purple/20 to-accent-cyan/20 border border-accent-purple/50 hover:border-accent-cyan hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all group relative overflow-hidden active:scale-98 touch-manipulation">
             <div className="absolute inset-0 bg-noise opacity-10"></div>
             <div className="relative z-10 flex items-center justify-between">
-                <div className="text-left"><div className="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2"><MessageSquare size={16} className="text-accent-cyan" /> Discuss Theory</div><div className="text-[10px] text-slate-400 font-mono mt-1">Initiate contextual analysis with Dr. Veritas</div></div>
+                <div className="text-left"><div className="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2"><MessageSquare size={16} className="text-accent-cyan" /> {t.detail.discussTheory}</div><div className="text-[10px] text-slate-400 font-mono mt-1">{t.detail.initiateContextAnalysis}</div></div>
                 <div className="p-2 bg-slate-900 rounded-lg group-hover:scale-110 transition-transform"><ArrowLeft className="rotate-180 text-white" size={16} /></div>
             </div>
         </button>
@@ -512,12 +552,17 @@ const StatsCard: React.FC = () => {
 };
 
 const SourcesCard: React.FC = () => {
-  const { details, t, loading } = useTheoryDetail();
+    const { details, t, loading, setIsReferencesOpen } = useTheoryDetail();
   if (loading) return <Card className="p-6 space-y-4"><div className="h-4 bg-slate-800 rounded w-1/3 animate-pulse"></div><div className="h-10 bg-slate-800 rounded animate-pulse"></div><div className="h-10 bg-slate-800 rounded animate-pulse"></div></Card>;
   if (!details || details.sources.length === 0) return null;
   return (
     <Card variant="glass" className="p-6">
-      <h3 className="text-slate-400 text-xs font-bold uppercase mb-4 flex items-center tracking-widest font-display"><Link size={14} className="mr-2 text-accent-cyan" /> {t.detail.sources}</h3>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-slate-400 text-xs font-bold uppercase flex items-center tracking-widest font-display"><Link size={14} className="mr-2 text-accent-cyan" /> {t.detail.sources}</h3>
+                <Button size="sm" variant="secondary" onClick={() => setIsReferencesOpen(true)}>
+                    {t.detail.references}
+                </Button>
+            </div>
       <div className="flex flex-col gap-3">
         {details.sources.map((source, idx) => (
           <div key={idx} className="group flex items-start gap-3 p-3 rounded-lg bg-slate-950/50 border border-slate-800 hover:border-slate-600 transition-all">
@@ -539,7 +584,7 @@ const RelatedTheories: React.FC = () => {
       <div className="space-y-3">
         {relatedTheories.map((related) => (
           <div key={related.id} onClick={() => onNavigateTo(related.id)} className="group relative h-20 rounded-lg overflow-hidden cursor-pointer border border-slate-800 hover:border-accent-cyan/50 transition-all shadow-sm active:scale-[0.98]" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') onNavigateTo(related.id); }}>
-             <div className="absolute inset-0 bg-slate-900"><img src={related.imageUrl} alt="" className="w-full h-full object-cover opacity-30 group-hover:opacity-60 transition-all duration-500 grayscale group-hover:grayscale-0" /><div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" /></div>
+             <div className="absolute inset-0 bg-slate-900"><img src={related.imageUrl} alt={`Verwandte Theorie: ${related.title}`} className="w-full h-full object-cover opacity-30 group-hover:opacity-60 transition-all duration-500 grayscale group-hover:grayscale-0" /><div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" /></div>
              <div className="absolute inset-0 p-3 flex flex-col justify-center z-10 pl-4"><span className="text-[9px] text-accent-purple font-mono uppercase tracking-wider mb-0.5 truncate opacity-80">{related.category}</span><h4 className="text-xs font-bold text-white group-hover:text-accent-cyan leading-tight line-clamp-2">{related.title}</h4></div>
           </div>
         ))}
@@ -549,14 +594,27 @@ const RelatedTheories: React.FC = () => {
 };
 
 const TheoryDetailLayout: React.FC = () => {
-    const { theory, onBack, t, activeTab, handleRefreshAnalysis, loading, onNavigateTo, networkNodes } = useTheoryDetail();
+    const {
+        theory,
+        onBack,
+        t,
+        activeTab,
+        handleRefreshAnalysis,
+        loading,
+        onNavigateTo,
+        networkNodes,
+        handleExportReport,
+        details,
+        isReferencesOpen,
+        setIsReferencesOpen
+    } = useTheoryDetail();
     const navigate = useNavigate();
-    if (!theory) return <PageFrame><div className="text-center py-20"><h2 className="text-2xl font-bold text-white mb-4">THEORY NOT FOUND</h2><Button onClick={onBack}>{t.detail.back}</Button></div></PageFrame>;
+    if (!theory) return <PageFrame><div className="text-center py-20"><h2 className="text-2xl font-bold text-white mb-4">{t.detail.theoryNotFound}</h2><Button onClick={onBack}>{t.detail.back}</Button></div></PageFrame>;
     const handleEdit = () => navigate(`/editor/${theory.id}`);
 
     return (
         <PageFrame>
-            <PageHeader title={t.detail.caseFile || "CASE FILE"} subtitle={`ID: ${theory.id.toUpperCase()}`} icon={FileKey} actions={<div className="flex gap-2"><Button variant="secondary" onClick={handleRefreshAnalysis} icon={<RefreshCw size={14} />} disabled={loading} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.refresh}</Button><Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />} className="text-slate-400 hover:text-white text-xs uppercase font-bold">{t.detail.back}</Button>{theory.isUserCreated && <Button variant="primary" size="sm" onClick={handleEdit} icon={<Edit3 size={14} />} className="text-xs">{t.detail.edit}</Button>}</div>} />
+            <PageHeader title={t.detail.caseFile || "CASE FILE"} subtitle={`ID: ${theory.id.toUpperCase()}`} icon={FileKey} actions={<div className="flex gap-2"><Button variant="secondary" onClick={handleRefreshAnalysis} icon={<RefreshCw size={14} />} disabled={loading} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.refresh}</Button><Button variant="secondary" onClick={handleExportReport} icon={<Download size={14} />} disabled={!details} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.report}</Button><Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />} className="text-slate-400 hover:text-white text-xs uppercase font-bold">{t.detail.back}</Button>{theory.isUserCreated && <Button variant="primary" size="sm" onClick={handleEdit} icon={<Edit3 size={14} />} className="text-xs">{t.detail.edit}</Button>}</div>} />
             <HeroSection />
             <TabNavigation />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -573,6 +631,18 @@ const TheoryDetailLayout: React.FC = () => {
                     <RelatedTheories />
                 </div>
             </div>
+
+            <ReferencesModal
+                isOpen={isReferencesOpen}
+                onClose={() => setIsReferencesOpen(false)}
+                title={theory.title}
+                references={(details?.sources || []).map((source) => ({
+                    title: source.title,
+                    url: source.url,
+                    sourceType: source.sourceType,
+                    snippet: source.snippet,
+                }))}
+            />
         </PageFrame>
     );
 };

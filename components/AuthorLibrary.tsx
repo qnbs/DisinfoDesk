@@ -1,5 +1,4 @@
 import React, { useState, useMemo, createContext, useContext, useEffect, useRef, useCallback } from 'react';
-import { AUTHORS_FULL } from '../data/enriched';
 import { Author } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageFrame, PageHeader, Card, Badge, EmptyState, Button } from './ui/Common';
@@ -10,6 +9,9 @@ import {
     Cpu, Activity, Fingerprint
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../store/hooks';
+import { selectAllAuthors } from '../store/slices/authorsSlice';
+import { RootState } from '../store/store';
 
 // --- Types & Constants ---
 
@@ -21,7 +23,7 @@ type CategoryKey = 'ALL' | 'COSMIC' | 'SYSTEM' | 'HISTORY' | 'ESOTERIC';
 // 3D Tilt Card Effect (Optimized)
 const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React.memo(({ author, onClick }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const rafRef = useRef<number | null>(null);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -82,7 +84,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React
 
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
-                <img src={author.imageUrl} alt="" className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700 grayscale group-hover:grayscale-0 scale-105" loading="lazy" />
+                <img src={author.imageUrl} alt={`Porträt von ${author.name}`} className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-700 grayscale group-hover:grayscale-0 scale-105" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/80 to-slate-950" />
             </div>
 
@@ -98,7 +100,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React
                         </div>
                         {author.influenceLevel >= 85 && (
                             <div className="text-[9px] font-bold text-red-400 border border-red-500/30 px-2 py-0.5 rounded bg-red-950/20 animate-pulse">
-                                HIGH IMPACT
+                                {t.authors.highImpact}
                             </div>
                         )}
                     </div>
@@ -130,7 +132,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React
                     <div className="pt-3 border-t border-slate-800/50 flex justify-between items-center text-[10px] font-mono text-slate-500">
                         <span className="flex items-center gap-1">
                             <Activity size={10} className="text-accent-purple" />
-                            INF-INDEX
+                            {t.authors.influenceIndexShort}
                         </span>
                         <div className="flex items-center gap-2">
                             <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
@@ -150,6 +152,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React
 
 // Network Graph Component
 const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void }> = React.memo(({ authors, onSelect }) => {
+    const { t } = useLanguage();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -288,8 +291,8 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
             <canvas ref={canvasRef} className="block w-full h-full cursor-crosshair relative z-10" />
             <div className="absolute bottom-4 left-4 p-3 bg-slate-900/80 backdrop-blur rounded border border-slate-700 text-[10px] font-mono text-slate-400 pointer-events-none z-20">
-                <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 rounded-full bg-cyan-500"></div> STANDARD NODE</div>
-                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500"></div> HIGH INFLUENCE</div>
+                <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 rounded-full bg-cyan-500"></div> {t.authors.standardNode}</div>
+                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500"></div> {t.authors.highInfluenceNode}</div>
             </div>
         </div>
     );
@@ -300,6 +303,7 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
 const useAuthorLibraryLogic = () => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
+    const authors = useAppSelector((state: RootState) => selectAllAuthors(state));
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [viewMode, setViewMode] = useState<ViewMode>('GRID');
@@ -328,12 +332,12 @@ const useAuthorLibraryLogic = () => {
 
     const allFocusAreas = useMemo(() => {
         const areas = new Set<string>();
-        AUTHORS_FULL.forEach(a => a.focusAreas.forEach(area => areas.add(area)));
+        authors.forEach(a => a.focusAreas.forEach(area => areas.add(area)));
         return Array.from(areas).sort();
-    }, []);
+    }, [authors]);
 
     const filteredAuthors = useMemo(() => {
-        let result = AUTHORS_FULL;
+        let result = authors;
         if (debouncedSearch) {
             const lowerTerm = debouncedSearch.toLowerCase();
             result = result.filter(author => 
@@ -349,14 +353,14 @@ const useAuthorLibraryLogic = () => {
             );
         }
         return result;
-    }, [debouncedSearch, activeCategory, categoryConfig]);
+    }, [authors, debouncedSearch, activeCategory, categoryConfig]);
 
     const displayAuthors = useMemo(() => filteredAuthors.slice(0, visibleCount), [filteredAuthors, visibleCount]);
 
     const featuredAuthor = useMemo(() => {
-        const elite = AUTHORS_FULL.filter(a => a.influenceLevel >= 85);
-        return elite.length > 0 ? elite[new Date().getHours() % elite.length] : AUTHORS_FULL[0];
-    }, []);
+        const elite = authors.filter(a => a.influenceLevel >= 85);
+        return elite.length > 0 ? elite[new Date().getHours() % elite.length] : authors[0];
+    }, [authors]);
 
     return {
         t, language, searchTerm, setSearchTerm, viewMode, setViewMode, activeCategory, setActiveCategory,
@@ -395,9 +399,9 @@ const LibraryHeader: React.FC = React.memo(() => {
             visualizerState="IDLE"
             actions={
                 <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
-                    <button onClick={() => setViewMode('GRID')} aria-label="Grid View" className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><LayoutGrid size={16} /></button>
-                    <button onClick={() => setViewMode('LIST')} aria-label="List View" className={`p-2 rounded transition-colors ${viewMode === 'LIST' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><List size={16} /></button>
-                    <button onClick={() => setViewMode('NETWORK')} aria-label="Network View" className={`p-2 rounded transition-colors ${viewMode === 'NETWORK' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Network size={16} /></button>
+                    <button onClick={() => setViewMode('GRID')} aria-label={t.authors.viewGrid} className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><LayoutGrid size={16} /></button>
+                    <button onClick={() => setViewMode('LIST')} aria-label={t.authors.viewList} className={`p-2 rounded transition-colors ${viewMode === 'LIST' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><List size={16} /></button>
+                    <button onClick={() => setViewMode('NETWORK')} aria-label={t.authors.viewNetwork} className={`p-2 rounded transition-colors ${viewMode === 'NETWORK' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}><Network size={16} /></button>
                 </div>
             }
         >
@@ -411,7 +415,7 @@ const LibraryHeader: React.FC = React.memo(() => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-900/50 border border-slate-700 text-white pl-12 pr-10 py-4 rounded-xl focus:outline-none focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan transition-all text-sm font-mono shadow-inner placeholder-slate-600"
                     />
-                    {searchTerm && <button onClick={() => setSearchTerm('')} aria-label="Clear Search" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded-full hover:bg-slate-800"><X size={14} /></button>}
+                    {searchTerm && <button onClick={() => setSearchTerm('')} aria-label={t.authors.clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded-full hover:bg-slate-800"><X size={14} /></button>}
                 </div>
                 
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -454,13 +458,13 @@ const LibraryContent: React.FC = () => {
                     tabIndex={0}
                     onKeyDown={(e) => e.key === 'Enter' && onNavigateToDetail(featuredAuthor.id)}
                 >
-                    <div className="absolute inset-0 bg-slate-900 opacity-50"><img src={featuredAuthor.imageUrl} alt="" className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000 grayscale group-hover:grayscale-0" /></div>
+                    <div className="absolute inset-0 bg-slate-900 opacity-50"><img src={featuredAuthor.imageUrl} alt={`Feature-Porträt von ${featuredAuthor.name}`} className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000 grayscale group-hover:grayscale-0" /></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent" />
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur border border-accent-purple/30 px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest text-accent-purple flex items-center gap-2"><Star size={12} className="fill-accent-purple" /> Archivist Choice</div>
+                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur border border-accent-purple/30 px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest text-accent-purple flex items-center gap-2"><Star size={12} className="fill-accent-purple" /> {t.authors.featuredChoice}</div>
                     <div className="relative z-10 p-8 md:p-12 max-w-3xl">
-                        <div className="flex items-center gap-3 mb-4"><Badge label={featuredAuthor.nationality} className="bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30" /><span className="text-slate-400 font-mono text-xs flex items-center gap-1"><Zap size={12} className="text-yellow-500" /> INF: {featuredAuthor.influenceLevel}%</span></div>
+                        <div className="flex items-center gap-3 mb-4"><Badge label={featuredAuthor.nationality} className="bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30" /><span className="text-slate-400 font-mono text-xs flex items-center gap-1"><Zap size={12} className="text-yellow-500" /> {t.authors.influenceShort}: {featuredAuthor.influenceLevel}%</span></div>
                         <h2 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter drop-shadow-md">{featuredAuthor.name}</h2>
-                        <Button variant="secondary" icon={<ArrowRight size={16} />}>{t.detail.edit}</Button>
+                        <Button variant="secondary" icon={<ArrowRight size={16} />}>{t.authors.viewDossier}</Button>
                     </div>
                 </div>
             )}
@@ -481,9 +485,9 @@ const LibraryContent: React.FC = () => {
                                     tabIndex={0}
                                     onKeyDown={(e) => e.key === 'Enter' && onNavigateToDetail(author.id)}
                                 >
-                                    <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-700 overflow-hidden shrink-0 group-hover:border-accent-cyan/50"><img src={author.imageUrl} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" /></div>
+                                    <div className="w-12 h-12 rounded-full bg-slate-950 border border-slate-700 overflow-hidden shrink-0 group-hover:border-accent-cyan/50"><img src={author.imageUrl} alt={`Avatar von ${author.name}`} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" /></div>
                                     <div className="flex-1 min-w-0"><h3 className="text-sm font-bold text-white group-hover:text-accent-cyan transition-colors">{author.name}</h3><div className="text-[10px] text-slate-500 font-mono">{author.lifespan} • {author.nationality}</div></div>
-                                    <div className="text-[9px] font-mono text-slate-600 group-hover:text-accent-purple">{author.influenceLevel}% INF</div>
+                                    <div className="text-[9px] font-mono text-slate-600 group-hover:text-accent-purple">{author.influenceLevel}% {t.authors.influenceShort}</div>
                                 </div>
                             )
                     ))}
@@ -491,7 +495,7 @@ const LibraryContent: React.FC = () => {
             )}
 
             {hasMore && viewMode !== 'NETWORK' && (
-                <div className="flex justify-center mt-12"><Button variant="secondary" onClick={handleLoadMore} className="w-full md:w-auto min-w-[200px]" icon={<ArrowDownCircle size={16} />}>Load More Profiles</Button></div>
+                <div className="flex justify-center mt-12"><Button variant="secondary" onClick={handleLoadMore} className="w-full md:w-auto min-w-[200px]" icon={<ArrowDownCircle size={16} />}>{t.authors.loadMoreProfiles}</Button></div>
             )}
         </div>
     );

@@ -1,183 +1,217 @@
-
-<div align="center">
-
 ```text
-██████╗ ██╗███████╗██╗███╗   ██╗███████╗ ██████╗ ██████╗ ███████╗███████╗██╗  ██╗
-██╔══██╗██║██╔════╝██║████╗  ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝██║ ██╔╝
-██║  ██║██║███████╗██║██╔██╗ ██║█████╗  ██║   ██║██║  ██║█████╗  ███████╗█████╔╝ 
-██║  ██║██║╚════██║██║██║╚██╗██║██╔══╝  ██║   ██║██║  ██║██╔══╝  ╚════██║██╔═██╗ 
-██████╔╝██║███████║██║██║ ╚████║██║     ╚██████╔╝██████╔╝███████╗███████║██║  ██╗
-╚═════╝ ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝
+░▒▓█ SYNTH-NET UPLINK :: CHANNEL 0xDD-84 █▓▒░
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  ██████╗ ██╗███████╗██╗███╗   ██╗███████╗ ██████╗ ██████╗ ███████╗██╗  ██╗  │
+│  ██╔══██╗██║██╔════╝██║████╗  ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝██║ ██╔╝  │
+│  ██║  ██║██║███████╗██║██╔██╗ ██║█████╗  ██║   ██║██║  ██║█████╗  █████╔╝   │
+│  ██║  ██║██║╚════██║██║██║╚██╗██║██╔══╝  ██║   ██║██║  ██║██╔══╝  ██╔═██╗   │
+│  ██████╔╝██║███████║██║██║ ╚████║██║     ╚██████╔╝██████╔╝███████╗██║  ██╗  │
+│  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  │
+└──────────────────────────────────────────────────────────────────────────────┘
+    >>> neon://truth-grid  |  D15INF0D35K  |  OFFLINE-FIRST // HASH-ROUTED <<<
+░▒▓█ SIGNAL: STABLE • MODE: TERMINAL-HACK x SYNTHWAVE • STATUS: ONLINE █▓▒░
 ```
 
-**SYSTEM DESIGNATION: DISINFODESK // CODENAME: PROJECT OMEGA**
+# DisinfoDesk
 
-[![Release](https://img.shields.io/badge/release-v2.7.0--modular-06b6d4?style=for-the-badge&logo=git)](https://github.com/your-repo/disinfodesk)
-[![Core](https://img.shields.io/badge/core-React_19_%7C_TypeScript_5-3178C6?style=for-the-badge&logo=react)](https://react.dev/)
-[![State](https://img.shields.io/badge/state-Redux_Toolkit_%2B_Undo-764ABC?style=for-the-badge&logo=redux)](https://redux-toolkit.js.org/)
-[![Intelligence](https://img.shields.io/badge/neural-Gemini_2.5_Pro-8E75B2?style=for-the-badge&logo=google-gemini)](https://ai.google.dev/)
-[![License](https://img.shields.io/badge/license-MIT-ef4444?style=for-the-badge)](LICENSE)
+> ⚠️ **Reine Bildungszwecke / Educational only**  
+> Dieses Projekt dient der Medienkompetenz und Analyse von Desinformation. Keine medizinische, rechtliche oder psychologische Beratung. Lokale Gesetze beachten und Inhalte unabhängig verifizieren.
 
-*An advanced Cognitive Defense Grid and OSINT Analysis Platform engineered to deconstruct modern disinformation vectors through generative AI and agent-based simulation.*
+Interaktive, lokale und offlinefähige Research-PWA für die Untersuchung von Mythen, Verschwörungserzählungen, Narrativen, Autoren und Medienbezügen. DisinfoDesk kombiniert kuratierte Datensätze mit optionaler KI-gestützter Einordnung – strikt client-side und local-first.
 
-[<kbd>LAUNCH SYSTEM</kbd>](#-installation--deployment) • [<kbd>ARCHITECTURE</kbd>](#%EF%B8%8F-technical-architecture) • [<kbd>INTELLIGENCE LAYER</kbd>](#-neural-intelligence-layer)
+## Live Demo
+- https://qnbs.github.io/DisinfoDesk/
 
-</div>
+## Inhaltsverzeichnis
+- [Value Proposition](#value-proposition)
+- [Key Capabilities](#key-capabilities)
+- [Architecture Snapshot](#architecture-snapshot)
+- [Tech Stack](#tech-stack)
+- [Security & Privacy Model](#security--privacy-model)
+- [Local Development](#local-development)
+- [Production Build](#production-build)
+- [GitHub Pages Deployment](#github-pages-deployment)
+- [Runtime Configuration](#runtime-configuration)
+- [PWA & Offline Behavior](#pwa--offline-behavior)
+- [Operational Runbook](#operational-runbook)
+- [Troubleshooting](#troubleshooting)
+- [Governance & Responsible Use](#governance--responsible-use)
+- [Contributing](#contributing)
+- [Lizenz](#lizenz)
 
----
+## Value Proposition
+- **Educational Simulation Tool:** Fokus auf Medienkompetenz, nicht auf Aktivismus, Therapie oder Beratung.
+- **Local-First by Default:** Persistenz und Caching sind auf lokale Kontrolle und Offline-Nutzung ausgelegt.
+- **Client-Side AI Integration:** Gemini-Funktionen sind optional und werden erst mit lokal hinterlegtem API-Key aktiv.
+- **Research UX:** Hash-Routing, strukturierte Detailseiten, Such-/Filterflows und narrative Cross-Referenzen.
 
-## 🌐 Executive Summary
+## Key Capabilities
+- **Theory Archive:** Strukturierte Erfassung und Exploration narrativer Entitäten.
+- **Authors Library:** Profile, Einflussdimensionen und verknüpfte Inhalte.
+- **Media Analysis:** Kultur-/Medienobjekte mit Kontext und Zuordnungen.
+- **Debunk Chat („Dr. Veritas“):** Skeptischer Dialogmodus mit optionalem Kontextpaket.
+- **Satire Generator:** Didaktischer Kontrastmodus zur Erkennung manipulativer Muster.
+- **Vault Operations:** Lokale Datenhaltung, Import/Export-Workflows und PWA-fähiger Betrieb.
 
-**DisinfoDesk** is a sovereign, Progressive Web Application (PWA) designed as an educational counter-measure against narrative warfare. Unlike static encyclopedias, it functions as a live operating system.
+## Architecture Snapshot
+- **Frontend:** React 19 + TypeScript + Vite.
+- **State Layer:** Redux Toolkit, RTK Query, `redux-persist`, `redux-undo`.
+- **Routing:** `createHashRouter` (`/#/...`) für robuste GitHub-Pages-Kompatibilität.
+- **Persistence:** IndexedDB-basierter Vault über `services/dbService.ts` (inkl. Compression/Encryption-Pipeline für Vault-Daten).
+- **AI Boundary:** `services/geminiService.ts` als zentrale Integrationsschicht für Gemini-Aufrufe.
+- **PWA Runtime:** Workbox-basiertes `sw.js` mit differenzierten Caching-Strategien.
 
-By leveraging **Google's Gemini 2.5 Flash & Pro models**, the system performs real-time forensic analysis of conspiracy theories, hallucinates satirical narratives for educational contrast, and mathematically models viral spread using **Canvas-based agent simulations**.
+## Tech Stack
+- **Runtime:** React 19, React Router 6, Redux Toolkit, RTK Query.
+- **Visualization:** Recharts.
+- **AI SDK:** `@google/genai`.
+- **Build Tooling:** Vite 6, TypeScript 5.
+- **UI/Icons:** Tailwind/CSS Utility Styling + `lucide-react`.
 
-The architecture follows a strict **Local-First / Offline-Capable** philosophy, utilizing a custom IndexedDB wrapper (`Vault`) to ensure user data sovereignty.
+## Security & Privacy Model
 
----
+### Gemini API Key Handling
+- Der Gemini API Key wird **nicht** über Build-Umgebungsvariablen in Bundles injiziert.
+- Key-Setzung erfolgt zur Laufzeit in **Settings → Privacy**.
+- Speicherung erfolgt lokal verschlüsselt in IndexedDB via `secureApiKeyService`.
+- Bei fehlendem Key wird explizit ein Runtime-Fehler mit UI-Hinweis ausgelöst.
 
-## 🏛️ Technical Architecture
+### Vault & Data-at-Rest
+- Persistente App-Daten laufen über IndexedDB (`DisinfoDesk_Vault`).
+- Vault-Pipeline verwendet Compression + AES-GCM-gestützte Ent-/Verschlüsselung.
+- Multi-Tab-Synchronisation erfolgt via `BroadcastChannel`.
 
-The system is built upon a high-performance, type-safe stack designed for reliability and complex state orchestration.
+### Empfehlung für Key-Härtung
+- API-Key in Google AI Studio auf `*.github.io` beschränken.
+- Angemessene Quotas/Rate-Limits setzen.
+- Bei Verdacht auf Leck sofort rotieren.
 
-### Core Stack
-*   **Runtime:** React 19 (leveraging Concurrent Mode & Suspense boundaries).
-*   **Language:** TypeScript 5 (Strict Mode enabled).
-*   **Build System:** Vite (HMR & Module Federation ready).
-*   **Styling:** Tailwind CSS with a custom "Cyber-Mystic" configuration & CSS Variables for high-performance theming.
-
-### State Management & Persistence (The "Cortex")
-The application utilizes a sophisticated Redux Toolkit implementation:
-*   **Entity Normalization:** Usage of `createEntityAdapter` for O(1) lookups of Theories and Authors, optimizing rendering performance for large datasets.
-*   **Time-Travel Debugging:** The `simulation` slice is wrapped in `redux-undo`, allowing users to traverse the history of viral parameters (Undo/Redo).
-*   **Hydration:** `redux-persist` is configured with a custom storage engine (`dbService`) to sync Redux state directly to IndexedDB.
-
-### The Vault (Storage Layer)
-Instead of relying on `localStorage` (blocking, low quota), DisinfoDesk implements a custom Singleton `DatabaseService` class.
-*   **Technology:** Native `IndexedDB` API.
-*   **Capabilities:** Asynchronous CRUD operations for heavy text payloads (Chat Logs, AI Analyses) and Blobs.
-*   **Encryption:** Ready for client-side encryption (Architecture prepared).
-
----
-
-## 🧠 Neural Intelligence Layer
-
-The AI integration is not merely a chatbot; it is deeply woven into the application's fabric via the `@google/genai` SDK.
-
-### 1. Dr. Veritas (Skeptical Engine)
-*   **Model:** `gemini-2.5-flash` (Low latency) or `gemini-3-pro` (Deep reasoning).
-*   **System Prompting:** Hardened system instructions force the model into a "Scientific Skeptic" persona, utilizing structured headers like `[VERDICT: ...]`.
-*   **Architecture:** Implemented via RTK Query `fakeBaseQuery` to manage loading states, caching, and error handling within the Redux lifecycle.
-
-### 2. Search Grounding (OSINT)
-*   The analysis module utilizes the `googleSearch` tool integration to fetch real-time, cited refutations for conspiracy theories, ensuring the AI does not hallucinate historical facts.
-
-### 3. Procedural Art & Vision
-*   **Generative:** Uses `gemini-2.5-flash-image` to synthesize atmospheric, "X-Files" style evidence photos.
-*   **Algorithmic Fallback:** A custom `artEngine.ts` generates deterministic SVG vector art based on theory IDs and entropy seeds when offline or to save tokens.
-
----
-
-## 🕸️ Vector Simulation Engine
-
-A dedicated module for visualizing the mathematics of virality.
-
-*   **Rendering:** HTML5 Canvas (2D Context) optimized with `requestAnimationFrame` and off-screen buffering concepts.
-*   **Logic:** Agent-Based Modeling (ABM) with ~120 autonomous nodes.
-*   **Parameters:**
-    *   *Echo Chamber Density:* Controls spatial segregation of nodes.
-    *   *Emotional Payload:* Modifies infection probability.
-    *   *Visual Proof:* Modifies node velocity/transmission speed.
-
----
-
-## 📂 System Topology
-
-```text
-/src
-├── components/        # React UI Components (Atomic Design)
-│   ├── ui/            # Generic primitives (Card, Button, HUD)
-│   └── ...            # Feature-specific modules (Chat, Editor)
-├── config/            # System constants & Theme definitions
-├── contexts/          # React Contexts (Toast, Language, Settings)
-├── data/              # Static seed data (Theories, Media, Authors)
-├── services/          # External IO (Gemini SDK, IndexedDB wrapper)
-├── store/             # Redux Logic
-│   ├── api/           # RTK Query definitions
-│   ├── middleware/    # Custom middleware (Error Logging, Analytics)
-│   └── slices/        # Feature reducers
-├── types/             # TypeScript Definitions (Strict contracts)
-└── utils/             # Heuristics & Helpers
+## Local Development
+```bash
+npm ci
+npm run dev
 ```
 
----
+Lokaler Dev-Server läuft standardmäßig auf Port `3000`.
 
-## 🚀 Installation & Deployment
-
-### Prerequisites
-*   Node.js v18+
-*   A valid [Google AI Studio API Key](https://aistudio.google.com/) (Required for Neural Modules)
-
-### Initialization Sequence
-
-1.  **Clone Repository**
-    ```bash
-    git clone https://github.com/your-username/disinfodesk.git
-    cd disinfodesk
-    ```
-
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Environment Configuration**
-    Create a `.env` file in the root directory.
-    ```env
-    # Critical for AI functions. Get one at aistudio.google.com
-    API_KEY=AIzaSy...
-    ```
-
-4.  **Dev Mode Launch**
-    ```bash
-    npm start
-    ```
-    *Access the uplink at `http://localhost:5173`*
-
-### Production Build
+## Production Build
 ```bash
 npm run build
-# The 'dist' folder is now ready for deployment (Vercel, Netlify, Docker).
+npm run preview
 ```
 
----
+Build-Merkmale:
+- Minifizierung via `esbuild`.
+- Source Maps im Production-Build deaktiviert.
+- Chunking/Asset-Hashing für Cache-Busting.
+- Repo-basierter `base`-Pfad für GitHub Pages (`/DisinfoDesk/`).
 
-## 🛡️ Usage Protocols
+## GitHub Pages Deployment
 
-### The Archive
-The central database. Use the **OmniSearch (CMD+K)** to instantly query normalized data across Theories, Authors, and Media.
+### CI Workflow
+- Workflow: `.github/workflows/deploy.yml`
+- Trigger: `push` auf `main` + manuell (`workflow_dispatch`)
+- Actions: Checkout, Node LTS Setup, `npm ci`, `npm run build`, Artifact Upload, Pages Deploy
 
-### The Editor (Theory Lab)
-Create new theory files. The system uses a specialized prompt to "draft" content based on a title, and the **Art Engine** automatically generates a unique cover image. These files are persisted locally.
+### Setup-Schritte
+1. Repository auf `main` pushen.
+2. In GitHub: **Settings → Pages → Source: GitHub Actions** aktivieren.
+3. Workflow **Deploy to GitHub Pages** ausführen/abwarten.
+4. Live unter: https://qnbs.github.io/DisinfoDesk/
 
-### Threat Matrix (Protocol Omega)
-A visual dashboard classifying narratives by "Danger Level." It utilizes Recharts for 3D Scatterplots correlating `Virality` vs. `Severity`.
+### SPA-Fallback auf Pages
+- `404.html` leitet auf Hash-Routes (`/DisinfoDesk/#/...`) um.
+- Dadurch funktionieren direkte Deep-Links auch auf statischem Hosting.
 
----
+## Runtime Configuration
 
-## ⚠️ Liability Disclaimer
+### Environment Files
+- `.env.example` dokumentiert den Runtime-Hinweis.
+- Relevanter Punkt: Der Gemini-Key wird **in der App**, nicht beim Build, gesetzt.
 
-**DisinfoDesk is a simulation and educational tool.**
-*   **AI hallucinations:** The "Dr. Veritas" module may generate plausible but incorrect information. Always verify citations.
-*   **Satire:** The "Satire Generator" creates fictional narratives for illustrative purposes.
-*   **Privacy:** This system operates **Client-Side**. Your query history is stored in your browser's IndexedDB and is not transmitted to our servers (only strictly necessary prompts are sent to Google's API).
+### Gemini Key setzen
+1. App öffnen.
+2. Zu **Settings → Privacy** wechseln.
+3. API Key speichern.
+4. Statusanzeige „Stored encrypted“ verifizieren.
 
----
+## PWA & Offline Behavior
 
-<div align="center">
+### Manifest
+- `start_url` und `scope` sind auf `/DisinfoDesk/` abgestimmt.
+- App-Shortcuts zeigen auf hash-basierte Ziele.
 
-**[ END OF TRANSMISSION ]**
+### Service Worker (`sw.js`)
+- Workbox `CacheFirst` für Images/Fonts.
+- `StaleWhileRevalidate` für Scripts/Styles/CDN-Assets.
+- `NetworkFirst` für Gemini-API-Aufrufe mit Timeout.
+- Navigation-Fallback auf `index.html` innerhalb der registrierten Scope.
 
-<sub>Engineered by a Senior Frontend Engineer</sub>
+### Praktischer Offline-Test
+1. Seite einmal online öffnen.
+2. DevTools → Network → Offline.
+3. Navigation in bereits gecachten Bereichen prüfen.
 
-</div>
+## Operational Runbook
+
+### Standard Release Flow
+1. Lokal `npm ci && npm run build`.
+2. Auf `main` mergen.
+3. Deploy-Workflow überwachen.
+4. Nach Go-Live Hard-Refresh + SW-Update prüfen.
+
+### Post-Deploy Checks
+- Startseite lädt ohne 404.
+- Assets kommen mit korrektem Base-Pfad.
+- Hash-Routen (`#/archive`, `#/media`, `#/authors`) funktionieren.
+- PWA Installability weiterhin gegeben.
+- Gemini-Funktionalität mit lokal gesetztem Key testbar.
+
+### Performance/Quality Baselines (Empfehlung)
+- Lighthouse (Mobile/Desktop) gegen Production-URL laufen lassen.
+- Fokus: Performance, Accessibility, Best Practices, PWA.
+- Bei SW-Änderungen `CACHE_SUFFIX` erhöhen, um sauberes Invalidieren zu erzwingen.
+
+## Troubleshooting
+
+### Blank Page nach Deploy
+- Prüfen, dass `base` in `vite.config.ts` auf Repo-Pfad zeigt.
+- Browser-Cache + Service Worker aktualisieren.
+
+### Assets laden nicht (404)
+- Sicherstellen, dass GitHub Pages via Actions deployed.
+- Build-Output in `dist/` und Workflow-Artefakt prüfen.
+
+### SPA Routing bricht bei Reload
+- `404.html` muss im Repository-Root vorhanden sein.
+- Hash-Fallback auf `/DisinfoDesk/#/...` darf nicht entfernt werden.
+
+### Gemini Features schlagen fehl
+- API Key in Settings hinterlegt?
+- Domain-Beschränkung in AI Studio korrekt (`*.github.io`)?
+- Quota/Rate-Limit erreicht?
+
+### PWA Update wird nicht übernommen
+- UI-Update-Hinweis auslösen und „Reload“ bestätigen.
+- Falls nötig: Hard-Reload und alten SW manuell entfernen.
+
+## Governance & Responsible Use
+- Kein Ersatz für medizinische, rechtliche, psychologische oder sicherheitsrelevante Beratung.
+- Inhalte dienen der Aufklärung, Analyse und kritischen Reflexion.
+- Nutzer tragen Verantwortung für Compliance mit lokalen Gesetzen und Plattformregeln.
+- Quellen und Behauptungen stets unabhängig verifizieren.
+
+## Contributing
+Beiträge sind willkommen – bevorzugt in kleinen, nachvollziehbaren PRs:
+- **Docs-first:** bei Verhaltensänderungen auch README/Guides aktualisieren.
+- **Security-first:** keine Secrets, keine Build-Key-Injektion.
+- **Offline-first:** PWA- und Subpath-Kompatibilität nicht regressieren.
+- **State Consistency:** Redux-Normalisierung und Persistenz-Patterns beibehalten.
+
+## Roadmap (kurz)
+- Ausbau Author/Media-Datenbasis und Cross-Referenzen.
+- Weitere didaktische Lernpfade und Fact-Check-Exports.
+- Zusätzliche UX-Verbesserungen für Recherche-Workflows.
+
+## Lizenz
+MIT – siehe [LICENSE](LICENSE).

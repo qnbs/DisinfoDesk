@@ -40,7 +40,7 @@ jobs:
     steps:
       # ── Checkout ──
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # ── Node.js Setup with npm cache ──
       - name: Setup Node.js

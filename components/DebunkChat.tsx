@@ -17,7 +17,8 @@ import { Message } from '../types';
 import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
-import { LiveSession } from '@google/genai';
+// LiveSession type is not exported in current @google/genai version; use inline type
+type LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
 
 const buildContextBrief = (contextId: string | null, language: 'de' | 'en') => {
     if (!contextId) return undefined;
@@ -590,6 +591,9 @@ export const DebunkChat: React.FC = () => {
                     <div 
                         ref={chatContainerRef}
                         className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scrollbar-thin scrollbar-thumb-slate-800"
+                        role="log"
+                        aria-live="polite"
+                        aria-label="Chat messages"
                     >
                         {messages.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">

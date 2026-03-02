@@ -329,7 +329,7 @@ const CURATED_MEDIA_EXPANSION_30: MediaItem[] = CURATED_MEDIA_SEEDS_30.map((seed
   const base: MediaItem = {
     id: seed.id,
     title: seed.title,
-    type: (seed.type === 'AUDIO' || seed.type === 'PODCAST' ? 'ARTICLE' : seed.type),
+    type: ((seed.type as string) === 'AUDIO' || (seed.type as string) === 'PODCAST' ? 'ARTICLE' : seed.type),
     year: seed.year,
     creator: seed.creator,
     descriptionDe: `Kuratiertes Dossier zu „${seed.topic}“ mit Kontext, Quellenpfaden und didaktischer Einordnung der Behauptungslogik.`,

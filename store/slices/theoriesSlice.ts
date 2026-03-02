@@ -5,7 +5,6 @@ import { THEORIES_DE_FULL as THEORIES_DE, THEORIES_EN_FULL as THEORIES_EN } from
 
 // 1. Setup Entity Adapter for Normalized State
 const theoriesAdapter = createEntityAdapter<Theory>({
-  selectId: (theory) => theory.id,
   sortComparer: (a, b) => b.popularity - a.popularity,
 });
 

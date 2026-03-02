@@ -101,9 +101,13 @@ if (workbox) {
     workbox.routing.registerRoute(
         ({request}) => request.mode === 'navigate',
         ({event}) => {
-            return handler.handle({event}).catch(() => {
+            return handler.handle({event}).catch(async () => {
                 const fallbackUrl = new URL('index.html', self.registration.scope).toString();
-                return caches.match(fallbackUrl) || caches.match('index.html');
+                const cached = await caches.match(fallbackUrl) || await caches.match('index.html');
+                return cached || new Response('Offline – bitte neu laden', {
+                    status: 503,
+                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                });
             });
         }
     );

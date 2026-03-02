@@ -14,9 +14,11 @@ export default defineConfig(() => {
       },
       plugins: [react()],
       build: {
+        target: 'esnext',
         minify: 'esbuild',
         sourcemap: false,
         cssCodeSplit: true,
+        chunkSizeWarningLimit: 400,
         rollupOptions: {
           output: {
             entryFileNames: 'assets/[name]-[hash].js',

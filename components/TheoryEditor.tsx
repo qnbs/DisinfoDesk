@@ -550,13 +550,10 @@ const MetadataPanel: React.FC = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 min-h-[60px] content-start">
                     {formState.tags.map(tag => (
-                        <Badge 
-                            key={tag} 
-                            label={tag} 
-                            className="bg-slate-800 text-slate-300 border-slate-700 pr-1 flex items-center gap-1 group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10"
-                        >
+                        <span key={tag} className="px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider backdrop-blur-md font-mono whitespace-nowrap bg-slate-800 text-slate-300 border-slate-700 shadow-sm pr-1 flex items-center gap-1 group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10">
+                            {tag}
                             <button onClick={() => handleRemoveTag(tag)} className="hover:text-red-400 p-0.5 rounded-full focus-visible:ring-2 focus-visible:ring-red-400 outline-none" aria-label={`Remove tag ${tag}`}><X size={10}/></button>
-                        </Badge>
+                        </span>
                     ))}
                 </div>
             </div>
@@ -572,7 +569,7 @@ const CoverArtTerminal: React.FC = () => {
             {/* Preview Area */}
             <div className="aspect-video relative overflow-hidden bg-slate-900">
                 {formState.imageUrl ? (
-                    <img src={formState.imageUrl} alt={formState.titleDe || formState.titleEn || 'Theory cover image preview'} className="w-full h-full object-cover transition-all duration-700" />
+                    <img src={formState.imageUrl} alt={formState.title || 'Theory cover image preview'} className="w-full h-full object-cover transition-all duration-700" />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-slate-600 flex-col gap-2">
                         <Sparkles size={32} opacity={0.5} className="animate-pulse" />

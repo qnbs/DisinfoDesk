@@ -481,7 +481,7 @@ const DocumentationView: React.FC = () => {
       {/* Content */}
       <div className="flex-1 bg-slate-900/40 rounded-xl border border-slate-800 p-6 md:p-8 relative overflow-hidden backdrop-blur-sm">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-slate-500">
-           {currentSection?.icon && React.cloneElement(currentSection.icon as React.ReactElement, { size: 200 })}
+           {currentSection?.icon && React.cloneElement(currentSection.icon as React.ReactElement<Record<string, unknown>>, { size: 200 })}
         </div>
         
         {currentSection && (

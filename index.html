@@ -211,10 +211,10 @@
         }
       }
       
-      /* UI/UX: Improved Touch Targets */
+      /* UI/UX: WCAG 2.2 AA Touch Targets (≥48px) */
       .touch-target-min {
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 48px;
+        min-height: 48px;
       }
       
       /* UI/UX: Better Contrast for Secondary Text */
@@ -292,7 +292,8 @@
 </script>
 </head>
   <body>
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-accent-cyan focus:text-black focus:rounded-md focus:font-bold">Zum Hauptinhalt springen</a>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-3 focus:bg-accent-cyan focus:text-black focus:rounded-lg focus:font-bold focus:text-sm focus:shadow-lg focus:min-h-[48px] focus:flex focus:items-center" style="scroll-margin-top: 0">Zum Hauptinhalt springen</a>
+    <noscript><div style="background:#020617;color:#e2e8f0;text-align:center;padding:2rem;font-family:sans-serif">JavaScript wird benötigt. Bitte aktiviere JavaScript in deinem Browser.</div></noscript>
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
   </body>

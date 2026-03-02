@@ -1,5 +1,7 @@
 
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, LiveSession, LiveServerMessage, Modality } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, type LiveServerMessage, Modality } from "@google/genai";
+// LiveSession type is not exported in current SDK; define locally
+type LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
 import { Theory, TheoryDetail, Language, SatireResponse, SourceItem, GroundingChunk, MediaItem, MediaAnalysisResponse, SatireOptions, RawTheoryAnalysisJSON } from '../types';
 import { dbService } from './dbService';
 import { secureApiKeyService } from './secureApiKeyService';
@@ -392,7 +394,8 @@ export const connectLiveSession = async (
     onClose: () => void,
   language: Language,
   contextBrief?: string
-): Promise<LiveSession> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
     const ai = await getAiClient();
     
     const config = {

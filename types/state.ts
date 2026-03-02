@@ -1,5 +1,7 @@
 
-import { Message, MediaType, TheoryDetail, MediaAnalysisResponse } from './index';
+import { MediaType, TheoryDetail } from './models';
+import { MediaAnalysisResponse } from './api';
+import { Message } from './ui';
 
 // --- Settings ---
 

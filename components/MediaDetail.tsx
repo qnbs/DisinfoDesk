@@ -75,7 +75,7 @@ const useMediaDetailLogic = () => {
                 title: `${t.mediaPage.detail.archiveTag}: ${tag}`,
                 sourceType: 'INTERNAL',
             })),
-        ].filter((entry): entry is { title: string; url?: string; sourceType?: string } => Boolean(entry));
+        ].filter((entry): entry is { title: string; url?: string; sourceType: string } => Boolean(entry));
 
         downloadFactCheckReport({
             generatedAt: new Date().toISOString(),
@@ -420,7 +420,7 @@ export const MediaDetail: React.FC = () => {
                         title: `${references.t.mediaPage.detail.archiveTag}: ${tag}`,
                         sourceType: 'INTERNAL',
                     })),
-                ].filter((entry): entry is { title: string; url?: string; sourceType?: string } => Boolean(entry))}
+                ].filter((entry): entry is { title: string; url?: string; sourceType: string } => Boolean(entry))}
             />
         </PageFrame>
     </MediaDetailContext.Provider>

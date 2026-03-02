@@ -487,7 +487,7 @@ const DeepInspector: React.FC = () => {
                                 </div>
                                 {'fullDescription' in selectedRecord && (
                                     <div className="bg-slate-950/50 border border-slate-800/50 p-4 rounded-lg">
-                                        <div className="text-xs text-slate-300 leading-relaxed font-sans">{selectedRecord.fullDescription}</div>
+                                        <div className="text-xs text-slate-300 leading-relaxed font-sans">{String((selectedRecord as Record<string, unknown>).fullDescription ?? '')}</div>
                                     </div>
                                 )}
                             </div>

@@ -138,7 +138,7 @@ const NavButton: React.FC<{ item: NavItem & { path: string }, id?: string, onCli
       {({ isActive }) => (
         <>
           <div className={cn("transition-transform duration-300", isActive ? 'scale-105' : 'group-hover:scale-105')}>
-            {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
+            {React.cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { size: 20 })}
           </div>
           <div className="flex flex-col items-start text-left min-w-0 flex-1">
             <span className="text-xs font-bold font-display uppercase tracking-wide truncate w-full">
@@ -178,9 +178,9 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       try {
-      const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+      const swUrl = `${(import.meta as unknown as { env: Record<string, string> }).env.BASE_URL}sw.js`;
 
-      navigator.serviceWorker.register(swUrl, { scope: import.meta.env.BASE_URL })
+      navigator.serviceWorker.register(swUrl, { scope: (import.meta as unknown as { env: Record<string, string> }).env.BASE_URL })
             .then(registration => {
             setWbRegistration(registration);
             
@@ -346,14 +346,14 @@ export const Layout: React.FC = () => {
         <div className="flex items-center gap-1">
             <button 
                 onClick={() => dispatch(setSearchOpen(true))}
-                className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
+                className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors active:scale-95"
                 aria-label={t.layout.searchAria}
             >
                 <SearchIcon size={20} />
             </button>
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)} 
-              className="p-2 text-slate-400 hover:text-white transition-colors active:scale-95"
+              className="p-2 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors active:scale-95"
               aria-label={isSidebarOpen ? t.layout.closeMenu : t.layout.openMenu}
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
@@ -374,6 +374,8 @@ export const Layout: React.FC = () => {
       {/* Sidebar Navigation */}
       <aside 
         id="nav-sidebar"
+        role="navigation"
+        aria-label="Main navigation"
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-[280px] bg-[#020617] border-r border-slate-800 transform transition-transform duration-300 ease-out shadow-2xl md:shadow-none",
           "md:relative md:translate-x-0 md:w-64 md:z-0 flex flex-col pt-safe pb-safe",
@@ -452,7 +454,7 @@ export const Layout: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation (Glassmorphic) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-t border-white/5 pb-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-t border-white/5 pb-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" aria-label="Mobile navigation">
         <div className="flex justify-around items-center h-[60px]">
           {mobileNavItems.map((item) => (
             <NavLink
@@ -466,7 +468,7 @@ export const Layout: React.FC = () => {
               {({ isActive }) => (
                 <>
                   <div className={cn("relative transition-all", isActive ? "-translate-y-1" : "")}>
-                    {React.cloneElement(item.icon as React.ReactElement, { 
+                    {React.cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { 
                       size: 22, 
                       className: isActive ? "drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" : "" 
                     })}

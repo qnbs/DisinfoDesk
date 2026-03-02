@@ -1,19 +1,44 @@
 ```text
-░▒▓█ SYNTH-NET UPLINK :: CHANNEL 0xDD-84 █▓▒░
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  ██████╗ ██╗███████╗██╗███╗   ██╗███████╗ ██████╗ ██████╗ ███████╗██╗  ██╗  │
-│  ██╔══██╗██║██╔════╝██║████╗  ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝██║ ██╔╝  │
-│  ██║  ██║██║███████╗██║██╔██╗ ██║█████╗  ██║   ██║██║  ██║█████╗  █████╔╝   │
-│  ██║  ██║██║╚════██║██║██║╚██╗██║██╔══╝  ██║   ██║██║  ██║██╔══╝  ██╔═██╗   │
-│  ██████╔╝██║███████║██║██║ ╚████║██║     ╚██████╔╝██████╔╝███████╗██║  ██╗  │
-│  ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝  │
-└──────────────────────────────────────────────────────────────────────────────┘
-    >>> neon://truth-grid  |  D15INF0D35K  |  OFFLINE-FIRST // HASH-ROUTED <<<
-░▒▓█ SIGNAL: STABLE • MODE: TERMINAL-HACK x SYNTHWAVE • STATUS: ONLINE █▓▒░
+
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+  ░ ╔══════════════════════════════════════════════════════════════════════════════╗ ░
+  ░ ║  ░▒▓█  S Y N T H - N E T  ·  U P L I N K  v4.0  ·  C H A N N E L  0xDD  █▓▒░  ║ ░
+  ░ ╠══════════════════════════════════════════════════════════════════════════════╣ ░
+  ░ ║                                                                            ║ ░
+  ░ ║    ██████╗ ██╗███████╗██╗███╗   ██╗███████╗ ██████╗                        ║ ░
+  ░ ║    ██╔══██╗██║██╔════╝██║████╗  ██║██╔════╝██╔═══██╗                       ║ ░
+  ░ ║    ██║  ██║██║███████╗██║██╔██╗ ██║█████╗  ██║   ██║  ┌────────────────┐   ║ ░
+  ░ ║    ██║  ██║██║╚════██║██║██║╚██╗██║██╔══╝  ██║   ██║  │ MEDIA LITERACY │   ║ ░
+  ░ ║    ██████╔╝██║███████║██║██║ ╚████║██║     ╚██████╔╝  │   RESEARCH &   │   ║ ░
+  ░ ║    ╚═════╝ ╚═╝╚══════╝╚═╝╚═╝  ╚═══╝╚═╝      ╚═════╝   │ ANALYSIS  HUB  │   ║ ░
+  ░ ║              ██████╗ ███████╗███████╗██╗  ██╗           └────────────────┘   ║ ░
+  ░ ║              ██╔══██╗██╔════╝██╔════╝██║ ██╔╝                              ║ ░
+  ░ ║              ██║  ██║█████╗  ███████╗█████╔╝    ┌──┐ ┌──┐ ┌──┐ ┌──┐       ║ ░
+  ░ ║              ██║  ██║██╔══╝  ╚════██║██╔═██╗    │▓▓│ │▒▒│ │░░│ │  │       ║ ░
+  ░ ║              ██████╔╝███████╗███████║██║  ██╗   │▓▓│ │▒▒│ │░░│ │  │       ║ ░
+  ░ ║              ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝   └──┘ └──┘ └──┘ └──┘       ║ ░
+  ░ ║                                                                            ║ ░
+  ░ ║  ╔════════════════╦═════════════════╦════════════════════════════════════╗   ║ ░
+  ░ ║  ║  TRUTH-GRID    ║   D15INF0D35K   ║   OFFLINE-FIRST // HASH-ROUTED   ║   ║ ░
+  ░ ║  ╚════════════════╩═════════════════╩════════════════════════════════════╝   ║ ░
+  ░ ║  ░▒▓█ SIGNAL:STABLE · MODE:SYNTH-TERMINAL × CYBERPUNK · ONLINE █▓▒░       ║ ░
+  ░ ╚══════════════════════════════════════════════════════════════════════════════╝ ░
+  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
 ```
 
 <p align="center">
   <a href="#-english">🇬🇧 English</a> • <a href="#-deutsch">🇩🇪 Deutsch</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/qnbs/DisinfoDesk/actions/workflows/ci-cd.yml"><img src="https://github.com/qnbs/DisinfoDesk/actions/workflows/ci-cd.yml/badge.svg?branch=main" alt="CI/CD Pipeline"></a>
+  <a href="https://github.com/qnbs/DisinfoDesk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/qnbs/DisinfoDesk?color=00e5ff&style=flat-square" alt="License"></a>
+  <img src="https://img.shields.io/badge/React-19-00d8ff?style=flat-square&logo=react" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Vite-6-646cff?style=flat-square&logo=vite" alt="Vite 6">
+  <img src="https://img.shields.io/badge/PWA-Offline--Ready-ff6f00?style=flat-square&logo=pwa" alt="PWA">
+  <img src="https://img.shields.io/badge/WCAG-2.2_AA-00c853?style=flat-square" alt="WCAG 2.2 AA">
 </p>
 
 ---
@@ -50,33 +75,80 @@ Interactive, local, and offline-capable research PWA for investigating myths, co
 - [License](#license)
 
 ## Value Proposition
-- **Educational Simulation Tool:** Focus on media literacy, not activism, therapy, or counseling.
-- **Local-First by Default:** Persistence and caching are designed for local control and offline usage.
-- **Client-Side AI Integration:** Gemini features are optional and only activate with a locally stored API key.
-- **Research UX:** Hash routing, structured detail pages, search/filter flows, and narrative cross-references.
+
+| | Principle | Description |
+|---|-----------|-------------|
+| 🎓 | **Educational Simulation** | Focus on media literacy, not activism, therapy, or counseling |
+| 🔒 | **Local-First by Default** | All persistence and caching designed for local control and offline usage |
+| 🤖 | **Client-Side AI** | Gemini features are optional — only activate with a locally stored API key |
+| 🔍 | **Research UX** | Hash routing, structured detail pages, search/filter flows, narrative cross-references |
+| ♿ | **Accessible** | WCAG 2.2 AA compliant — 48×48px touch targets, focus indicators, reduced motion support |
+| 🌐 | **Bilingual** | Full EN/DE interface with runtime language switching |
 
 ## Key Capabilities
-- **Theory Archive:** Structured capture and exploration of narrative entities.
-- **Authors Library:** Profiles, influence dimensions, and linked content.
-- **Media Analysis:** Cultural/media objects with context and associations.
-- **Debunk Chat ("Dr. Veritas"):** Skeptical dialogue mode with optional context packages.
-- **Satire Generator:** Didactic contrast mode for recognizing manipulative patterns.
-- **Vault Operations:** Local data storage, import/export workflows, and PWA-capable operation.
+
+| Module | Description | Route |
+|--------|------------|-------|
+| 📚 **Theory Archive** | Structured exploration of conspiracy narratives, myths, and disinformation entities | `/#/archive` |
+| 👤 **Authors Library** | Profiles with influence dimensions, timelines, and cross-linked content | `/#/authors` |
+| 📡 **Media Analysis** | Cultural/media objects with context layers and source associations | `/#/media` |
+| 🗣️ **Debunk Chat** | *"Dr. Veritas"* — skeptical AI dialogue with optional context packages | `/#/chat` |
+| 🎭 **Satire Generator** | Didactic contrast mode for recognizing manipulative rhetorical patterns | `/#/satire` |
+| 🔐 **Vault Operations** | Local encrypted storage, import/export workflows, PWA-capable offline operation | `/#/database` |
+| 🌊 **Viral Simulation** | Narrative spread simulation with undo/redo history | `/#/simulation` |
+| 📊 **Dashboard** | Aggregated overview of all datasets and research metrics | `/#/` |
 
 ## Architecture Snapshot
-- **Frontend:** React 19 + TypeScript + Vite.
-- **State Layer:** Redux Toolkit, RTK Query, `redux-persist`, `redux-undo`.
-- **Routing:** `createHashRouter` (`/#/...`) for robust GitHub Pages compatibility.
-- **Persistence:** IndexedDB-based Vault via `services/dbService.ts` (including compression/encryption pipeline for vault data).
-- **AI Boundary:** `services/geminiService.ts` as central integration layer for Gemini calls.
-- **PWA Runtime:** Workbox-based `sw.js` with differentiated caching strategies.
+
+```mermaid
+graph LR
+    subgraph Browser
+        UI[React 19 + Router]
+        RTK[Redux Toolkit<br/>RTK Query]
+        SW[Service Worker<br/>Workbox]
+    end
+
+    subgraph Services
+        GS[geminiService]
+        DB[dbService<br/>IndexedDB Vault]
+        AK[secureApiKeyService]
+    end
+
+    subgraph External
+        GH[GitHub Pages<br/>Static Host]
+        GM[Gemini API<br/>Optional]
+    end
+
+    UI --> RTK
+    RTK --> DB
+    RTK --> GS
+    GS --> AK
+    GS --> GM
+    SW --> GH
+    UI --> SW
+```
+
+| Layer | Technology | Role |
+|-------|-----------|------|
+| **Frontend** | React 19 · TypeScript · Vite | SPA with hash routing (`/#/...`) |
+| **State** | Redux Toolkit · RTK Query · redux-persist · redux-undo | Normalized stores, API cache, undo history |
+| **Persistence** | IndexedDB Vault (`dbService.ts`) | Compression + AES-GCM encryption pipeline |
+| **AI Boundary** | `geminiService.ts` → `@google/genai` | Single integration point for all Gemini calls |
+| **PWA Runtime** | Workbox `sw.js` | CacheFirst / StaleWhileRevalidate / NetworkFirst strategies |
+| **Routing** | `createHashRouter` | GitHub Pages compatible deep links |
 
 ## Tech Stack
-- **Runtime:** React 19, React Router 6, Redux Toolkit, RTK Query.
-- **Visualization:** Recharts.
-- **AI SDK:** `@google/genai`.
-- **Build Tooling:** Vite 6, TypeScript 5.
-- **UI/Icons:** Tailwind/CSS Utility Styling + `lucide-react`.
+
+| Category | Technologies |
+|----------|-------------|
+| **Runtime** | React 19 · React Router 6 · Redux Toolkit 2 · RTK Query |
+| **Language** | TypeScript 5.8 (strict null-safe patterns) |
+| **Build** | Vite 6 · esbuild · manual chunk splitting |
+| **Visualization** | Recharts (lazy-loaded) |
+| **AI** | `@google/genai` SDK · Gemini 2.0 Flash |
+| **UI** | Tailwind CSS (CDN) · `lucide-react` icons |
+| **PWA** | Workbox 7 · IndexedDB · BroadcastChannel |
+| **Quality** | ESLint · Vitest · Lighthouse CI · CodeQL |
 
 ## Security & Privacy Model
 
@@ -224,11 +296,11 @@ The `lighthouserc.json` defines performance budgets:
 
 ## UI/UX Audit Results
 
-### Accessibility (WCAG 2.1 AA)
+### Accessibility (WCAG 2.2 AA)
 
 | Criterion | Status | Implementation |
 |-----------|--------|----------------|
-| **Touch Targets** | ✅ | Minimum 44×44px for all interactive elements via `min-w-[44px] min-h-[44px]` |
+| **Touch Targets** | ✅ | Minimum 48×48px for all interactive elements via `min-w-[48px] min-h-[48px]` |
 | **Color Contrast** | ✅ | Text-Muted uses `slate-400` (4.6:1 ratio) instead of `slate-500` (3.5:1) |
 | **Focus Indicators** | ✅ | `focus-visible` ring with 2px offset, cyan/purple accent |
 | **Skip Navigation** | ✅ | Skip-to-main-content link for keyboard users |
@@ -239,9 +311,9 @@ The `lighthouserc.json` defines performance budgets:
 
 | Component | Improvement |
 |-----------|-------------|
-| **Button** | `min-h-[44px]` instead of fixed `h-8`/`h-10` |
-| **Close Buttons** | 44×44px touch area with `touch-action-manipulation` |
-| **View Toggles** | Icon buttons with 44×44px touch area |
+| **Button** | `min-h-[48px]` instead of fixed `h-8`/`h-10` |
+| **Close Buttons** | 48×48px touch area with `touch-action-manipulation` |
+| **View Toggles** | Icon buttons with 48×48px touch area |
 | **Search Clear** | 36×36px touch area with aria-label |
 
 ### Loading States
@@ -265,7 +337,7 @@ The `lighthouserc.json` defines performance budgets:
 ### CSS Utilities Added
 
 ```css
-.touch-target-min { min-width: 44px; min-height: 44px; }
+.touch-target-min { min-width: 48px; min-height: 48px; }
 .text-muted { color: rgb(148 163 184); }        /* 4.6:1 contrast */
 .text-muted-strong { color: rgb(203 213 225); } /* 8.9:1 contrast */
 .shimmer-loading { /* animated gradient overlay */ }
@@ -302,16 +374,31 @@ The `lighthouserc.json` defines performance budgets:
 - Always independently verify sources and claims.
 
 ## Contributing
-Contributions welcome – preferably in small, traceable PRs:
-- **Docs-first:** Update README/guides with behavioral changes.
-- **Security-first:** No secrets, no build-key injection.
-- **Offline-first:** Don't regress PWA and subpath compatibility.
-- **State Consistency:** Maintain Redux normalization and persistence patterns.
+Contributions welcome — preferably in small, traceable PRs.
 
-## Roadmap (Brief)
-- Expand Author/Media database and cross-references.
-- Additional didactic learning paths and fact-check exports.
-- Further UX improvements for research workflows.
+### Principles
+| Principle | Guideline |
+|-----------|-----------|
+| 📝 **Docs-first** | Update README and copilot-instructions with behavioral changes |
+| 🔒 **Security-first** | No secrets, no build-time key injection, runtime-only API keys |
+| 📴 **Offline-first** | Never regress PWA, subpath, or hash-routing compatibility |
+| 🧱 **State consistency** | Maintain Redux normalization, entity adapters, and persistence patterns |
+| ♿ **Accessible** | All interactive elements ≥48×48px, focus-visible, reduced-motion aware |
+
+### Quality Gates
+```bash
+npm run lint          # ESLint — must pass with 0 errors
+npm run typecheck     # TypeScript — must pass with 0 errors
+npm run test:ci       # Vitest — all tests must pass
+npm run build         # Vite — production build must succeed
+```
+
+## Roadmap
+- [ ] Expand Author/Media database and cross-references
+- [ ] Additional didactic learning paths and fact-check exports
+- [ ] Enhanced research workflow UX
+- [ ] Full `strict: true` TypeScript migration
+- [ ] E2E testing with Playwright
 
 ## License
 MIT – see [LICENSE](LICENSE).
@@ -350,33 +437,80 @@ Interaktive, lokale und offlinefähige Research-PWA für die Untersuchung von My
 - [Lizenz](#lizenz)
 
 ## Wertversprechen
-- **Pädagogisches Simulationswerkzeug:** Fokus auf Medienkompetenz, nicht auf Aktivismus, Therapie oder Beratung.
-- **Local-First als Standard:** Persistenz und Caching sind auf lokale Kontrolle und Offline-Nutzung ausgelegt.
-- **Client-seitige KI-Integration:** Gemini-Funktionen sind optional und werden erst mit lokal hinterlegtem API-Key aktiv.
-- **Research UX:** Hash-Routing, strukturierte Detailseiten, Such-/Filterflows und narrative Cross-Referenzen.
+
+| | Prinzip | Beschreibung |
+|---|---------|-------------|
+| 🎓 | **Pädagogische Simulation** | Fokus auf Medienkompetenz, nicht Aktivismus, Therapie oder Beratung |
+| 🔒 | **Local-First als Standard** | Persistenz und Caching für lokale Kontrolle und Offline-Nutzung |
+| 🤖 | **Client-seitige KI** | Gemini-Funktionen optional — erst mit lokal hinterlegtem API-Key aktiv |
+| 🔍 | **Research UX** | Hash-Routing, strukturierte Detailseiten, Such-/Filterflows, Cross-Referenzen |
+| ♿ | **Barrierefrei** | WCAG 2.2 AA konform — 48×48px Touch-Targets, Fokusindikatoren, Reduced-Motion |
+| 🌐 | **Zweisprachig** | Vollständige EN/DE-Oberfläche mit Laufzeit-Sprachwechsel |
 
 ## Kernfunktionen
-- **Theorien-Archiv:** Strukturierte Erfassung und Exploration narrativer Entitäten.
-- **Autoren-Bibliothek:** Profile, Einflussdimensionen und verknüpfte Inhalte.
-- **Medienanalyse:** Kultur-/Medienobjekte mit Kontext und Zuordnungen.
-- **Debunk Chat („Dr. Veritas"):** Skeptischer Dialogmodus mit optionalem Kontextpaket.
-- **Satire Generator:** Didaktischer Kontrastmodus zur Erkennung manipulativer Muster.
-- **Vault-Operationen:** Lokale Datenhaltung, Import/Export-Workflows und PWA-fähiger Betrieb.
+
+| Modul | Beschreibung | Route |
+|-------|-------------|-------|
+| 📚 **Theorien-Archiv** | Strukturierte Exploration von Verschwörungsnarrativen, Mythen und Desinformation | `/#/archive` |
+| 👤 **Autoren-Bibliothek** | Profile mit Einflussdimensionen, Timelines und Cross-Links | `/#/authors` |
+| 📡 **Medienanalyse** | Kultur-/Medienobjekte mit Kontextebenen und Quellenzuordnungen | `/#/media` |
+| 🗣️ **Debunk Chat** | *„Dr. Veritas"* — skeptischer KI-Dialog mit optionalem Kontextpaket | `/#/chat` |
+| 🎭 **Satire Generator** | Didaktischer Kontrastmodus zur Erkennung manipulativer Rhetorik | `/#/satire` |
+| 🔐 **Vault-Operationen** | Lokale verschlüsselte Speicherung, Import/Export, PWA-fähiger Offline-Betrieb | `/#/database` |
+| 🌊 **Viralsimulation** | Narrative-Verbreitungs-Simulation mit Undo/Redo-Verlauf | `/#/simulation` |
+| 📊 **Dashboard** | Aggregierte Übersicht aller Datensätze und Recherche-Metriken | `/#/` |
 
 ## Architekturübersicht
-- **Frontend:** React 19 + TypeScript + Vite.
-- **State Layer:** Redux Toolkit, RTK Query, `redux-persist`, `redux-undo`.
-- **Routing:** `createHashRouter` (`/#/...`) für robuste GitHub-Pages-Kompatibilität.
-- **Persistenz:** IndexedDB-basierter Vault über `services/dbService.ts` (inkl. Compression/Encryption-Pipeline für Vault-Daten).
-- **KI-Grenze:** `services/geminiService.ts` als zentrale Integrationsschicht für Gemini-Aufrufe.
-- **PWA Runtime:** Workbox-basiertes `sw.js` mit differenzierten Caching-Strategien.
+
+```mermaid
+graph LR
+    subgraph Browser
+        UI[React 19 + Router]
+        RTK[Redux Toolkit<br/>RTK Query]
+        SW[Service Worker<br/>Workbox]
+    end
+
+    subgraph Dienste
+        GS[geminiService]
+        DB[dbService<br/>IndexedDB Vault]
+        AK[secureApiKeyService]
+    end
+
+    subgraph Extern
+        GH[GitHub Pages<br/>Statisches Hosting]
+        GM[Gemini API<br/>Optional]
+    end
+
+    UI --> RTK
+    RTK --> DB
+    RTK --> GS
+    GS --> AK
+    GS --> GM
+    SW --> GH
+    UI --> SW
+```
+
+| Schicht | Technologie | Aufgabe |
+|---------|------------|---------|
+| **Frontend** | React 19 · TypeScript · Vite | SPA mit Hash-Routing (`/#/...`) |
+| **State** | Redux Toolkit · RTK Query · redux-persist · redux-undo | Normalisierte Stores, API-Cache, Undo-Verlauf |
+| **Persistenz** | IndexedDB Vault (`dbService.ts`) | Kompression + AES-GCM-Verschlüsselung |
+| **KI-Grenze** | `geminiService.ts` → `@google/genai` | Einziger Integrationspunkt für alle Gemini-Aufrufe |
+| **PWA Runtime** | Workbox `sw.js` | CacheFirst / StaleWhileRevalidate / NetworkFirst Strategien |
+| **Routing** | `createHashRouter` | GitHub-Pages-kompatible Deep Links |
 
 ## Tech Stack
-- **Laufzeit:** React 19, React Router 6, Redux Toolkit, RTK Query.
-- **Visualisierung:** Recharts.
-- **KI SDK:** `@google/genai`.
-- **Build-Tooling:** Vite 6, TypeScript 5.
-- **UI/Icons:** Tailwind/CSS Utility Styling + `lucide-react`.
+
+| Kategorie | Technologien |
+|-----------|-------------|
+| **Laufzeit** | React 19 · React Router 6 · Redux Toolkit 2 · RTK Query |
+| **Sprache** | TypeScript 5.8 (strikte Null-Safety-Patterns) |
+| **Build** | Vite 6 · esbuild · Manuelles Chunk-Splitting |
+| **Visualisierung** | Recharts (lazy-loaded) |
+| **KI** | `@google/genai` SDK · Gemini 2.0 Flash |
+| **UI** | Tailwind CSS (CDN) · `lucide-react` Icons |
+| **PWA** | Workbox 7 · IndexedDB · BroadcastChannel |
+| **Qualität** | ESLint · Vitest · Lighthouse CI · CodeQL |
 
 ## Sicherheits- & Datenschutzmodell
 
@@ -524,11 +658,11 @@ Die `lighthouserc.json` definiert Performance-Budgets:
 
 ## UI/UX Audit Ergebnisse
 
-### Barrierefreiheit (WCAG 2.1 AA)
+### Barrierefreiheit (WCAG 2.2 AA)
 
 | Kriterium | Status | Implementierung |
 |-----------|--------|-----------------|
-| **Touch Targets** | ✅ | Minimum 44×44px für alle interaktiven Elemente via `min-w-[44px] min-h-[44px]` |
+| **Touch Targets** | ✅ | Minimum 48×48px für alle interaktiven Elemente via `min-w-[48px] min-h-[48px]` |
 | **Farbkontrast** | ✅ | Text-Muted nutzt `slate-400` (4.6:1 Ratio) statt `slate-500` (3.5:1) |
 | **Fokus-Indikatoren** | ✅ | `focus-visible` Ring mit 2px Offset, cyan/purple accent |
 | **Sprungnavigation** | ✅ | Skip-to-main-content Link für Tastaturnutzer |
@@ -539,9 +673,9 @@ Die `lighthouserc.json` definiert Performance-Budgets:
 
 | Komponente | Verbesserung |
 |------------|-------------|
-| **Button** | `min-h-[44px]` statt fixed `h-8`/`h-10` |
-| **Close Buttons** | 44×44px Touch-Area mit `touch-action-manipulation` |
-| **View Toggles** | Icon-Buttons mit 44×44px Touch-Area |
+| **Button** | `min-h-[48px]` statt fixed `h-8`/`h-10` |
+| **Close Buttons** | 48×48px Touch-Area mit `touch-action-manipulation` |
+| **View Toggles** | Icon-Buttons mit 48×48px Touch-Area |
 | **Search Clear** | 36×36px Touch-Area mit aria-label |
 
 ### Ladezustände
@@ -565,7 +699,7 @@ Die `lighthouserc.json` definiert Performance-Budgets:
 ### Hinzugefügte CSS-Utilities
 
 ```css
-.touch-target-min { min-width: 44px; min-height: 44px; }
+.touch-target-min { min-width: 48px; min-height: 48px; }
 .text-muted { color: rgb(148 163 184); }        /* 4.6:1 Kontrast */
 .text-muted-strong { color: rgb(203 213 225); } /* 8.9:1 Kontrast */
 .shimmer-loading { /* animiertes Gradient-Overlay */ }
@@ -602,16 +736,31 @@ Die `lighthouserc.json` definiert Performance-Budgets:
 - Quellen und Behauptungen stets unabhängig verifizieren.
 
 ## Mitwirken
-Beiträge sind willkommen – bevorzugt in kleinen, nachvollziehbaren PRs:
-- **Docs-first:** bei Verhaltensänderungen auch README/Guides aktualisieren.
-- **Security-first:** keine Secrets, keine Build-Key-Injektion.
-- **Offline-first:** PWA- und Subpath-Kompatibilität nicht regressieren.
-- **State Consistency:** Redux-Normalisierung und Persistenz-Patterns beibehalten.
+Beiträge willkommen — bevorzugt in kleinen, nachvollziehbaren PRs.
 
-## Roadmap (kurz)
-- Ausbau Author/Media-Datenbasis und Cross-Referenzen.
-- Weitere didaktische Lernpfade und Fact-Check-Exports.
-- Zusätzliche UX-Verbesserungen für Recherche-Workflows.
+### Prinzipien
+| Prinzip | Leitlinie |
+|---------|-----------|
+| 📝 **Docs-first** | README und Copilot-Instructions bei Verhaltensänderungen aktualisieren |
+| 🔒 **Security-first** | Keine Secrets, keine Build-Key-Injektion, nur Laufzeit-API-Keys |
+| 📴 **Offline-first** | PWA-, Subpath- und Hash-Routing-Kompatibilität nie regressieren |
+| 🧱 **State Consistency** | Redux-Normalisierung, Entity-Adapter und Persistenz-Patterns beibehalten |
+| ♿ **Barrierefrei** | Alle interaktiven Elemente ≥48×48px, Focus-Visible, Reduced-Motion |
+
+### Qualitäts-Gates
+```bash
+npm run lint          # ESLint — muss mit 0 Fehlern bestehen
+npm run typecheck     # TypeScript — muss mit 0 Fehlern bestehen
+npm run test:ci       # Vitest — alle Tests müssen bestehen
+npm run build         # Vite — Production Build muss erfolgreich sein
+```
+
+## Roadmap
+- [ ] Ausbau Author/Media-Datenbasis und Cross-Referenzen
+- [ ] Weitere didaktische Lernpfade und Fact-Check-Exports
+- [ ] Erweiterte Recherche-Workflow-UX
+- [ ] Vollständige `strict: true` TypeScript-Migration
+- [ ] E2E-Tests mit Playwright
 
 ## Lizenz
 MIT – siehe [LICENSE](LICENSE).

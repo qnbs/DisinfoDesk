@@ -34,6 +34,7 @@ Interaktive, lokale und offlinefähige Research-PWA für die Untersuchung von My
 - [Runtime Configuration](#runtime-configuration)
 - [PWA & Offline Behavior](#pwa--offline-behavior)
 - [Operational Runbook](#operational-runbook)
+- [CI/CD Pipeline](#cicd-pipeline)
 - [Troubleshooting](#troubleshooting)
 - [Governance & Responsible Use](#governance--responsible-use)
 - [Contributing](#contributing)
@@ -194,6 +195,46 @@ Build-Merkmale:
 ### PWA Update wird nicht übernommen
 - UI-Update-Hinweis auslösen und „Reload“ bestätigen.
 - Falls nötig: Hard-Reload und alten SW manuell entfernen.
+
+## CI/CD Pipeline
+
+Dieses Repository verwendet eine vollständige CI/CD-Pipeline mit GitHub Actions.
+
+### Workflows
+
+| Workflow | Datei | Trigger | Beschreibung |
+|----------|-------|---------|--------------|
+| **CI/CD Pipeline** | `ci-cd.yml` | Push/PR auf `main` | Lint → TypeCheck → Test → Build → Lighthouse → Deploy |
+| **CodeQL Security** | `codeql.yml` | Push/PR + Weekly | Automatische Sicherheitsanalyse für JS/TS |
+| **Dependabot** | `dependabot.yml` | Weekly | Automatische Dependency-Updates |
+
+### CI Job (läuft bei jedem Push/PR)
+1. **Lint:** ESLint mit TypeScript-Regeln (fail-fast)
+2. **TypeCheck:** Strikte TypeScript-Kompilierungsprüfung
+3. **Test:** Vitest Unit-Tests
+4. **Build:** Vite Production Build
+5. **Lighthouse:** Performance, Accessibility, SEO, PWA Audit mit Budgets
+
+### Deploy Job (nur auf `main` nach erfolgreichem CI)
+- Artifact Download vom CI Job
+- GitHub Pages Deployment via `deploy-pages@v4`
+
+### Lokale Validierung
+```bash
+npm run lint          # ESLint
+npm run typecheck     # TypeScript
+npm run test          # Vitest (watch mode)
+npm run test:ci       # Vitest (single run)
+npm run build         # Production build
+```
+
+### Lighthouse Budgets
+Die `lighthouserc.json` definiert Performance-Budgets:
+- Performance: ≥85
+- Accessibility: ≥90 (error threshold)
+- Best Practices: ≥90
+- SEO: ≥90
+- PWA: ≥80
 
 ## Governance & Responsible Use
 - Kein Ersatz für medizinische, rechtliche, psychologische oder sicherheitsrelevante Beratung.

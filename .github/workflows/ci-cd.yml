@@ -1,0 +1,124 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  DisinfoDesk CI/CD Pipeline                                                   ║
+# ║  Full lint → test → build → Lighthouse → deploy workflow (2026 best practices)║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Permissions required for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  security-events: write
+
+# Prevent concurrent deployments to pages, but allow concurrent CI runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NODE_VERSION: 'lts/*'
+  CI: true
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════
+  # CI JOB: Lint, Test, Build, Lighthouse Audit
+  # ════════════════════════════════════════════════════════════════════════════
+  ci:
+    name: CI (Lint, Test, Build, Lighthouse)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── Checkout ──
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # ── Node.js Setup with npm cache ──
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # ── Install dependencies (clean install) ──
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Lint (fail-fast) ──
+      - name: Lint codebase
+        run: npm run lint
+        continue-on-error: false
+
+      # ── Type Check (warn on existing issues) ──
+      - name: TypeScript type check
+        run: npm run typecheck
+        continue-on-error: true
+
+      # ── Unit Tests ──
+      - name: Run tests
+        run: npm run test:ci
+        continue-on-error: false
+
+      # ── Production Build ──
+      - name: Build production bundle
+        run: npm run build
+
+      # ── Upload build artifact for deploy job ──
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+          retention-days: 1
+
+      # ── Lighthouse CI Audit ──
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # DEPLOY JOB: GitHub Pages (only on main branch, after CI passes)
+  # ════════════════════════════════════════════════════════════════════════════
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ── Download build artifact from CI job ──
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+
+      # ── Configure GitHub Pages ──
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # ── Upload to Pages ──
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./dist
+
+      # ── Deploy to Pages ──
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

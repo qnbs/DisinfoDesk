@@ -241,7 +241,7 @@ const DataBankSelector: React.FC = () => {
 
     return (
         <div className="flex md:flex-col gap-2 p-2 md:p-4 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl w-full md:w-64 shrink-0 overflow-x-auto md:overflow-visible">
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2 hidden md:flex">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2 hidden md:flex">
                 <Server size={12} /> Data Banks
             </div>
             {banks.map(bank => {
@@ -267,12 +267,12 @@ const DataBankSelector: React.FC = () => {
                         />
                         
                         <div className="flex flex-col md:flex-row items-center md:justify-between mb-1 md:mb-2 relative z-10 gap-1">
-                            <div className={`p-1.5 md:p-2 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-900 text-slate-500'}`}>
+                            <div className={`p-1.5 md:p-2 rounded-lg ${isActive ? 'bg-white/10 text-white' : 'bg-slate-900 text-slate-400'}`}>
                                 <bank.icon size={16} />
                             </div>
                             <span className="font-mono text-[10px] md:text-xs font-bold text-slate-400">{count}</span>
                         </div>
-                        <div className={`text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 text-center md:text-left ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                        <div className={`text-[10px] md:text-xs font-bold uppercase tracking-wider relative z-10 text-center md:text-left ${isActive ? 'text-white' : 'text-slate-400'}`}>
                             {bank.label}
                         </div>
                         {isActive && <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none" />}
@@ -284,7 +284,7 @@ const DataBankSelector: React.FC = () => {
                 <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800 flex items-center gap-3">
                     <ShieldCheck size={16} className="text-green-500" />
                     <div>
-                        <div className="text-[9px] text-slate-500 uppercase font-bold">Vault Integrity</div>
+                        <div className="text-[9px] text-slate-400 uppercase font-bold">Vault Integrity</div>
                         <div className="text-xs text-green-400 font-mono">100% SECURE</div>
                     </div>
                 </div>

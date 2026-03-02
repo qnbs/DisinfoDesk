@@ -341,10 +341,10 @@ const SearchHeader: React.FC = () => {
                         <span>for commands</span>
                     </div>
                 )}
-                <button onClick={onClose} className="p-1 text-slate-500 hover:text-white rounded hover:bg-slate-800 transition-colors">
-                    <span className="sr-only">Close</span>
+                <button onClick={onClose} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors touch-action-manipulation">
+                    <span className="sr-only">Close search</span>
                     <kbd className="hidden md:inline font-mono text-[10px] border border-slate-700 rounded px-1.5 py-0.5">ESC</kbd>
-                    <span className="md:hidden"><Command size={16}/></span>
+                    <span className="md:hidden"><Command size={18}/></span>
                 </button>
             </div>
         </div>
@@ -359,7 +359,7 @@ const SearchResults: React.FC = () => {
     return (
         <div className="flex-1 overflow-y-auto bg-[#050b14] scrollbar-thin scrollbar-thumb-slate-800 relative">
           {flatResults.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-500 opacity-50">
+            <div className="flex flex-col items-center justify-center h-48 text-slate-400 opacity-70">
               <Search size={32} className="mb-2" />
               <div className="font-mono text-xs uppercase tracking-widest">{t.search.noResults}</div>
             </div>
@@ -367,7 +367,7 @@ const SearchResults: React.FC = () => {
             <div className="p-2 space-y-4">
                 {Object.entries(groupedResults).map(([group, items]) => (
                     <div key={group}>
-                        <div className="px-2 mb-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest font-mono flex items-center gap-2">
+                        <div className="px-2 mb-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono flex items-center gap-2">
                             {group === 'SYSTEM' && <Terminal size={10} />}
                             {group === 'DATABASE' && <Database size={10} />}
                             {group}
@@ -449,7 +449,7 @@ const OmniSearchLayout: React.FC = () => {
             onClick={onClose}
             role="dialog"
             aria-modal="true"
-            aria-label={t.search.title || "Search"}
+            aria-label="OmniSearch"
         >
             <div 
                 className="w-full max-w-2xl bg-[#0B0F19] border border-slate-700 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[70vh] ring-1 ring-white/10"

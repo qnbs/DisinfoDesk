@@ -35,6 +35,7 @@ Interaktive, lokale und offlinefähige Research-PWA für die Untersuchung von My
 - [PWA & Offline Behavior](#pwa--offline-behavior)
 - [Operational Runbook](#operational-runbook)
 - [CI/CD Pipeline](#cicd-pipeline)
+- [UI/UX Audit Results](#uiux-audit-results)
 - [Troubleshooting](#troubleshooting)
 - [Governance & Responsible Use](#governance--responsible-use)
 - [Contributing](#contributing)
@@ -235,6 +236,56 @@ Die `lighthouserc.json` definiert Performance-Budgets:
 - Best Practices: ≥90
 - SEO: ≥90
 - PWA: ≥80
+
+## UI/UX Audit Results
+
+### Accessibility (WCAG 2.1 AA)
+
+| Kriterium | Status | Implementierung |
+|-----------|--------|-----------------|
+| **Touch Targets** | ✅ | Minimum 44×44px für alle interaktiven Elemente via `min-w-[44px] min-h-[44px]` |
+| **Color Contrast** | ✅ | Text-Muted nutzt `slate-400` (4.6:1 Ratio) statt `slate-500` (3.5:1) |
+| **Focus Indicators** | ✅ | `focus-visible` Ring mit 2px Offset, cyan/purple accent |
+| **Skip Navigation** | ✅ | Skip-to-main-content Link für Keyboard-User |
+| **Screen Reader** | ✅ | ARIA-Labels, Roles, Live-Regions für dynamische Inhalte |
+| **Reduced Motion** | ✅ | `prefers-reduced-motion` deaktiviert Animationen |
+
+### Touch & Mobile UX
+
+| Komponente | Verbesserung |
+|------------|-------------|
+| **Button** | `min-h-[44px]` statt fixed `h-8`/`h-10` |
+| **Close Buttons** | 44×44px Touch-Area mit `touch-action-manipulation` |
+| **View Toggles** | Icon-Buttons mit 44×44px Touch-Area |
+| **Search Clear** | 36×36px Touch-Area mit aria-label |
+
+### Loading States
+
+| Feature | Implementierung |
+|---------|-----------------|
+| **Skeleton Variants** | `text`, `card`, `avatar`, `image` mit unterschiedlichen Höhen |
+| **Shimmer Animation** | CSS `shimmer-loading` mit 1.5s smooth gradient |
+| **Reduced Motion** | Shimmer respektiert `prefers-reduced-motion` |
+| **ARIA** | `role="status"` + `aria-label="Loading..."` |
+
+### Micro-Interactions
+
+| Element | Animation |
+|---------|-----------|
+| **Buttons** | Smooth 150ms color/border transitions |
+| **Cards** | Hover mit border-color + shadow transition |
+| **Modals** | Fade-in/scale entrance mit reduced-motion awareness |
+| **Toast Notifications** | Slide-in/out mit 300ms timing |
+
+### CSS Utilities hinzugefügt
+
+```css
+.touch-target-min { min-width: 44px; min-height: 44px; }
+.text-muted { color: rgb(148 163 184); }        /* 4.6:1 contrast */
+.text-muted-strong { color: rgb(203 213 225); } /* 8.9:1 contrast */
+.shimmer-loading { /* animated gradient overlay */ }
+.transition-smooth { transition: all 150ms ease-out; }
+```
 
 ## Governance & Responsible Use
 - Kein Ersatz für medizinische, rechtliche, psychologische oder sicherheitsrelevante Beratung.

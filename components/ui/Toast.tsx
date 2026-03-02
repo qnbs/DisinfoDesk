@@ -65,9 +65,10 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onClose }) => {
       </div>
       <button 
         onClick={handleClose}
-        className="p-1 rounded hover:bg-white/10 text-slate-500 hover:text-white transition-colors"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors touch-action-manipulation"
+        aria-label="Close notification"
       >
-        <X size={14} />
+        <X size={16} />
       </button>
     </div>
   );

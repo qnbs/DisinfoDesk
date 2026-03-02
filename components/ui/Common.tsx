@@ -260,9 +260,9 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
   };
   
   const sizes = { 
-      sm: "px-3 py-1.5 text-[10px] h-8 gap-1.5", 
-      md: "px-4 py-2 text-xs h-10 gap-2", 
-      lg: "px-6 py-3 text-sm h-12 gap-2.5" 
+      sm: "px-3 py-2 text-[10px] min-h-[36px] gap-1.5", 
+      md: "px-4 py-2.5 text-xs min-h-[44px] gap-2", 
+      lg: "px-6 py-3 text-sm min-h-[48px] gap-2.5" 
   };
   
   return (
@@ -304,7 +304,22 @@ export const EmptyState: React.FC<{ icon?: React.ElementType; title: string; des
     </div>
 ));
 
-export const Skeleton: React.FC<{ className?: string }> = React.memo(({ className = '' }) => <div className={cn("bg-slate-800/50 animate-pulse rounded", className)} />);
+export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' | 'avatar' | 'image' }> = React.memo(({ className = '', variant = 'text' }) => {
+  const variants = {
+    text: 'h-4 rounded',
+    card: 'h-32 rounded-xl',
+    avatar: 'w-12 h-12 rounded-full',
+    image: 'aspect-video rounded-lg',
+  };
+  
+  return (
+    <div 
+      className={cn("shimmer-loading", variants[variant], className)} 
+      role="status"
+      aria-label="Loading..."
+    />
+  );
+});
 
 export const ErrorFallback: React.FC<{ error: Error, resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center" role="alert">

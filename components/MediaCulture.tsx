@@ -447,16 +447,18 @@ const MediaHeader: React.FC = () => {
                     <button 
                         onClick={() => setViewMode('GRID')}
                         aria-pressed={viewMode === 'GRID'}
-                        className={`p-2 rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                        aria-label="Grid view"
+                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded transition-colors ${viewMode === 'GRID' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                     >
-                        <LayoutGrid size={16} />
+                        <LayoutGrid size={18} />
                     </button>
                     <button 
                         onClick={() => setViewMode('ANALYTICS')}
                         aria-pressed={viewMode === 'ANALYTICS'}
-                        className={`p-2 rounded transition-colors ${viewMode === 'ANALYTICS' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+                        aria-label="Analytics view"
+                        className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded transition-colors ${viewMode === 'ANALYTICS' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                     >
-                        <BarChart2 size={16} />
+                        <BarChart2 size={18} />
                     </button>
                 </div>
             }
@@ -475,16 +477,17 @@ const MediaHeader: React.FC = () => {
                     {searchTerm && (
                         <button 
                             onClick={() => setSearchTerm('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white min-w-[36px] min-h-[36px] flex items-center justify-center"
+                            aria-label="Clear search"
                         >
-                            <X size={14} />
+                            <X size={16} />
                         </button>
                     )}
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="mr-2 text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <div className="mr-2 text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                         <Sliders size={12} /> {t.common.filter}:
                     </div>
                     {filters.map(f => (

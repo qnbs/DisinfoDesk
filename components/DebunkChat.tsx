@@ -465,7 +465,7 @@ const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | n
         actions={
             <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={handleSaveSession} icon={<Save size={16}/>} className="border-slate-700 hover:border-accent-cyan">{t.chat.save}</Button>
-                <button onClick={handleReset} className="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-slate-900 rounded-lg"><Trash2 size={18} /></button>
+                <button onClick={handleReset} className="text-slate-400 hover:text-red-400 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-900 rounded-lg" aria-label="Reset chat"><Trash2 size={18} /></button>
             </div>
         } 
     />
@@ -479,10 +479,10 @@ const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
     return (
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in-up`}>
             <div className="flex items-center gap-2 mb-1 opacity-70">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
                     {isUser ? 'AGENT_01' : 'DR_VERITAS_AI'}
                 </span>
-                <span className="text-[9px] text-slate-600 font-mono">
+                <span className="text-[9px] text-slate-400 font-mono">
                     {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
                 </span>
             </div>

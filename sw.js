@@ -1,9 +1,6 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
 if (workbox) {
-    // Only log in development
-    // console.log(`[DisinfoDesk] Workbox Core loaded.`);
-
     // --- CONFIGURATION ---
     workbox.setConfig({ debug: false });
     
@@ -13,32 +10,48 @@ if (workbox) {
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v6'; // Increment this to force cache purge on update
+    const CACHE_SUFFIX = 'v7'; // Increment this to force cache purge on update
 
-        workbox.precaching.precacheAndRoute([
-            { url: 'index.html', revision: CACHE_SUFFIX },
-            { url: 'manifest.json', revision: CACHE_SUFFIX },
-        ]);
+    // --- 0. PRECACHE (App Shell) ---
+    workbox.precaching.precacheAndRoute([
+        { url: 'index.html', revision: CACHE_SUFFIX },
+        { url: 'manifest.json', revision: CACHE_SUFFIX },
+    ]);
 
-    // --- 1. STRATEGIES ---
+    // --- 1. CACHE CLEANUP: Remove stale caches on activation ---
+    self.addEventListener('activate', (event) => {
+        event.waitUntil(
+            caches.keys().then(keys =>
+                Promise.all(
+                    keys
+                        .filter(key => key.startsWith(CACHE_PREFIX) && !key.endsWith(CACHE_SUFFIX))
+                        .map(key => caches.delete(key))
+                )
+            )
+        );
+    });
 
-    // IMAGES: Cache First (Serve from cache, update only if missing/expired)
-    // Keep up to 60 images for 30 days.
+    // --- 2. STRATEGIES ---
+
+    // IMAGES: Cache First — aggressive caching with WebP/AVIF awareness
     workbox.routing.registerRoute(
         ({request}) => request.destination === 'image',
         new workbox.strategies.CacheFirst({
             cacheName: `${CACHE_PREFIX}-images-${CACHE_SUFFIX}`,
             plugins: [
                 new workbox.expiration.ExpirationPlugin({
-                    maxEntries: 60,
-                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                    maxEntries: 120,
+                    maxAgeSeconds: 60 * 24 * 60 * 60, // 60 Days
                     purgeOnQuotaError: true,
+                }),
+                new workbox.cacheableResponse.CacheableResponsePlugin({
+                    statuses: [0, 200],
                 }),
             ],
         })
     );
 
-    // FONTS: Cache First (Google Fonts & Static)
+    // FONTS: Cache First (Google Fonts & Static) — immutable, long-lived
     workbox.routing.registerRoute(
         ({url}) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
         new workbox.strategies.CacheFirst({
@@ -54,8 +67,7 @@ if (workbox) {
         })
     );
 
-    // JS/CSS/CDN LIBS: Stale While Revalidate
-    // Serve fast from cache, then check network for updates in background.
+    // JS/CSS/CDN LIBS: Stale While Revalidate — fast first paint, background refresh
     workbox.routing.registerRoute(
         ({request, url}) => 
             request.destination === 'script' || 
@@ -68,32 +80,27 @@ if (workbox) {
                 new workbox.cacheableResponse.CacheableResponsePlugin({
                     statuses: [0, 200],
                 }),
+                new workbox.expiration.ExpirationPlugin({
+                    maxEntries: 100,
+                    maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                    purgeOnQuotaError: true,
+                }),
             ]
         })
     );
 
-    // API REQUESTS: Network First (Fresh data preferred), fallback to cache
-    // This allows cached API responses if offline
+    // API REQUESTS: Network Only — do NOT cache AI responses (security)
     workbox.routing.registerRoute(
         ({url}) => url.href.includes('generativelanguage.googleapis.com'),
-        new workbox.strategies.NetworkFirst({
-            cacheName: `${CACHE_PREFIX}-api-${CACHE_SUFFIX}`,
-            networkTimeoutSeconds: 3,
-            plugins: [
-                new workbox.expiration.ExpirationPlugin({
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60, // 1 Hour cache for API
-                }),
-            ],
+        new workbox.strategies.NetworkOnly({
+            networkTimeoutSeconds: 30,
         })
     );
 
-    // --- 2. OFFLINE FALLBACK (SPA NAVIGATION) ---
-    
-    // For Single Page Apps: Return index.html for navigation requests.
-    // Uses standard Workbox NetworkFirst strategy with offline fallback.
+    // --- 3. OFFLINE FALLBACK (SPA NAVIGATION) ---
     const navigationStrategy = new workbox.strategies.NetworkFirst({
         cacheName: `${CACHE_PREFIX}-html-${CACHE_SUFFIX}`,
+        networkTimeoutSeconds: 5,
         plugins: [
             new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         ],
@@ -109,20 +116,40 @@ if (workbox) {
                 const fallbackUrl = new URL('index.html', self.registration.scope).toString();
                 const cached = await caches.match(fallbackUrl) || await caches.match('index.html');
                 return cached || new Response(
-                    '<html><body style="background:#020617;color:#e2e8f0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h1>Offline</h1><p>Please reload when connected. / Bitte bei Verbindung neu laden.</p></div></body></html>',
+                    `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#020617"><title>DisinfoDesk — Offline</title><style>*{margin:0;box-sizing:border-box}body{background:#020617;color:#e2e8f0;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}.card{text-align:center;max-width:400px;padding:3rem 2rem;border:1px solid #1e293b;border-radius:1rem;background:#0f172a}.icon{font-size:3rem;margin-bottom:1.5rem;opacity:.6}h1{font-size:1.5rem;font-weight:700;margin-bottom:.75rem;letter-spacing:.05em}p{color:#94a3b8;font-size:.875rem;line-height:1.6;margin-bottom:1.5rem}button{background:#06b6d4;color:#020617;border:none;padding:.75rem 1.5rem;border-radius:.5rem;font-weight:700;font-size:.875rem;cursor:pointer;text-transform:uppercase;letter-spacing:.1em;transition:all .2s}button:hover{background:#22d3ee;box-shadow:0 0 20px rgba(6,182,212,.3)}@media(prefers-color-scheme:light){body{background:#f8fafc;color:#1e293b}.card{background:#fff;border-color:#e2e8f0}p{color:#64748b}}</style></head><body><div class="card"><div class="icon">📡</div><h1>Offline</h1><p>DisinfoDesk ist derzeit offline. Stellen Sie eine Internetverbindung her und versuchen Sie es erneut.<br><br>DisinfoDesk is currently offline. Please connect to the internet and try again.</p><button onclick="location.reload()">Retry / Erneut versuchen</button></div></body></html>`,
                     { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
                 );
             }
         }
     );
 
+    // --- 4. BACKGROUND SYNC STUB (future-ready) ---
+    // When BackgroundSync API is available, queue failed mutations for retry
+    if ('sync' in self.registration) {
+        self.addEventListener('sync', (event) => {
+            if (event.tag === 'disinfodesk-sync') {
+                // Future: replay queued IndexedDB mutations
+            }
+        });
+    }
+
 } else {
-    console.log(`[DisinfoDesk] Workbox failed to load.`);
+    // Workbox failed to load — degrade gracefully
 }
 
-// Listen to "SKIP_WAITING" message to force update from UI
+// --- 5. MESSAGE HANDLERS ---
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
+    }
+    // Cache status reporting for UI
+    if (event.data && event.data.type === 'GET_CACHE_STATUS') {
+        caches.keys().then(keys => {
+            const relevantCaches = keys.filter(k => k.startsWith('disinfodesk-cache'));
+            Promise.all(relevantCaches.map(k => caches.open(k).then(c => c.keys().then(reqs => ({ name: k, entries: reqs.length })))))
+                .then(stats => {
+                    event.source?.postMessage({ type: 'CACHE_STATUS', caches: stats, version: 'v7' });
+                });
+        });
     }
 });

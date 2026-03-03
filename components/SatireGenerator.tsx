@@ -512,7 +512,7 @@ const ConfigDeck: React.FC = () => {
             </div>
 
             {/* 2. Modules */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
                 <ModuleSelector 
                     title={t.satire.params.subject} 
                     icon={Database} 

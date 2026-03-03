@@ -20,12 +20,15 @@ import { OnboardingTour } from './OnboardingTour';
 const BackgroundGrid = React.memo(() => (
   <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
     {/* Base Grid */}
-    <div className="absolute inset-0 bg-cyber-grid bg-[length:40px_40px] opacity-[0.02]" />
+    <div className="absolute inset-0 bg-grid" />
     {/* Vignette */}
     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/50 to-[#020617]" />
+    {/* Radial fade from center */}
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#020617_70%)]" />
     {/* Orbs */}
-    <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-accent-cyan/5 blur-[100px] rounded-full animate-pulse-slow" />
-    <div className="absolute top-[30%] -right-[5%] w-[30%] h-[30%] bg-accent-purple/5 blur-[100px] rounded-full animate-pulse-slow" style={{ animationDelay: '3s' }} />
+    <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-accent-cyan/[0.04] blur-[120px] rounded-full animate-pulse-slow" />
+    <div className="absolute top-[30%] -right-[5%] w-[30%] h-[30%] bg-accent-purple/[0.04] blur-[120px] rounded-full animate-pulse-slow" style={{ animationDelay: '3s' }} />
+    <div className="absolute bottom-[10%] left-[20%] w-[25%] h-[25%] bg-blue-500/[0.02] blur-[100px] rounded-full animate-pulse-slow" style={{ animationDelay: '6s' }} />
   </div>
 ));
 
@@ -48,11 +51,15 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
     const handleReboot = useCallback(() => window.location.reload(), []);
 
     return (
-        <div className="p-4 border-t border-slate-800 bg-[#020617] relative z-10 pb-safe-bottom">
+        <div className="p-4 border-t border-slate-800/50 bg-[#020617] relative z-10 pb-safe-bottom">
+            <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className={cn("w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]", isOnline ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500')} />
+                        <div className="relative">
+                          <div className={cn("w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]", isOnline ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500')} />
+                          <div className={cn("absolute inset-0 w-2 h-2 rounded-full animate-ping opacity-30", isOnline ? 'bg-green-500' : 'bg-red-500')} />
+                        </div>
                         <div className="min-w-0">
                             <div className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest leading-none">
                                 {isOnline ? 'UPLINK_OK' : 'OFFLINE'}
@@ -65,7 +72,7 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
                     
                     <button 
                         onClick={handleReboot}
-                        className="text-slate-600 hover:text-accent-cyan transition-colors p-2 rounded hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+                        className="text-slate-600 hover:text-accent-cyan transition-all p-2 rounded-lg hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none hover:shadow-[0_0_10px_rgba(6,182,212,0.1)]"
                         title={t.layout.footer.reboot}
                       aria-label={t.layout.footer.reboot}
                     >
@@ -81,11 +88,13 @@ const ContentLoader = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="flex h-full w-full items-center justify-center min-h-[400px]">
+    <div className="flex h-full w-full items-center justify-center min-h-[400px] animate-fade-in">
       <div className="flex flex-col items-center gap-4">
           <div className="relative">
               <div className="w-12 h-12 border-2 border-slate-800 rounded-full"></div>
               <div className="absolute inset-0 border-t-2 border-accent-cyan rounded-full animate-spin"></div>
+              <div className="absolute inset-1 border-t border-purple-500/50 rounded-full animate-spin-reverse"></div>
+              <div className="absolute inset-0 w-12 h-12 bg-accent-cyan/5 rounded-full blur-xl" />
           </div>
           <div className="text-[10px] font-mono text-slate-500 animate-pulse tracking-[0.2em] uppercase">{t.layout.loadingModule}</div>
       </div>
@@ -132,11 +141,13 @@ const NavButton: React.FC<{ item: NavItem & { path: string }, id?: string, onCli
         "group relative flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan touch-manipulation active:scale-98",
         isActive 
           ? "bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 shadow-[0_0_15px_rgba(6,182,212,0.1)]" 
-          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 border border-transparent"
+          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent hover:border-slate-700/50"
       )}
     >
       {({ isActive }) => (
         <>
+          {/* Active indicator bar */}
+          {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-accent-cyan rounded-r-full shadow-[0_0_10px_rgba(6,182,212,0.5)]" />}
           <div className={cn("transition-transform duration-300", isActive ? 'scale-105' : 'group-hover:scale-105')}>
             {React.cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { size: 20 })}
           </div>
@@ -145,7 +156,7 @@ const NavButton: React.FC<{ item: NavItem & { path: string }, id?: string, onCli
               {item.label}
             </span>
           </div>
-          {isActive && <div className="w-1 h-1 rounded-full bg-accent-cyan shadow-[0_0_5px_cyan]" />}
+          {isActive && <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_8px_cyan] animate-pulse" />}
         </>
       )}
     </NavLink>
@@ -315,19 +326,19 @@ export const Layout: React.FC = () => {
 
       {/* Offline Banner */}
       {!isOnline && (
-        <div className="fixed top-safe left-0 right-0 bg-red-900/90 backdrop-blur border-b border-red-500 text-white text-[10px] font-bold font-mono text-center py-1 z-[100] flex items-center justify-center gap-2">
-          <WifiOff size={10} /> OFFLINE MODE - CACHE ACTIVE
+        <div className="fixed top-safe left-0 right-0 bg-red-950/90 backdrop-blur-xl border-b border-red-500/50 text-white text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-2 shadow-[0_2px_15px_rgba(239,68,68,0.15)]">
+          <WifiOff size={10} className="animate-pulse" /> OFFLINE MODE — CACHE ACTIVE
         </div>
       )}
 
       {/* Update Available Banner */}
       {updateAvailable && (
-        <div className="fixed top-safe left-0 right-0 bg-accent-cyan/90 backdrop-blur border-b border-accent-cyan text-slate-900 text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-3 animate-fade-in-up shadow-lg">
+        <div className="fixed top-safe left-0 right-0 bg-gradient-to-r from-accent-cyan/90 to-cyan-400/90 backdrop-blur-xl border-b border-accent-cyan/50 text-slate-900 text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-3 animate-fade-in-down shadow-[0_2px_20px_rgba(6,182,212,0.2)]">
           <RefreshCw size={12} className="animate-spin" /> 
           <span>{t.layout.updateAvailable}</span>
           <button 
             onClick={handleUpdateApp}
-            className="px-2 py-0.5 bg-slate-900 text-accent-cyan rounded hover:bg-slate-800 transition-colors uppercase border border-slate-700 hover:border-accent-cyan"
+            className="px-2.5 py-0.5 bg-slate-900 text-accent-cyan rounded-md hover:bg-slate-800 transition-all uppercase border border-slate-700 hover:border-accent-cyan hover:shadow-neon-cyan text-[10px]"
           >
             {t.layout.reload}
           </button>
@@ -335,10 +346,10 @@ export const Layout: React.FC = () => {
       )}
 
       {/* Mobile Header */}
-      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-lg transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')}>
+      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-2xl border-b border-white/[0.06] flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-elevation-1 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-             <GlobeLock size={16} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-center backdrop-blur-sm">
+             <GlobeLock size={16} className="text-accent-cyan" />
           </div>
           <div className="text-sm font-bold font-display tracking-tight text-white">DISINFODESK</div>
         </div>
@@ -377,24 +388,31 @@ export const Layout: React.FC = () => {
         role="navigation"
         aria-label="Main navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[280px] bg-[#020617] border-r border-slate-800 transform transition-transform duration-300 ease-out shadow-2xl md:shadow-none",
+          "fixed inset-y-0 left-0 z-50 w-[280px] bg-[#020617]/95 backdrop-blur-2xl border-r border-slate-800/50 transform transition-transform duration-300 ease-out shadow-2xl md:shadow-none",
           "md:relative md:translate-x-0 md:w-64 md:z-0 flex flex-col pt-safe pb-safe",
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
           !isOnline || updateAvailable ? 'mt-8 md:mt-0' : ''
         )}
       >
+        {/* Sidebar right edge glow */}
+        <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-700/30 to-transparent pointer-events-none" aria-hidden="true" />
+        
         {/* Sidebar Header */}
         <div className="p-6 relative z-10 hidden md:block">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-inner group">
-                <GlobeLock size={20} className="text-accent-cyan group-hover:text-white transition-colors" />
+            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-inner group relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <GlobeLock size={20} className="text-accent-cyan group-hover:text-white transition-colors relative z-10" />
             </div>
             <div>
               <div className="font-bold font-display text-lg text-white tracking-tight leading-none">DISINFODESK</div>
-              <div className="text-[9px] font-mono text-slate-500 mt-1">v2.7.0 PWA</div>
+              <div className="text-[9px] font-mono text-slate-500 mt-1 flex items-center gap-1.5">
+                <span className="inline-block w-1 h-1 rounded-full bg-accent-cyan/60" />
+                v2.8.0 PWA
+              </div>
             </div>
           </div>
-          <div className="h-px w-full bg-slate-800" />
+          <div className="h-px w-full bg-gradient-to-r from-slate-800 via-slate-700/50 to-slate-800" />
         </div>
         
         {/* Mobile Sidebar Close */}
@@ -454,27 +472,29 @@ export const Layout: React.FC = () => {
       </main>
 
       {/* Mobile Bottom Navigation (Glassmorphic) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/80 backdrop-blur-xl border-t border-white/5 pb-safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" aria-label="Mobile navigation">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#020617]/85 backdrop-blur-2xl border-t border-white/[0.06] pb-safe-bottom shadow-[0_-4px_30px_rgba(0,0,0,0.6)]" aria-label="Mobile navigation">
+        {/* Top glow line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-600/30 to-transparent pointer-events-none" />
         <div className="flex justify-around items-center h-[60px]">
           {mobileNavItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) => cn(
-                "flex flex-col items-center justify-center w-full h-full gap-1 transition-all active:scale-90 outline-none focus-visible:text-accent-cyan",
+                "flex flex-col items-center justify-center w-full h-full gap-1 transition-all active:scale-90 outline-none focus-visible:text-accent-cyan relative",
                 isActive ? 'text-accent-cyan' : 'text-slate-500 hover:text-slate-300'
               )}
             >
               {({ isActive }) => (
                 <>
-                  <div className={cn("relative transition-all", isActive ? "-translate-y-1" : "")}>
+                  {isActive && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-accent-cyan rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]" />}
+                  <div className={cn("relative transition-all duration-200", isActive ? "-translate-y-0.5" : "")}>
                     {React.cloneElement(item.icon as React.ReactElement<Record<string, unknown>>, { 
                       size: 22, 
                       className: isActive ? "drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" : "" 
                     })}
-                    {isActive && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent-cyan rounded-full shadow-[0_0_5px_cyan]" />}
                   </div>
-                  <span className={cn("text-[9px] font-bold uppercase tracking-wider transition-opacity", isActive ? "opacity-100" : "opacity-70")}>{item.label}</span>
+                  <span className={cn("text-[9px] font-bold uppercase tracking-wider transition-opacity", isActive ? "opacity-100" : "opacity-60")}>{item.label}</span>
                 </>
               )}
             </NavLink>

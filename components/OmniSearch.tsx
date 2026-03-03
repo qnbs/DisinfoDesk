@@ -448,14 +448,14 @@ const OmniSearchLayout: React.FC = () => {
     const { onClose, t } = useOmniSearch();
     return (
         <div 
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" 
+            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" 
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-label="OmniSearch"
         >
             <div 
-                className="w-full max-w-2xl bg-[#0B0F19] border border-slate-700 rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[70vh] ring-1 ring-white/10"
+                className="w-full max-w-2xl bg-[#0B0F19]/95 backdrop-blur-2xl border border-slate-700/50 rounded-xl shadow-elevation-3 overflow-hidden flex flex-col max-h-[70vh] ring-1 ring-white/[0.08] animate-fade-in-scale"
                 onClick={e => e.stopPropagation()}
             >
                 <SearchHeader />

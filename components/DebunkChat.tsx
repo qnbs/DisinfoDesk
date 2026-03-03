@@ -631,7 +631,8 @@ export const DebunkChat: React.FC = () => {
                                 <button 
                                     key={i} 
                                     onClick={() => triggerQuickAction(action.prompt)}
-                                    className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold uppercase text-slate-400 hover:text-accent-cyan hover:border-accent-cyan transition-all whitespace-nowrap flex items-center gap-1"
+                                    className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold uppercase text-slate-400 hover:text-accent-cyan hover:border-accent-cyan/50 transition-all whitespace-nowrap flex items-center gap-1 hover:bg-slate-800 hover:shadow-[0_0_10px_rgba(6,182,212,0.1)] animate-fade-in opacity-0"
+                                    style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'forwards' }}
                                 >
                                     <Zap size={10} /> {action.label}
                                 </button>
@@ -640,7 +641,9 @@ export const DebunkChat: React.FC = () => {
                     )}
 
                     {/* Tactical Input Area */}
-                    <div className="p-4 bg-slate-900 border-t border-slate-800 relative shadow-2xl">
+                    <div className="p-4 bg-slate-900/80 backdrop-blur-xl border-t border-slate-800/50 relative shadow-elevation-2">
+                        {/* Top glow */}
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-700/30 to-transparent pointer-events-none" />
                         <div className="flex gap-3 items-end max-w-5xl mx-auto">
                             <Button 
                                 onClick={startLiveSession}

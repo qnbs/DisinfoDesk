@@ -5,13 +5,21 @@
   "start_url": "/DisinfoDesk/",
   "scope": "/DisinfoDesk/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "theme_color": "#020617",
   "background_color": "#020617",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "id": "disinfodesk-v3",
   "dir": "ltr",
   "lang": "de",
   "categories": ["education", "reference", "news"],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
@@ -45,14 +53,14 @@
       "sizes": "1280x720",
       "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "Desktop Dashboard"
+      "label": "Desktop Dashboard — Tactical Command Overview"
     },
     {
       "src": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=720&auto=format&fit=crop",
       "sizes": "720x1280",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Mobile Feed"
+      "label": "Mobile Feed — On-the-Go Research"
     }
   ],
   "shortcuts": [
@@ -69,6 +77,26 @@
       "description": "Starte den Debunk-Bot",
       "url": "/DisinfoDesk/#/chat",
       "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Satire Generator",
+      "short_name": "Satire",
+      "description": "Didaktischer Kontrastmodus",
+      "url": "/DisinfoDesk/#/satire",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Tactical Command Overview",
+      "url": "/DisinfoDesk/#/",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+disinfo",
+      "url": "/DisinfoDesk/#/archive/%s"
     }
   ]
 }

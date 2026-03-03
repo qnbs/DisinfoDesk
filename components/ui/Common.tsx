@@ -171,12 +171,14 @@ interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = React.memo(({ title, subtitle, icon: Icon, actions, children, status = "ONLINE", statusColor = "bg-green-500", visualizerState = "IDLE" }) => {
   const dispatch = useAppDispatch();
   return (
-    <header className="relative bg-slate-950/80 border border-white/10 rounded-xl mb-6 shadow-2xl overflow-hidden group shrink-0 select-none backdrop-blur-xl transition-all duration-500 hover:border-white/20">
+    <header className="relative bg-slate-950/80 border border-white/[0.08] rounded-xl mb-6 shadow-elevation-2 overflow-hidden group shrink-0 select-none backdrop-blur-2xl transition-all duration-500 hover:border-white/[0.15] hover:shadow-elevation-3">
       {/* Visualizer Background */}
       <div className="absolute inset-0 z-0 h-full w-full" aria-hidden="true">
           <HeaderVisualizer state={visualizerState} />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-noise opacity-[0.03]" />
+          {/* Subtle top glow line */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/30 to-transparent" />
       </div>
 
       <div className="relative z-10 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -213,12 +215,13 @@ export const PageHeader: React.FC<PageHeaderProps> = React.memo(({ title, subtit
   );
 });
 
-interface CardProps extends React.HTMLAttributes<HTMLElement> { variant?: 'glass' | 'cyber' | 'solid'; as?: React.ElementType; }
-export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, className = '', onClick, variant = 'glass', as: Component = 'div', ...props }, ref) => {
+interface CardProps extends React.HTMLAttributes<HTMLElement> { variant?: 'glass' | 'cyber' | 'solid' | 'elevated'; as?: React.ElementType; glow?: boolean; }
+export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, className = '', onClick, variant = 'glass', glow = false, as: Component = 'div', ...props }, ref) => {
   const variants = {
     glass: "bg-slate-900/60 backdrop-blur-xl border-white/10 hover:border-white/20 hover:shadow-2xl hover:bg-slate-900/70",
     cyber: "bg-slate-950/80 backdrop-blur-md border-slate-800 hover:border-accent-cyan/30 hover:shadow-neon-cyan shadow-lg",
-    solid: "bg-slate-950 border-slate-800 hover:border-slate-700 shadow-xl"
+    solid: "bg-slate-950 border-slate-800 hover:border-slate-700 shadow-xl",
+    elevated: "bg-slate-900/80 backdrop-blur-2xl border-white/[0.08] shadow-elevation-2 hover:shadow-elevation-3 hover:border-white/[0.15] hover:bg-slate-900/90"
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -232,9 +235,10 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
     <Component 
         ref={ref} 
         className={cn(
-            "relative rounded-xl overflow-hidden transition-all duration-300 border", 
+            "relative rounded-xl overflow-hidden transition-all duration-300 border group/card", 
             variants[variant], 
-            onClick ? "cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none" : "", 
+            onClick ? "cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none hover-lift" : "", 
+            glow ? "animate-glow-pulse" : "",
             className
         )} 
         onClick={onClick}
@@ -244,19 +248,21 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
         {...props}
     >
       <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none mix-blend-overlay" />
+      {glow && <div className="absolute -inset-px bg-gradient-to-r from-accent-cyan/20 via-purple-500/10 to-accent-cyan/20 rounded-xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none blur-sm" />}
       <div className="relative z-10 h-full">{children}</div>
     </Component>
   );
 }));
 Card.displayName = 'Card';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; size?: 'sm' | 'md' | 'lg'; isLoading?: boolean; icon?: React.ReactNode; }
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'; size?: 'sm' | 'md' | 'lg'; isLoading?: boolean; icon?: React.ReactNode; }
 export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ children, variant = 'primary', size = 'md', isLoading = false, icon, className = '', disabled, ...props }, ref) => {
   const variants = {
-    primary: "bg-accent-cyan text-slate-950 hover:bg-cyan-400 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]",
-    secondary: "bg-slate-800 text-slate-200 border border-slate-700 hover:border-slate-500 hover:bg-slate-700 hover:text-white shadow-sm",
+    primary: "bg-accent-cyan text-slate-950 hover:bg-cyan-400 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]",
+    secondary: "bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-slate-500 hover:bg-slate-700 hover:text-white shadow-sm backdrop-blur-sm",
     ghost: "bg-transparent text-slate-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10",
-    danger: "bg-danger-red/10 text-danger-red border border-danger-red/50 hover:bg-danger-red hover:text-white hover:border-danger-red shadow-[0_0_10px_rgba(239,68,68,0.1)]"
+    danger: "bg-danger-red/10 text-danger-red border border-danger-red/50 hover:bg-danger-red hover:text-white hover:border-danger-red shadow-[0_0_10px_rgba(239,68,68,0.1)]",
+    accent: "bg-gradient-to-r from-accent-cyan to-purple-500 text-white border border-white/20 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:brightness-110"
   };
   
   const sizes = { 
@@ -269,7 +275,7 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
     <button 
         ref={ref} 
         className={cn(
-            "font-bold font-mono uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center justify-center relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-accent-cyan disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation select-none", 
+            "font-bold font-mono uppercase tracking-wider rounded-lg transition-all duration-200 flex items-center justify-center relative overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-accent-cyan disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation select-none group/btn", 
             variants[variant], 
             sizes[size], 
             className
@@ -278,7 +284,9 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
         aria-busy={isLoading}
         {...props}
     >
-      {isLoading && <Loader2 size={size === 'sm' ? 12 : 16} className="animate-spin absolute" />}
+      {/* Subtle inner shine */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none rounded-lg opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+      {isLoading && <Loader2 size={size === 'sm' ? 12 : 16} className="animate-spin absolute z-20" />}
       <span className={cn("relative z-10 flex items-center justify-center transition-opacity", isLoading ? 'opacity-0' : 'opacity-100', size === 'sm' ? 'gap-1.5' : 'gap-2')}>
         {icon}
         {children}
@@ -288,19 +296,26 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
 }));
 Button.displayName = 'Button';
 
-export const Badge: React.FC<{ label: string; color?: string; className?: string }> = React.memo(({ label, className = '' }) => (
-    <span className={cn("px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider backdrop-blur-md font-mono whitespace-nowrap bg-slate-900 text-slate-400 border-slate-800 shadow-sm", className)}>{label}</span>
+export const Badge: React.FC<{ label: string; color?: string; className?: string; glow?: boolean }> = React.memo(({ label, className = '', glow = false }) => (
+    <span className={cn(
+      "px-2.5 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-wider backdrop-blur-md font-mono whitespace-nowrap bg-slate-900/80 text-slate-400 border-slate-800 shadow-sm transition-colors duration-200",
+      glow ? "border-accent-cyan/30 text-accent-cyan shadow-[0_0_8px_rgba(6,182,212,0.15)]" : "",
+      className
+    )}>{label}</span>
 ));
 
 export const EmptyState: React.FC<{ icon?: React.ElementType; title: string; description: string; action?: React.ReactNode; className?: string }> = React.memo(({ icon: Icon = Search, title, description, action, className = "" }) => (
     <div className={cn("flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in", className)}>
       <div className="relative mb-6 group">
-        <div className="absolute inset-0 bg-accent-cyan/10 blur-xl rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
-        <div className="relative p-5 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl"><Icon size={32} className="text-slate-500 group-hover:text-accent-cyan transition-colors" /></div>
+        <div className="absolute inset-0 bg-accent-cyan/10 blur-2xl rounded-full scale-150 opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/5 to-purple-500/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        <div className="relative p-5 bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-accent-cyan/20 group-hover:shadow-neon-cyan">
+          <Icon size={32} className="text-slate-500 group-hover:text-accent-cyan transition-colors duration-500" />
+        </div>
       </div>
       <h3 className="text-base font-bold text-white mb-2 font-display uppercase tracking-widest">{title}</h3>
       <p className="text-slate-500 text-xs max-w-sm mb-8 leading-relaxed font-mono">{description}</p>
-      {action && <div className="animate-fade-in delay-100">{action}</div>}
+      {action && <div className="animate-fade-in-up stagger-2">{action}</div>}
     </div>
 ));
 
@@ -322,10 +337,15 @@ export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' 
 });
 
 export const ErrorFallback: React.FC<{ error: Error, resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center" role="alert">
-    <div className="bg-red-950/20 p-4 rounded-full mb-6 border border-red-500/20 shadow-neon-red"><Loader2 size={32} className="text-red-500" /></div>
+  <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center animate-fade-in" role="alert">
+    <div className="relative mb-6">
+      <div className="absolute inset-0 bg-red-500/10 blur-2xl rounded-full scale-150" />
+      <div className="relative bg-red-950/20 p-4 rounded-2xl border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
+        <Loader2 size={32} className="text-red-500" />
+      </div>
+    </div>
     <h2 className="text-xl font-bold text-white mb-2 font-display tracking-tight uppercase">System Critical Failure</h2>
-    <p className="text-slate-500 text-xs font-mono mb-6 max-w-md">The application encountered an unrecoverable error. Diagnostic dump: {error.message}</p>
+    <p className="text-slate-500 text-xs font-mono mb-6 max-w-md leading-relaxed">The application encountered an unrecoverable error. Diagnostic dump: {error.message}</p>
     <Button onClick={resetErrorBoundary} variant="secondary">Initiate Reboot Sequence</Button>
   </div>
 );

@@ -47,13 +47,21 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onClose }) => {
     info: 'border-accent-cyan/30'
   };
 
+  const glowColors = {
+    success: 'shadow-[0_0_20px_rgba(34,197,94,0.1)]',
+    error: 'shadow-[0_0_20px_rgba(239,68,68,0.1)]',
+    warning: 'shadow-[0_0_20px_rgba(234,179,8,0.1)]',
+    info: 'shadow-[0_0_20px_rgba(6,182,212,0.1)]'
+  };
+
   return (
     <div 
       className={`
-        flex items-center gap-3 p-4 mb-3 rounded-lg border bg-slate-900/95 backdrop-blur-md shadow-2xl min-w-[300px] max-w-[400px] pointer-events-auto
+        flex items-center gap-3 p-4 mb-3 rounded-xl border bg-slate-900/95 backdrop-blur-2xl min-w-[300px] max-w-[400px] pointer-events-auto
         transform transition-all duration-300 ease-in-out
         ${borderColors[toast.type]}
-        ${isExiting ? 'translate-x-[120%] opacity-0' : 'translate-x-0 opacity-100'}
+        ${glowColors[toast.type]}
+        ${isExiting ? 'translate-x-[120%] opacity-0 scale-95' : 'translate-x-0 opacity-100 scale-100'}
       `}
       role="alert"
     >
@@ -65,7 +73,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onClose }) => {
       </div>
       <button 
         onClick={handleClose}
-        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors touch-action-manipulation"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors touch-action-manipulation"
         aria-label="Close notification"
       >
         <X size={16} />

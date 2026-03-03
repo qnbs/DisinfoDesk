@@ -252,12 +252,13 @@ const MetricTile: React.FC<{
     trend?: 'up' | 'down' | 'stable',
     icon: React.ElementType, 
     color: string, 
-    sparkData: number[] 
-}> = ({ title, value, trend, icon: Icon, color, sparkData }) => {
+    sparkData: number[],
+    delay?: number 
+}> = ({ title, value, trend, icon: Icon, color, sparkData, delay = 0 }) => {
     const chartData = useMemo(() => sparkData.map((val, i) => ({ i, val })), [sparkData]);
     
     return (
-        <Card variant="solid" className="p-4 flex flex-col h-32 relative overflow-hidden group border-slate-800 bg-slate-900/40 hover:bg-slate-900 transition-colors">
+        <Card variant="solid" className="p-4 flex flex-col h-32 relative overflow-hidden group border-slate-800 bg-slate-900/40 hover:bg-slate-900 transition-all hover-lift animate-fade-in-up opacity-0" style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}>
             {/* Header */}
             <div className="flex justify-between items-start z-10">
                 <div className="flex items-center gap-2">
@@ -380,7 +381,7 @@ export const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8 auto-rows-[minmax(140px,auto)]">
                 
                 {/* 1. Global Map (Large Hero) */}
-                <Card className="col-span-1 md:col-span-2 lg:col-span-4 row-span-2 relative bg-slate-950 border-slate-800 p-0 overflow-hidden shadow-2xl group">
+                <Card className="col-span-1 md:col-span-2 lg:col-span-4 row-span-2 relative bg-slate-950 border-slate-800 p-0 overflow-hidden shadow-elevation-2 group animate-fade-in-up opacity-0" style={{ animationDelay: '0ms', animationFillMode: 'forwards' }}>
                     <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
                         <div className="px-2 py-1 bg-slate-900/80 backdrop-blur rounded border border-slate-700 text-xs font-mono text-accent-cyan flex items-center gap-2">
                             <Globe size={12} className="animate-spin-slow" /> LIVE TRACKING
@@ -396,7 +397,7 @@ export const Dashboard: React.FC = () => {
                 </Card>
 
                 {/* 2. Defcon Status */}
-                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 flex items-center justify-between p-6">
+                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 flex items-center justify-between p-6 animate-fade-in-up opacity-0" style={{ animationDelay: '100ms', animationFillMode: 'forwards' }}>
                     <div>
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Global Status</div>
                         <div className="text-xl font-black text-white font-display tracking-tight">DEFCON 4</div>
@@ -406,7 +407,7 @@ export const Dashboard: React.FC = () => {
                 </Card>
 
                 {/* 3. System Load (Live Chart) */}
-                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 p-4 flex flex-col">
+                <Card className="col-span-1 md:col-span-2 lg:col-span-2 bg-slate-900/50 border-slate-800 p-4 flex flex-col animate-fade-in-up opacity-0" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
                     <div className="flex justify-between items-center mb-2">
                         <div className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
                             <Cpu size={12} /> Sys Load
@@ -436,6 +437,7 @@ export const Dashboard: React.FC = () => {
                         icon={HardDrive} 
                         color="text-slate-400" 
                         sparkData={sysLoad.map(n => n * 0.5)}
+                        delay={0}
                     />
                     <MetricTile 
                         title="Threats" 
@@ -444,6 +446,7 @@ export const Dashboard: React.FC = () => {
                         icon={ShieldAlert} 
                         color="text-red-500" 
                         sparkData={sysLoad.map(n => n * 1.2)}
+                        delay={80}
                     />
                     <MetricTile 
                         title="Viral Vel." 
@@ -451,6 +454,7 @@ export const Dashboard: React.FC = () => {
                         icon={Radio} 
                         color="text-accent-cyan" 
                         sparkData={sysLoad.map(n => n * 0.8)}
+                        delay={160}
                     />
                     <MetricTile 
                         title="Intel AI" 
@@ -458,6 +462,7 @@ export const Dashboard: React.FC = () => {
                         icon={Brain} 
                         color="text-accent-purple" 
                         sparkData={sysLoad}
+                        delay={240}
                     />
                 </div>
 

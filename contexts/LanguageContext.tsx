@@ -29,7 +29,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const value = {
     language,
     setLanguage,
-    t: translations[language]
+    t: translations[language as keyof typeof translations]
   };
 
   return (

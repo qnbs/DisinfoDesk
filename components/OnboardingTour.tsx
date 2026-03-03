@@ -322,7 +322,7 @@ const TourCard: React.FC = () => {
 
     return (
         <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none z-30">
-            <Card className="pointer-events-auto w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden animate-fade-in-up flex flex-col p-0">
+            <Card className="pointer-events-auto w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden animate-fade-in-up flex flex-col p-0" role="dialog" aria-modal="true" aria-label="Onboarding Tour">
                 
                 {/* Header Progress */}
                 <div className="h-1 w-full bg-slate-800 flex">

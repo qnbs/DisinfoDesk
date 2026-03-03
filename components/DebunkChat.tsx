@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
+import React, { useState, useRef, useEffect, useCallback, createContext, useContext, useMemo } from 'react';
 import { streamChatWithSkeptic, resetChatSession, connectLiveSession, base64ToUint8Array } from '../services/geminiService';
 import { dbService } from '../services/dbService';
 import { THEORIES_DE_FULL, THEORIES_EN_FULL, MEDIA_ITEMS } from '../constants';
@@ -9,8 +9,9 @@ import {
     MicOff, ShieldCheck, AlertTriangle, XCircle, 
     HelpCircle, StopCircle, User, Activity, Radio, Signal,
     Terminal, Lock, Zap, Search, Fingerprint, ChevronRight,
-    Play, Pause, RefreshCw, BarChart2
+    Play, Pause, RefreshCw, BarChart2, FileDown
 } from 'lucide-react';
+import { exportChatPDF } from '../services/pdfExportService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { Message } from '../types';
@@ -18,6 +19,7 @@ import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
 import { useToast } from '../contexts/ToastContext';
+import { playSound } from '../utils/microInteractions';
 // LiveSession type is not exported in current @google/genai version; use inline type
 type LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
 
@@ -379,6 +381,8 @@ const useDebunkChatLogic = () => {
     const textToSend = manualMsg || input;
     if (!textToSend.trim() || loading) return;
 
+    playSound('send', settings.soundEnabled);
+
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
@@ -387,7 +391,7 @@ const useDebunkChatLogic = () => {
     dispatch(setChatThinking(true));
     dispatch(addChatMessage({ role: 'model', text: '', isStreaming: true }));
 
-    const history = messages.map(m => m.text);
+    const history = messages.map((m: any) => m.text);
     let fullResponse = "";
     
     try {
@@ -419,6 +423,7 @@ const useDebunkChatLogic = () => {
             }
             const cleanText = fullResponse.replace(regex, '').trim();
             dispatch(finalizeLastChatMessage({ text: cleanText, verdict }));
+            playSound('receive', settings.soundEnabled);
             dispatch(setChatThinking(false));
         }
         abortControllerRef.current = null;
@@ -437,7 +442,7 @@ const useDebunkChatLogic = () => {
     try { 
         await dbService.saveChat({ 
             id: 'chat_' + Date.now(), 
-            title: messages.find(m => m.role === 'user')?.text.substring(0, 30) + '...' || 'Session', 
+            title: messages.find((m: any) => m.role === 'user')?.text.substring(0, 30) + '...' || 'Session', 
             timestamp: Date.now(), 
             messages 
         }); 
@@ -469,7 +474,18 @@ const useDebunkChatLogic = () => {
 // --- COMPONENTS ---
 
 const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | null }> = ({ status, mode, contextId }) => {
-    const { handleSaveSession, handleReset, t } = useContext(ChatContext)!;
+    const { handleSaveSession, handleReset, messages, t } = useContext(ChatContext)!;
+    
+    const handleExportPDF = async () => {
+        if (messages.length <= 1) return;
+        try {
+            await exportChatPDF(
+                messages.map((m: any) => ({ role: m.role, text: m.text, timestamp: m.timestamp })),
+                contextId ? `Debunk Session · ${contextId}` : 'Debunk Chat Session'
+            );
+        } catch (e) { console.error('PDF export failed:', e); }
+    };
+
   return (
     <PageHeader 
                 title={t.chat.headerTitle}
@@ -480,6 +496,7 @@ const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | n
         visualizerState={mode === 'LIVE' ? 'LISTENING' : 'IDLE'}
         actions={
             <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" onClick={handleExportPDF} icon={<FileDown size={16}/>} className="border-slate-700 hover:border-purple-500">PDF</Button>
                                 <Button variant="ghost" size="sm" onClick={handleSaveSession} icon={<Save size={16}/>} className="border-slate-700 hover:border-accent-cyan">{t.chat.save}</Button>
                 <button onClick={handleReset} className="text-slate-400 hover:text-red-400 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-900 rounded-lg" aria-label="Reset chat"><Trash2 size={18} /></button>
             </div>
@@ -487,6 +504,61 @@ const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | n
     />
   );
 };
+
+// --- Skeleton Loader for AI thinking state ---
+const ChatSkeleton: React.FC = () => (
+  <div className="flex flex-col items-start animate-fade-in-up" role="status" aria-label="AI is thinking">
+    <div className="flex items-center gap-2 mb-1 opacity-70">
+      <span className="text-[10px] font-mono uppercase tracking-widest text-accent-purple">DR_VERITAS_AI</span>
+    </div>
+    <div className="relative max-w-[80%] rounded-sm p-4 border-l-2 bg-[#0B0F19]/80 backdrop-blur-md border-l-accent-purple shadow-lg space-y-3">
+      <div className="h-3 w-3/4 rounded shimmer-loading" />
+      <div className="h-3 w-full rounded shimmer-loading" style={{ animationDelay: '150ms' }} />
+      <div className="h-3 w-5/6 rounded shimmer-loading" style={{ animationDelay: '300ms' }} />
+      <div className="h-3 w-2/3 rounded shimmer-loading" style={{ animationDelay: '450ms' }} />
+      <div className="flex items-center gap-1.5 pt-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-purple animate-pulse" />
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-purple animate-pulse" style={{ animationDelay: '200ms' }} />
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-purple animate-pulse" style={{ animationDelay: '400ms' }} />
+        <span className="text-[9px] font-mono text-accent-purple/60 ml-1 uppercase tracking-widest">Analyzing...</span>
+      </div>
+    </div>
+  </div>
+);
+
+// --- Typewriter effect for streaming text ---
+const TypewriterText: React.FC<{ text: string; isStreaming: boolean }> = React.memo(({ text, isStreaming }) => {
+  const reducedMotion = useAppSelector(s => s.settings.config.reducedMotion);
+  const [displayLen, setDisplayLen] = useState(0);
+  const prevTextRef = useRef(text);
+
+  useEffect(() => {
+    if (text.length > prevTextRef.current.length && !reducedMotion && isStreaming) {
+      const start = prevTextRef.current.length;
+      setDisplayLen(start);
+      let i = start;
+      const timer = setInterval(() => {
+        i += 2;
+        if (i >= text.length) { i = text.length; clearInterval(timer); }
+        setDisplayLen(i);
+      }, 12);
+      prevTextRef.current = text;
+      return () => clearInterval(timer);
+    } else {
+      setDisplayLen(text.length);
+      prevTextRef.current = text;
+    }
+  }, [text, isStreaming, reducedMotion]);
+
+  const shown = reducedMotion ? text : text.slice(0, displayLen);
+
+  return (
+    <span className="whitespace-pre-wrap font-sans">
+      {shown}
+      {isStreaming && <span className="inline-block w-[2px] h-[1.1em] bg-accent-purple ml-0.5 align-middle animate-pulse" />}
+    </span>
+  );
+});
 
 const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
     const isUser = msg.role === 'user';
@@ -506,17 +578,18 @@ const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
             <div className={`
                 relative max-w-[90%] md:max-w-[80%] rounded-sm p-4 text-sm leading-relaxed border-l-2
                 ${isUser 
-                    ? 'bg-slate-900/50 border-l-accent-cyan text-slate-200' 
-                    : 'bg-[#0B0F19] border-l-accent-purple text-slate-300 shadow-lg'}
+                    ? 'bg-slate-900/50 backdrop-blur-sm border-l-accent-cyan text-slate-200' 
+                    : 'bg-[#0B0F19]/80 backdrop-blur-md border-l-accent-purple text-slate-300 shadow-lg'}
             `}>
                 {/* Decorative Corner */}
                 <div className={`absolute -top-1 ${isUser ? '-right-1 border-r-2 border-t-2 border-accent-cyan' : '-left-1 border-l-2 border-t-2 border-accent-purple'} w-2 h-2`}></div>
 
-                {/* Content */}
-                <div className="whitespace-pre-wrap font-sans">{msg.text}</div>
-                
-                {/* Typing Indicator for Stream */}
-                {msg.isStreaming && <span className="inline-block w-2 h-4 bg-accent-purple ml-1 animate-pulse align-middle"></span>}
+                {/* Content — typewriter for AI, plain for user */}
+                {isSystem ? (
+                  <TypewriterText text={msg.text} isStreaming={!!msg.isStreaming} />
+                ) : (
+                  <div className="whitespace-pre-wrap font-sans">{msg.text}</div>
+                )}
 
                 {/* Verdict Stamp */}
                 {msg.verdict && (
@@ -610,18 +683,31 @@ export const DebunkChat: React.FC = () => {
                         aria-live="polite"
                         aria-label="Chat messages"
                     >
-                        {messages.length === 0 && (
-                            <div className="flex flex-col items-center justify-center h-full text-slate-600 opacity-60">
-                                <Bot size={64} className="mb-4 text-accent-cyan opacity-20" />
-                                <div className="text-sm font-mono uppercase tracking-widest text-center">
-                                    {t.chat.live.secureLineReady}<br/>
-                                    {t.chat.live.waitingForInput}
+                        {messages.length === 0 && !loading && (
+                            <div className="flex flex-col items-center justify-center h-full animate-fade-in">
+                                {/* Cyber-mystic empty state */}
+                                <div className="relative mb-8 group">
+                                    <div className="absolute inset-0 bg-accent-cyan/5 blur-3xl rounded-full scale-150 group-hover:bg-accent-cyan/10 transition-all duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/5 to-accent-cyan/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                    <div className="relative p-8 bg-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl shadow-2xl transition-all duration-700 group-hover:border-accent-cyan/20 group-hover:shadow-[0_0_40px_rgba(6,182,212,0.08)]">
+                                        <Bot size={48} className="text-accent-cyan/30 group-hover:text-accent-cyan/50 transition-colors duration-700" />
+                                    </div>
+                                </div>
+                                <h3 className="text-base font-bold text-white/80 mb-2 font-display uppercase tracking-[0.15em]">{t.chat.live.secureLineReady}</h3>
+                                <p className="text-slate-500 text-xs font-mono uppercase tracking-widest text-center max-w-xs leading-relaxed">{t.chat.live.waitingForInput}</p>
+                                <div className="mt-6 flex items-center gap-2 text-[9px] font-mono text-slate-600 uppercase tracking-widest">
+                                    <Lock size={10} className="text-green-500/50" />
+                                    <span>TLS 1.3 // AES-256-GCM</span>
                                 </div>
                             </div>
                         )}
-                        {messages.map((msg, index) => (
+                        {messages.map((msg: any, index: number) => (
                             <TextMessageBubble key={index} msg={msg} />
                         ))}
+                        {/* Skeleton while waiting for first AI token */}
+                        {loading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
+                            <ChatSkeleton />
+                        )}
                     </div>
 
                     {/* Quick Actions Bar */}

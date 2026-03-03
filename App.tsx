@@ -27,6 +27,7 @@ const MediaCulture = React.lazy(() => import('./components/MediaCulture').then(m
 const DatabaseManager = React.lazy(() => import('./components/DatabaseManager').then(module => ({ default: module.DatabaseManager })));
 const AuthorLibrary = React.lazy(() => import('./components/AuthorLibrary').then(module => ({ default: module.AuthorLibrary })));
 const AuthorDetail = React.lazy(() => import('./components/AuthorDetail').then(module => ({ default: module.AuthorDetail })));
+const SharedView = React.lazy(() => import('./components/SharedView'));
 
 // Global Effect Handler Wrapper
 const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -127,6 +128,10 @@ const router = createHashRouter([
         element: <Help />,
       },
       {
+        path: "shared",
+        element: <SharedView />,
+      },
+      {
         path: "*",
         element: <Navigate to="/" replace />
       }
@@ -137,13 +142,15 @@ const router = createHashRouter([
 const App: React.FC = () => {
   return (
     // Redux Provider is in index.tsx
-    <SettingsProvider>
-      <LanguageProvider>
-        <ToastProvider>
-           <RouterProvider router={router} />
-        </ToastProvider>
-      </LanguageProvider>
-    </SettingsProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+      <SettingsProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <RouterProvider router={router} />
+          </ToastProvider>
+        </LanguageProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 };
 

@@ -17,7 +17,7 @@ interface RejectedAction extends UnknownAction {
  * Intercepts any action ending in /rejected (AsyncThunks) or containing an error.
  * Automatically dispatches a system log entry, centralized error handling.
  */
-export const rtkQueryErrorLogger: Middleware = (api: MiddlewareAPI) => (next) => (action: UnknownAction) => {
+export const rtkQueryErrorLogger: Middleware = (api: MiddlewareAPI) => (next) => (action: unknown) => {
   if (isRejectedWithValue(action)) {
     // Cast to specific rejected structure after the type guard
     const rejectedAction = action as RejectedAction;

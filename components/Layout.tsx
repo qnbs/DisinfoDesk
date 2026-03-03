@@ -15,6 +15,7 @@ import { saveScrollPosition, setSearchOpen, selectActiveFile } from '../store/sl
 import { syncStaticData } from '../store/slices/theoriesSlice';
 import { OmniSearch } from './OmniSearch';
 import { OnboardingTour } from './OnboardingTour';
+import { playSound, haptic } from '../utils/microInteractions';
 
 // --- Ambient Background (Memoized) ---
 const BackgroundGrid = React.memo(() => (
@@ -89,14 +90,20 @@ const ContentLoader = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-center min-h-[400px] animate-fade-in">
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-5">
           <div className="relative">
-              <div className="w-12 h-12 border-2 border-slate-800 rounded-full"></div>
+              <div className="w-14 h-14 border-2 border-slate-800 rounded-full backdrop-blur-sm"></div>
               <div className="absolute inset-0 border-t-2 border-accent-cyan rounded-full animate-spin"></div>
-              <div className="absolute inset-1 border-t border-purple-500/50 rounded-full animate-spin-reverse"></div>
-              <div className="absolute inset-0 w-12 h-12 bg-accent-cyan/5 rounded-full blur-xl" />
+              <div className="absolute inset-1.5 border-t border-purple-500/50 rounded-full animate-spin-reverse"></div>
+              <div className="absolute inset-0 w-14 h-14 bg-accent-cyan/5 rounded-full blur-xl" />
           </div>
           <div className="text-[10px] font-mono text-slate-500 animate-pulse tracking-[0.2em] uppercase">{t.layout.loadingModule}</div>
+          {/* Skeleton preview bars */}
+          <div className="flex flex-col gap-2 w-48 opacity-40">
+            <div className="h-2 w-full rounded shimmer-loading" />
+            <div className="h-2 w-3/4 rounded shimmer-loading" style={{ animationDelay: '200ms' }} />
+            <div className="h-2 w-5/6 rounded shimmer-loading" style={{ animationDelay: '400ms' }} />
+          </div>
       </div>
     </div>
   );
@@ -132,11 +139,18 @@ const ActiveFileIndicator: React.FC = React.memo(() => {
 
 // --- Nav Button (Memoized) ---
 const NavButton: React.FC<{ item: NavItem & { path: string }, id?: string, onClick?: () => void }> = React.memo(({ item, id, onClick }) => {
+  const soundEnabled = useAppSelector(s => s.settings.config.soundEnabled);
+  const handleClick = useCallback(() => {
+    playSound('navigate', soundEnabled);
+    haptic('light');
+    onClick?.();
+  }, [soundEnabled, onClick]);
+
   return (
     <NavLink
       id={id}
       to={item.path}
-      onClick={onClick}
+      onClick={handleClick}
       className={({ isActive }) => cn(
         "group relative flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan touch-manipulation active:scale-98",
         isActive 

@@ -6,14 +6,15 @@ import {
   Table as TableIcon, SlidersHorizontal, ChevronDown, ChevronUp,
   Hash, Eye, RefreshCw, ArrowDownCircle, Loader2,
   Database, Activity, Zap, Terminal, FileText, ChevronRight,
-  TrendingUp, Globe, Lock
+  TrendingUp, Globe, Lock, Download, Upload
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../contexts/ToastContext';
 import { Card, Button, Badge, PageFrame, PageHeader, EmptyState, Skeleton } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { 
     setSearch, toggleCategory, toggleDanger, setTag, setSort, toggleFavorite, resetFilters,
-    selectFilteredTheories, selectTagStats
+    selectFilteredTheories, selectTagStats, addTheory
 } from '../store/slices/theoriesSlice';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -432,7 +433,55 @@ const FilterHUD: React.FC = React.memo(() => {
 });
 
 const HeaderSection: React.FC = React.memo(() => {
-    const { t, localSearch, setLocalSearch, isFilterOpen, setIsFilterOpen, viewMode, setViewMode, sortOption, handleSetSort } = useTheoryList();
+    const { t, localSearch, setLocalSearch, isFilterOpen, setIsFilterOpen, viewMode, setViewMode, sortOption, handleSetSort } = useTheoryList();                
+    const dispatch = useAppDispatch();
+    const { showToast } = useToast();
+    const theoriesDe = useAppSelector(state => state.theories.entitiesDe);
+    const theoriesEn = useAppSelector(state => state.theories.entitiesEn);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleExport = () => {
+        const userTheoriesDe = Object.values(theoriesDe.entities).filter((t: any) => t?.isUserCreated);
+        const userTheoriesEn = Object.values(theoriesEn.entities).filter((t: any) => t?.isUserCreated);
+        const exportData = { de: userTheoriesDe, en: userTheoriesEn };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `disinfodesk-user-theories.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Exported user theories successfully", "success");
+    };
+
+    const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target?.result as string);
+                let importedCount = 0;
+                
+                if (data.de && Array.isArray(data.de)) {
+                    data.de.forEach((t: any) => { dispatch(addTheory({ lang: 'de', theory: t })); importedCount++; });
+                }
+                if (data.en && Array.isArray(data.en)) {
+                    data.en.forEach((t: any) => { dispatch(addTheory({ lang: 'en', theory: t })); importedCount++; });
+                }
+                
+                showToast(`Imported ${importedCount} user theories successfully`, "success");
+            } catch (err) {
+                console.error('Failed to parse theory logic', err);
+                showToast("Failed to import user theories. Invalid format.", "error");
+            }
+        };
+        reader.readAsText(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     return (
         <div className="mb-6">
@@ -441,6 +490,13 @@ const HeaderSection: React.FC = React.memo(() => {
                 subtitle={t.list.secureAccessSubtitle}
                 icon={Cloud}
                 visualizerState="BUSY"
+                actions={
+                  <div className="flex gap-2">
+                    <input type="file" accept=".json" ref={fileInputRef} onChange={handleImport} className="hidden" />
+                    <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} icon={<Upload size={14} />}>Import</Button>
+                    <Button variant="ghost" size="sm" onClick={handleExport} icon={<Download size={14} />}>Export</Button>
+                  </div>
+                }
             >
                 <div className="flex flex-col gap-4 mt-2">
                     <div className="flex flex-col md:flex-row gap-4 items-stretch">

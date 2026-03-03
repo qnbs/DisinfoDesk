@@ -11,10 +11,11 @@ import {
   Lock, Share2, Wifi, BookOpen, Film, Feather, MessageSquare, 
   Skull, Edit3, Database, Settings, HelpCircle, HardDrive, 
   LayoutGrid, Power, Fingerprint, Eye, Server, Layers,
-  Brain
+  Brain, FileDown
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, PageFrame, PageHeader, Badge, cn } from './ui/Common';
+import { exportElementPDF } from '../services/pdfExportService';
 import { useAppSelector } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
 import { useNavigate } from 'react-router-dom';
@@ -369,6 +370,15 @@ export const Dashboard: React.FC = () => {
                 icon={LayoutGrid}
                 status="ONLINE"
                 visualizerState="BUSY"
+                actions={
+                    <button 
+                        onClick={() => { const el = document.getElementById('main-content'); if (el) exportElementPDF(el, 'Dashboard-Situation-Report'); }}
+                        className="text-slate-400 hover:text-accent-cyan transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-slate-900 rounded-lg"
+                        aria-label="Export Dashboard as PDF"
+                    >
+                        <FileDown size={18} />
+                    </button>
+                }
             >
                 <div className="flex gap-4 text-[10px] font-mono text-slate-500 mt-2">
                     <span className="flex items-center gap-1"><Wifi size={10} className="text-green-500"/> UPLINK: STABLE</span>

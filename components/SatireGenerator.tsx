@@ -618,10 +618,18 @@ export const SatireGenerator: React.FC = () => {
 
                     <div className="relative">
                         {!logic.result && !logic.isFabricating && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-900/20">
-                                <ShieldAlert size={64} className="text-slate-700 mb-4" />
-                                <h3 className="text-xl font-bold text-slate-500 uppercase tracking-widest mb-2">{logic.t.satire.ui.outputBufferEmpty}</h3>
-                                <p className="text-slate-600 text-xs font-mono">{logic.t.satire.ui.outputBufferHint}</p>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-700/50 rounded-2xl bg-slate-900/30 backdrop-blur-sm group">
+                                <div className="relative mb-6">
+                                    <div className="absolute inset-0 bg-accent-purple/10 blur-2xl rounded-full scale-150 group-hover:bg-accent-purple/20 transition-all duration-700" />
+                                    <ShieldAlert size={56} className="relative text-slate-600 group-hover:text-accent-purple/60 transition-colors duration-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 font-display">{logic.t.satire.ui.outputBufferEmpty}</h3>
+                                <p className="text-slate-600 text-xs font-mono max-w-xs">{logic.t.satire.ui.outputBufferHint}</p>
+                                <div className="mt-6 flex gap-3 opacity-30">
+                                    <div className="h-1.5 w-8 rounded-full shimmer-loading" />
+                                    <div className="h-1.5 w-12 rounded-full shimmer-loading" style={{ animationDelay: '200ms' }} />
+                                    <div className="h-1.5 w-6 rounded-full shimmer-loading" style={{ animationDelay: '400ms' }} />
+                                </div>
                             </div>
                         )}
                         <ResultViewer />

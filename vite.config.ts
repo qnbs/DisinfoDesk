@@ -12,7 +12,15 @@ export default defineConfig(() => {
         port: 3000,
         host: '0.0.0.0',
       },
-      plugins: [react()],
+      plugins: [
+        react({
+          babel: {
+            plugins: [
+              ['babel-plugin-react-compiler', { target: '19' }]
+            ]
+          }
+        })
+      ],
       build: {
         target: 'esnext',
         minify: 'esbuild',
@@ -41,6 +49,10 @@ export default defineConfig(() => {
 
               if (id.includes('lucide-react')) {
                 return 'vendor-icons';
+              }
+
+              if (id.includes('jspdf') || id.includes('html2canvas')) {
+                return 'vendor-pdf';
               }
 
               return undefined;

@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, forwardRef, useState } from 'react';
+import React, { useRef, useEffect, forwardRef, useState, useCallback } from 'react';
 import { Loader2, Search, Terminal } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSearchOpen } from '../../store/slices/uiSlice';
+import { playSound, haptic } from '../../utils/microInteractions';
 
 // Utility for class merging
 export function cn(...classes: (string | undefined | null | false)[]) {
@@ -217,11 +218,12 @@ export const PageHeader: React.FC<PageHeaderProps> = React.memo(({ title, subtit
 
 interface CardProps extends React.HTMLAttributes<HTMLElement> { variant?: 'glass' | 'cyber' | 'solid' | 'elevated'; as?: React.ElementType; glow?: boolean; }
 export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, className = '', onClick, variant = 'glass', glow = false, as: Component = 'div', ...props }, ref) => {
+  const soundEnabled = useAppSelector(s => s.settings.config.soundEnabled);
   const variants = {
-    glass: "bg-slate-900/60 backdrop-blur-xl border-white/10 hover:border-white/20 hover:shadow-2xl hover:bg-slate-900/70",
-    cyber: "bg-slate-950/80 backdrop-blur-md border-slate-800 hover:border-accent-cyan/30 hover:shadow-neon-cyan shadow-lg",
+    glass: "bg-slate-900/50 backdrop-blur-xl border-white/[0.08] hover:border-white/[0.15] hover:shadow-2xl hover:bg-slate-900/60 shadow-[0_4px_24px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.04)]",
+    cyber: "bg-slate-950/70 backdrop-blur-lg border-slate-800/80 hover:border-accent-cyan/30 hover:shadow-neon-cyan shadow-lg",
     solid: "bg-slate-950 border-slate-800 hover:border-slate-700 shadow-xl",
-    elevated: "bg-slate-900/80 backdrop-blur-2xl border-white/[0.08] shadow-elevation-2 hover:shadow-elevation-3 hover:border-white/[0.15] hover:bg-slate-900/90"
+    elevated: "bg-slate-900/60 backdrop-blur-2xl border-white/[0.08] shadow-elevation-2 hover:shadow-elevation-3 hover:border-white/[0.15] hover:bg-slate-900/70 shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]"
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -230,6 +232,14 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
           onClick(e as unknown as React.MouseEvent<HTMLElement>);
       }
   };
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (onClick) {
+      playSound('click', soundEnabled);
+      haptic('light');
+      onClick(e);
+    }
+  }, [onClick, soundEnabled]);
 
   return (
     <Component 
@@ -241,7 +251,7 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
             glow ? "animate-glow-pulse" : "",
             className
         )} 
-        onClick={onClick}
+        onClick={onClick ? handleClick : undefined}
         onKeyDown={handleKeyDown}
         tabIndex={onClick ? 0 : undefined}
         role={onClick ? "button" : undefined}
@@ -256,7 +266,8 @@ export const Card = React.memo(forwardRef<HTMLElement, CardProps>(({ children, c
 Card.displayName = 'Card';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'; size?: 'sm' | 'md' | 'lg'; isLoading?: boolean; icon?: React.ReactNode; }
-export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ children, variant = 'primary', size = 'md', isLoading = false, icon, className = '', disabled, ...props }, ref) => {
+export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ children, variant = 'primary', size = 'md', isLoading = false, icon, className = '', disabled, onClick, ...props }, ref) => {
+  const soundEnabled = useAppSelector(s => s.settings.config.soundEnabled);
   const variants = {
     primary: "bg-accent-cyan text-slate-950 hover:bg-cyan-400 border border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)]",
     secondary: "bg-slate-800/80 text-slate-200 border border-slate-700 hover:border-slate-500 hover:bg-slate-700 hover:text-white shadow-sm backdrop-blur-sm",
@@ -270,6 +281,13 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
       md: "px-4 py-2.5 text-xs min-h-[44px] gap-2", 
       lg: "px-6 py-3 text-sm min-h-[48px] gap-2.5" 
   };
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || isLoading) return;
+    playSound(variant === 'danger' ? 'error' : 'click', soundEnabled);
+    haptic('light');
+    onClick?.(e);
+  }, [disabled, isLoading, variant, soundEnabled, onClick]);
   
   return (
     <button 
@@ -282,6 +300,7 @@ export const Button = React.memo(forwardRef<HTMLButtonElement, ButtonProps>(({ c
         )} 
         disabled={disabled || isLoading} 
         aria-busy={isLoading}
+        onClick={handleClick}
         {...props}
     >
       {/* Subtle inner shine */}
@@ -336,7 +355,7 @@ export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' 
   );
 });
 
-export const ErrorFallback: React.FC<{ error: Error, resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => (
+export const ErrorFallback: React.FC<{ error: unknown, resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center animate-fade-in" role="alert">
     <div className="relative mb-6">
       <div className="absolute inset-0 bg-red-500/10 blur-2xl rounded-full scale-150" />
@@ -345,7 +364,7 @@ export const ErrorFallback: React.FC<{ error: Error, resetErrorBoundary: () => v
       </div>
     </div>
     <h2 className="text-xl font-bold text-white mb-2 font-display tracking-tight uppercase">System Critical Failure</h2>
-    <p className="text-slate-500 text-xs font-mono mb-6 max-w-md leading-relaxed">The application encountered an unrecoverable error. Diagnostic dump: {error.message}</p>
+    <p className="text-slate-500 text-xs font-mono mb-6 max-w-md leading-relaxed">The application encountered an unrecoverable error. Diagnostic dump: {error instanceof Error ? error.message : String(error)}</p>
     <Button onClick={resetErrorBoundary} variant="secondary">Initiate Reboot Sequence</Button>
   </div>
 );

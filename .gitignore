@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+out.txt
+generate_50_theories.js
+make_data.cjs
+patch*.cjs
+patch*.js
+patch_*.js

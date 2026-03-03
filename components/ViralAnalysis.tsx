@@ -7,15 +7,14 @@ import {
   Activity, Target, Lock, Wifi, AlertTriangle, 
   Microscope, Terminal, Crosshair, BarChart3
 } from 'lucide-react';
-import { 
-  AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, 
-  ResponsiveContainer, CartesianGrid, ReferenceLine
-} from 'recharts';
+const LazyViralityChart = React.lazy(() => import('./LazyViralityChart'));
+const LazyTelemetryChart = React.lazy(() => import('./LazyTelemetryChart'));
 import { Card, Button, PageFrame, PageHeader } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setParams, resetParams } from '../store/slices/simulationSlice';
 import { ActionCreators } from 'redux-undo';
 import { useNavigate } from 'react-router-dom';
+import ViralityWorker from '../workers/virality.worker?worker';
 
 // --- TYPES & PHYSICS CONSTANTS ---
 
@@ -594,19 +593,9 @@ export const ViralAnalysis: React.FC = () => {
                             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_red]"></span>
                         </div>
                         <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                                <AreaChart data={telemetry}>
-                                    <defs>
-                                        <linearGradient id="gradInf" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                                    <Area type="monotone" dataKey="infected" stroke="#ef4444" strokeWidth={2} fill="url(#gradInf)" isAnimationActive={false} />
-                                    <Area type="monotone" dataKey="recovered" stroke="#10b981" strokeWidth={1} fill="transparent" isAnimationActive={false} />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                            <React.Suspense fallback={<div className="w-full h-full flex items-center justify-center"><div className="flex flex-col items-center gap-2 opacity-50"><div className="h-2 w-24 rounded shimmer-loading" /><div className="h-2 w-16 rounded shimmer-loading" style={{ animationDelay: '200ms' }} /></div></div>}>
+    <LazyTelemetryChart telemetry={telemetry} />
+</React.Suspense>
                         </div>
                     </Card>
                 </div>

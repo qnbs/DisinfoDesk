@@ -1,6 +1,9 @@
-import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fakeBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { Theory, Language, AppError, SatireOptions } from '../../types';
 import { analyzeTheoryWithGemini, generateSatireTheory, generateTheoryImage } from '../../services/geminiService';
+
+// Retry wrapper with exponential backoff (max 3 attempts)
+const retryingBaseQuery = retry(fakeBaseQuery<AppError>(), { maxRetries: 2 });
 
 // Define Tag Types
 export const TAGS = {
@@ -11,7 +14,7 @@ export const TAGS = {
 
 export const aiApi = createApi({
   reducerPath: 'aiApi',
-  baseQuery: fakeBaseQuery<AppError>(),
+  baseQuery: retryingBaseQuery,
   tagTypes: [TAGS.ANALYSIS, TAGS.IMAGE, TAGS.SATIRE],
   refetchOnMountOrArgChange: 300, // Re-fetch if components remount after 5 mins to ensure fresh but cached data
   
@@ -26,6 +29,10 @@ export const aiApi = createApi({
           return { data };
         } catch (error) {
           const err = error as Error;
+          // Don't retry on auth/config errors
+          if (err.message?.includes('API key') || err.message?.includes('permission')) {
+            retry.fail({ message: err.message, stack: err.stack, code: err.name });
+          }
           return { error: { message: err.message, stack: err.stack, code: err.name } };
         }
       },
@@ -45,6 +52,9 @@ export const aiApi = createApi({
           return { data };
         } catch (error) {
           const err = error as Error;
+          if (err.message?.includes('API key') || err.message?.includes('permission')) {
+            retry.fail({ message: err.message, stack: err.stack, code: err.name });
+          }
           return { error: { message: err.message, stack: err.stack, code: err.name } };
         }
       },
@@ -62,6 +72,9 @@ export const aiApi = createApi({
           return { data };
         } catch (error) {
           const err = error as Error;
+          if (err.message?.includes('API key') || err.message?.includes('permission')) {
+            retry.fail({ message: err.message, stack: err.stack, code: err.name });
+          }
           return { error: { message: err.message, stack: err.stack, code: err.name } };
         }
       },

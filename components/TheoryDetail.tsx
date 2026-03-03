@@ -4,8 +4,9 @@ import { analyzeTheoryWithGemini, generateTheoryImage } from '../services/gemini
 import { 
     ArrowLeft, ShieldCheck, History, FileText, ExternalLink, Link, 
     Youtube, FileKey, GitBranch, Edit3, BookOpen, Quote, AlertTriangle, 
-    CheckCircle2, Clock, RefreshCw, MessageSquare, Download
+    CheckCircle2, Clock, RefreshCw, MessageSquare, Download, Share2
 } from 'lucide-react';
+import { generateShareLink, copyShareLink } from '../services/shareService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
@@ -407,7 +408,9 @@ const useTheoryDetailLogic = () => {
     networkNodes,
     onBack,
     onNavigateTo,
-    t
+    t,
+    language,
+    showToast
   };
 };
 
@@ -555,7 +558,7 @@ const StatsCard: React.FC = () => {
 
 const SourcesCard: React.FC = () => {
     const { details, t, loading, setIsReferencesOpen } = useTheoryDetail();
-  if (loading) return <Card className="p-6 space-y-4"><div className="h-4 bg-slate-800 rounded w-1/3 animate-pulse"></div><div className="h-10 bg-slate-800 rounded animate-pulse"></div><div className="h-10 bg-slate-800 rounded animate-pulse"></div></Card>;
+  if (loading) return <Card className="p-6 space-y-4"><div className="h-4 rounded w-1/3 shimmer-loading" /><div className="h-10 rounded shimmer-loading" style={{ animationDelay: '150ms' }} /><div className="h-10 rounded shimmer-loading" style={{ animationDelay: '300ms' }} /></Card>;
   if (!details || details.sources.length === 0) return null;
   return (
     <Card variant="glass" className="p-6">
@@ -600,6 +603,8 @@ const TheoryDetailLayout: React.FC = () => {
         theory,
         onBack,
         t,
+        language,
+        showToast,
         activeTab,
         handleRefreshAnalysis,
         loading,
@@ -616,7 +621,7 @@ const TheoryDetailLayout: React.FC = () => {
 
     return (
         <PageFrame>
-            <PageHeader title={(t.detail as Record<string, unknown>).caseFile as string || "CASE FILE"} subtitle={`ID: ${theory.id.toUpperCase()}`} icon={FileKey} actions={<div className="flex gap-2"><Button variant="secondary" onClick={handleRefreshAnalysis} icon={<RefreshCw size={14} />} disabled={loading} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.refresh}</Button><Button variant="secondary" onClick={handleExportReport} icon={<Download size={14} />} disabled={!details} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.report}</Button><Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />} className="text-slate-400 hover:text-white text-xs uppercase font-bold">{t.detail.back}</Button>{theory.isUserCreated && <Button variant="primary" size="sm" onClick={handleEdit} icon={<Edit3 size={14} />} className="text-xs">{t.detail.edit}</Button>}</div>} />
+            <PageHeader title={(t.detail as Record<string, unknown>).caseFile as string || "CASE FILE"} subtitle={`ID: ${theory.id.toUpperCase()}`} icon={FileKey} actions={<div className="flex gap-2"><Button variant="ghost" size="sm" onClick={async () => { const link = generateShareLink({ type: 'theory', id: theory.id, title: theory.title, lang: language as 'de' | 'en', summary: theory.shortDescription }); const ok = await copyShareLink(link); if (ok) showToast('Share link copied!', 'success'); }} icon={<Share2 size={14} />} className="text-xs">Share</Button><Button variant="secondary" onClick={handleRefreshAnalysis} icon={<RefreshCw size={14} />} disabled={loading} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.refresh}</Button><Button variant="secondary" onClick={handleExportReport} icon={<Download size={14} />} disabled={!details} className="text-xs font-bold border-white/10 hover:border-white">{t.detail.report}</Button><Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />} className="text-slate-400 hover:text-white text-xs uppercase font-bold">{t.detail.back}</Button>{theory.isUserCreated && <Button variant="primary" size="sm" onClick={handleEdit} icon={<Edit3 size={14} />} className="text-xs">{t.detail.edit}</Button>}</div>} />
             <HeroSection />
             <TabNavigation />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

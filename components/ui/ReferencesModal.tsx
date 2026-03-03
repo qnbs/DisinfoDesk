@@ -24,14 +24,15 @@ export const ReferencesModal: React.FC<ReferencesModalProps> = ({ isOpen, onClos
 
   return (
     <div
-      className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={t.detail.references}
     >
       <Card
-        className="w-full max-w-3xl max-h-[80vh] overflow-hidden border border-slate-700"
+        className="w-full max-w-3xl max-h-[80vh] overflow-hidden border border-white/[0.1] shadow-[0_16px_64px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)] animate-fade-in-scale"
+        variant="elevated"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 md:p-5 border-b border-slate-800 flex items-center justify-between">

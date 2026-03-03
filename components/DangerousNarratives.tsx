@@ -7,8 +7,9 @@ import {
   Activity, Target, AlertOctagon, 
   Microscope, Radar, BarChart2, ArrowLeft, Lock, AlertTriangle,
   Siren, Terminal, Radio, Brain, Crosshair, Wifi, Globe as GlobeIcon,
-  ChevronsUp
+  ChevronsUp, FileDown
 } from 'lucide-react';
+import { exportElementPDF } from '../services/pdfExportService';
 import { 
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
   Tooltip, ResponsiveContainer, Cell, ReferenceLine,
@@ -664,9 +665,17 @@ export const DangerousNarratives: React.FC = () => {
             statusColor="bg-red-600"
             visualizerState="ALERT"
             actions={
-                <Button variant="ghost" onClick={logic.onBack} size="sm" icon={<ArrowLeft size={16} />}>
-                    {logic.t.detail.back}
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" icon={<FileDown size={16}/>}
+                        onClick={() => {
+                            const el = document.getElementById('main-content');
+                            if (el) exportElementPDF(el, 'Threat-Matrix-Report');
+                        }}
+                    >PDF</Button>
+                    <Button variant="ghost" onClick={logic.onBack} size="sm" icon={<ArrowLeft size={16} />}>
+                        {logic.t.detail.back}
+                    </Button>
+                </div>
             }
           />
           

@@ -12,7 +12,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info', duration = APP_CONFIG.UI.TOAST_DURATION) => {
+  const showToast = useCallback((message: string, type: ToastType = 'info', duration: number = APP_CONFIG.UI.TOAST_DURATION) => {
     const id = Date.now().toString() + Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, message, type, duration }]);
   }, []);

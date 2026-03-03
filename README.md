@@ -33,6 +33,7 @@
 
 <p align="center">
   <a href="https://github.com/qnbs/DisinfoDesk/actions/workflows/ci-cd.yml"><img src="https://github.com/qnbs/DisinfoDesk/actions/workflows/ci-cd.yml/badge.svg?branch=main" alt="CI/CD Pipeline"></a>
+  <a href="https://github.com/qnbs/DisinfoDesk/actions/workflows/e2e.yml"><img src="https://github.com/qnbs/DisinfoDesk/actions/workflows/e2e.yml/badge.svg?branch=main" alt="E2E Tests"></a>
   <a href="https://github.com/qnbs/DisinfoDesk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/qnbs/DisinfoDesk?color=00e5ff&style=flat-square" alt="License"></a>
   <img src="https://img.shields.io/badge/React-19-00d8ff?style=flat-square&logo=react" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript" alt="TypeScript">
@@ -263,6 +264,7 @@ This repository uses a complete CI/CD pipeline with GitHub Actions.
 | Workflow | File | Trigger | Description |
 |----------|------|---------|-------------|
 | **CI/CD Pipeline** | `ci-cd.yml` | Push/PR to `main` | Lint → TypeCheck → Test → Build → Lighthouse → Deploy |
+| **E2E Tests** | `e2e.yml` | Push/PR to `main` | Playwright Chromium: Chat, Matrix, Offline, A11y (15 tests) |
 | **CodeQL Security** | `codeql.yml` | Push/PR + Weekly | Automatic security analysis for JS/TS |
 | **Dependabot** | `dependabot.yml` | Weekly | Automatic dependency updates |
 
@@ -394,11 +396,18 @@ npm run build         # Vite — production build must succeed
 ```
 
 ## Roadmap
+- [x] Full `strict: true` TypeScript migration
+- [x] E2E testing with Playwright (15 tests: chat, matrix, offline, a11y)
+- [x] React 19 Compiler integration with `babel-plugin-react-compiler`
+- [x] PDF export for reports, chats, and page screenshots (jsPDF + html2canvas)
+- [x] Shareable read-only links with URL-safe base64 encoding
+- [x] Global ErrorBoundary + RTK Query retry with exponential backoff
+- [x] Web Worker virality simulation with OffscreenCanvas
+- [x] Lazy Recharts loading for reduced initial bundle
 - [ ] Expand Author/Media database and cross-references
 - [ ] Additional didactic learning paths and fact-check exports
 - [ ] Enhanced research workflow UX
-- [ ] Full `strict: true` TypeScript migration
-- [ ] E2E testing with Playwright
+- [ ] Collaborative annotation mode
 
 ## License
 MIT – see [LICENSE](LICENSE).
@@ -625,6 +634,7 @@ Dieses Repository verwendet eine vollständige CI/CD-Pipeline mit GitHub Actions
 | Workflow | Datei | Trigger | Beschreibung |
 |----------|-------|---------|--------------|
 | **CI/CD Pipeline** | `ci-cd.yml` | Push/PR auf `main` | Lint → TypeCheck → Test → Build → Lighthouse → Deploy |
+| **E2E Tests** | `e2e.yml` | Push/PR auf `main` | Playwright Chromium: Chat, Matrix, Offline, A11y (15 Tests) |
 | **CodeQL Security** | `codeql.yml` | Push/PR + Weekly | Automatische Sicherheitsanalyse für JS/TS |
 | **Dependabot** | `dependabot.yml` | Weekly | Automatische Dependency-Updates |
 
@@ -756,11 +766,18 @@ npm run build         # Vite — Production Build muss erfolgreich sein
 ```
 
 ## Roadmap
+- [x] Vollständige `strict: true` TypeScript-Migration
+- [x] E2E-Tests mit Playwright (15 Tests: Chat, Matrix, Offline, A11y)
+- [x] React 19 Compiler-Integration mit `babel-plugin-react-compiler`
+- [x] PDF-Export für Reports, Chats und Seiten-Screenshots (jsPDF + html2canvas)
+- [x] Teilbare Nur-Lese-Links mit URL-safe Base64-Kodierung
+- [x] Globale ErrorBoundary + RTK Query Retry mit exponentiellem Backoff
+- [x] Web Worker Viralitätssimulation mit OffscreenCanvas
+- [x] Lazy Recharts-Loading für reduziertes initiales Bundle
 - [ ] Ausbau Author/Media-Datenbasis und Cross-Referenzen
 - [ ] Weitere didaktische Lernpfade und Fact-Check-Exports
 - [ ] Erweiterte Recherche-Workflow-UX
-- [ ] Vollständige `strict: true` TypeScript-Migration
-- [ ] E2E-Tests mit Playwright
+- [ ] Kollaborativer Annotationsmodus
 
 ## Lizenz
 MIT – siehe [LICENSE](LICENSE).

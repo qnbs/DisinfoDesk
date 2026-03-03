@@ -117,7 +117,7 @@ export const GenerationHUD: React.FC<GenerationHUDProps> = ({ mode, isVisible, c
   // --- OVERLAY VARIANT (Optimized for Image Generation) ---
   if (variant === 'overlay') {
     return (
-        <div className={`absolute inset-0 bg-slate-950/70 backdrop-blur-md flex flex-col items-center justify-center z-50 ${className}`}>
+        <div className={`absolute inset-0 bg-slate-950/60 backdrop-blur-xl flex flex-col items-center justify-center z-50 ${className}`} role="status" aria-live="assertive" aria-label="AI generation in progress">
             {/* Background Texture */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
             
@@ -162,7 +162,7 @@ export const GenerationHUD: React.FC<GenerationHUDProps> = ({ mode, isVisible, c
 
   // --- CARD VARIANT (Standard) ---
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-slate-950/90 backdrop-blur-md border ${borderClass} shadow-2xl flex flex-col ${className}`}>
+    <div className={`relative overflow-hidden rounded-xl bg-slate-950/70 backdrop-blur-xl border ${borderClass} shadow-[0_8px_40px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col ${className}`} role="status" aria-label="AI generation in progress">
       
       {/* Scanline Effect */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
@@ -227,8 +227,8 @@ export const GenerationHUD: React.FC<GenerationHUDProps> = ({ mode, isVisible, c
         </div>
 
         {/* Right: Terminal Log */}
-        <div className="flex-1 bg-black/50 rounded-lg border border-slate-800 p-4 font-mono text-xs overflow-hidden relative">
-           <div className="absolute top-2 right-2 text-[9px] text-slate-600">SYS_LOG.TXT</div>
+        <div className="flex-1 bg-black/50 rounded-lg border border-slate-800 p-4 font-mono text-xs overflow-hidden relative" role="log" aria-live="polite" aria-label="AI processing log">
+           <div className="absolute top-2 right-2 text-[9px] text-slate-600" aria-hidden="true">SYS_LOG.TXT</div>
            <div className="space-y-1.5 mt-2">
               {logs.map((log, i) => (
                 <div key={i} className={`flex gap-2 ${i === logs.length - 1 ? 'text-white font-bold' : 'text-slate-400 opacity-70'}`}>

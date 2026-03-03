@@ -170,10 +170,13 @@ const HoldButton: React.FC<{ onComplete: () => void, label: string, icon?: React
 };
 
 const ControlToggle: React.FC<{ label: string; description?: string; checked: boolean; onChange: (c: boolean) => void; icon: React.ReactNode }> = React.memo(({ label, description, checked, onChange, icon }) => (
-  <div 
+  <button 
+    type="button"
+    role="switch"
+    aria-checked={checked}
     onClick={() => onChange(!checked)}
     className={`
-      flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group select-none relative overflow-hidden
+      w-full flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group select-none relative overflow-hidden text-left
       ${checked ? 'bg-slate-900 border-accent-cyan/50 shadow-[0_0_15px_rgba(6,182,212,0.1)]' : 'bg-slate-950/30 border-slate-800 hover:border-slate-600 hover:bg-slate-900/50'}
     `}
   >
@@ -190,7 +193,7 @@ const ControlToggle: React.FC<{ label: string; description?: string; checked: bo
       <div className={`w-3.5 h-3.5 rounded-full bg-current shadow-sm transition-all duration-300 ${checked ? 'translate-x-5 text-accent-cyan shadow-[0_0_8px_cyan]' : 'translate-x-0 text-slate-500'}`} />
     </div>
     {checked && <div className="absolute inset-0 bg-accent-cyan/5 pointer-events-none" />}
-  </div>
+  </button>
 ));
 
 const RangeSlider: React.FC<{ label: string; value: number; min: number; max: number; step: number; onChange: (val: number) => void; format?: (v: number) => string; color?: string }> = ({ label, value, min, max, step, onChange, format, color = "bg-accent-cyan" }) => (

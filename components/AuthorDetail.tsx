@@ -1,5 +1,5 @@
 
-import React, { useMemo, createContext, useContext, useState } from 'react';
+import React, { useMemo, useCallback, createContext, useContext, useState } from 'react';
 import { MEDIA_ITEMS } from '../constants';
 import { Author } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -37,7 +37,7 @@ const useAuthorDetailLogic = () => {
     const onBack = () => navigate('/authors');
     const onSearchRelated = () => navigate('/archive');
 
-    const runPsychProfile = () => {
+    const runPsychProfile = useCallback(() => {
         setProfiling(true);
         // Simulate AI Processing
         setTimeout(() => {
@@ -52,7 +52,7 @@ const useAuthorDetailLogic = () => {
             });
             setProfiling(false);
         }, 2500);
-    };
+    }, [language]);
 
     return { t, language, author, relatedMedia, onBack, onSearchRelated, activeTab, setActiveTab, runPsychProfile, profiling, profileData };
 };
@@ -168,12 +168,12 @@ const InfluenceRadar: React.FC<{ author: Author }> = ({ author }) => {
     const persistence = Math.min(100, Math.max(20, Math.round((author.notableWorks.length / 6) * 100)));
     const controversy = Math.min(100, Math.max(20, Math.round(author.controversiesAndDebunkings.length * 25)));
 
-    const radarData = [
+    const radarData = useMemo(() => [
         { subject: t.authors.detail.rhetoric, value: rhetoric },
         { subject: t.authors.detail.reach, value: reach },
         { subject: t.authors.detail.persistence, value: persistence },
         { subject: t.authors.detail.controversy, value: controversy },
-    ];
+    ], [t, rhetoric, reach, persistence, controversy]);
 
     return (
         <Card className="p-6 border-slate-800 bg-slate-900/50">

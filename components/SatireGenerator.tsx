@@ -126,6 +126,8 @@ const EntropyCanvas: React.FC<{ onEntropyFull: () => void, active: boolean }> = 
         <div className="relative w-full h-32 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden group cursor-crosshair">
             <canvas 
                 ref={canvasRef} 
+                role="img"
+                aria-label="Entropy harvesting visualization collecting mouse randomness"
                 onMouseMove={handleMouseMove}
                 className="w-full h-full block"
             />
@@ -165,8 +167,8 @@ const useSatireLogic = () => {
     const [format, setFormat] = useState('LEAK');
     const [paranoia, setParanoia] = useState(75);
 
-    // Data Maps
-    const subjects: SatireSubject[] = [
+    // Data Maps (memoized to avoid re-creating on every render)
+    const subjects: SatireSubject[] = useMemo(() => [
         { id: 'CATS', label: t.satire.subjects.CATS, icon: '🐈' },
         { id: 'INTERNET', label: t.satire.subjects.INTERNET, icon: '🌐' },
         { id: 'FOOD', label: t.satire.subjects.FOOD, icon: '🍔' },
@@ -175,17 +177,17 @@ const useSatireLogic = () => {
         { id: 'SOCKS', label: t.satire.subjects.SOCKS, icon: '🧦' },
         { id: 'MATH', label: t.satire.subjects.MATH, icon: '➗' },
         { id: 'TIME', label: t.satire.subjects.TIME, icon: '⏰' }
-    ];
+    ], [t]);
 
-    const archetypes: SatireArchetype[] = [
+    const archetypes: SatireArchetype[] = useMemo(() => [
         { id: 'ANCIENT', label: t.satire.archetypes.ANCIENT.label, desc: t.satire.archetypes.ANCIENT.desc },
         { id: 'CYBER', label: t.satire.archetypes.CYBER.label, desc: t.satire.archetypes.CYBER.desc },
         { id: 'GOV', label: t.satire.archetypes.GOV.label, desc: t.satire.archetypes.GOV.desc },
         { id: 'BIO', label: t.satire.archetypes.BIO.label, desc: t.satire.archetypes.BIO.desc }
-    ];
+    ], [t]);
 
-    // Fabrication Sequence
-    const LOG_STEPS = [
+    // Fabrication Sequence (stable reference)
+    const LOG_STEPS = useMemo(() => [
         "Initializing Narrative Vectors...",
         "Scraping Akasha Records...",
         "Injecting Cognitive Dissonance...",
@@ -193,7 +195,7 @@ const useSatireLogic = () => {
         "Bribing Digital Witnesses...",
         "Compiling Reality Distortion...",
         "Finalizing Payload..."
-    ];
+    ], []);
 
     useEffect(() => {
         if (isFabricating) {

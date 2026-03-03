@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { Language } from '../types';
 import { translations } from '../utils/translations';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -16,6 +16,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const language = useAppSelector(state => state.settings.language);
   const dispatch = useAppDispatch();
+
+  // Sync <html lang> attribute for screen readers (WCAG 3.1.1)
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     dispatch(setReduxLanguage(lang));

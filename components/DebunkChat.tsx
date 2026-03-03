@@ -57,10 +57,21 @@ const buildContextBrief = (contextId: string | null, language: 'de' | 'en') => {
 
 const ReactiveCore: React.FC<{ active: boolean, mode: 'IDLE' | 'LISTENING' | 'SPEAKING' | 'THINKING' }> = ({ active, mode }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Pause animation when off-screen
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
     
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas || !isVisible) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
@@ -169,9 +180,9 @@ const ReactiveCore: React.FC<{ active: boolean, mode: 'IDLE' | 'LISTENING' | 'SP
         };
         render();
         return () => cancelAnimationFrame(animationFrame);
-    }, [active, mode]);
+    }, [active, mode, isVisible]);
 
-    return <canvas ref={canvasRef} className="w-full h-full" />;
+    return <div ref={containerRef} className="w-full h-full" aria-hidden="true"><canvas ref={canvasRef} className="w-full h-full" /></div>;
 };
 
 // --- 2. LOGIC HOOK ---
@@ -226,7 +237,9 @@ const useDebunkChatLogic = () => {
 
   const initAudioContext = () => {
       if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+          const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+          if (!AudioCtx) return;
+          audioContextRef.current = new AudioCtx({ sampleRate: 24000 });
       }
   };
 

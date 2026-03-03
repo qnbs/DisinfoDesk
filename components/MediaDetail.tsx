@@ -37,12 +37,17 @@ const useMediaDetailLogic = () => {
             // Start Analysis
             const loadAnalysis = async () => {
                 setLoading(true);
-                const res = await analyzeMediaWithGemini(found, language, { 
-                    model: settings.aiModelVersion,
-                    temperature: 0.7 
-                });
-                setAnalysis(res);
-                setLoading(false);
+                try {
+                    const res = await analyzeMediaWithGemini(found, language, { 
+                        model: settings.aiModelVersion,
+                        temperature: 0.7 
+                    });
+                    setAnalysis(res);
+                } catch {
+                    setAnalysis(null);
+                } finally {
+                    setLoading(false);
+                }
             };
             loadAnalysis();
         } else {

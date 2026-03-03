@@ -418,6 +418,8 @@ const AdvancedPropagationNetwork: React.FC<{
         <div ref={containerRef} className="absolute inset-0 z-0">
             <canvas 
                 ref={canvasRef} 
+                role="img"
+                aria-label="Network propagation simulation showing how narratives spread through nodes"
                 onClick={handleInteraction}
                 className={`w-full h-full block ${tool !== 'OBSERVE' ? 'cursor-crosshair' : 'cursor-default'}`}
             />

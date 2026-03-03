@@ -39,11 +39,21 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const requestRef = useRef<number>(0);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Pause animation when off-screen
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
     
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        if (!canvas || !container) return;
+        if (!canvas || !container || !isVisible) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -155,7 +165,7 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
             observer.disconnect();
             cancelAnimationFrame(requestRef.current);
         };
-    }, [activeNodes]);
+    }, [activeNodes, isVisible]);
 
     return (
         <div ref={containerRef} className="w-full h-full relative min-h-[300px]">

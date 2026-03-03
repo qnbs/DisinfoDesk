@@ -68,6 +68,7 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
     a.href = url;
     a.download = `disinfodesk_quick_export.json`;
     a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     onClose();
   };
 
@@ -328,6 +329,7 @@ const SearchHeader: React.FC = () => {
                 type="text"
                 className="flex-1 bg-transparent text-lg text-white placeholder-slate-600 outline-none font-mono tracking-wide"
                 placeholder={t.search.placeholder}
+                aria-label={t.search.placeholder}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -422,12 +424,13 @@ const SearchResults: React.FC = () => {
 const SearchFooter: React.FC = () => {
     const { flatResults, t, selectedIndex } = useOmniSearch();
     const currentItem = flatResults[selectedIndex];
+    const pid = useMemo(() => Math.floor(Math.random() * 9000) + 1000, []);
 
     return (
         <div className="p-2 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-500 flex justify-between font-mono px-4 h-8 items-center">
             <div className="flex gap-4">
                 <span className="flex items-center gap-1"><Cpu size={10} className="text-accent-cyan"/> {t.search.footerLeft}</span>
-                <span className="hidden md:inline opacity-50">PID: {Math.floor(Math.random() * 9000) + 1000}</span>
+                <span className="hidden md:inline opacity-50">PID: {pid}</span>
             </div>
             <div className="flex items-center gap-4">
                 {currentItem && (

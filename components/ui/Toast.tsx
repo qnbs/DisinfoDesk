@@ -76,7 +76,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onClose }) => {
 
 export const ToastContainer: React.FC<{ toasts: ToastMessage[], removeToast: (id: string) => void }> = ({ toasts, removeToast }) => {
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col items-end pointer-events-none p-4 md:p-0">
+    <div className="fixed top-4 right-4 z-[9999] flex flex-col items-end pointer-events-none p-4 md:p-0" aria-live="polite" aria-relevant="additions">
       {toasts.map(toast => (
         <ToastItem key={toast.id} toast={toast} onClose={removeToast} />
       ))}

@@ -155,11 +155,21 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
     const { t } = useLanguage();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Pause physics simulation when off-screen
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        if (!canvas || !container) return;
+        if (!canvas || !container || !isVisible) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -284,12 +294,12 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
             cancelAnimationFrame(animationFrame);
             canvas.removeEventListener('click', handleClick);
         };
-    }, [authors, onSelect]);
+    }, [authors, onSelect, isVisible]);
 
     return (
         <div ref={containerRef} className="w-full h-[600px] bg-slate-950 rounded-xl border border-slate-800 relative overflow-hidden shadow-inner group">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
-            <canvas ref={canvasRef} className="block w-full h-full cursor-crosshair relative z-10" />
+            <canvas ref={canvasRef} className="block w-full h-full cursor-crosshair relative z-10" role="img" aria-label="Network graph showing connections between conspiracy theory authors" />
             <div className="absolute bottom-4 left-4 p-3 bg-slate-900/80 backdrop-blur rounded border border-slate-700 text-[10px] font-mono text-slate-400 pointer-events-none z-20">
                 <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 rounded-full bg-cyan-500"></div> {t.authors.standardNode}</div>
                 <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500"></div> {t.authors.highInfluenceNode}</div>

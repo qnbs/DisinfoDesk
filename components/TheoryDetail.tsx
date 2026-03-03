@@ -190,6 +190,8 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
         <div ref={containerRef} className="w-full h-full bg-slate-950 rounded-xl border border-white/10 relative overflow-hidden">
             <canvas 
                 ref={canvasRef} 
+                role="img"
+                aria-label="Interactive force-directed network graph showing connections between conspiracy theories"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={() => setDraggingNode(null)}

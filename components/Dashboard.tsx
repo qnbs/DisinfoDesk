@@ -67,11 +67,21 @@ const CipherText: React.FC<{ text: string, className?: string, reveal?: boolean 
 const HoloGlobe: React.FC<{ active: boolean, markers: {id: string, color: string}[] }> = ({ active, markers }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const parentRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Pause animation when off-screen
+    useEffect(() => {
+        const el = parentRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const parent = parentRef.current;
-        if (!canvas || !parent) return;
+        if (!canvas || !parent || !isVisible) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
@@ -191,9 +201,9 @@ const HoloGlobe: React.FC<{ active: boolean, markers: {id: string, color: string
             window.removeEventListener('resize', resize);
             cancelAnimationFrame(animationFrameId);
         };
-    }, [active, markers]);
+    }, [active, markers, isVisible]);
 
-    return <div ref={parentRef} className="w-full h-full absolute inset-0"><canvas ref={canvasRef} className="block" /></div>;
+    return <div ref={parentRef} className="w-full h-full absolute inset-0"><canvas ref={canvasRef} className="block" role="img" aria-label="Interactive holographic globe showing disinformation threat vectors worldwide" /></div>;
 };
 
 // SVG Threat Gauge
@@ -340,8 +350,8 @@ export const Dashboard: React.FC = () => {
     
     // Derived Stats
     const totalFiles = theories.length;
-    const criticalThreats = theories.filter(t => t.dangerLevel.includes('High') || t.dangerLevel.includes('Extreme')).length;
-    const avgVirality = Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (totalFiles || 1));
+    const criticalThreats = useMemo(() => theories.filter(t => t.dangerLevel.includes('High') || t.dangerLevel.includes('Extreme')).length, [theories]);
+    const avgVirality = useMemo(() => Math.round(theories.reduce((acc, t) => acc + t.popularity, 0) / (totalFiles || 1)), [theories, totalFiles]);
     const sysLoad = useLiveTelemetry(Array(20).fill(20));
     
     // Map Markers

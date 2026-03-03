@@ -155,8 +155,7 @@ const useVaultLogic = () => {
                 'SATIRES': 'satires'
             };
             
-            // Type-safe save dispatch
-            // @ts-ignore - Dynamic dispatch is safe here due to logic
+            // Type-safe save dispatch via runtime store name map
             await dbService.put(storeNameMap[activeTab] as Parameters<typeof dbService.put>[0], updatedItem);
 
             setEditMode(false);
@@ -174,6 +173,7 @@ const useVaultLogic = () => {
         a.href = url;
         a.download = `vault_dump_${new Date().getTime()}.json`;
         a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         showToast('Vault exported to local drive.', 'success');
     };
 

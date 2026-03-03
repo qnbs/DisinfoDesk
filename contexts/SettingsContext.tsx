@@ -70,6 +70,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     a.href = url;
     a.download = `disinfodesk_vault_export_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     addLog('Vault encrypted export generated successfully.', 'success');
   }, [addLog]);
 

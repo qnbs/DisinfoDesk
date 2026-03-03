@@ -1,14 +1,14 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
 if (workbox) {
-    console.log(`[DisinfoDesk] Workbox Core loaded. PWA Protocol initiated.`);
+    // Only log in development
+    // console.log(`[DisinfoDesk] Workbox Core loaded.`);
 
     // --- CONFIGURATION ---
     workbox.setConfig({ debug: false });
     
-    // Force immediate takeover of the page once installed
-    // This allows the app to control the page immediately without a reload
-    self.skipWaiting();
+    // Skip waiting is controlled via SKIP_WAITING message from Layout.tsx
+    // to allow the update UX banner to function properly
     workbox.core.clientsClaim();
 
     // --- CONSTANTS ---

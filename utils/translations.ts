@@ -559,7 +559,10 @@ export const translations = {
         misleading: 'IRREFÜHREND',
         unverified: 'UNBESTÄTIGT'
       },
-      error: 'Verbindung unterbrochen.'
+      error: 'Verbindung unterbrochen.',
+      micDenied: 'Mikrofonzugriff verweigert.',
+      sessionSaved: 'Sitzung verschlüsselt und archiviert.',
+      sessionSaveFailed: 'Speichern fehlgeschlagen.'
     },
     satire: {
       title: 'Der Aluhut-Generator',
@@ -1335,7 +1338,10 @@ export const translations = {
         misleading: 'MISLEADING',
         unverified: 'UNVERIFIED'
       },
-      error: 'Connection interrupted.'
+      error: 'Connection interrupted.',
+      micDenied: 'Microphone access denied.',
+      sessionSaved: 'Session encrypted and archived.',
+      sessionSaveFailed: 'Save failed.'
     },
     satire: {
       title: 'Tinfoil Hat Generator',

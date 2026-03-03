@@ -60,21 +60,70 @@ const decompressData = async (buffer: ArrayBuffer): Promise<any> => {
 class CryptoGuard {
   private key: CryptoKey | null = null;
   private readonly ivLen = 12;
+  private static readonly KEY_DB_NAME = 'DisinfoDesk_CryptoKeys';
+  private static readonly KEY_DB_VERSION = 1;
+  private static readonly KEY_STORE = 'master_keys';
+  private static readonly KEY_ID = 'vault_master_key';
+
+  /** Store the master key JWK in a dedicated IndexedDB (not localStorage). */
+  private async openKeyDb(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(CryptoGuard.KEY_DB_NAME, CryptoGuard.KEY_DB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(CryptoGuard.KEY_STORE)) {
+          db.createObjectStore(CryptoGuard.KEY_STORE, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  private async getStoredKeyJwk(): Promise<JsonWebKey | null> {
+    const db = await this.openKeyDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(CryptoGuard.KEY_STORE, 'readonly');
+      const get = tx.objectStore(CryptoGuard.KEY_STORE).get(CryptoGuard.KEY_ID);
+      get.onsuccess = () => resolve((get.result as { id: string; jwk: JsonWebKey } | undefined)?.jwk ?? null);
+      get.onerror = () => reject(get.error);
+    });
+  }
+
+  private async setStoredKeyJwk(jwk: JsonWebKey): Promise<void> {
+    const db = await this.openKeyDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(CryptoGuard.KEY_STORE, 'readwrite');
+      tx.objectStore(CryptoGuard.KEY_STORE).put({ id: CryptoGuard.KEY_ID, jwk });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
 
   async init() {
     if (this.key) return;
-    // Try to get key from storage, or generate new
-    const rawKey = localStorage.getItem('vault_master_key');
-    if (rawKey) {
+
+    // Migrate: if legacy key exists in localStorage, move it to IndexedDB
+    const legacyRaw = localStorage.getItem('vault_master_key');
+    if (legacyRaw) {
+      const jwk = JSON.parse(legacyRaw) as JsonWebKey;
+      await this.setStoredKeyJwk(jwk);
+      localStorage.removeItem('vault_master_key');
+    }
+
+    // Try to load from IndexedDB
+    const storedJwk = await this.getStoredKeyJwk();
+    if (storedJwk) {
       this.key = await window.crypto.subtle.importKey(
-        'jwk', JSON.parse(rawKey), { name: CRYPTO_ALGO }, false, ['encrypt', 'decrypt']
+        'jwk', storedJwk, { name: CRYPTO_ALGO }, false, ['encrypt', 'decrypt']
       );
     } else {
+      // Generate new master key
       this.key = await window.crypto.subtle.generateKey(
         { name: CRYPTO_ALGO, length: 256 }, true, ['encrypt', 'decrypt']
       );
       const exported = await window.crypto.subtle.exportKey('jwk', this.key);
-      localStorage.setItem('vault_master_key', JSON.stringify(exported));
+      await this.setStoredKeyJwk(exported);
     }
   }
 

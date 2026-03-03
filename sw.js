@@ -13,7 +13,7 @@ if (workbox) {
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v5'; // Increment this to force cache purge on update
+    const CACHE_SUFFIX = 'v6'; // Increment this to force cache purge on update
 
         workbox.precaching.precacheAndRoute([
             { url: 'index.html', revision: CACHE_SUFFIX },
@@ -90,25 +90,29 @@ if (workbox) {
 
     // --- 2. OFFLINE FALLBACK (SPA NAVIGATION) ---
     
-    // For Single Page Apps: Return index.html for navigation requests
-    // This ensures reloading any route works offline.
-    const handler = workbox.strategies.strategyWrapper(
-        new workbox.strategies.NetworkFirst({
-            cacheName: `${CACHE_PREFIX}-html-${CACHE_SUFFIX}`,
-        })
-    );
+    // For Single Page Apps: Return index.html for navigation requests.
+    // Uses standard Workbox NetworkFirst strategy with offline fallback.
+    const navigationStrategy = new workbox.strategies.NetworkFirst({
+        cacheName: `${CACHE_PREFIX}-html-${CACHE_SUFFIX}`,
+        plugins: [
+            new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
+        ],
+    });
 
     workbox.routing.registerRoute(
         ({request}) => request.mode === 'navigate',
-        ({event}) => {
-            return handler.handle({event}).catch(async () => {
+        async ({event}) => {
+            try {
+                return await navigationStrategy.handle({event, request: event.request});
+            } catch (_err) {
+                // Network failed and cache miss — try index.html from any cache
                 const fallbackUrl = new URL('index.html', self.registration.scope).toString();
                 const cached = await caches.match(fallbackUrl) || await caches.match('index.html');
-                return cached || new Response('Offline – bitte neu laden', {
-                    status: 503,
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                });
-            });
+                return cached || new Response(
+                    '<html><body style="background:#020617;color:#e2e8f0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h1>Offline</h1><p>Please reload when connected. / Bitte bei Verbindung neu laden.</p></div></body></html>',
+                    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                );
+            }
         }
     );
 

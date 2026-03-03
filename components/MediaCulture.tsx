@@ -82,8 +82,9 @@ const useMediaCultureLogic = () => {
 
     const spotlightItem = useMemo(() => {
         if (filteredMedia.length === 0) return null;
-        // Deterministic pseudo-random based on length to prevent jitter on re-renders, but changes on filter
-        const index = filteredMedia.length % filteredMedia.length; 
+        // Deterministic pseudo-random: hash the first item's id to pick a stable but varied index
+        const seed = filteredMedia[0]?.id?.length ?? 0;
+        const index = (seed * 7 + filteredMedia.length * 13) % filteredMedia.length;
         return filteredMedia[index];
     }, [filteredMedia]);
 

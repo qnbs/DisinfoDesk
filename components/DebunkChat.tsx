@@ -17,6 +17,7 @@ import { Message } from '../types';
 import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
+import { useToast } from '../contexts/ToastContext';
 // LiveSession type is not exported in current @google/genai version; use inline type
 type LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
 
@@ -179,6 +180,7 @@ const useDebunkChatLogic = () => {
   const { t, language } = useLanguage();
   const { settings } = useSettings();
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   
   const messages = useAppSelector(state => state.ui.chat.messages);
   const input = useAppSelector(state => state.ui.chat.input);
@@ -324,7 +326,7 @@ const useDebunkChatLogic = () => {
       } catch (e) {
           console.error("Live Init Failed", e);
           setMode('TEXT');
-          alert("Could not establish neural uplink (Microphone Access Denied).");
+          showToast(t.chat?.micDenied || "Microphone access denied.", 'error');
       }
   };
 
@@ -426,8 +428,8 @@ const useDebunkChatLogic = () => {
             timestamp: Date.now(), 
             messages 
         }); 
-        alert("Session encrypted and archived to Vault."); 
-    } catch (e) { console.error(e); }
+        showToast(t.chat?.sessionSaved || "Session archived.", 'success'); 
+    } catch (e) { console.error(e); showToast(t.chat?.sessionSaveFailed || "Save failed.", 'error'); }
   };
 
   // Quick Action Prompts

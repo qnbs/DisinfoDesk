@@ -531,22 +531,22 @@ export const ViralAnalysis: React.FC = () => {
                         
                         <div className="w-px h-10 bg-slate-700 mx-2"></div>
 
-                        <button onClick={() => setRenderMode('NETWORK')} className={`p-3 rounded-lg border transition-all ${renderMode === 'NETWORK' ? 'bg-accent-cyan text-slate-900 border-accent-cyan' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Network Graph">
+                        <button onClick={() => setRenderMode('NETWORK')} className={`p-3 rounded-lg border transition-all ${renderMode === 'NETWORK' ? 'bg-accent-cyan text-slate-900 border-accent-cyan' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Network Graph" aria-label="Network Graph">
                             <Network size={18} />
                         </button>
-                        <button onClick={() => setRenderMode('HEATMAP')} className={`p-3 rounded-lg border transition-all ${renderMode === 'HEATMAP' ? 'bg-red-500 text-white border-red-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Heatmap">
+                        <button onClick={() => setRenderMode('HEATMAP')} className={`p-3 rounded-lg border transition-all ${renderMode === 'HEATMAP' ? 'bg-red-500 text-white border-red-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title="Heatmap" aria-label="Heatmap">
                             <Flame size={18} />
                         </button>
 
                         <div className="w-px h-10 bg-slate-700 mx-2"></div>
 
-                        <button onClick={() => setActiveTool('OBSERVE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'OBSERVE' ? 'bg-slate-700 text-white border-slate-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title={t.viralPage.sim.actions.observe}>
+                        <button onClick={() => setActiveTool('OBSERVE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'OBSERVE' ? 'bg-slate-700 text-white border-slate-500' : 'bg-slate-800 text-slate-400 border-slate-600'}`} title={t.viralPage.sim.actions.observe} aria-label={t.viralPage.sim.actions.observe}>
                             <Microscope size={18} />
                         </button>
-                        <button onClick={() => setActiveTool('CURE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'CURE' ? 'bg-green-500 text-slate-900 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-green-900/20 text-green-500 border-green-900'}`} title={t.viralPage.sim.actions.cure}>
+                        <button onClick={() => setActiveTool('CURE')} className={`p-3 rounded-lg border transition-all ${activeTool === 'CURE' ? 'bg-green-500 text-slate-900 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' : 'bg-green-900/20 text-green-500 border-green-900'}`} title={t.viralPage.sim.actions.cure} aria-label={t.viralPage.sim.actions.cure}>
                             <Shield size={18} />
                         </button>
-                        <button onClick={() => setActiveTool('INFECT')} className={`p-3 rounded-lg border transition-all ${activeTool === 'INFECT' ? 'bg-red-500 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-red-900/20 text-red-500 border-red-900'}`} title={t.viralPage.sim.actions.infect}>
+                        <button onClick={() => setActiveTool('INFECT')} className={`p-3 rounded-lg border transition-all ${activeTool === 'INFECT' ? 'bg-red-500 text-white border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-red-900/20 text-red-500 border-red-900'}`} title={t.viralPage.sim.actions.infect} aria-label={t.viralPage.sim.actions.infect}>
                             <AlertTriangle size={18} />
                         </button>
                     </div>

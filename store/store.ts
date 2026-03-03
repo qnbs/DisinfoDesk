@@ -90,7 +90,7 @@ export const store = configureStore({
     .prepend(listenerMiddleware.middleware)
     .concat(aiApi.middleware)
     .concat(rtkQueryErrorLogger),
-  devTools: process.env.NODE_ENV !== 'production' ? {
+  devTools: (import.meta as unknown as { env: { DEV: boolean } }).env.DEV ? {
     name: 'DisinfoDesk OS',
     trace: true,
     traceLimit: 25,

@@ -128,13 +128,13 @@ const useVaultLogic = () => {
         if (!window.confirm(`SECURITY ALERT: Permanently shredding ${ids.length} records. This action is irreversible. Proceed?`)) return;
 
         try {
-            const storeNameMap: Record<Tab, any> = {
+            const storeNameMap: Record<Tab, string> = {
                 'ANALYSES': 'analyses',
                 'MEDIA': 'media_analyses',
                 'CHATS': 'chats',
                 'SATIRES': 'satires'
             };
-            await dbService.deleteBatch(storeNameMap[activeTab], ids);
+            await dbService.deleteBatch(storeNameMap[activeTab] as Parameters<typeof dbService.deleteBatch>[0], ids);
             setSelectedIds(new Set());
             setSelectedId(null);
             showToast(`${ids.length} records purged from Vault.`, 'success');
@@ -148,7 +148,7 @@ const useVaultLogic = () => {
         if(!selectedId) return;
         try {
             const updatedItem = JSON.parse(editedContent) as DatabaseRecord;
-            const storeNameMap: Record<Tab, any> = {
+            const storeNameMap: Record<Tab, string> = {
                 'ANALYSES': 'analyses',
                 'MEDIA': 'media_analyses',
                 'CHATS': 'chats',
@@ -157,7 +157,7 @@ const useVaultLogic = () => {
             
             // Type-safe save dispatch
             // @ts-ignore - Dynamic dispatch is safe here due to logic
-            await dbService.put(storeNameMap[activeTab], updatedItem);
+            await dbService.put(storeNameMap[activeTab] as Parameters<typeof dbService.put>[0], updatedItem);
 
             setEditMode(false);
             showToast('Record re-encrypted and saved.', 'success');

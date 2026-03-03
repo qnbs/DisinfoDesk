@@ -54,3 +54,11 @@
 - `prefers-reduced-motion` kills all animations globally; `prefers-contrast: more` lightens muted text.
 - Chat message stream uses `role="log"` + `aria-live="polite"`.
 - Skip-to-content link targets `#main-content`; sidebar has `role="navigation"`.
+- Icon-only buttons must have both `title` and `aria-label` attributes.
+- Canvas elements used for visualization need `role="img"` + `aria-label`.
+- Prefer `useToast()` over `alert()`/`window.confirm()` for user feedback.
+
+## Security & Cryptography
+- Vault master key (AES-GCM 256) is stored in a dedicated IndexedDB (`DisinfoDesk_CryptoKeys`), never in `localStorage`.
+- API key encryption uses a separate IndexedDB (`DisinfoDesk_KeyVault`) via `secureApiKeyService.ts`.
+- Never use `process.env` in browser code; use `import.meta.env` (Vite convention).

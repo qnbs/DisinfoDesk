@@ -159,7 +159,7 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
 
     return (
         <div ref={containerRef} className="w-full h-full relative min-h-[300px]">
-            <canvas ref={canvasRef} className="block" />
+            <canvas ref={canvasRef} className="block" role="img" aria-label="Tactical globe visualization showing global narrative threat vectors" />
         </div>
     );
 };

@@ -20,6 +20,10 @@ interface UIState {
   };
   activeFileId: string | null; // Globally tracks the currently "open" investigation
   isSearchOpen: boolean;
+  updateModal: {
+    isOpen: boolean;
+    lastSeenVersion: string;
+  };
 }
 
 const initialState: UIState = {
@@ -33,6 +37,10 @@ const initialState: UIState = {
   scrollPositions: {},
   activeFileId: null,
   isSearchOpen: false,
+  updateModal: {
+    isOpen: false,
+    lastSeenVersion: '0.0.0',
+  },
 };
 
 export const uiSlice = createSlice({
@@ -121,7 +129,19 @@ export const uiSlice = createSlice({
         if (msg.isStreaming) msg.isStreaming = false;
       });
     }
-  },
+    // --- Update Modal Management ---
+    showUpdateModal: (state) => {
+      state.updateModal.isOpen = true;
+    },
+    
+    hideUpdateModal: (state) => {
+      state.updateModal.isOpen = false;
+    },
+
+    dismissUpdateModal: (state, action: PayloadAction<string>) => {
+      state.updateModal.isOpen = false;
+      state.updateModal.lastSeenVersion = action.payload;
+    },  },
 });
 
 // --- Optimized Selectors ---
@@ -145,7 +165,8 @@ export const {
   setSearchOpen, setActiveFile,
   setChatMessages, addChatMessage, updateLastChatMessage, finalizeLastChatMessage,
   setChatInput, setChatThinking, clearChat, injectChatContext,
-  setTheoryTab, saveScrollPosition, resetTransientState
+  setTheoryTab, saveScrollPosition, resetTransientState,
+  showUpdateModal, hideUpdateModal, dismissUpdateModal
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

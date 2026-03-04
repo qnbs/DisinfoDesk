@@ -1,4 +1,24 @@
 User-agent: *
-Allow: /
+Allow: /DisinfoDesk/
+Allow: /DisinfoDesk/#/
 
+# Disallow administrative and non-indexable paths
+Disallow: /*/settings
+Disallow: /*/database
+Disallow: /*.json
+Disallow: /*.svg
+Disallow: /404.html
+
+# Allow crawling of core content
+Allow: /DisinfoDesk/#/archive
+Allow: /DisinfoDesk/#/media
+Allow: /DisinfoDesk/#/authors
+Allow: /DisinfoDesk/#/dangerous
+Allow: /DisinfoDesk/#/virality
+Allow: /DisinfoDesk/#/help
+
+# Crawl delay (ms) to reduce server load
+Crawl-delay: 1
+
+# Sitemap location
 Sitemap: https://qnbs.github.io/DisinfoDesk/sitemap.xml

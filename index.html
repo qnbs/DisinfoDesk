@@ -29,9 +29,12 @@
     
     <title>DisinfoDesk: Das Lexikon</title>
     
-    <!-- Performance Optimizations -->
+    <!-- Performance Optimizations: Preload Critical Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://aistudiocdn.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
@@ -448,6 +451,126 @@
       /* Safe bottom padding for notch devices */
       .pb-safe-bottom {
         padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+      }
+      
+      /* ═══ CRITICAL CSS (Inline) ═══ */
+      /* Prevents FOUC (Flash of Unstyled Content) and ensures fast first paint */
+      body { 
+        background-color: #020617; 
+        color: #e2e8f0; 
+      }
+      
+      #root {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      
+      .fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      /* ═══ PRINT STYLES (Report Optimization) ═══ */
+      @media print {
+        @page {
+          margin: 2cm;
+          size: A4;
+        }
+        
+        body {
+          background: white;
+          color: #000;
+          font-size: 11pt;
+          line-height: 1.5;
+        }
+        
+        /* Hide navigation and interactive elements */
+        nav, footer, .sidebar, [role="navigation"], .no-print, 
+        button:not(.print-visible), [type="button"], [type="submit"],
+        .toast, modal, dialog, .update-banner {
+          display: none !important;
+        }
+        
+        /* Content optimization for print */
+        main, article, .report-content, .print-section {
+          page-break-inside: avoid;
+          width: 100%;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+          page-break-after: avoid;
+          color: #000;
+          font-weight: bold;
+          margin-top: 0.5cm;
+          margin-bottom: 0.3cm;
+        }
+        
+        p {
+          page-break-inside: avoid;
+          margin-bottom: 0.5cm;
+        }
+        
+        a {
+          color: #0066cc;
+          text-decoration: underline;
+        }
+        
+        a[href]::after {
+          content: " (" attr(href) ")";
+          font-size: 80%;
+          color: #666;
+        }
+        
+        img {
+          max-width: 100%;
+          page-break-inside: avoid;
+          margin: 0.5cm 0;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          page-break-inside: avoid;
+          margin: 1cm 0;
+        }
+        
+        th, td {
+          border: 1px solid #999;
+          padding: 0.3cm;
+          text-align: left;
+        }
+        
+        th {
+          background: #f0f0f0;
+          font-weight: bold;
+        }
+        
+        .page-break {
+          page-break-before: always;
+        }
+        
+        /* Print-specific badges */
+        .badge, [role="status"] {
+          page-break-inside: avoid;
+        }
+        
+        /* Optimize report sections */
+        .report-header {
+          page-break-after: avoid;
+          border-bottom: 2px solid #000;
+          padding-bottom: 0.5cm;
+          margin-bottom: 1cm;
+        }
+        
+        .report-section {
+          page-break-inside: avoid;
+          margin-bottom: 1cm;
+        }
       }
     </style>
   <script type="importmap">

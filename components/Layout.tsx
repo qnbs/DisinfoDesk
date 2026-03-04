@@ -11,10 +11,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addLog } from '../store/slices/settingsSlice';
-import { saveScrollPosition, setSearchOpen, selectActiveFile } from '../store/slices/uiSlice';
+import { saveScrollPosition, setSearchOpen, selectActiveFile, showUpdateModal, hideUpdateModal, dismissUpdateModal } from '../store/slices/uiSlice';
 import { syncStaticData } from '../store/slices/theoriesSlice';
 import { OmniSearch } from './OmniSearch';
 import { OnboardingTour } from './OnboardingTour';
+import { WhatsNewModal } from './ui/WhatsNewModal';
 import { playSound, haptic } from '../utils/microInteractions';
 
 // --- Ambient Background (Memoized) ---
@@ -37,6 +38,7 @@ const BackgroundGrid = React.memo(() => (
 const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isOnline }) => {
     const [latency, setLatency] = useState(24);
     const { t } = useLanguage();
+    const APP_VERSION = '1.0.0'; // Sync with package.json
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -71,14 +73,19 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
                         </div>
                     </div>
                     
-                    <button 
-                        onClick={handleReboot}
-                        className="text-slate-600 hover:text-accent-cyan transition-all p-2 rounded-lg hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none hover:shadow-[0_0_10px_rgba(6,182,212,0.1)]"
-                        title={t.layout.footer.reboot}
-                      aria-label={t.layout.footer.reboot}
-                    >
-                        <Power size={14} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-900/50 border border-slate-800 text-[8px] font-mono text-slate-500 uppercase tracking-wider">
+                            v{APP_VERSION}
+                        </span>
+                        <button 
+                            onClick={handleReboot}
+                            className="text-slate-600 hover:text-accent-cyan transition-all p-2 rounded-lg hover:bg-slate-900 active:scale-95 touch-manipulation focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none hover:shadow-[0_0_10px_rgba(6,182,212,0.1)]"
+                            title={t.layout.footer.reboot}
+                          aria-label={t.layout.footer.reboot}
+                        >
+                            <Power size={14} />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -193,6 +200,16 @@ export const Layout: React.FC = () => {
   // Update State
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [wbRegistration, setWbRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const updateModalState = useAppSelector(state => state.ui.updateModal);
+  const APP_VERSION = '1.0.0';
+
+  // Check version and show update modal on mount
+  useEffect(() => {
+    const lastSeenVersion = localStorage.getItem('disinfodesk_last_seen_version') || '0.0.0';
+    if (lastSeenVersion !== APP_VERSION) {
+      dispatch(showUpdateModal());
+    }
+  }, [dispatch]);
 
   // Initial Sync
   useEffect(() => {
@@ -337,6 +354,14 @@ export const Layout: React.FC = () => {
       <BackgroundGrid />
       <OnboardingTour />
       <OmniSearch isOpen={isSearchOpen} onClose={() => dispatch(setSearchOpen(false))} />
+      <WhatsNewModal 
+        isOpen={updateModalState.isOpen}
+        onClose={() => dispatch(hideUpdateModal())}
+        onDismiss={() => {
+          localStorage.setItem('disinfodesk_last_seen_version', APP_VERSION);
+          dispatch(dismissUpdateModal(APP_VERSION));
+        }}
+      />
 
       {/* Offline Banner */}
       {!isOnline && (

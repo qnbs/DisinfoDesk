@@ -368,3 +368,131 @@ export const ErrorFallback: React.FC<{ error: unknown, resetErrorBoundary: () =>
     <Button onClick={resetErrorBoundary} variant="secondary">Initiate Reboot Sequence</Button>
   </div>
 );
+
+/**
+ * Empty State Component
+ * Displays engaging cyber-mystic illustration and helpful message
+ */
+interface EmptyStateProps {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+  variant?: 'default' | 'search' | 'chat' | 'data';
+}
+
+export const EmptyState: React.FC<EmptyStateProps> = React.memo((({ 
+  icon: Icon, 
+  title, 
+  description, 
+  action,
+  variant = 'default'
+}) => {
+  const variants = {
+    default: 'accent-cyan',
+    search: 'accent-purple',
+    chat: 'success-green',
+    data: 'accent-amber',
+  };
+
+  const colorClass = variants[variant];
+
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-6 rounded-xl border border-slate-800/50 glass-panel-subtle text-center animate-fade-in-up">
+      <div className="relative mb-6">
+        <div className={`absolute inset-0 bg-${colorClass}/10 blur-2xl rounded-full scale-150 opacity-40`} />
+        <div className={`relative bg-${colorClass}/5 p-4 rounded-2xl border border-${colorClass}/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]`}>
+          <Icon size={40} className={`text-${colorClass}`} />
+        </div>
+      </div>
+      <h3 className="text-lg font-bold text-white mb-2 font-display uppercase tracking-widest">{title}</h3>
+      <p className="text-slate-400 text-sm max-w-sm mb-6 leading-relaxed font-mono">{description}</p>
+      {action && <div className="animate-fade-in-up">{action}</div>}
+    </div>
+  );
+}));
+
+/**
+ * Loading Container
+ * Wraps content with smooth loading transitions
+ */
+interface LoadingContainerProps {
+  isLoading: boolean;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  skeleton?: React.ReactNode;
+}
+
+export const LoadingContainer: React.FC<LoadingContainerProps> = React.memo(({
+  isLoading,
+  children,
+  fallback,
+  skeleton,
+}) => (
+  <div className="relative">
+    {isLoading ? (
+      <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {fallback || skeleton || <Skeleton variant="card" className="h-40" />}
+      </div>
+    ) : (
+      <div className="transition-opacity duration-300 opacity-100">
+        {children}
+      </div>
+    )}
+  </div>
+));
+
+/**
+ * Cyber-Mystic Divider
+ */
+export const CyberDivider: React.FC<{ variant?: 'default' | 'dotted' | 'gradient' }> = React.memo(({ 
+  variant = 'default' 
+}) => {
+  const variants = {
+    default: 'h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent',
+    dotted: 'h-px bg-repeating-linear-gradient(90deg, #475569 0px, #475569 2px, transparent 2px, transparent 8px)',
+    gradient: 'h-px bg-gradient-to-r from-accent-cyan/30 via-accent-purple/30 to-accent-cyan/30',
+  };
+
+  return <div className={cn(variants[variant])} />;
+});
+
+/**
+ * Status Badge Component
+ */
+interface StatusBadgeProps {
+  status: 'online' | 'offline' | 'processing' | 'success' | 'error' | 'warning';
+  label: string;
+  className?: string;
+}
+
+export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ 
+  status, 
+  label,
+  className
+}) => {
+  const statusConfig = {
+    online: 'bg-green-500/20 text-green-400 border-green-500/40',
+    offline: 'bg-red-500/20 text-red-400 border-red-500/40',
+    processing: 'bg-accent-cyan/20 text-accent-cyan border-accent-cyan/40',
+    success: 'bg-green-500/20 text-green-400 border-green-500/40',
+    error: 'bg-red-500/20 text-red-400 border-red-500/40',
+    warning: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+  };
+
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider border',
+      'transition-all duration-200 hover:shadow-lg',
+      statusConfig[status],
+      className
+    )}>
+      <span className={cn(
+        'w-2 h-2 rounded-full',
+        status === 'processing' ? 'animate-pulse' : '',
+        statusConfig[status].split(' ')[1]
+      )} />
+      {label}
+    </span>
+  );
+});

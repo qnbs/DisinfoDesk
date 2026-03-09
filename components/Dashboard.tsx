@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import {
-  Globe, Activity, ShieldAlert, Radio, Terminal, Cpu, Lock, Wifi, MessageSquare, Skull, Database, Settings, HardDrive, LayoutGrid, Server, Brain, FileDown
+  Globe, Activity, ShieldAlert, Radio, Terminal, Cpu, Lock, Wifi, MessageSquare, Skull, Database, Settings, HardDrive, LayoutGrid, Server, Brain, FileDown, User, Film
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Card, PageFrame, PageHeader } from './ui/Common';
@@ -306,12 +306,14 @@ const CommandDeck: React.FC = () => {
         { id: 'sim', label: 'Simulation', sub: 'Viral Vector', icon: Globe, path: '/virality', color: 'border-orange-500/30 text-orange-400 hover:bg-orange-950/20' },
         { id: 'uplink', label: 'AI Uplink', sub: 'Dr. Veritas', icon: MessageSquare, path: '/chat', color: 'border-purple-500/30 text-accent-purple hover:bg-purple-950/20' },
         { id: 'arch', label: 'Archives', sub: 'Main Database', icon: Database, path: '/archive', color: 'border-blue-500/30 text-blue-400 hover:bg-blue-950/20' },
+        { id: 'authors', label: 'Authors', sub: 'Intel Profiles', icon: User, path: '/authors', color: 'border-cyan-500/30 text-accent-cyan hover:bg-cyan-950/20' },
+        { id: 'media', label: 'Media Vault', sub: 'Pop Culture', icon: Film, path: '/media', color: 'border-green-500/30 text-green-400 hover:bg-green-950/20' },
         { id: 'fab', label: 'Fabricator', sub: 'Satire Engine', icon: Skull, path: '/satire', color: 'border-pink-500/30 text-pink-400 hover:bg-pink-950/20' },
         { id: 'sys', label: 'System', sub: 'Configuration', icon: Settings, path: '/settings', color: 'border-slate-500/30 text-slate-400 hover:bg-slate-800' },
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
             {commands.map(cmd => (
                 <button
                     key={cmd.id}

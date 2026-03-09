@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -14,7 +15,7 @@ function cspPlugin(): Plugin {
       if (ctx.server) return html; // skip in dev
       const csp = [
         "default-src 'self'",
-        "script-src 'self' https://aistudiocdn.com",
+        "script-src 'self' https://aistudiocdn.com https://storage.googleapis.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https://cdn-icons-png.flaticon.com https://*.githubusercontent.com",
@@ -33,6 +34,32 @@ function cspPlugin(): Plugin {
   };
 }
 
+/** Copy Service Worker and PWA assets to dist/ */
+function copyServiceWorkerPlugin(): Plugin {
+  return {
+    name: 'copy-sw',
+    closeBundle() {
+      const filesToCopy = [
+        { src: 'sw.js', dest: 'sw.js' },
+        { src: 'manifest.json', dest: 'manifest.json' },
+        { src: '404.html', dest: '404.html' },
+        { src: 'robots.txt', dest: 'robots.txt' },
+        { src: 'sitemap.xml', dest: 'sitemap.xml' }
+      ];
+      
+      filesToCopy.forEach(({ src, dest }) => {
+        const srcPath = path.resolve(__dirname, src);
+        const destPath = path.resolve(__dirname, 'dist', dest);
+        
+        if (fs.existsSync(srcPath)) {
+          fs.copyFileSync(srcPath, destPath);
+          console.log(`✓ ${src} copied to dist/`);
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig(() => {
     return {
       base: ghPagesBase,
@@ -42,6 +69,7 @@ export default defineConfig(() => {
       },
       plugins: [
         cspPlugin(),
+        copyServiceWorkerPlugin(),
         tailwindcss(),
         react({
           babel: {

@@ -883,23 +883,23 @@ const SettingsSidebar: React.FC = () => {
   ];
 
   return (
-    <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-2 pb-4 md:pb-0 md:pr-6 md:w-64 flex-shrink-0 scrollbar-hide">
+    <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible gap-2 pb-4 md:pb-0 md:pr-6 md:w-64 flex-shrink-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
       <div className="hidden md:block mb-4 pl-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                {t.settings.sidebarConfig}
+        {t.settings.sidebarConfig}
       </div>
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => handleSetActiveTab(tab.id)}
           className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan
+            flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wide md:tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan shrink-0 min-w-max
             ${activeTab === tab.id 
               ? 'bg-slate-800 text-white shadow-lg border-l-4 border-accent-cyan' 
               : 'bg-transparent text-slate-500 border-l-4 border-transparent hover:bg-slate-900/50 hover:text-slate-300'}
           `}
         >
           <span className={activeTab === tab.id ? tab.color : 'text-slate-600'}>{tab.icon}</span>
-          {tab.label}
+          <span className="block">{tab.label}</span>
         </button>
       ))}
     </div>

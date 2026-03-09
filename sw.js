@@ -4,13 +4,19 @@ if (workbox) {
     // --- CONFIGURATION ---
     workbox.setConfig({ debug: false });
     
-    // Skip waiting is controlled via SKIP_WAITING message from Layout.tsx
-    // to allow the update UX banner to function properly
+    // Aggressive update strategy: skip waiting and claim clients immediately
+    // This ensures users get the latest version as soon as it's available
+    self.addEventListener('install', (event) => {
+        console.log('[SW] v8 Installing, will skip waiting...');
+        self.skipWaiting(); // Activate immediately
+    });
+    
+    // Claim clients immediately after activation
     workbox.core.clientsClaim();
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v7'; // Increment this to force cache purge on update
+    const CACHE_SUFFIX = 'v8'; // Increment this to force cache purge on update (updated: 2026-03-09)
 
     // --- 0. PRECACHE (App Shell) ---
     workbox.precaching.precacheAndRoute([
@@ -20,14 +26,23 @@ if (workbox) {
 
     // --- 1. CACHE CLEANUP: Remove stale caches on activation ---
     self.addEventListener('activate', (event) => {
+        console.log('[SW] Activating new service worker, cleaning up old caches...');
         event.waitUntil(
-            caches.keys().then(keys =>
-                Promise.all(
-                    keys
-                        .filter(key => key.startsWith(CACHE_PREFIX) && !key.endsWith(CACHE_SUFFIX))
-                        .map(key => caches.delete(key))
-                )
-            )
+            caches.keys().then(keys => {
+                const cachesToDelete = keys.filter(key => 
+                    key.startsWith(CACHE_PREFIX) && !key.includes(CACHE_SUFFIX)
+                );
+                console.log('[SW] Deleting', cachesToDelete.length, 'old cache(s):', cachesToDelete);
+                return Promise.all(
+                    cachesToDelete.map(key => {
+                        console.log('[SW] Deleting cache:', key);
+                        return caches.delete(key);
+                    })
+                );
+            }).then(() => {
+                console.log('[SW] Cache cleanup complete, claiming clients');
+                return self.clients.claim();
+            })
         );
     });
 

@@ -3,6 +3,7 @@ import React, {
   useState, useMemo, useCallback, createContext, useContext, useEffect
 } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../utils/translations';
 import { MEDIA_ITEMS } from '../constants';
 import { MediaItem, MediaType } from '../types';
 import { AUTHORS_FULL } from '../data/enriched';
@@ -240,7 +241,14 @@ const SpotlightHero: React.FC = () => {
     if (!spotlightItem) return null;
 
     return (
-        <div className="relative w-full h-[350px] md:h-[400px] rounded-2xl overflow-hidden mb-12 group border border-slate-800 shadow-2xl animate-fade-in cursor-pointer" onClick={() => onNavigateToDetail(spotlightItem.id)}>
+        <div 
+            className="relative w-full h-[350px] md:h-[400px] rounded-2xl overflow-hidden mb-12 group border border-slate-800 shadow-2xl animate-fade-in cursor-pointer" 
+            onClick={() => onNavigateToDetail(spotlightItem.id)}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onNavigateToDetail(spotlightItem.id)}
+            role="button"
+            tabIndex={0}
+            aria-label={`${translations[language as 'de' | 'en'].a11y?.viewDetails || 'View details for'} ${spotlightItem.title}`}
+        >
             <div className="absolute inset-0">
                 <img src={spotlightItem.imageUrl} alt={`Artwork: ${spotlightItem.title}`} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/60 to-transparent"></div>

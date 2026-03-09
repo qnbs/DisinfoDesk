@@ -746,7 +746,9 @@ export const DebunkChat: React.FC = () => {
                             <div className="relative flex-1 group">
                                 <div className="absolute inset-0 bg-accent-cyan/5 rounded-lg opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none"></div>
                                 <input 
-                                    type="text" 
+                                    type="text"
+                                    id="chat-input-field"
+                                    aria-label={t.a11y?.chatInput || t.chat.placeholder}
                                     value={input} 
                                     onChange={(e) => handleInputChange(e.target.value)} 
                                     onKeyDown={handleKeyDown} 

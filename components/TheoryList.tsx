@@ -507,7 +507,9 @@ const HeaderSection: React.FC = React.memo(() => {
                                 <Search className="text-slate-500 group-focus-within:text-accent-cyan transition-colors" size={18} />
                             </div>
                             <input 
-                                type="text" 
+                                type="text"
+                                id="theory-search-input"
+                                aria-label={t.a11y?.searchTheories || t.list.searchPlaceholder}
                                 placeholder={t.list.searchPlaceholder}
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}

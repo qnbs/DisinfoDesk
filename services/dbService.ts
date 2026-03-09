@@ -159,7 +159,9 @@ class CryptoGuard {
       );
       return await decompressData(decrypted);
     } catch (e) {
-      console.error("Decryption failed. Data corruption or wrong key.", e);
+      if (import.meta.env.DEV) {
+          console.error("Decryption failed. Data corruption or wrong key.", e);
+      }
       throw new Error("Vault Access Denied: Decryption Failed");
     }
   }

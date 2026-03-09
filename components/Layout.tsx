@@ -99,7 +99,7 @@ const ContentLoader = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="flex h-full w-full items-center justify-center min-h-[400px] animate-fade-in">
+    <div className="flex h-full w-full items-center justify-center min-h-[400px] animate-fade-in" role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-5">
           <div className="relative">
               <div className="w-14 h-14 border-2 border-slate-800 rounded-full backdrop-blur-sm"></div>
@@ -108,6 +108,7 @@ const ContentLoader = () => {
               <div className="absolute inset-0 w-14 h-14 bg-accent-cyan/5 rounded-full blur-xl" />
           </div>
           <div className="text-[10px] font-mono text-slate-500 animate-pulse tracking-[0.2em] uppercase">{t.layout.loadingModule}</div>
+          <span className="sr-only">{t.a11y?.loading || t.common.loading}</span>
           {/* Skeleton preview bars */}
           <div className="flex flex-col gap-2 w-48 opacity-40">
             <div className="h-2 w-full rounded shimmer-loading" />
@@ -356,6 +357,14 @@ export const Layout: React.FC = () => {
 
   return (
     <div className={cn("h-[100dvh] bg-[#020617] text-slate-200 font-sans flex flex-col md:flex-row overflow-hidden relative selection:bg-accent-cyan/30 selection:text-white", settings.reducedMotion ? 'motion-reduce' : '')}>
+      
+      {/* Skip to main content link for keyboard users */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-accent-cyan focus:text-slate-950 focus:rounded-lg focus:font-bold focus:shadow-neon-cyan"
+      >
+        {t.a11y?.skipToMain || 'Skip to main content'}
+      </a>
       
       <BackgroundGrid />
       <OnboardingTour />

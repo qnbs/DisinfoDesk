@@ -777,6 +777,17 @@ export const translations = {
       skip: 'ÜBERSPRINGEN',
       next: 'WEITER',
       init: 'INITIALISIEREN'
+    },
+    a11y: {
+      skipToMain: 'Zum Hauptinhalt springen',
+      notifications: 'Benachrichtigungen',
+      loading: 'Wird geladen...',
+      searchTheories: 'Theorien durchsuchen',
+      chatInput: 'Nachricht an Dr. Veritas',
+      viewDetails: 'Details anzeigen für',
+      closeDialog: 'Dialog schließen',
+      menuOpen: 'Menü ist geöffnet',
+      menuClosed: 'Menü ist geschlossen'
     }
   },
   en: {
@@ -1556,6 +1567,17 @@ export const translations = {
       skip: 'SKIP',
       next: 'NEXT',
       init: 'INITIALIZE'
+    },
+    a11y: {
+      skipToMain: 'Skip to main content',
+      notifications: 'Notifications',
+      loading: 'Loading...',
+      searchTheories: 'Search theories',
+      chatInput: 'Message to Dr. Veritas',
+      viewDetails: 'View details for',
+      closeDialog: 'Close dialog',
+      menuOpen: 'Menu is open',
+      menuClosed: 'Menu is closed'
     }
   }
 };

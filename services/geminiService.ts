@@ -165,7 +165,9 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     try {
         rawData = JSON.parse(text) as RawTheoryAnalysisJSON;
     } catch {
-        console.error("JSON Parse Error on:", text);
+        if (import.meta.env.DEV) {
+            console.error("JSON Parse Error on:", text);
+        }
         // Fallback structure to prevent UI crash
         rawData = {
             fullDescription: response.text || "Analysis format error. Raw output received.",
@@ -209,12 +211,16 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
       timestamp: Date.now(),
       data: result,
       language
-    }).catch(console.error);
+    }).catch((err) => {
+        if (import.meta.env.DEV) console.error(err);
+    });
 
     return result;
 
   } catch (error) {
-    console.error("Gemini Analysis Error:", error);
+    if (import.meta.env.DEV) {
+        console.error("Gemini Analysis Error:", error);
+    }
     throw error;
   }
 };
@@ -321,12 +327,16 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
         data: rawData,
         language,
         mediaType: item.type
-    }).catch(console.error);
+    }).catch((err) => {
+        if (import.meta.env.DEV) console.error(err);
+    });
 
     return rawData;
 
   } catch (error) {
-    console.error("Media Analysis Error", error);
+    if (import.meta.env.DEV) {
+        console.error("Media Analysis Error", error);
+    }
     throw error;
   }
 };
@@ -366,7 +376,9 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
     
     return JSON.parse(response.text!) as SatireResponse;
   } catch (e) {
-    console.error("Satire Gen Error:", e);
+    if (import.meta.env.DEV) {
+        console.error("Satire Gen Error:", e);
+    }
     throw e;
   }
 }
@@ -393,7 +405,9 @@ export const generateTheoryImage = async (theory: Theory, language: Language, cu
     }
     return null;
   } catch (error) {
-    console.error("Image Gen Error:", error);
+    if (import.meta.env.DEV) {
+        console.error("Image Gen Error:", error);
+    }
     throw error;
   }
 };
@@ -425,17 +439,21 @@ export const connectLiveSession = async (
     const session = await ai.live.connect({
         ...config,
         callbacks: {
-            onopen: () => console.warn('[Live] Session Connected'),
+            onopen: () => {
+                if (import.meta.env.DEV) console.warn('[Live] Session Connected');
+            },
             onmessage: (msg: LiveServerMessage) => {
                 const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
                 if (audioData) onAudioData(audioData);
             },
             onclose: () => {
-                console.warn('[Live] Session Closed');
+                if (import.meta.env.DEV) console.warn('[Live] Session Closed');
                 onClose();
             },
             onerror: (err) => {
-                console.error('[Live] Error', err);
+                if (import.meta.env.DEV) {
+                    console.error('[Live] Error', err);
+                }
                 onClose();
             }
         }
@@ -532,7 +550,9 @@ export const streamChatWithSkeptic = async function* (
         yield chunk.text;
     }
   } catch (error) {
-    console.error("Stream Error:", error);
+    if (import.meta.env.DEV) {
+        console.error("Stream Error:", error);
+    }
     throw error;
   }
 };

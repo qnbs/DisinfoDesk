@@ -98,5 +98,30 @@
       "protocol": "web+disinfo",
       "url": "/DisinfoDesk/#/archive/%s"
     }
+  ],
+  "share_target": {
+    "action": "/DisinfoDesk/#/editor",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/DisinfoDesk/#/editor",
+      "accept": {
+        "application/json": [".json", ".theory"]
+      },
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
+          "sizes": "192x192"
+        }
+      ],
+      "launch_type": "single-client"
+    }
   ]
 }

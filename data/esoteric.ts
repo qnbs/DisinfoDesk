@@ -5,138 +5,138 @@ export const ESOTERIC_THEORIES_DE: Theory[] = [
   {
     id: 't3',
     title: 'Reptiloide',
-    shortDescription: 'Formwandelnde Reptilienwesen kontrollieren angeblich die Weltregierung in Menschengestalt.',
+    shortDescription: 'David Ickes Signaturtheorie: Shapshifting-Reptilien (Draco-Rasse) infiltrieren Elite-Positionen. Fusion aus antisemitischen Tropes (Blutlinien, Kontrolle) mit Sci-Fi-Ästhetik. Psychologisch: Dehumanisierung von Machthabern, Externalisierung von Schuld. Gefährlich durch othering-Dynamik, kulturell absurd.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.MEDIUM,
-    popularity: 45,
+    popularity: 48,
     originYear: '1998',
-    tags: ['Aliens', 'Elite', 'David Icke'],
+    tags: ['Aliens', 'Elite', 'David Icke', 'Shapeshifter', 'Draco', 'Blutlinien', 'Windsor', 'Royals'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4', // General WF
-    relatedIds: ['t5', 't10', 't13', 't17', 't19', 't40']
+    relatedIds: ['t5', 't10', 't13', 't17', 't19', 't40', 't77']
   },
   {
     id: 't10',
     title: 'Hohle Erde',
-    shortDescription: 'Im Inneren der Erde befinden sich angeblich Zivilisationen (Agartha) und eine innere Sonne.',
+    shortDescription: 'Hollow-Earth-Hypothese: Agartha-Zivilisation + innere Sonne + polare Öffnungen. Wurzeln in 17. Jh. (Edmond Halley), popularisiert durch Symmes (1818) und Nazi-Mythen (Admiral Byrd). Seismologie widerlegt (feste Masse). Jules-Verne-Ästhetik, harmlose Phantastik, geografisch absurd.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 30,
+    popularity: 34,
     originYear: '17. Jh',
-    tags: ['Agartha', 'Pole', 'Expeditionen'],
+    tags: ['Agartha', 'Pole', 'Expeditionen', 'Edmond Halley', 'Admiral Byrd', 'Symmes Holes', 'Shambhala'],
     videoUrl: 'https://www.youtube.com/watch?v=3sxnZc6qfT0',
-    relatedIds: ['t1', 't3', 't11', 't39', 't51']
+    relatedIds: ['t1', 't3', 't11', 't39', 't51', 't56']
   },
   {
     id: 't15',
     title: 'Remote Viewing',
-    shortDescription: 'Das US-Militär (Projekt Stargate) nutzte angeblich Hellseher wie Ingo Swann, um sowjetische Ziele und außerirdische Basen auszuspionieren.',
+    shortDescription: 'CIA/DIA Project Stargate (1975-1995): Psi-Spionage-Programm mit Ingo Swann, Russell Targ. AIR-Review (1995) fand null operativen Nutzen. Legitime Parapsychologie-Forschung, aber kein Nachweis überlichtschneller Information. Kulturell: Netflix-Dokumentationen, RV-Kurse. Harmlose Pseudoskill-Industrie.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 55,
+    popularity: 60,
     originYear: '1970er',
-    tags: ['CIA', 'Psi-Kräfte', 'Spionage', 'Ingo Swann'],
+    tags: ['CIA', 'Psi-Kräfte', 'Spionage', 'Ingo Swann', 'Russell Targ', 'Stargate Project', 'Parapsychologie', 'SRI'],
     videoUrl: 'https://www.youtube.com/watch?v=WkC91tV7oMw',
-    relatedIds: ['t13', 't57']
+    relatedIds: ['t13', 't57', 't78', 't22']
   },
   {
     id: 't22',
     title: 'Simulations-Theorie',
-    shortDescription: 'Die Realität ist eigentlich eine Computersimulation einer fortgeschrittenen Zivilisation, und wir sind nur Code.',
+    shortDescription: 'Nick Bostrom\'s philosophisches Gedankenexperiment (2003) als spirituelle Erlösungserzählung umgedeutet: Realität = Programm, Bewusstsein = Glitch. Vereint Quantenmechanik-Missverständnisse mit Gnostizismus. Elon Musk vulgarisierte These. Epistemisch unfalsifizierbar, kulturell einflussreich (Matrix-Ikonografie), harmlos.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 75,
+    popularity: 83,
     originYear: '2003 (Bostrom)',
-    tags: ['Matrix', 'Philosophie', 'Technologie', 'KI'],
+    tags: ['Matrix', 'Philosophie', 'Technologie', 'KI', 'Nick Bostrom', 'Elon Musk', 'Quantenmechanik', 'Solipsismus'],
     videoUrl: 'https://www.youtube.com/watch?v=tlBKz9e3jXU',
-    relatedIds: ['t6', 't47', 't57', 't77']
+    relatedIds: ['t6', 't47', 't57', 't77', 't62']
   },
   {
     id: 't28',
     title: 'Planet Nibiru (Planet X)',
-    shortDescription: 'Ein riesiger Planet nähert sich der Erde und wird eine globale Katastrophe auslösen, was von der NASA vertuscht wird.',
+    shortDescription: 'Zecharia Sitchins Pseudo-Sumerologie: 12. Planet mit 3.600-Jahre-Orbit, Heimat der Anunnaki. Nancy Lieder (ZetaTalk) prophezeite 2003-Kollision, verschob auf 2012. Astronomisch widerlegt (gravitativer Einfluss sichtbar). Apokalypse-Evergreen, regelmäßig recycelt. Harmlose Weltuntergangs-Fantasy.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 55,
+    popularity: 58,
     originYear: '1995',
-    tags: ['Weltraum', 'Weltuntergang', 'NASA', 'Sumerer'],
-    relatedIds: ['t1', 't12', 't56']
+    tags: ['Weltraum', 'Weltuntergang', 'NASA', 'Sumerer', 'Zecharia Sitchin', 'Anunnaki', '2012', 'Nancy Lieder'],
+    relatedIds: ['t1', 't12', 't56', 't19', 't51']
   },
   {
     id: 't38',
     title: 'Nordics (Plejader)',
-    shortDescription: 'Menschenähnliche, wohlwollende Außerirdische ("Space Brothers"), die vor Atomkraft warnen und spirituellen Aufstieg lehren.',
+    shortDescription: '1950er Contactee-Bewegung: blonde, menschenähnliche „Space Brothers" warnen vor Atomkrieg (George Adamski, Billy Meier). New-Age-Channeling (Barbara Marciniak) spiritualisierte Kontakte. Carl-Jung-Analyse: Projektionen archetypischer Idealfiguren. Harmlose Friedensbotschaft, esoterische Kommerzialisierung.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 50,
+    popularity: 54,
     originYear: '1950er',
-    tags: ['Aliens', 'Spiritualität', 'Channeling', 'Kontaktler'],
-    relatedIds: ['t19', 't3', 't78']
+    tags: ['Aliens', 'Spiritualität', 'Channeling', 'Kontaktler', 'George Adamski', 'Billy Meier', 'Barbara Marciniak', 'Plejaden'],
+    relatedIds: ['t19', 't3', 't78', 't57', 't15']
   },
   {
     id: 't39',
     title: 'Aldebaran & Vril',
-    shortDescription: 'Esoterische Nazis sollen telepathischen Kontakt zu Aldebaran gehabt haben, um UFO-Technologie (Vril) zu entwickeln.',
+    shortDescription: 'Post-WWII-Mythos: Thule/Vril-Gesellschaften channelten Aldebaran-Aliens für UFO-Technologie (Haunebu, Glocke), flüchteten nach Neuschwabenland. Keine primären NS-Quellen (1990er-Erfindung). Romantisiert Nazi-Okkultismus, verharmlost Kriegsverbrechen durch Alien-Erklärungen. Rechtsextreme Ankerpunkte, gefährlich.',
     category: Category.ESOTERIC,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 60,
+    dangerLevel: DangerLevel.EXTREME,
+    popularity: 64,
     originYear: '1920er',
-    tags: ['Nazi-Okkultismus', 'UFO', 'Vril', 'Geschichte'],
-    relatedIds: ['t10', 't11', 't50']
+    tags: ['Nazi-Okkultismus', 'UFO', 'Vril', 'Geschichte', 'Thule-Gesellschaft', 'Haunebu', 'Neuschwabenland', 'Die Glocke'],
+    relatedIds: ['t10', 't11', 't50', 't38', 't40']
   },
   {
     id: 't40',
     title: 'Draconier (Draco-Allianz)',
-    shortDescription: 'Eine kriegerische Rasse reptiloider Eroberer aus dem Alpha-Draconis-System, die angeblich die Erde als Kolonie betrachten.',
+    shortDescription: 'Reptiloid-Militarismus-Trope: Alpha-Draconis-Eroberer als kosmische Antagonisten (vs. wohlwollende Nordics/Plejader). Stewart Swerdlow, Alex Collier populär. Manichäische Alien-Soap-Opera mit Exopolitik-Jargon. Psychologisch: Gut-Böse-Projektion im Kosmos. Gefährlich nur durch Othering-Potenzial.',
     category: Category.ESOTERIC,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 55,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 57,
     originYear: '1990er',
-    tags: ['Aliens', 'Krieg', 'Reptiloide', 'Exopolitik'],
-    relatedIds: ['t3', 't37', 't5']
+    tags: ['Aliens', 'Krieg', 'Reptiloide', 'Exopolitik', 'Alpha Draconis', 'Stewart Swerdlow', 'Alex Collier'],
+    relatedIds: ['t3', 't37', 't5', 't39', 't77']
   },
   {
     id: 't57',
     title: 'Akasha Chronik',
-    shortDescription: 'Ein mystisches "Weltgedächtnis" im Äther, das jedes Ereignis, jeden Gedanken und jede Emotion der Geschichte speichert.',
+    shortDescription: 'Theosophisches Konzept (Helena Blavatsky, Rudolf Steiner): Äther-"Bibliothek" aller Ereignisse, zugänglich durch Hellsehen. Verbindet indische Akasha-Philosophie mit viktorianischem Spiritismus. Edgar Cayce popularisierte „Readings". Epistemisch nicht prüfbar, spirituell funktional (Sinnstiftung). Harmlose Esoterik.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 68,
+    popularity: 66,
     originYear: '19. Jh (Theosophie)',
-    tags: ['Spiritualität', 'Gedächtnis', 'Äther', 'Metaphysik'],
-    relatedIds: ['t15', 't22', 't38']
+    tags: ['Spiritualität', 'Gedächtnis', 'Äther', 'Metaphysik', 'Helena Blavatsky', 'Rudolf Steiner', 'Edgar Cayce', 'Theosophie'],
+    relatedIds: ['t15', 't22', 't38', 't78']
   },
   {
     id: 't62',
     title: 'CERN Portale',
-    shortDescription: 'Der Large Hadron Collider (LHC) wird verdächtigt, Portale zu anderen Dimensionen oder zur Hölle zu öffnen (Shiva-Statue, Gotthard-Tunnel Ritual).',
+    shortDescription: 'LHC als interdimensionales Tor-Experiment: Gotthard-Tunnel-Zeremonie (2016) + Shiva-Statue = „Dämon-Beschwörung". Technisch: Higgs-Boson-Entdeckung, kein Portal-Mechanismus. Verbindet Physik-Analphabetismus mit christlichem Apokalyptismus. Harmlose Anti-Wissenschaft-Paranoia.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 70,
+    popularity: 67,
     originYear: '2008',
-    tags: ['Physik', 'Dimensionen', 'Dämonen', 'Schweiz'],
-    relatedIds: ['t22', 't12']
+    tags: ['Physik', 'Dimensionen', 'Dämonen', 'Schweiz', 'Higgs-Boson', 'Strangelets', 'Schwarze Löcher', 'Gotthard-Tunnel'],
+    relatedIds: ['t22', 't12', 't77']
   },
   {
     id: 't77',
     title: 'Gefängnisplanet (Prison Planet)',
-    shortDescription: 'Die Theorie, dass die Erde eine spirituelle Falle ist, in der Seelen durch Reinkarnation (den "Lichttunnel") recycelt werden, um Energie für Archonten zu liefern.',
+    shortDescription: 'Gnostisch-inspirierte Dystopie: Erde als Seelen-Batteriefarm für interdimensionale Archonten, Reinkarnation via „Lichttunnel" = Reset-Mechanismus. Verbindet antike Häresien mit moderner Entfremdung. Wayne Bush, Cameron Day populär. Gefährlich durch Realitätsflucht-Idealisierung (Suizid-Risiko), anti-materialistisch.',
     category: Category.ESOTERIC,
-    dangerLevel: DangerLevel.MEDIUM,
-    popularity: 65,
+    dangerLevel: DangerLevel.HIGH,
+    popularity: 71,
     originYear: 'Gnostizismus',
-    tags: ['Gnostik', 'Archonten', 'Reinkarnation', 'Matrix'],
-    relatedIds: ['t22', 't3']
+    tags: ['Gnostik', 'Archonten', 'Reinkarnation', 'Matrix', 'Lichttunnel', 'Demiurg', 'Loosh', 'Robert Monroe'],
+    relatedIds: ['t22', 't3', 't57', 't40']
   },
   {
     id: 't78',
     title: 'Starseeds',
-    shortDescription: 'Menschen, die glauben, ihre Seelen stammten von anderen Sternensystemen (Plejaden, Sirius), um die Schwingung der Erde zu erhöhen.',
+    shortDescription: 'New-Age-Identitätskonstrukt: Inkarnierte außerirdische Seelen (Plejaden, Sirius, Arcturus) mit Mission, Erd-Schwingung anzuheben. Bietet Sinnstiftung für Entfremdung („Ich gehöre nicht hierher"). Kommerzialisiert durch Coaching/Channeling-Industrie. Harmlose Selbstmystifizierung, finanziell ausbeutbar.',
     category: Category.ESOTERIC,
     dangerLevel: DangerLevel.LOW,
-    popularity: 80,
+    popularity: 85,
     originYear: '1970er',
-    tags: ['New Age', 'Aliens', 'Aufstieg', 'Spiritualität'],
-    relatedIds: ['t38']
+    tags: ['New Age', 'Aliens', 'Aufstieg', 'Spiritualität', 'Channeling', 'Lichtarbeiter', 'Indigo-Kinder', 'Schwingung'],
+    relatedIds: ['t38', 't57', 't77', 't15']
   },
   // HEALTH
   {

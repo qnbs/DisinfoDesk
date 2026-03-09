@@ -5,170 +5,170 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
   {
     id: 't5',
     title: 'New World Order (NWO)',
-    shortDescription: 'Eine geheime Elite plant eine autoritäre Weltregierung, um die Menschheit zu versklaven.',
+    shortDescription: 'Ur-Narrativ globalistischer Verschwörung: Eine schattenhafte Elite orchestriere supranationale Institutionen (UN, WEF, EU) zur Errichtung einer totalitären Weltregierung. Flexible Großerzählung, die als ideologisches Gerüst für zahlreiche Subtheorien dient.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.HIGH,
-    popularity: 90,
+    popularity: 87,
     originYear: '1990er',
-    tags: ['Elite', 'Globalisierung', 'Kontrolle'],
-    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64']
+    tags: ['Elite', 'Globalisierung', 'Kontrolle', 'Eine-Welt-Regierung', 'George H.W. Bush', 'UN', 'Bilderberg', 'Supranationalismus'],
+    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64', 't74', 't75']
   },
   {
     id: 't7',
     title: 'QAnon',
-    shortDescription: 'Ein komplexes Geflecht aus Behauptungen über einen "Deep State" und geheime Eliten-Ringe.',
+    shortDescription: 'Dezentrale Verschwörungsbewegung um einen mysteriösen "Q"-Informanten, die einen globalen Kampf gegen eine satanistische Elite konstruiert. Kulminierte in realer Gewalt (Capitol Riots 2021) und transnationaler Radikalisierung mit anhaltender Demokratiegefährdung.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.EXTREME,
-    popularity: 85,
+    popularity: 72,
     originYear: '2017',
-    tags: ['Deep State', 'USA', 'Internetkultur'],
+    tags: ['Deep State', 'USA', 'Internetkultur', 'Radikalisierung', 'Capitol Riot', 'Chan-Boards', 'Trumpismus', 'Great Awakening'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4', // Generic Deep State ref
-    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65']
+    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65', 't7', 't20', 't75']
   },
   {
     id: 't9',
     title: 'Großer Austausch',
-    shortDescription: 'Rassistische Theorie über den angeblich gezielten Austausch der Bevölkerung.',
+    shortDescription: 'White-Supremacist-Narrativ einer vermeintlich orchestrierten "Bevölkerungsersetzung" durch Migration. Ideologische Grundlage zahlreicher Terroranschläge (Christchurch, El Paso, Halle) und zentrales Element rechtsextremer Mobilisierung weltweit.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.EXTREME,
-    popularity: 55,
+    popularity: 63,
     originYear: '2010er',
-    tags: ['Demografie', 'Politik', 'Rechtsradikal'],
-    relatedIds: ['t5', 't7', 't20']
+    tags: ['Demografie', 'Politik', 'Rechtsradikal', 'White Genocide', 'Renaud Camus', 'Terrorismus', 'Ethno-Nationalismus', 'Identitäre'],
+    relatedIds: ['t5', 't7', 't20', 't64', 't74', 't43']
   },
   {
     id: 't14',
     title: 'Project Blue Beam',
-    shortDescription: 'Ein angeblicher Plan der NASA, mittels riesiger Hologramme am Himmel eine religiöse Wiederkunft zu inszenieren und die NWO einzuleiten.',
+    shortDescription: 'NASA würde mittels Satelliten-Hologrammen eine falsche Alien-Invasion oder Messias-Rückkehr inszenieren, um globale Massenpanik und NWO-Akzeptanz zu erzwingen. Technisch absurd, aber langlebiges Motiv in Endzeitszenarien (Serge Monast 1994). Erlebt durch UAP-Diskurs Renaissance.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 50,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 58,
     originYear: '1994',
-    tags: ['Hologramme', 'Religion', 'NWO', 'NASA'],
+    tags: ['Hologramme', 'Religion', 'NWO', 'NASA', 'Serge Monast', 'False Messiah', 'HAARP', 'Alien Invasion'],
     videoUrl: 'https://www.youtube.com/watch?v=rK0K9X9_Z9M',
-    relatedIds: ['t5', 't2', 't6', 't21', 't39']
+    relatedIds: ['t5', 't2', 't6', 't21', 't39', 't13', 't19']
   },
   {
     id: 't18',
     title: '9/11 Inside Job',
-    shortDescription: 'Die Terroranschläge vom 11. September 2001 wurden angeblich von der US-Regierung inszeniert (Sprengung, nicht Flugzeuge), um Kriege zu rechtfertigen.',
+    shortDescription: 'Archetyp der False-Flag-Operation: Behauptet kontrollierte Sprengung statt Flugzeugeinschläge, inszeniert für Kriegslegitimation ("Operation Northwoods"). Obwohl durch Physik-Expertisen widerlegt, bleibt es kulturprägender Einstieg in Verschwörungsdenken ("Jet fuel can\'t melt steel beams").',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.HIGH,
-    popularity: 88,
+    popularity: 81,
     originYear: '2001',
-    tags: ['Terror', 'False Flag', 'Stahlträger', 'Bush'],
-    relatedIds: ['t5', 't16', 't7', 't19', 't25']
+    tags: ['Terror', 'False Flag', 'Stahlträger', 'Bush', 'NIST-Report', 'Thermit', 'Building 7', 'PNAC', 'Inside Job'],
+    relatedIds: ['t5', 't16', 't7', 't19', 't25', 't43', 't65']
   },
   {
     id: 't20',
     title: 'The Great Reset',
-    shortDescription: 'Das Weltwirtschaftsforum (WEF) nutzte angeblich die Pandemie, um Privateigentum abzuschaffen und eine totalitäre Kontrolle einzuführen.',
+    shortDescription: 'Verzerrung einer WEF-Initiative zur nachhaltigen Wirtschaftsreform: wird als dystopischer Plan zur Abschaffung von Privateigentum ("You will own nothing") und totaler Überwachung fehlinterpretiert. Zentraler Bezugspunkt anti-globalistischer Mobilisierung seit COVID-19.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 85,
+    dangerLevel: DangerLevel.EXTREME,
+    popularity: 93,
     originYear: '2020',
-    tags: ['WEF', 'Klaus Schwab', 'Wirtschaft', 'Enteignung'],
-    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64']
+    tags: ['WEF', 'Klaus Schwab', 'Wirtschaft', 'Enteignung', 'ESG', 'Stakeholder-Kapitalismus', 'Build Back Better', '4th Industrial Revolution'],
+    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64', 't74', 't75', 't7']
   },
   {
     id: 't30',
     title: 'Adrenochrome',
-    shortDescription: 'Hollywood-Eliten sollen angeblich Kinderblut trinken, um die Droge Adrenochrom zur Verjüngung zu gewinnen.',
+    shortDescription: 'Extreme Blutlibel-Variante: Eliten würden Kinder foltern, um oxidiertes Adrenalin (Adrenochrom) zu extrahieren. Wurzeln in mittelalterlichem Antisemitismus, modern popularisiert durch "Fear and Loathing", von QAnon militarisiert. Führte zu Pizzagate-Schießerei und anhaltender Gefährdung realer Personen.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.EXTREME,
-    popularity: 80,
+    popularity: 68,
     originYear: '2016',
-    tags: ['QAnon', 'Hollywood', 'Satanism', 'Blut'],
-    relatedIds: ['t7', 't5', 't3', 't46', 't65']
+    tags: ['QAnon', 'Hollywood', 'Satanism', 'Blut', 'Pizzagate', 'Wayfair', 'Blutlibel', 'Ritualmord', 'Hunter S. Thompson'],
+    relatedIds: ['t7', 't5', 't3', 't46', 't65', 't16', 't30']
   },
   {
     id: 't35',
     title: 'Die Illuminaten',
-    shortDescription: 'Der bayerische Geheimorden (1776) existiert angeblich weiter und kontrolliert Banken, Regierungen und die Unterhaltungsindustrie.',
+    shortDescription: 'Historischer Aufklärungsbund (Adam Weishaupt, 1776-1785) wird als unsterbliche Schattenregierung mythologisiert. Popkulturell omnipräsent (Jay-Z "Roc"-Zeichen, Dollarnote-Pyramide), funktioniert als universeller Platzhalter für Elite-Macht. Meme-hafte Virulenz bei minimalem Radikalisierungspotential.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.MEDIUM,
-    popularity: 95,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 92,
     originYear: '1776',
-    tags: ['Elite', 'Bayern', 'Geheimbund', 'Popkultur'],
-    relatedIds: ['t5', 't34', 't20', 't43', 't45']
+    tags: ['Elite', 'Bayern', 'Geheimbund', 'Popkultur', 'Adam Weishaupt', 'All-Seeing Eye', 'Symbolismus', 'Freimaurerei'],
+    relatedIds: ['t5', 't34', 't20', 't43', 't45', 't46']
   },
   {
     id: 't43',
     title: 'Die Bilderberger',
-    shortDescription: 'Jährliche, informelle Treffen einflussreicher Personen aus Politik und Wirtschaft, denen die Bildung einer geheimen Weltregierung nachgesagt wird.',
+    shortDescription: 'Reales informelles Forum transatlantischer Eliten (seit 1954), dessen Geheimhaltung verschwörungstheoretische Projektion begünstigt. Wird als NWO-Kabinett gedeutet, das Regierungschefs und Märkte steuert. Tatsächlich Diskussions-Chatham-House-Konferenz ohne Beschlussfassung.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.MEDIUM,
-    popularity: 82,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 76,
     originYear: '1954',
-    tags: ['Elite', 'Konferenz', 'Geheim', 'Politik'],
-    relatedIds: ['t5', 't20', 't35']
+    tags: ['Elite', 'Konferenz', 'Geheim', 'Politik', 'Chatham House Rules', 'Davos', 'Transatlantiker', 'Council on Foreign Relations'],
+    relatedIds: ['t5', 't20', 't35', 't64', 't46']
   },
   {
     id: 't46',
     title: 'Bohemian Grove',
-    shortDescription: 'Ein jährliches Treffen der amerikanischen Machtelite in Kalifornien, bei dem angeblich okkulte Rituale vor einer Eulenstatue (Moloch) abgehalten werden.',
+    shortDescription: 'Realer exklusiver Männer-Retreat kalifornischer Eliten (seit 1872) mit theatralischer "Cremation of Care"-Zeremonie. Alex Jones\' illegale Infiltration (2000) mythologisierte das Camp als Moloch-Kult. Faktisch Mischung aus Networking, Natur und Alkohol, symbolisch überinterpretiert.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.MEDIUM,
-    popularity: 70,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 65,
     originYear: '1872',
-    tags: ['Elite', 'Okkultismus', 'Rituale', 'Kalifornien'],
+    tags: ['Elite', 'Okkultismus', 'Rituale', 'Kalifornien', 'Alex Jones', 'Owl', 'Manhattan Project', 'Richard Nixon'],
     videoUrl: 'https://www.youtube.com/watch?v=F2E_HJ9yljk',
-    relatedIds: ['t5', 't30', 't34']
+    relatedIds: ['t5', 't30', 't34', 't35', 't43']
   },
   {
     id: 't47',
     title: 'Transhumanismus-Agenda',
-    shortDescription: 'Die Verschmelzung von Mensch und Maschine wird angeblich vorangetrieben, um die Menschheit zu kontrollieren oder "Seelenlos" zu machen.',
+    shortDescription: 'Philosophische Vision technologischer Menschheitsverbesserung (Bostrom, Kurzweil) wird als dystopisches Cyborg-Versklavungsprogramm fehlgedeutet. Verbindet Ängste vor KI, Chip-Implantaten, mRNA-Technologie und "Seelenverlust". Neuralink und CRISPR als angebliche NWO-Werkzeuge.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.MEDIUM,
-    popularity: 65,
+    popularity: 71,
     originYear: '2000er',
-    tags: ['Technologie', 'KI', 'Evolution', 'Kontrolle'],
-    relatedIds: ['t6', 't20', 't22', 't48']
+    tags: ['Technologie', 'KI', 'Evolution', 'Kontrolle', 'Ray Kurzweil', 'Neuralink', 'CRISPR', 'Singularity', 'Brain-Computer Interface'],
+    relatedIds: ['t6', 't20', 't22', 't48', 't74', 't64']
   },
   {
     id: 't64',
     title: 'Agenda 2030',
-    shortDescription: 'Die UN-Ziele für nachhaltige Entwicklung werden als Deckmantel für eine globale totalitäre Überwachung und Enteignung interpretiert.',
+    shortDescription: 'UN-Nachhaltigkeitsziele (SDGs) werden als euphemistischer Blueprint für technokratische Kontrolle und Eigentumsenteignung umgedeutet. Verbindet anti-grüne Ressentiments mit Souveränitätsängsten. Fungiert als globalsüdliche Variante der WEF-Skepsis.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.HIGH,
-    popularity: 82,
+    popularity: 85,
     originYear: '2015',
-    tags: ['UN', 'NWO', 'Nachhaltigkeit', 'Kontrolle'],
-    relatedIds: ['t20', 't5', 't74']
+    tags: ['UN', 'NWO', 'Nachhaltigkeit', 'Kontrolle', 'SDGs', 'Agenda 21', 'IPCC', 'Smart Cities', 'Stakeholder', 'Public-Private Partnership'],
+    relatedIds: ['t20', 't5', 't74', 't47', 't9']
   },
   {
     id: 't65',
     title: 'The Finders Cult',
-    shortDescription: 'Ein mysteriöser Kult, der 1987 in eine CIA-Untersuchung verwickelt war. Oft als Vorläufer der QAnon/Pizzagate-Erzählungen über Elite-Kinderhandel zitiert.',
+    shortDescription: 'Obskurer Kult (1987 in Florida verhaftet), dessen FBI-Akten CIA-Verbindungen suggerierten. Dient als historischer "Beweis"-Ankerpunkt für QAnon-Narrative über institutionalisierten Kindesmissbrauch. Tatsächliche Fakten unklar, FBI-Akten 2019 teilweise freigegeben, aber inkonsistent.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 55,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 52,
     originYear: '1987',
-    tags: ['CIA', 'Kult', 'Kinder', 'Deep State'],
-    relatedIds: ['t7', 't30']
+    tags: ['CIA', 'Kult', 'Kinder', 'Deep State', 'FBI', 'Tallahassee', 'FOIA', 'Marion Pettie'],
+    relatedIds: ['t7', 't30', 't18', 't5']
   },
   {
     id: 't74',
     title: '15-Minuten-Städte',
-    shortDescription: 'Stadtplanungskonzepte für bessere Erreichbarkeit werden als Versuch gedeutet, Bürger in "Klima-Ghettos" einzusperren und Bewegungsfreiheit einzuschränken.',
+    shortDescription: 'Urbanistisches Konzept nachhaltiger Nahversorgung wird als "Open-Air-Gefängnis" umgedeutet. Verbindet Klima-Skepsis, Anti-Lockdown-Ressentiments und NWO-Ängste. Führte 2023-2024 zu Protesten, Vandalismus an Verkehrsinfrastruktur und Bedrohung von Stadtplanern.',
     category: Category.GEOPOLITICS,
-    dangerLevel: DangerLevel.HIGH,
-    popularity: 88,
+    dangerLevel: DangerLevel.EXTREME,
+    popularity: 91,
     originYear: '2022',
-    tags: ['Klima', 'Lockdown', 'Städtebau', 'WEF'],
-    relatedIds: ['t20', 't64']
+    tags: ['Klima', 'Lockdown', 'Städtebau', 'WEF', 'ULEZ', 'C40 Cities', 'Smart Cities', 'Verkehrswende', 'Oxford', 'Low Traffic Neighbourhoods'],
+    relatedIds: ['t20', 't64', 't5', 't9', 't47']
   },
   {
     id: 't75',
     title: 'NESARA / GESARA',
-    shortDescription: 'Die Hoffnung auf ein geheimes Gesetz, das alle Schulden erlässt und ein neues Finanzsystem (oft mit BRICS/Goldstandard) einführt.',
+    shortDescription: 'Millenaristische Fantasie eines geheimen "National Economic Security and Recovery Act", der Schuldenerlasse, UBI und Goldstandard bringt. Von Harvey Barnard (1990er) erfunden, von Shaini Goodwin kultisch ausgebaut, von QAnon als "White Hat"-Operation vereinnahmt. Finanziell gefährdend für vulnerable Gläubige.',
     category: Category.GEOPOLITICS,
     dangerLevel: DangerLevel.MEDIUM,
-    popularity: 70,
+    popularity: 66,
     originYear: '2000',
-    tags: ['Finanzen', 'Schulden', 'Gold', 'Utopie'],
-    relatedIds: ['t7', 't5']
+    tags: ['Finanzen', 'Schulden', 'Gold', 'Utopie', 'White Hats', 'Debt Jubilee', 'Quantum Financial System', 'BRICS', 'RV/GCR'],
+    relatedIds: ['t7', 't5', 't20', 't35']
   }
 ];
 
@@ -176,169 +176,169 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
   {
     id: 't5',
     title: 'New World Order (NWO)',
-    shortDescription: 'A secret elite plans an authoritarian world government to enslave humanity.',
+    shortDescription: 'Ur-narrative of globalist conspiracy: A shadowy elite orchestrates supranational institutions (UN, WEF, EU) to establish a totalitarian world government. Flexible master narrative serving as ideological scaffolding for numerous sub-theories.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.HIGH,
-    popularity: 90,
+    popularity: 87,
     originYear: '1990s',
-    tags: ['Elite', 'Globalization', 'Control'],
-    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64']
+    tags: ['Elite', 'Globalization', 'Control', 'One World Government', 'George H.W. Bush', 'UN', 'Bilderberg', ' Supranationalism'],
+    relatedIds: ['t7', 't3', 't9', 't14', 't18', 't20', 't25', 't35', 't43', 't64', 't74', 't75']
   },
   {
     id: 't7',
     title: 'QAnon',
-    shortDescription: 'A complex web of claims about a "Deep State" and secret elite rings.',
+    shortDescription: 'Decentralized conspiracy movement around a mysterious "Q" informant, constructing a global battle against a satanic elite. Culminated in real-world violence (Capitol Riots 2021) and transnational radicalization with ongoing threat to democracy.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.EXTREME,
-    popularity: 85,
+    popularity: 72,
     originYear: '2017',
-    tags: ['Deep State', 'USA', 'Internet Culture'],
+    tags: ['Deep State', 'USA', 'Internet Culture', 'Radicalization', 'Capitol Riot', 'Chan Boards', 'Trumpism', 'Great Awakening'],
     videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
-    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65']
+    relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65', 't7', 't20', 't75']
   },
   {
     id: 't9',
     title: 'Great Replacement',
-    shortDescription: 'Racist theory about the allegedly targeted replacement of the population.',
+    shortDescription: 'White supremacist narrative of allegedly orchestrated "population replacement" through migration. Ideological foundation of numerous terrorist attacks (Christchurch, El Paso, Halle) and central element of far-right mobilization worldwide.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.EXTREME,
-    popularity: 55,
+    popularity: 63,
     originYear: '2010s',
-    tags: ['Demography', 'Politics', 'Far-right'],
-    relatedIds: ['t5', 't7', 't20']
+    tags: ['Demography', 'Politics', 'Far-right', 'White Genocide', 'Renaud Camus', 'Terrorism', 'Ethno-Nationalism', 'Identitarian'],
+    relatedIds: ['t5', 't7', 't20', 't64', 't74', 't43']
   },
   {
     id: 't14',
     title: 'Project Blue Beam',
-    shortDescription: 'An alleged NASA plan to stage a religious second coming using giant holograms in the sky to initiate the NWO.',
+    shortDescription: 'NASA would use satellite holograms to stage a fake alien invasion or messiah return, forcing global mass panic and NWO acceptance. Technically absurd but long-lived motif in apocalyptic scenarios (Serge Monast 1994). Experiencing renaissance through UAP discourse.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.HIGH,
-    popularity: 50,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 58,
     originYear: '1994',
-    tags: ['Holograms', 'Religion', 'NWO', 'NASA'],
+    tags: ['Holograms', 'Religion', 'NWO', 'NASA', 'Serge Monast', 'False Messiah', 'HAARP', 'Alien Invasion'],
     videoUrl: 'https://www.youtube.com/watch?v=rK0K9X9_Z9M',
-    relatedIds: ['t5', 't2', 't6', 't21', 't39']
+    relatedIds: ['t5', 't2', 't6', 't21', 't39', 't13', 't19']
   },
   {
     id: 't18',
     title: '9/11 Inside Job',
-    shortDescription: 'The September 11, 2001 terrorist attacks were allegedly orchestrated by the US government (controlled demolition) to justify wars.',
+    shortDescription: 'Archetype of false-flag operation: Claims controlled demolition instead of plane impacts, orchestrated for war legitimation ("Operation Northwoods"). Despite refutation by physics experts, remains culturally formative gateway into conspiratorial thinking ("Jet fuel can\'t melt steel beams").',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.HIGH,
-    popularity: 88,
+    popularity: 81,
     originYear: '2001',
-    tags: ['Terror', 'False Flag', 'Steel Beams', 'Bush'],
-    relatedIds: ['t5', 't16', 't7', 't19', 't25']
+    tags: ['Terror', 'False Flag', 'Steel Beams', 'Bush', 'NIST Report', 'Thermite', 'Building 7', 'PNAC', 'Inside Job'],
+    relatedIds: ['t5', 't16', 't7', 't19', 't25', 't43', 't65']
   },
   {
     id: 't20',
     title: 'The Great Reset',
-    shortDescription: 'The World Economic Forum (WEF) allegedly used the pandemic to abolish private property and establish totalitarian control.',
+    shortDescription: 'Distortion of a WEF initiative for sustainable economic reform: misinterpreted as dystopian plan to abolish private property ("You will own nothing") and establish total surveillance. Central reference point of anti-globalist mobilization since COVID-19.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.HIGH,
-    popularity: 85,
+    dangerLevel: DangerLevelEn.EXTREME,
+    popularity: 93,
     originYear: '2020',
-    tags: ['WEF', 'Klaus Schwab', 'Economy', 'Expropriation'],
-    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64']
+    tags: ['WEF', 'Klaus Schwab', 'Economy', 'Expropriation', 'ESG', 'Stakeholder Capitalism', 'Build Back Better', '4th Industrial Revolution'],
+    relatedIds: ['t5', 't9', 't30', 't47', 't48', 't64', 't74', 't75', 't7']
   },
   {
     id: 't30',
     title: 'Adrenochrome',
-    shortDescription: 'Hollywood elites allegedly drink children\'s blood to harvest the drug adrenochrome for rejuvenation.',
+    shortDescription: 'Extreme blood libel variant: Elites torture children to extract oxidized adrenaline (adrenochrome). Roots in medieval antisemitism, modernly popularized by "Fear and Loathing", weaponized by QAnon. Led to Pizzagate shooting and ongoing endangerment of real persons.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.EXTREME,
-    popularity: 80,
+    popularity: 68,
     originYear: '2016',
-    tags: ['QAnon', 'Hollywood', 'Satanism', 'Blood'],
-    relatedIds: ['t7', 't5', 't3', 't46', 't65']
+    tags: ['QAnon', 'Hollywood', 'Satanism', 'Blood', 'Pizzagate', 'Wayfair', 'Blood Libel', 'Ritual Murder', 'Hunter S. Thompson'],
+    relatedIds: ['t7', 't5', 't3', 't46', 't65', 't16', 't30']
   },
   {
     id: 't35',
     title: 'The Illuminati',
-    shortDescription: 'The Bavarian secret order (1776) allegedly continues to exist, controlling banks, governments, and the entertainment industry.',
+    shortDescription: 'Historical Enlightenment society (Adam Weishaupt, 1776-1785) mythologized as immortal shadow government. Ubiquitous in pop culture (Jay-Z "Roc" sign, dollar pyramid), functions as universal placeholder for elite power. Meme-like virality with minimal radicalization potential.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.MEDIUM,
-    popularity: 95,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 92,
     originYear: '1776',
-    tags: ['Elite', 'Bavaria', 'Secret Society', 'Pop Culture'],
-    relatedIds: ['t5', 't34', 't20', 't43', 't45']
+    tags: ['Elite', 'Bavaria', 'Secret Society', 'Pop Culture', 'Adam Weishaupt', 'All-Seeing Eye', 'Symbolism', 'Freemasonry'],
+    relatedIds: ['t5', 't34', 't20', 't43', 't45', 't46']
   },
   {
     id: 't43',
     title: 'The Bilderberg Group',
-    shortDescription: 'Annual informal meetings of influential people from politics and business, rumored to be establishing a secret world government.',
+    shortDescription: 'Real informal forum of transatlantic elites (since 1954) whose secrecy facilitates conspiratorial projection. Interpreted as NWO cabinet steering heads of state and markets. Actually discussion-based Chatham House conference without binding resolutions.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.MEDIUM,
-    popularity: 82,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 76,
     originYear: '1954',
-    tags: ['Elite', 'Conference', 'Secret', 'Politics'],
-    relatedIds: ['t5', 't20', 't35']
+    tags: ['Elite', 'Conference', 'Secret', 'Politics', 'Chatham House Rules', 'Davos', 'Transatlantic', 'Council on Foreign Relations'],
+    relatedIds: ['t5', 't20', 't35', 't64', 't46']
   },
   {
     id: 't46',
     title: 'Bohemian Grove',
-    shortDescription: 'An annual gathering of the American power elite in California, where occult rituals are allegedly performed before an owl statue (Moloch).',
+    shortDescription: 'Real exclusive men\'s retreat of Californian elites (since 1872) with theatrical "Cremation of Care" ceremony. Alex Jones\' illegal infiltration (2000) mythologized the camp as Moloch cult. Factually mix of networking, nature, and alcohol, symbolically over-interpreted.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.MEDIUM,
-    popularity: 70,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 65,
     originYear: '1872',
-    tags: ['Elite', 'Occultism', 'Rituals', 'California'],
+    tags: ['Elite', 'Occultism', 'Rituals', 'California', 'Alex Jones', 'Owl', 'Manhattan Project', 'Richard Nixon'],
     videoUrl: 'https://www.youtube.com/watch?v=F2E_HJ9yljk',
-    relatedIds: ['t5', 't30', 't34']
+    relatedIds: ['t5', 't30', 't34', 't35', 't43']
   },
   {
     id: 't47',
     title: 'Transhumanism Agenda',
-    shortDescription: 'The merging of humans and machines is allegedly being pushed to control humanity or remove its "soul".',
+    shortDescription: 'Philosophical vision of technological human enhancement (Bostrom, Kurzweil) misinterpreted as dystopian cyborg enslavement program. Combines fears of AI, chip implants, mRNA technology, and "soul loss". Neuralink and CRISPR as alleged NWO tools.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.MEDIUM,
-    popularity: 65,
+    popularity: 71,
     originYear: '2000s',
-    tags: ['Technology', 'AI', 'Evolution', 'Control'],
-    relatedIds: ['t6', 't20', 't22', 't48']
+    tags: ['Technology', 'AI', 'Evolution', 'Control', 'Ray Kurzweil', 'Neuralink', 'CRISPR', 'Singularity', 'Brain-Computer Interface'],
+    relatedIds: ['t6', 't20', 't22', 't48', 't74', 't64']
   },
   {
     id: 't64',
     title: 'Agenda 2030',
-    shortDescription: 'UN sustainable development goals are interpreted as a cover for global totalitarian surveillance, depopulation, and expropriation.',
+    shortDescription: 'UN Sustainable Development Goals (SDGs) reinterpreted as euphemistic blueprint for technocratic control and property expropriation. Combines anti-green resentments with sovereignty anxieties. Functions as Global South variant of WEF skepticism.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.HIGH,
-    popularity: 82,
+    popularity: 85,
     originYear: '2015',
-    tags: ['UN', 'NWO', 'Sustainability', 'Control'],
-    relatedIds: ['t20', 't5', 't74']
+    tags: ['UN', 'NWO', 'Sustainability', 'Control', 'SDGs', 'Agenda 21', 'IPCC', 'Smart Cities', 'Stakeholder', 'Public-Private Partnership'],
+    relatedIds: ['t20', 't5', 't74', 't47', 't9']
   },
   {
     id: 't65',
     title: 'The Finders Cult',
-    shortDescription: 'A mysterious cult implicated in a 1987 CIA investigation. Often cited as a precursor to QAnon/Pizzagate narratives about elite child trafficking.',
+    shortDescription: 'Obscure cult (arrested 1987 in Florida) whose FBI files suggested CIA connections. Serves as historical "proof" anchor point for QAnon narratives about institutionalized child abuse. Actual facts unclear, FBI files partially released 2019 but inconsistent.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.HIGH,
-    popularity: 55,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 52,
     originYear: '1987',
-    tags: ['CIA', 'Cult', 'Children', 'Deep State'],
-    relatedIds: ['t7', 't30']
+    tags: ['CIA', 'Cult', 'Children', 'Deep State', 'FBI', 'Tallahassee', 'FOIA', 'Marion Pettie'],
+    relatedIds: ['t7', 't30', 't18', 't5']
   },
   {
     id: 't74',
     title: '15-Minute Cities',
-    shortDescription: 'Urban planning concepts for better accessibility are interpreted as an attempt to lock citizens in "climate ghettos" and restrict movement.',
+    shortDescription: 'Urban planning concept of sustainable local amenities reinterpreted as "open-air prison". Combines climate skepticism, anti-lockdown resentments, and NWO fears. Led to 2023-2024 protests, vandalism of traffic infrastructure, and threats against urban planners.',
     category: CategoryEn.GEOPOLITICS,
-    dangerLevel: DangerLevelEn.HIGH,
-    popularity: 88,
+    dangerLevel: DangerLevelEn.EXTREME,
+    popularity: 91,
     originYear: '2022',
-    tags: ['Climate', 'Lockdown', 'Urban Planning', 'WEF'],
-    relatedIds: ['t20', 't64']
+    tags: ['Climate', 'Lockdown', 'Urban Planning', 'WEF', 'ULEZ', 'C40 Cities', 'Smart Cities', 'Transport', 'Oxford', 'Low Traffic Neighbourhoods'],
+    relatedIds: ['t20', 't64', 't5', 't9', 't47']
   },
   {
     id: 't75',
     title: 'NESARA / GESARA',
-    shortDescription: 'The hope for a secret law that forgives all debts and introduces a new financial system (often linked to BRICS/Gold Standard).',
+    shortDescription: 'Millenarian fantasy of a secret "National Economic Security and Recovery Act" bringing debt forgiveness, UBI, and gold standard. Invented by Harvey Barnard (1990s), cultically expanded by Shaini Goodwin, appropriated by QAnon as "White Hat" operation. Financially endangering vulnerable believers.',
     category: CategoryEn.GEOPOLITICS,
     dangerLevel: DangerLevelEn.MEDIUM,
-    popularity: 70,
+    popularity: 66,
     originYear: '2000',
-    tags: ['Finance', 'Debt', 'Gold', 'Utopia'],
-    relatedIds: ['t7', 't5']
+    tags: ['Finance', 'Debt', 'Gold', 'Utopia', 'White Hats', 'Debt Jubilee', 'Quantum Financial System', 'BRICS', 'RV/GCR'],
+    relatedIds: ['t7', 't5', 't20', 't35']
   }
 ];

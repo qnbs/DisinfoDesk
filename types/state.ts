@@ -10,25 +10,57 @@ export type SafetyLevel = 'strict' | 'standard' | 'unrestricted';
 export type UIDensity = 'comfortable' | 'compact';
 
 export interface AppSettings {
-  // Neural
+  // Neural — Advanced AI Configuration
   aiTemperature: number; // 0.0 to 1.0
   aiModelVersion: string;
   thinkingBudget: number; // Token budget for reasoning (Gemini 2.5+)
-  safetyLevel: SafetyLevel; // New: AI Safety Filter
+  safetyLevel: SafetyLevel; // AI Safety Filter
+  maxOutputTokens: number; // Max response length
+  topK: number; // Sampling parameter (1-40)
+  topP: number; // Nucleus sampling (0.0-1.0)
+  presencePenalty: number; // Repetition penalty (-2.0 to 2.0)
+  frequencyPenalty: number; // Frequency penalty (-2.0 to 2.0)
+  responseFormat: 'text' | 'json' | 'markdown';
+  enableGrounding: boolean; // Google Search grounding
   
-  // Interface
+  // Interface — UX & Theming
   highContrast: boolean;
   reducedMotion: boolean;
   fontSize: 'small' | 'medium' | 'large';
   soundEnabled: boolean;
-  accentColor: AccentColor; // New: Theming
-  uiDensity: UIDensity; // New: Spacing
+  accentColor: AccentColor;
+  uiDensity: UIDensity;
+  compactMode: boolean; // Hide secondary info
+  showTutorialHints: boolean;
+  
+  // Performance — Cache & Optimization
+  cacheStrategy: 'aggressive' | 'balanced' | 'minimal';
+  prefetchEnabled: boolean; // Preload theory details
+  dataSaverMode: boolean; // Reduce image quality
+  offlineFirst: boolean; // Prioritize cache over network
+  maxCacheSize: number; // MB
+  autoClearCache: boolean;
   
   // Privacy & System
   incognitoMode: boolean;
   developerMode: boolean;
   hasSeenOnboarding: boolean;
-  autoArchive: boolean; // New: Chat automation
+  autoArchive: boolean; // Chat automation
+  telemetryEnabled: boolean; // Anonymous usage stats
+  experimentalFeatures: boolean; // Beta features
+  
+  // Backup & Restore
+  autoBackup: boolean;
+  backupInterval: number; // hours
+  backupLocation: 'local' | 'cloud' | 'disabled';
+  lastBackupTimestamp: number;
+  
+  // Advanced
+  keyboardShortcuts: boolean;
+  debugMode: boolean;
+  verboseLogging: boolean;
+  networkMonitor: boolean;
+  cacheInspector: boolean;
 }
 
 export interface SystemLog {

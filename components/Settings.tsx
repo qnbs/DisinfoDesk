@@ -300,6 +300,85 @@ const NeuralEngineConfig: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Advanced AI Parameters */}
+            <div className="bg-gradient-to-br from-purple-950/30 to-slate-950/30 border border-purple-900/50 rounded-xl p-6">
+                <h4 className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <Brain size={14} className="text-purple-400" /> Advanced AI Parameters
+                </h4>
+                <div className="space-y-6">
+                    <RangeSlider 
+                        label={t.settings.labels.maxOutputTokens}
+                        value={settings.maxOutputTokens} 
+                        min={512} max={8192} step={128} 
+                        onChange={(v) => handleUpdate('maxOutputTokens', v)}
+                        format={(v) => `${v} T`}
+                        color="bg-purple-500"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <RangeSlider 
+                            label={t.settings.labels.topK}
+                            value={settings.topK} 
+                            min={1} max={40} step={1} 
+                            onChange={(v) => handleUpdate('topK', v)}
+                            color="bg-purple-500"
+                        />
+                        <RangeSlider 
+                            label={t.settings.labels.topP}
+                            value={settings.topP} 
+                            min={0} max={1} step={0.05} 
+                            onChange={(v) => handleUpdate('topP', v)}
+                            format={(v) => v.toFixed(2)}
+                            color="bg-purple-500"
+                        />
+                        <RangeSlider 
+                            label={t.settings.labels.presencePenalty}
+                            value={settings.presencePenalty} 
+                            min={-2} max={2} step={0.1} 
+                            onChange={(v) => handleUpdate('presencePenalty', v)}
+                            format={(v) => v.toFixed(1)}
+                            color="bg-purple-500"
+                        />
+                        <RangeSlider 
+                            label={t.settings.labels.frequencyPenalty}
+                            value={settings.frequencyPenalty} 
+                            min={-2} max={2} step={0.1} 
+                            onChange={(v) => handleUpdate('frequencyPenalty', v)}
+                            format={(v) => v.toFixed(1)}
+                            color="bg-purple-500"
+                        />
+                    </div>
+
+                    {/* Response Format Selector */}
+                    <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t.settings.labels.responseFormat}</div>
+                        <div className="grid grid-cols-3 gap-3">
+                            {(['text', 'json', 'markdown'] as const).map(format => (
+                                <button
+                                    key={format}
+                                    onClick={() => handleUpdate('responseFormat', format)}
+                                    className={`py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                        settings.responseFormat === format 
+                                            ? 'bg-purple-500/20 border-purple-500 text-purple-300' 
+                                            : 'bg-slate-900 border-slate-700 text-slate-500 hover:bg-slate-800'
+                                    }`}
+                                >
+                                    {format}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Google Search Grounding */}
+                    <ControlToggle 
+                        label={t.settings.labels.enableGrounding}
+                        description={t.settings.labels.enableGroundingDesc}
+                        checked={settings.enableGrounding}
+                        onChange={(v) => handleUpdate('enableGrounding', v)}
+                        icon={<Shield size={18}/>}
+                    />
+                </div>
+            </div>
         </div>
     );
 };
@@ -353,6 +432,20 @@ const InterfaceMatrix: React.FC = () => {
                     description={t.settings.labels.contrastDesc}
                     checked={settings.highContrast}
                     onChange={(v) => handleUpdate('highContrast', v)}
+                    icon={<Eye size={18}/>}
+                />
+                <ControlToggle 
+                    label={t.settings.labels.compactMode}
+                    description={t.settings.labels.compactModeDesc}
+                    checked={settings.compactMode}
+                    onChange={(v) => handleUpdate('compactMode', v)}
+                    icon={<Grid size={18}/>}
+                />
+                <ControlToggle 
+                    label={t.settings.labels.showTutorialHints}
+                    description={t.settings.labels.showTutorialHintsDesc}
+                    checked={settings.showTutorialHints}
+                    onChange={(v) => handleUpdate('showTutorialHints', v)}
                     icon={<Eye size={18}/>}
                 />
                 
@@ -420,6 +513,13 @@ const DataSovereignty: React.FC = () => {
                         checked={settings.autoArchive}
                         onChange={(v) => handleUpdate('autoArchive', v)}
                         icon={<Server size={18}/>}
+                    />
+                    <ControlToggle 
+                        label={t.settings.labels.telemetryEnabled}
+                        description={t.settings.labels.telemetryEnabledDesc}
+                        checked={settings.telemetryEnabled}
+                        onChange={(v) => handleUpdate('telemetryEnabled', v)}
+                        icon={<Activity size={18}/>}
                     />
                 </div>
             </div>
@@ -543,6 +643,229 @@ const SystemDiagnostics: React.FC = () => {
     );
 };
 
+const PerformanceControls: React.FC = () => {
+    const { settings, handleUpdate, t } = useSettingsPage();
+
+    return (
+        <div className="space-y-6 animate-fade-in">
+            {/* Cache Strategy */}
+            <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6">
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Zap size={14} className="text-yellow-400" /> {t.settings.labels.cacheStrategy}
+                </h4>
+                <p className="text-[10px] text-slate-400 mb-4">{t.settings.labels.cacheStrategyDesc}</p>
+                <div className="grid grid-cols-3 gap-3">
+                    {(['aggressive', 'balanced', 'minimal'] as const).map(strategy => (
+                        <button
+                            key={strategy}
+                            onClick={() => handleUpdate('cacheStrategy', strategy)}
+                            className={`py-3 px-4 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all ${
+                                settings.cacheStrategy === strategy 
+                                    ? 'bg-yellow-500/20 border-yellow-500 text-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.2)]' 
+                                    : 'bg-slate-900 border-slate-700 text-slate-500 hover:bg-slate-800 hover:border-slate-600'
+                            }`}
+                        >
+                            {t.settings.labels[`cacheStrategy${strategy.charAt(0).toUpperCase() + strategy.slice(1)}` as keyof typeof t.settings.labels]}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Performance Toggles */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ControlToggle 
+                    label={t.settings.labels.prefetchEnabled}
+                    description={t.settings.labels.prefetchEnabledDesc}
+                    checked={settings.prefetchEnabled}
+                    onChange={(v) => handleUpdate('prefetchEnabled', v)}
+                    icon={<Zap size={18}/>}
+                />
+                <ControlToggle 
+                    label={t.settings.labels.dataSaverMode}
+                    description={t.settings.labels.dataSaverModeDesc}
+                    checked={settings.dataSaverMode}
+                    onChange={(v) => handleUpdate('dataSaverMode', v)}
+                    icon={<Smartphone size={18}/>}
+                />
+                <ControlToggle 
+                    label={t.settings.labels.offlineFirst}
+                    description={t.settings.labels.offlineFirstDesc}
+                    checked={settings.offlineFirst}
+                    onChange={(v) => handleUpdate('offlineFirst', v)}
+                    icon={<HardDrive size={18}/>}
+                />
+                <ControlToggle 
+                    label={t.settings.labels.autoClearCache}
+                    description={t.settings.labels.autoClearCacheDesc}
+                    checked={settings.autoClearCache}
+                    onChange={(v) => handleUpdate('autoClearCache', v)}
+                    icon={<Trash2 size={18}/>}
+                />
+            </div>
+
+            {/* Cache Size Slider */}
+            <RangeSlider 
+                label={t.settings.labels.maxCacheSize}
+                value={settings.maxCacheSize} 
+                min={10} max={500} step={10} 
+                onChange={(v) => handleUpdate('maxCacheSize', v)}
+                format={(v) => `${v} MB`}
+                color="bg-yellow-500"
+            />
+        </div>
+    );
+};
+
+const BackupManager: React.FC = () => {
+    const { settings, handleUpdate, t, language } = useSettingsPage();
+    const lastBackup = settings.lastBackupTimestamp > 0 
+        ? new Date(settings.lastBackupTimestamp).toLocaleString(language === 'de' ? 'de-DE' : 'en-US')
+        : (language === 'de' ? 'Nie' : 'Never');
+
+    return (
+        <div className="space-y-6 animate-fade-in">
+            {/* Auto-Backup Toggle */}
+            <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6">
+                <ControlToggle 
+                    label={t.settings.labels.autoBackup}
+                    description={t.settings.labels.autoBackupDesc}
+                    checked={settings.autoBackup}
+                    onChange={(v) => handleUpdate('autoBackup', v)}
+                    icon={<HardDrive size={18}/>}
+                />
+            </div>
+
+            {/* Backup Configuration */}
+            <div className={`space-y-6 transition-opacity duration-300 ${settings.autoBackup ? 'opacity-100' : 'opacity-40 pointer-events-none grayscale'}`}>
+                {/* Interval Slider */}
+                <RangeSlider 
+                    label={t.settings.labels.backupInterval}
+                    value={settings.backupInterval} 
+                    min={6} max={168} step={6} 
+                    onChange={(v) => handleUpdate('backupInterval', v)}
+                    format={(v) => `${v}h`}
+                    color="bg-orange-500"
+                />
+
+                {/* Backup Location */}
+                <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <HardDrive size={14} className="text-orange-400" /> {t.settings.labels.backupLocation}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 mb-4">{t.settings.labels.backupLocationDesc}</p>
+                    <div className="grid grid-cols-3 gap-3">
+                        {(['local', 'cloud', 'disabled'] as const).map(location => (
+                            <button
+                                key={location}
+                                onClick={() => handleUpdate('backupLocation', location)}
+                                className={`py-3 px-4 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all ${
+                                    settings.backupLocation === location 
+                                        ? 'bg-orange-500/20 border-orange-500 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)]' 
+                                        : 'bg-slate-900 border-slate-700 text-slate-500 hover:bg-slate-800 hover:border-slate-600'
+                                }`}
+                            >
+                                {t.settings.labels[`backupLocation${location.charAt(0).toUpperCase() + location.slice(1)}` as keyof typeof t.settings.labels]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Last Backup Info */}
+                <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.settings.labels.lastBackupTimestamp}</div>
+                        <div className="text-sm text-white font-mono mt-1">{lastBackup}</div>
+                    </div>
+                    <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={() => handleUpdate('lastBackupTimestamp', Date.now())}
+                        icon={<Download size={14}/>}
+                    >
+                        {language === 'de' ? 'Jetzt sichern' : 'Backup Now'}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AdvancedTools: React.FC = () => {
+    const { settings, handleUpdate, t } = useSettingsPage();
+
+    return (
+        <div className="space-y-6 animate-fade-in">
+            {/* Developer Tools */}
+            <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6">
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Terminal size={14} className="text-pink-400" /> Developer Tools
+                </h4>
+                <div className="space-y-4">
+                    <ControlToggle 
+                        label={t.settings.labels.keyboardShortcuts}
+                        description={t.settings.labels.keyboardShortcutsDesc}
+                        checked={settings.keyboardShortcuts}
+                        onChange={(v) => handleUpdate('keyboardShortcuts', v)}
+                        icon={<Layout size={18}/>}
+                    />
+                    <ControlToggle 
+                        label={t.settings.labels.debugMode}
+                        description={t.settings.labels.debugModeDesc}
+                        checked={settings.debugMode}
+                        onChange={(v) => handleUpdate('debugMode', v)}
+                        icon={<Terminal size={18}/>}
+                    />
+                    <ControlToggle 
+                        label={t.settings.labels.verboseLogging}
+                        description={t.settings.labels.verboseLoggingDesc}
+                        checked={settings.verboseLogging}
+                        onChange={(v) => handleUpdate('verboseLogging', v)}
+                        icon={<Activity size={18}/>}
+                    />
+                </div>
+            </div>
+
+            {/* Monitoring Tools */}
+            <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6">
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Activity size={14} className="text-green-400" /> Monitoring
+                </h4>
+                <div className="space-y-4">
+                    <ControlToggle 
+                        label={t.settings.labels.networkMonitor}
+                        description={t.settings.labels.networkMonitorDesc}
+                        checked={settings.networkMonitor}
+                        onChange={(v) => handleUpdate('networkMonitor', v)}
+                        icon={<Activity size={18}/>}
+                    />
+                    <ControlToggle 
+                        label={t.settings.labels.cacheInspector}
+                        description={t.settings.labels.cacheInspectorDesc}
+                        checked={settings.cacheInspector}
+                        onChange={(v) => handleUpdate('cacheInspector', v)}
+                        icon={<HardDrive size={18}/>}
+                    />
+                </div>
+            </div>
+
+            {/* Experimental Features */}
+            <div className="bg-gradient-to-br from-pink-950/30 to-slate-950/30 border border-pink-900/50 rounded-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <AlertOctagon size={14} className="text-pink-400" />
+                    <h4 className="text-xs font-bold text-pink-300 uppercase tracking-widest">Experimental</h4>
+                </div>
+                <ControlToggle 
+                    label={t.settings.labels.experimentalFeatures}
+                    description={t.settings.labels.experimentalFeaturesDesc}
+                    checked={settings.experimentalFeatures}
+                    onChange={(v) => handleUpdate('experimentalFeatures', v)}
+                    icon={<Zap size={18}/>}
+                />
+            </div>
+        </div>
+    );
+};
+
 // --- 4. Main Components ---
 
 const SettingsSidebar: React.FC = () => {
@@ -553,6 +876,9 @@ const SettingsSidebar: React.FC = () => {
         { id: 'INTELLIGENCE', label: t.settings.tabs.INTELLIGENCE, icon: <Brain size={16} />, color: 'text-purple-400' },
         { id: 'INTERFACE', label: t.settings.tabs.INTERFACE, icon: <Layout size={16} />, color: 'text-cyan-400' },
         { id: 'PRIVACY', label: t.settings.tabs.PRIVACY, icon: <Shield size={16} />, color: 'text-green-400' },
+        { id: 'PERFORMANCE', label: 'Performance', icon: <Zap size={16} />, color: 'text-yellow-400' },
+        { id: 'BACKUP', label: 'Backup', icon: <HardDrive size={16} />, color: 'text-orange-400' },
+        { id: 'ADVANCED', label: 'Advanced', icon: <Terminal size={16} />, color: 'text-pink-400' },
         { id: 'SYSTEM', label: t.settings.tabs.SYSTEM, icon: <Activity size={16} />, color: 'text-red-400' },
   ];
 
@@ -587,6 +913,9 @@ const SettingsContent: React.FC = () => {
         case 'INTELLIGENCE': return <NeuralEngineConfig />;
         case 'INTERFACE': return <InterfaceMatrix />;
         case 'PRIVACY': return <DataSovereignty />;
+        case 'PERFORMANCE': return <PerformanceControls />;
+        case 'BACKUP': return <BackupManager />;
+        case 'ADVANCED': return <AdvancedTools />;
         case 'SYSTEM': return <SystemDiagnostics />;
         default: return null;
     }

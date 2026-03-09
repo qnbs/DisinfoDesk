@@ -325,22 +325,43 @@ export const Badge: React.FC<{ label: string; color?: string; className?: string
 
 // Simple EmptyState is superseded by the variant-aware version below
 
-export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' | 'avatar' | 'image' }> = React.memo(({ className = '', variant = 'text' }) => {
+export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' | 'avatar' | 'image' | 'heading' }> = React.memo(({ className = '', variant = 'text' }) => {
   const variants = {
-    text: 'h-4 rounded',
-    card: 'h-32 rounded-xl',
-    avatar: 'w-12 h-12 rounded-full',
-    image: 'aspect-video rounded-lg',
+    text: 'h-4 rounded w-full',
+    card: 'h-32 rounded-xl w-full',
+    avatar: 'w-12 h-12 rounded-full shrink-0',
+    image: 'aspect-video rounded-lg w-full',
+    heading: 'h-6 rounded w-2/3',
   };
   
   return (
     <div 
-      className={cn("shimmer-loading", variants[variant], className)} 
+      className={cn(
+        "skeleton shimmer", 
+        variants[variant], 
+        className
+      )} 
       role="status"
       aria-label="Loading..."
+      aria-busy="true"
     />
   );
 });
+
+/**
+ * Skeleton Group - Renders multiple skeleton elements
+ */
+export const SkeletonGroup: React.FC<{ 
+  count?: number; 
+  variant?: 'text' | 'card' | 'avatar'; 
+  className?: string;
+}> = React.memo(({ count = 3, variant = 'text', className = '' }) => (
+  <div className={cn("space-y-3", className)}>
+    {Array.from({ length: count }).map((_, i) => (
+      <Skeleton key={i} variant={variant} />
+    ))}
+  </div>
+));
 
 export const ErrorFallback: React.FC<{ error: unknown, resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center animate-fade-in" role="alert">
@@ -480,6 +501,345 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({
         statusConfig[status].split(' ')[1]
       )} />
       {label}
+    </span>
+  );
+});
+
+/**
+ * Ripple Effect Hook
+ * Creates click ripple effect for interactive elements
+ */
+interface Ripple {
+  x: number;
+  y: number;
+  id: number;
+}
+
+export function useRipple() {
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+
+  const addRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const newRipple = { x, y, id: Date.now() };
+    
+    setRipples(prev => [...prev, newRipple]);
+    
+    // Remove ripple after animation
+    setTimeout(() => {
+      setRipples(prev => prev.filter(r => r.id !== newRipple.id));
+    }, 600);
+  }, []);
+
+  const RippleContainer = useCallback(() => (
+    <>
+      {ripples.map(ripple => (
+        <span
+          key={ripple.id}
+          className="absolute pointer-events-none rounded-full bg-white/30 animate-[ripple_0.6s_ease-out]"
+          style={{
+            left: ripple.x,
+            top: ripple.y,
+            width: 10,
+            height: 10,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      ))}
+    </>
+  ), [ripples]);
+
+  return { addRipple, RippleContainer };
+}
+
+/**
+ * Advanced Loading Spinner
+ */
+interface LoadingSpinnerProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'spinner' | 'dots' | 'pulse' | 'orbit';
+  className?: string;
+  label?: string;
+}
+
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = React.memo(({
+  size = 'md',
+  variant = 'spinner',
+  className = '',
+  label,
+}) => {
+  const sizes = {
+    sm: 16,
+    md: 24,
+    lg: 32,
+    xl: 48,
+  };
+
+  if (variant === 'dots') {
+    const dotSizes = {
+      sm: 'w-1 h-1',
+      md: 'w-1.5 h-1.5',
+      lg: 'w-2 h-2',
+      xl: 'w-3 h-3',
+    };
+    return (
+      <div className={cn('flex items-center gap-1', className)} role="status" aria-label={label || 'Loading'}>
+        <span className={cn(dotSizes[size], 'bg-accent-cyan rounded-full animate-[pulse_1.4s_ease-in-out_infinite]')} style={{ animationDelay: '0s' }} />
+        <span className={cn(dotSizes[size], 'bg-accent-cyan rounded-full animate-[pulse_1.4s_ease-in-out_infinite]')} style={{ animationDelay: '0.2s' }} />
+        <span className={cn(dotSizes[size], 'bg-accent-cyan rounded-full animate-[pulse_1.4s_ease-in-out_infinite]')} style={{ animationDelay: '0.4s' }} />
+        {label && <span className="sr-only">{label}</span>}
+      </div>
+    );
+  }
+
+  if (variant === 'pulse') {
+    return (
+      <div className={cn('relative', className)} role="status" aria-label={label || 'Loading'}>
+        <div className={cn('absolute inset-0 bg-accent-cyan rounded-full animate-ping opacity-75')} style={{ width: sizes[size], height: sizes[size] }} />
+        <div className={cn('relative bg-accent-cyan rounded-full')} style={{ width: sizes[size], height: sizes[size] }} />
+        {label && <span className="sr-only">{label}</span>}
+      </div>
+    );
+  }
+
+  if (variant === 'orbit') {
+    const orbitSize = sizes[size];
+    return (
+      <div className={cn('relative', className)} role="status" aria-label={label || 'Loading'} style={{ width: orbitSize, height: orbitSize }}>
+        <div className="absolute inset-0 rounded-full border-2 border-accent-cyan/20" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-accent-cyan animate-spin" />
+        {label && <span className="sr-only">{label}</span>}
+      </div>
+    );
+  }
+
+  // Default: spinner
+  return (
+    <div className={cn('flex flex-col items-center gap-2', className)} role="status" aria-label={label || 'Loading'}>
+      <Loader2 size={sizes[size]} className="animate-spin text-accent-cyan" />
+      {label && <span className="text-xs font-mono text-slate-400 animate-pulse">{label}</span>}
+    </div>
+  );
+});
+
+/**
+ * Progress Bar
+ */
+interface ProgressBarProps {
+  value: number;
+  max?: number;
+  variant?: 'default' | 'gradient' | 'striped';
+  size?: 'sm' | 'md' | 'lg';
+  label?: string;
+  showPercentage?: boolean;
+  className?: string;
+}
+
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({
+  value,
+  max = 100,
+  variant = 'default',
+  size = 'md',
+  label,
+  showPercentage = false,
+  className = '',
+}) => {
+  const percentage = Math.min((value / max) * 100, 100);
+  
+  const sizes = {
+    sm: 'h-1',
+    md: 'h-2',
+    lg: 'h-3',
+  };
+
+  const variants = {
+    default: 'bg-accent-cyan',
+    gradient: 'bg-gradient-to-r from-accent-cyan via-purple-500 to-accent-cyan bg-[length:200%_100%] animate-[borderFlow_3s_linear_infinite]',
+    striped: 'bg-accent-cyan bg-[linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[borderFlow_1s_linear_infinite]',
+  };
+
+  return (
+    <div className={cn('w-full', className)}>
+      {(label || showPercentage) && (
+        <div className="flex justify-between items-center mb-2">
+          {label && <span className="text-xs font-mono text-slate-400">{label}</span>}
+          {showPercentage && <span className="text-xs font-mono font-bold text-accent-cyan">{percentage.toFixed(0)}%</span>}
+        </div>
+      )}
+      <div 
+        className={cn('w-full bg-slate-800/50 rounded-full overflow-hidden', sizes[size])}
+        role="progressbar"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={max}
+      >
+        <div
+          className={cn('h-full transition-all duration-300 ease-out', variants[variant])}
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+});
+
+/**
+ * Tooltip Component
+ */
+interface TooltipProps {
+  content: string;
+  children: React.ReactNode;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  className?: string;
+}
+
+export const Tooltip: React.FC<TooltipProps> = React.memo(({
+  content,
+  children,
+  position = 'top',
+  className = '',
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const positions = {
+    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
+    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
+    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+  };
+
+  return (
+    <div 
+      className="relative inline-block"
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+      onFocus={() => setIsVisible(true)}
+      onBlur={() => setIsVisible(false)}
+    >
+      {children}
+      {isVisible && (
+        <div
+          className={cn(
+            'absolute z-50 px-2 py-1 text-xs font-mono text-white bg-slate-900 border border-slate-700 rounded-lg shadow-lg whitespace-nowrap pointer-events-none animate-fade-in-scale',
+            positions[position],
+            className
+          )}
+          role="tooltip"
+        >
+          {content}
+          <div 
+            className="absolute w-2 h-2 bg-slate-900 border-slate-700 transform rotate-45"
+            style={{
+              ...(position === 'top' && { bottom: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)', borderRight: '1px solid #334155', borderBottom: '1px solid #334155' }),
+              ...(position === 'bottom' && { top: -5, left: '50%', transform: 'translateX(-50%) rotate(45deg)', borderLeft: '1px solid #334155', borderTop: '1px solid #334155' }),
+              ...(position === 'left' && { right: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)', borderTop: '1px solid #334155', borderRight: '1px solid #334155' }),
+              ...(position === 'right' && { left: -5, top: '50%', transform: 'translateY(-50%) rotate(45deg)', borderBottom: '1px solid #334155', borderLeft: '1px solid #334155' }),
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+});
+
+/**
+ * Collapsible/Accordion Component
+ */
+interface CollapsibleProps {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  icon?: React.ReactNode;
+  className?: string;
+}
+
+export const Collapsible: React.FC<CollapsibleProps> = React.memo(({
+  title,
+  children,
+  defaultOpen = false,
+  icon,
+  className = '',
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className={cn('border border-slate-800 rounded-lg overflow-hidden transition-all', className)}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between bg-slate-900/50 hover:bg-slate-900/70 transition-colors focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className="font-mono text-sm font-bold text-slate-200">{title}</span>
+        </div>
+        <svg
+          className={cn('w-5 h-5 text-slate-400 transition-transform duration-300', isOpen && 'rotate-180')}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div
+        className={cn(
+          'overflow-hidden transition-all duration-300 ease-in-out',
+          isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="p-4 bg-slate-950/30">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+/**
+ * Animated Counter
+ */
+interface AnimatedCounterProps {
+  value: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+  className?: string;
+}
+
+export const AnimatedCounter: React.FC<AnimatedCounterProps> = React.memo(({
+  value,
+  duration = 1000,
+  suffix = '',
+  prefix = '',
+  className = '',
+}) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const startValue = displayValue;
+    const diff = value - startValue;
+
+    const animate = () => {
+      const now = Date.now();
+      const progress = Math.min((now - startTime) / duration, 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const current = startValue + diff * easeOutQuart;
+
+      setDisplayValue(Math.round(current));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value, duration]);
+
+  return (
+    <span className={cn('font-mono font-bold', className)}>
+      {prefix}{displayValue.toLocaleString()}{suffix}
     </span>
   );
 });

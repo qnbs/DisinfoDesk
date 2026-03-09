@@ -37,6 +37,24 @@ async function dismissOnboarding(page: Page) {
 
   // Wait a moment for state to settle
   await page.waitForTimeout(500);
+
+  // Dismiss the WhatsNew modal if it appears after onboarding
+  const whatsNewDialog = page.locator('dialog[open]');
+  const whatsNewVisible = await whatsNewDialog.isVisible({ timeout: 3000 }).catch(() => false);
+  if (whatsNewVisible) {
+    const gotItBtn = whatsNewDialog.locator('button').filter({ hasText: /verstanden|got it/i }).first();
+    if (await gotItBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await gotItBtn.click();
+      await page.waitForTimeout(500);
+    } else {
+      // Fallback: click the close (X) button
+      const closeBtn = whatsNewDialog.locator('button').first();
+      if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+        await closeBtn.click();
+        await page.waitForTimeout(500);
+      }
+    }
+  }
 }
 
 test.describe('Navigation & Shell', () => {

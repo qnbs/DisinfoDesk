@@ -16,9 +16,9 @@
   --color-success-green: #10b981;
 
   /* ── Fonts ── */
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'Fira Code', monospace;
-  --font-display: 'Rajdhani', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
 
   /* ── Spacing (safe area insets) ── */
   --spacing-safe-top: env(safe-area-inset-top);
@@ -160,15 +160,102 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Base ── */
+html {
+  font-size: 16px;
+}
+
 body {
   background-color: #020617;
   color: #e2e8f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: normal;
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: #f1f5f9;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Improved text contrast */
+.text-slate-400, [class*="text-slate-400"] {
+  color: #cbd5e1 !important; /* slate-300 for better readability */
+}
+
+/* Body text with better contrast */
+p, li, span:not([class*="font-mono"]):not([class*="font-display"]) {
+  color: #e2e8f0; /* slate-200 */
+}
+
+/* Muted text with sufficient contrast */
+.text-muted, [class*="text-muted"] {
+  color: #cbd5e1; /* slate-300 */
+}
+
+/* Enhanced neon glow for accents */
+.neon-text-cyan {
+  color: #a5f3fc;
+  text-shadow: 0 0 8px rgba(165, 243, 252, 0.6);
+}
+
+.neon-text-purple {
+  color: #c4b5fd;
+  text-shadow: 0 0 8px rgba(196, 181, 253, 0.6);
+}
+
+/* Buttons & interactive elements */
+button, a[role="button"], [role="button"] {
+  font-weight: 600;
+}
+
+/* Mobile readability boost */
+@media (max-width: 768px) {
+  html {
+    font-size: 16.5px;
+  }
+  
+  body {
+    line-height: 1.7;
+  }
+  
+  /* Touch-friendly hit areas */
+  button, a, [role="button"], input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion: minimal glow */
+@media (prefers-reduced-motion: reduce) {
+  .neon-text-cyan, .neon-text-purple {
+    text-shadow: none;
+  }
 }
 
 #root {

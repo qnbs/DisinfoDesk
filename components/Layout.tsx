@@ -204,15 +204,18 @@ export const Layout: React.FC = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [wbRegistration, setWbRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const updateModalState = useAppSelector(state => state.ui.updateModal);
+  const hasSeenOnboarding = useAppSelector(state => state.settings.config.hasSeenOnboarding);
   const APP_VERSION = '1.0.0';
 
-  // Check version and show update modal on mount
+  // Check version and show update modal on mount (only if onboarding is complete)
   useEffect(() => {
+    if (!hasSeenOnboarding) return; // Don't show WhatsNew until onboarding is done
+    
     const lastSeenVersion = localStorage.getItem('disinfodesk_last_seen_version') || '0.0.0';
     if (lastSeenVersion !== APP_VERSION) {
       dispatch(showUpdateModal());
     }
-  }, [dispatch]);
+  }, [dispatch, hasSeenOnboarding]);
 
   // Initial Sync
   useEffect(() => {

@@ -317,7 +317,7 @@ Button.displayName = 'Button';
 
 export const Badge: React.FC<{ label: string; color?: string; className?: string; glow?: boolean }> = React.memo(({ label, className = '', glow = false }) => (
     <span className={cn(
-      "px-2.5 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-wider backdrop-blur-md font-mono whitespace-nowrap bg-slate-900/80 text-slate-400 border-slate-800 shadow-sm transition-colors duration-200",
+      "px-2.5 py-0.5 rounded-md border text-[9px] font-semibold uppercase tracking-wider backdrop-blur-md font-mono whitespace-nowrap bg-slate-900/80 text-slate-300 border-slate-800 shadow-sm transition-colors duration-200",
       glow ? "border-accent-cyan/30 text-accent-cyan shadow-[0_0_8px_rgba(6,182,212,0.15)]" : "",
       className
     )}>{label}</span>

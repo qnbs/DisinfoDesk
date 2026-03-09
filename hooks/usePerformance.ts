@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Performance Monitor Hook
@@ -59,9 +59,9 @@ export const usePerformanceMonitor = (componentName: string, logThreshold = 16.6
  * For lazy rendering and performance optimization
  */
 export const useIsInViewport = (ref: React.RefObject<HTMLElement>, threshold = 0.1) => {
-  const [isIntersecting, setIsIntersecting] = React.useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setIsIntersecting(entry.isIntersecting),
       { threshold }
@@ -106,7 +106,7 @@ export const useLifecycle = (
  * Hook to measure memory usage (if available)
  */
 export const useMemoryMonitor = (intervalMs = 5000) => {
-  const [memoryInfo, setMemoryInfo] = React.useState<{
+  const [memoryInfo, setMemoryInfo] = useState<{
     usedJSHeapSize: number;
     totalJSHeapSize: number;
     jsHeapSizeLimit: number;

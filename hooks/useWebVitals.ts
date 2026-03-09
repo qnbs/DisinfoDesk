@@ -24,6 +24,7 @@ export const useWebVitals = (onMetric?: MetricHandler) => {
     if (import.meta.env.DEV || !onMetric) return;
 
     // Dynamic import for production only - gracefully fails if package not installed
+    // @ts-expect-error - web-vitals is optionally installed
     import('web-vitals')
       .then(({ onCLS, onFID, onLCP, onFCP, onTTFB }) => {
         onCLS(onMetric);

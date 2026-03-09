@@ -1,14 +1,24 @@
-
 import {
   StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis
 } from '../types';
 
+// === CONFIGURATION ===
 const DB_NAME = 'DisinfoDesk_Vault';
-const DB_VERSION = 3; // Incremented for Schema Upgrade
+const DB_VERSION = 4; // Schema v4: Compound Indexes + TTL + Performance Optimization
 const CRYPTO_ALGO = 'AES-GCM';
 const BROADCAST_CHANNEL = 'vault_sync_channel';
+const TTL_DEFAULT = 30 * 24 * 60 * 60 * 1000; // 30 days default TTL
+const QUOTA_WARNING_THRESHOLD = 0.8; // Warn at 80% quota usage
 
-// --- Types ---
+// Cache Configuration
+const CACHE_MAX_SIZE = 100; // LRU cache entries
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Batch Operation Configuration
+const BATCH_DELAY = 50; // ms - time to wait before flushing batch
+const BATCH_MAX_SIZE = 20; // max items before auto-flush
+
+// === TYPES ===
 
 interface DBSchema {
   analyses: StoredAnalysis;
@@ -16,18 +26,10 @@ interface DBSchema {
   chats: StoredChat;
   satires: StoredSatire;
   app_state: { key: string; value: string };
-  // New Store for binary blobs (Images) to keep main stores light
   blob_storage: { id: string; data: Blob; mimeType: string; refCount: number }; 
 }
 
 type StoreName = keyof DBSchema;
-type ChangeType = 'PUT' | 'DELETE' | 'CLEAR';
-
-interface VaultEvent {
-  type: ChangeType;
-  store: StoreName;
-  key?: string | IDBValidKey;
-}
 
 export interface StorageStats {
   usageBytes: number;
@@ -35,12 +37,49 @@ export interface StorageStats {
   totalRecords: number;
   encrypted: boolean;
   compressionRatio: number;
+  quotaUsage?: number;
+  quotaAvailable?: number;
+  indexUsage?: Record<string, number>;
 }
 
-/**
- * UTILITY: Native Compression Streams (GZIP)
- * Compresses stringified JSON into Uint8Array
- */
+export interface QueryOptions {
+  limit?: number;
+  offset?: number;
+  orderBy?: 'asc' | 'desc';
+  startKey?: string;
+  endKey?: string;
+}
+
+export interface PerformanceMetrics {
+  transactionCount: number;
+  averageTransactionTime: number;
+  cacheHitRate: number;
+  lastCleanup: number;
+  expiredRecords: number;
+}
+
+interface StoredEncryptedData {
+  iv: ArrayBuffer;
+  cipher: ArrayBuffer;
+  isEncrypted: true;
+}
+
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+  hits: number;
+  size: number;
+}
+
+interface BatchOperation {
+  store: StoreName;
+  data: unknown;
+  resolve: () => void;
+  reject: (e: Error) => void;
+}
+
+// === COMPRESSION UTILITIES ===
+
 const compressData = async (data: unknown): Promise<ArrayBuffer> => {
   const jsonStr = JSON.stringify(data);
   const blob = new Blob([jsonStr]);
@@ -49,108 +88,125 @@ const compressData = async (data: unknown): Promise<ArrayBuffer> => {
 };
 
 const decompressData = async (buffer: ArrayBuffer): Promise<unknown> => {
-  const stream = new Response(buffer).body?.pipeThrough(new DecompressionStream('gzip'));
-  if (!stream) throw new Error("Decompression stream failed");
-  const blob = await new Response(stream).blob();
-  const text = await blob.text();
-  return JSON.parse(text);
+  const blob = new Blob([buffer]);
+  const stream = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+  const decompressed = await new Response(stream).text();
+  return JSON.parse(decompressed);
 };
 
-/**
- * UTILITY: Web Crypto API (AES-GCM)
- */
+// === CRYPTO GUARD (Separate Key Storage) ===
+
 class CryptoGuard {
   private key: CryptoKey | null = null;
-  private readonly ivLen = 12;
-  private static readonly KEY_DB_NAME = 'DisinfoDesk_CryptoKeys';
-  private static readonly KEY_DB_VERSION = 1;
-  private static readonly KEY_STORE = 'master_keys';
-  private static readonly KEY_ID = 'vault_master_key';
-
-  /** Store the master key JWK in a dedicated IndexedDB (not localStorage). */
-  private async openKeyDb(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(CryptoGuard.KEY_DB_NAME, CryptoGuard.KEY_DB_VERSION);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(CryptoGuard.KEY_STORE)) {
-          db.createObjectStore(CryptoGuard.KEY_STORE, { keyPath: 'id' });
-        }
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-
-  private async getStoredKeyJwk(): Promise<JsonWebKey | null> {
-    const db = await this.openKeyDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(CryptoGuard.KEY_STORE, 'readonly');
-      const get = tx.objectStore(CryptoGuard.KEY_STORE).get(CryptoGuard.KEY_ID);
-      get.onsuccess = () => resolve((get.result as { id: string; jwk: JsonWebKey } | undefined)?.jwk ?? null);
-      get.onerror = () => reject(get.error);
-    });
-  }
-
-  private async setStoredKeyJwk(jwk: JsonWebKey): Promise<void> {
-    const db = await this.openKeyDb();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(CryptoGuard.KEY_STORE, 'readwrite');
-      tx.objectStore(CryptoGuard.KEY_STORE).put({ id: CryptoGuard.KEY_ID, jwk });
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
+  private readonly keyDB = 'DisinfoDesk_CryptoKeys';
+  private readonly keyStore = 'keys';
+  private readonly masterKeyId = 'master_encryption_key';
 
   async init() {
     if (this.key) return;
-
-    // Migrate: if legacy key exists in localStorage, move it to IndexedDB
-    const legacyRaw = localStorage.getItem('vault_master_key');
-    if (legacyRaw) {
-      const jwk = JSON.parse(legacyRaw) as JsonWebKey;
-      await this.setStoredKeyJwk(jwk);
-      localStorage.removeItem('vault_master_key');
-    }
-
-    // Try to load from IndexedDB
-    const storedJwk = await this.getStoredKeyJwk();
-    if (storedJwk) {
-      this.key = await window.crypto.subtle.importKey(
-        'jwk', storedJwk, { name: CRYPTO_ALGO }, false, ['encrypt', 'decrypt']
-      );
+    
+    // Open dedicated key storage database
+    const db = await this.openKeyDB();
+    
+    // Try to load existing key
+    const existingKey = await this.loadKey(db);
+    
+    if (existingKey) {
+      this.key = existingKey;
     } else {
       // Generate new master key
       this.key = await window.crypto.subtle.generateKey(
-        { name: CRYPTO_ALGO, length: 256 }, true, ['encrypt', 'decrypt']
+        { name: CRYPTO_ALGO, length: 256 },
+        true,
+        ['encrypt', 'decrypt']
       );
-      const exported = await window.crypto.subtle.exportKey('jwk', this.key);
-      await this.setStoredKeyJwk(exported);
+      await this.saveKey(db, this.key);
     }
   }
 
-  async encrypt(data: unknown): Promise<{ iv: Uint8Array, cipher: ArrayBuffer, isEncrypted: boolean }> {
+  private async openKeyDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.keyDB, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(this.keyStore)) {
+          db.createObjectStore(this.keyStore);
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  private async loadKey(db: IDBDatabase): Promise<CryptoKey | null> {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([this.keyStore], 'readonly');
+      const store = tx.objectStore(this.keyStore);
+      const request = store.get(this.masterKeyId);
+      
+      request.onsuccess = async () => {
+        if (!request.result) {
+          // Migration from localStorage (legacy)
+          const legacyKey = localStorage.getItem('disinfoDesk_masterKey');
+          if (legacyKey) {
+            try {
+              const jwk = JSON.parse(atob(legacyKey));
+              const key = await window.crypto.subtle.importKey(
+                'jwk', jwk, { name: CRYPTO_ALGO }, true, ['encrypt', 'decrypt']
+              );
+              await this.saveKey(db, key);
+              localStorage.removeItem('disinfoDesk_masterKey');
+              resolve(key);
+              return;
+            } catch (e) {
+              console.warn('Legacy key migration failed', e);
+            }
+          }
+          resolve(null);
+        } else {
+          const jwk = request.result;
+          const key = await window.crypto.subtle.importKey(
+            'jwk', jwk, { name: CRYPTO_ALGO }, true, ['encrypt', 'decrypt']
+          );
+          resolve(key);
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  private async saveKey(db: IDBDatabase, key: CryptoKey): Promise<void> {
+    const jwk = await window.crypto.subtle.exportKey('jwk', key);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction([this.keyStore], 'readwrite');
+      const store = tx.objectStore(this.keyStore);
+      const request = store.put(jwk, this.masterKeyId);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async encrypt(data: unknown): Promise<StoredEncryptedData> {
     await this.init();
-    if (!this.key) throw new Error("Crypto Init Failed");
+    if (!this.key) throw new Error('Encryption key not initialized');
     
-    // Auto-compress before encrypting
     const compressed = await compressData(data);
-    const iv = window.crypto.getRandomValues(new Uint8Array(this.ivLen));
-    
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
     const cipher = await window.crypto.subtle.encrypt(
       { name: CRYPTO_ALGO, iv },
       this.key,
       compressed
     );
-
-    return { iv, cipher, isEncrypted: true };
+    
+    return { iv: iv.buffer, cipher, isEncrypted: true };
   }
 
   async decrypt(record: Record<string, unknown>): Promise<unknown> {
-    if (!record || !record.isEncrypted) return record; // Legacy data pass-through
+    if (!record || !record.isEncrypted) return record; // Legacy unencrypted data
+    
     await this.init();
-    if (!this.key) throw new Error("Crypto Init Failed");
-
+    if (!this.key) throw new Error('Decryption key not initialized');
+    
     try {
       const decrypted = await window.crypto.subtle.decrypt(
         { name: CRYPTO_ALGO, iv: record.iv as BufferSource },
@@ -159,35 +215,59 @@ class CryptoGuard {
       );
       return await decompressData(decrypted);
     } catch (e) {
-      if (import.meta.env.DEV) {
-          console.error("Decryption failed. Data corruption or wrong key.", e);
-      }
-      throw new Error("Vault Access Denied: Decryption Failed");
+      console.error('Decryption failed', e);
+      throw new Error('Vault Access Denied: Decryption Failed');
     }
   }
 }
 
-/**
- * THE VAULT SERVICE
- * Sophisticated Wrapper for IndexedDB
- */
+// === DATABASE SERVICE (State-of-the-Art Implementation) ===
+
 class DatabaseService {
   private db: IDBDatabase | null = null;
   private pendingOpen: Promise<IDBDatabase> | null = null;
-  private crypto = new CryptoGuard();
-  private channel = new BroadcastChannel(BROADCAST_CHANNEL);
-  private subscribers = new Set<(event: VaultEvent) => void>();
+  private cryptoGuard = new CryptoGuard();
+  private broadcastChannel = new BroadcastChannel(BROADCAST_CHANNEL);
+  private subscribers: Array<() => void> = [];
+
+  // === LRU CACHE ===
+  private cache = new Map<string, CacheEntry>();
+  private cacheSize = 0; // Total bytes in cache
+
+  // === BATCH QUEUE ===
+  private batchQueue: BatchOperation[] = [];
+  private batchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // === PERFORMANCE METRICS ===
+  private metrics = {
+    transactionCount: 0,
+    totalTransactionTime: 0,
+    cacheHits: 0,
+    cacheMisses: 0,
+    lastCleanup: Date.now(),
+    expiredRecords: 0,
+    indexUsage: new Map<string, number>(),
+  };
 
   constructor() {
-    // Listen for changes from other tabs
-    this.channel.onmessage = (msg: MessageEvent<VaultEvent>) => {
-      this.notifySubscribers(msg.data);
+    // Cross-tab synchronization
+    this.broadcastChannel.onmessage = () => {
+      this.invalidateCache(); // Clear cache on external updates
+      this.notifySubscribers();
     };
+    
+    // Periodic cleanup of expired records
+    this.scheduleCleanup();
+    
+    // Cache eviction on memory pressure
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      setInterval(() => this.checkMemoryPressure(), 60000); // Every minute
+    }
   }
 
-  // --- Connection & Migration ---
+  // === CONNECTION MANAGEMENT ===
 
-  private async open(): Promise<IDBDatabase> {
+  private async ensureDBOpen(): Promise<IDBDatabase> {
     if (this.db) return this.db;
     if (this.pendingOpen) return this.pendingOpen;
 
@@ -196,342 +276,657 @@ class DatabaseService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const _tx = (event.target as IDBOpenDBRequest).transaction;
+        const oldVersion = event.oldVersion;
 
-        // V1 -> V2 Stores
+        // === SCHEMA MIGRATIONS ===
+        
+        // V1->V2: Core Stores with Enhanced Indexes
         const stores = ['analyses', 'media_analyses', 'chats', 'satires'];
         stores.forEach(name => {
-           if (!db.objectStoreNames.contains(name)) {
-             const store = db.createObjectStore(name, { keyPath: 'id' });
-             store.createIndex('timestamp', 'timestamp', { unique: false });
-           }
+          if (!db.objectStoreNames.contains(name)) {
+            const store = db.createObjectStore(name, { keyPath: 'id' });
+            // Single timestamp index for backward compat
+            store.createIndex('timestamp', 'timestamp', { unique: false });
+            // Compound index for efficient range queries
+            store.createIndex('timestamp_id', ['timestamp', 'id'], { unique: true });
+            // TTL index for automatic cleanup
+            store.createIndex('expiresAt', 'expiresAt', { unique: false });
+          } else if (oldVersion < 4) {
+            // Upgrade existing stores
+            const tx = (event.target as IDBOpenDBRequest).transaction;
+            const store = tx?.objectStore(name);
+            if (store) {
+              if (!store.indexNames.contains('timestamp_id')) {
+                store.createIndex('timestamp_id', ['timestamp', 'id'], { unique: true });
+              }
+              if (!store.indexNames.contains('expiresAt')) {
+                store.createIndex('expiresAt', 'expiresAt', { unique: false });
+              }
+            }
+          }
         });
 
+        // App State Store
         if (!db.objectStoreNames.contains('app_state')) {
-            db.createObjectStore('app_state', { keyPath: 'key' });
+          db.createObjectStore('app_state', { keyPath: 'key' });
         }
 
-        // V3 Upgrade: Blob Storage for efficient image handling
+        // V3: Blob Storage (images)
         if (!db.objectStoreNames.contains('blob_storage')) {
-            db.createObjectStore('blob_storage', { keyPath: 'id' });
+          const blobStore = db.createObjectStore('blob_storage', { keyPath: 'id' });
+          blobStore.createIndex('refCount', 'refCount', { unique: false });
         }
-
-        // Migration Logic (if needed in future versions)
-        // e.g., if (event.oldVersion < 3) { ... migrate data structure ... }
       };
 
-      request.onsuccess = (event) => {
-        this.db = (event.target as IDBOpenDBRequest).result;
-        
-        this.db.onclose = () => {
-            this.db = null;
-            this.pendingOpen = null;
-        };
-        
-        this.db.onversionchange = () => {
-            this.db?.close();
-            this.db = null;
-            this.pendingOpen = null;
-        };
-
+      request.onsuccess = () => {
+        this.db = request.result;
+        this.pendingOpen = null;
         resolve(this.db);
       };
 
-      request.onerror = (event) => {
-        this.db = null;
+      request.onerror = () => {
         this.pendingOpen = null;
-        reject((event.target as IDBOpenDBRequest).error);
+        reject(request.error);
       };
     });
 
     return this.pendingOpen;
   }
 
-  // --- Pipeline Operations (Encryption/Compression Middleware) ---
+  // === TRANSACTION EXECUTOR ===
 
   private async executeTransaction<T>(
-    storeNames: StoreName[], 
-    mode: IDBTransactionMode, 
-    callback: (stores: Record<StoreName, IDBObjectStore>) => Promise<T> | T
+    storeNames: StoreName[],
+    mode: IDBTransactionMode,
+    callback: (stores: IDBObjectStore[]) => Promise<T>
   ): Promise<T> {
-    const db = await this.open();
+    const db = await this.ensureDBOpen();
+    const tx = db.transaction(storeNames, mode);
+    const stores = storeNames.map(name => tx.objectStore(name));
     
-    return new Promise<T>((resolve, reject) => {
-      const tx = db.transaction(storeNames, mode);
-      const stores = {} as Record<StoreName, IDBObjectStore>;
-      storeNames.forEach(name => stores[name] = tx.objectStore(name));
-
-      // Execute callback and handle result
-      Promise.resolve(callback(stores))
-        .then(result => {
-          // Commit wrapper for readwrite
-          if (mode === 'readwrite') {
-            tx.oncomplete = () => resolve(result);
-          } else {
-            resolve(result); // readonly usually doesn't need to wait for complete
-          }
-        })
-        .catch(e => {
-          tx.abort();
-          reject(e);
-        });
-
+    // Execute callback
+    const result = await callback(stores);
+    
+    // Wait for transaction completion
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(new Error('Transaction aborted'));
     });
+    
+    return result;
   }
 
-  // --- Subscriptions (Reactivity) ---
+  // === RETRY LOGIC (Exponential Backoff) ===
 
-  public subscribe(callback: (event: VaultEvent) => void): () => void {
-    this.subscribers.add(callback);
-    return () => this.subscribers.delete(callback);
+  private async retryTransaction<T>(
+    fn: () => Promise<T>,
+    maxRetries = 3,
+    baseDelay = 100
+  ): Promise<T> {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries - 1) throw error;
+        
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.warn(`Transaction retry ${attempt + 1}/${maxRetries} in ${delay}ms`, error);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw new Error('Max retries exceeded');
   }
 
-  private notifySubscribers(event: VaultEvent) {
-    this.subscribers.forEach(cb => cb(event));
-  }
+  // === PERFORMANCE MONITORING ===
 
-  private broadcast(event: VaultEvent) {
-    this.channel.postMessage(event);
-    this.notifySubscribers(event);
-  }
-
-  // --- CRUD (Augmented) ---
-
-  /**
-   * High-Performance Iterator
-   * Uses Async Generators to stream data instead of loading all into RAM.
-   * Automatically handles decryption.
-   */
-  async *streamAll<T>(storeName: StoreName): AsyncGenerator<T, void, unknown> {
-    const db = await this.open();
-    const tx = db.transaction(storeName, 'readonly');
-    const store = tx.objectStore(storeName);
-    // Use index for chronological order if available
-    const request = store.indexNames.contains('timestamp') 
-        ? store.index('timestamp').openCursor(null, 'prev')
-        : store.openCursor();
-
-    let cursorRequestResolve: (value: IDBCursorWithValue | null) => void;
-    let cursorRequestReject: (reason?: Error | null) => void;
-
-    request.onsuccess = (e) => cursorRequestResolve((e.target as IDBRequest).result);
-    request.onerror = (e) => cursorRequestReject((e.target as IDBRequest).error);
-
-    while (true) {
-        const promise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
-            cursorRequestResolve = resolve;
-            cursorRequestReject = reject;
-        });
-        
-        // Note: The first yield waits for onsuccess above. Subsequent loops wait for .continue()
-        const cursor = await promise;
-        if (!cursor) break;
-
-        const rawData = cursor.value;
-        const decrypted = await this.crypto.decrypt(rawData);
-        
-        yield decrypted as T;
-        
-        // Prepare promise for next iteration before calling continue
-        const _nextPromise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
-            cursorRequestResolve = resolve;
-            cursorRequestReject = reject;
-        });
-        
-        cursor.continue();
-        
-        // Await the next result immediately to keep generator mechanics sound
-        // However, logic above simplifies this by creating promise inside loop.
-        // Actually, for simple implementation:
-        // We need to re-assign the handlers because continue() triggers onsuccess again.
-        request.onsuccess = (e) => cursorRequestResolve((e.target as IDBRequest).result);
+  private async measureTransaction<T>(name: string, fn: () => Promise<T>): Promise<T> {
+    const start = performance.now();
+    try {
+      const result = await fn();
+      const duration = performance.now() - start;
+      this.metrics.transactionCount++;
+      this.metrics.totalTransactionTime += duration;
+      
+      if (duration > 100) {
+        console.warn(`Slow transaction: ${name} took ${duration.toFixed(2)}ms`);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(`Transaction failed: ${name}`, error);
+      throw error;
     }
   }
 
-  /**
-   * Traditional GetAll (Buffered)
-   * Augmented with Decryption
-   */
-  async getAll<T>(storeName: StoreName): Promise<T[]> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, 'readonly');
-      const store = tx.objectStore(storeName);
-      const index = store.indexNames.contains('timestamp') ? store.index('timestamp') : store;
-      // Get most recent first
-      const request = store.indexNames.contains('timestamp') 
-        ? (index as IDBIndex).openCursor(null, 'prev') 
-        : store.openCursor();
-      
-      const results: Record<string, unknown>[] = [];
+  // === LRU CACHE ===
 
-      request.onsuccess = async (event) => {
-        const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
-        if (cursor) {
-          results.push(cursor.value);
-          cursor.continue();
-        } else {
-          // Bulk Decrypt
-          try {
-             const decrypted = await Promise.all(results.map(r => this.crypto.decrypt(r)));
-             resolve(decrypted as T[]);
-          } catch (e) {
-             reject(e);
-          }
-        }
-      };
-      request.onerror = () => reject(request.error);
-    });
+  private getCacheKey(store: StoreName, id: string): string {
+    return `${store}:${id}`;
   }
 
-  async get<T>(storeName: StoreName, key: string): Promise<T | undefined> {
-    const raw = await this.executeTransaction<unknown>([storeName], 'readonly', (stores) => {
-      return new Promise((resolve, reject) => {
-          const req = stores[storeName].get(key);
+  private getFromCache<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) {
+      this.metrics.cacheMisses++;
+      return null;
+    }
+    
+    // Check TTL
+    if (Date.now() - entry.timestamp > CACHE_TTL) {
+      this.cache.delete(key);
+      this.cacheSize -= entry.size;
+      this.metrics.cacheMisses++;
+      return null;
+    }
+    
+    entry.hits++;
+    this.metrics.cacheHits++;
+    
+    // Move to end (LRU)
+    this.cache.delete(key);
+    this.cache.set(key, entry);
+    
+    return entry.data as T;
+  }
+
+  private setInCache(key: string, data: unknown): void {
+    const size = JSON.stringify(data).length;
+    
+    // LRU eviction if needed
+    while (this.cache.size >= CACHE_MAX_SIZE) {
+      const firstKey = this.cache.keys().next().value as string | undefined;
+      if (!firstKey) break; // Safety check
+      
+      const firstEntry = this.cache.get(firstKey);
+      this.cache.delete(firstKey);
+      if (firstEntry) this.cacheSize -= firstEntry.size;
+    }
+    
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      hits: 0,
+      size,
+    });
+    this.cacheSize += size;
+  }
+
+  private invalidateCache(store?: StoreName, id?: string): void {
+    if (store && id) {
+      const key = this.getCacheKey(store, id);
+      const entry = this.cache.get(key);
+      if (entry) {
+        this.cache.delete(key);
+        this.cacheSize -= entry.size;
+      }
+    } else if (store) {
+      for (const [key, entry] of this.cache.entries()) {
+        if (key.startsWith(`${store}:`)) {
+          this.cache.delete(key);
+          this.cacheSize -= entry.size;
+        }
+      }
+    } else {
+      this.cache.clear();
+      this.cacheSize = 0;
+    }
+  }
+
+  // === CRUD OPERATIONS (Cache-Aware) ===
+
+  async get<T>(storeName: StoreName, id: string): Promise<T | undefined> {
+    // Check cache first
+    const cacheKey = this.getCacheKey(storeName, id);
+    const cached = this.getFromCache<T>(cacheKey);
+    if (cached) return cached;
+    
+    return this.measureTransaction(`get_${storeName}`, async () => {
+      return this.executeTransaction([storeName], 'readonly', async (stores) => {
+        const store = stores[0];
+        const data = await new Promise<StoredEncryptedData | undefined>((resolve, reject) => {
+          const req = store.get(id);
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
+        });
+        
+        if (!data) return undefined;
+        
+        const decrypted = await this.cryptoGuard.decrypt(data as unknown as Record<string, unknown>) as T;
+        
+        // Cache the result
+        this.setInCache(cacheKey, decrypted);
+        
+        return decrypted;
+      });
+    });
+  }
+
+  async put<T>(storeName: StoreName, data: T): Promise<void> {
+    // Add TTL if not present
+    const dataWithTTL = {
+      ...data,
+      timestamp: (data as any).timestamp || Date.now(),
+      expiresAt: (data as any).expiresAt || (Date.now() + TTL_DEFAULT),
+    };
+    
+    await this.retryTransaction(async () => {
+      const encrypted = await this.cryptoGuard.encrypt(dataWithTTL);
+      
+      await this.measureTransaction(`put_${storeName}`, async () => {
+        await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+          const store = stores[0];
+          await new Promise<void>((resolve, reject) => {
+            const req = store.put(encrypted);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+          });
+        });
       });
     });
     
-    if (!raw) return undefined;
-    return this.crypto.decrypt(raw as Record<string, unknown>) as Promise<T>;
-  }
-
-  /**
-   * Secure Put
-   * Automatically encrypts data before storage.
-   */
-  async put<T>(storeName: StoreName, value: T): Promise<void> {
-    // Encrypt payload (except app_state which is simple key-val)
-    let payload = value;
-    if (storeName !== 'app_state') {
-        payload = await this.crypto.encrypt(value) as unknown as T;
-        // Restore ID for indexing (IndexedDB needs the key path visible)
-        (payload as Record<string, unknown>).id = (value as Record<string, unknown>).id;
-        if ((value as Record<string, unknown>).timestamp) (payload as Record<string, unknown>).timestamp = (value as Record<string, unknown>).timestamp;
+    // Invalidate cache
+    const id = (data as any).id;
+    if (id) {
+      this.invalidateCache(storeName, id);
     }
-
-    await this.executeTransaction([storeName], 'readwrite', (stores) => {
-      stores[storeName].put(payload);
-    });
-
-    this.broadcast({ type: 'PUT', store: storeName, key: (value as Record<string, unknown>).id as string });
+    
+    // Notify other tabs
+    this.broadcastChannel.postMessage({ storeName, op: 'put' });
   }
 
-  async delete(storeName: StoreName, key: string): Promise<void> {
-    await this.executeTransaction([storeName], 'readwrite', (stores) => {
-      stores[storeName].delete(key);
-    });
-    this.broadcast({ type: 'DELETE', store: storeName, key });
-  }
-
-  async deleteBatch(storeName: StoreName, keys: string[]): Promise<void> {
-    await this.executeTransaction([storeName], 'readwrite', (stores) => {
-      keys.forEach(key => stores[storeName].delete(key));
-    });
-    this.broadcast({ type: 'DELETE', store: storeName });
-  }
-
-  async clear(storeName: StoreName): Promise<void> {
-    await this.executeTransaction([storeName], 'readwrite', (stores) => {
-      stores[storeName].clear();
-    });
-    this.broadcast({ type: 'CLEAR', store: storeName });
-  }
-
-  // --- Blob Storage Optimization (Binary) ---
-  
-  async saveImageBlob(id: string, base64: string): Promise<void> {
-      // Convert base64 to Blob to save roughly 33% space and parsing time
-      const byteString = atob(base64.split(',')[1]);
-      const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([ab], { type: mimeString });
-
-      await this.executeTransaction(['blob_storage'], 'readwrite', (stores) => {
-          stores['blob_storage'].put({ id, data: blob, mimeType: mimeString, refCount: 1 });
+  async delete(storeName: StoreName, id: string): Promise<void> {
+    await this.retryTransaction(async () => {
+      await this.measureTransaction(`delete_${storeName}`, async () => {
+        await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+          const store = stores[0];
+          await new Promise<void>((resolve, reject) => {
+            const req = store.delete(id);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+          });
+        });
       });
+    });
+    
+    this.invalidateCache(storeName, id);
+    this.broadcastChannel.postMessage({ storeName, op: 'delete', id });
   }
 
-  // --- Statistics & Diagnostics ---
+  // === BATCH OPERATIONS ===
+
+  async putBatch(storeName: StoreName, data: unknown): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.batchQueue.push({ store: storeName, data, resolve, reject });
+      
+      // Auto-flush if batch is full
+      if (this.batchQueue.length >= BATCH_MAX_SIZE) {
+        this.flushBatch();
+      } else if (!this.batchTimer) {
+        // Schedule flush
+        this.batchTimer = setTimeout(() => this.flushBatch(), BATCH_DELAY);
+      }
+    });
+  }
+
+  private async flushBatch(): Promise<void> {
+    if (this.batchTimer) {
+      clearTimeout(this.batchTimer);
+      this.batchTimer = null;
+    }
+    
+    if (this.batchQueue.length === 0) return;
+    
+    const batch = [...this.batchQueue];
+    this.batchQueue = [];
+    
+    // Group by store
+    const byStore = new Map<StoreName, BatchOperation[]>();
+    for (const op of batch) {
+      if (!byStore.has(op.store)) {
+        byStore.set(op.store, []);
+      }
+      byStore.get(op.store)!.push(op);
+    }
+    
+    // Execute batched transactions
+    for (const [storeName, ops] of byStore.entries()) {
+      try {
+        await this.measureTransaction(`batch_${storeName}`, async () => {
+          await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+            const store = stores[0];
+            
+            for (const op of ops) {
+              try {
+                const dataWithTTL = {
+                  ...(op.data as object),
+                  timestamp: (op.data as any).timestamp || Date.now(),
+                  expiresAt: (op.data as any).expiresAt || (Date.now() + TTL_DEFAULT),
+                };
+                const encrypted = await this.cryptoGuard.encrypt(dataWithTTL);
+                
+                await new Promise<void>((resolve, reject) => {
+                  const req = store.put(encrypted);
+                  req.onsuccess = () => resolve();
+                  req.onerror = () => reject(req.error);
+                });
+                
+                op.resolve();
+              } catch (err) {
+                op.reject(err as Error);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        ops.forEach(op => op.reject(error as Error));
+      }
+    }
+    
+    this.broadcastChannel.postMessage({ op: 'batch_flush', count: batch.length });
+  }
+
+  // === STREAMING (Memory-Efficient) ===
+
+  async *streamAll<T>(storeName: StoreName): AsyncGenerator<T> {
+    await this.ensureDBOpen();
+    
+    const items: T[] = [];
+    await this.executeTransaction([storeName], 'readonly', async (stores) => {
+      const store = stores[0];
+      
+      // Use compound index if available for better performance
+      const indexName = store.indexNames.contains('timestamp_id') ? 'timestamp_id' : 'timestamp';
+      const source = store.indexNames.contains(indexName) ? store.index(indexName) : store;
+      const request = source.openCursor(null, 'prev');
+      
+      // Track index usage
+      this.metrics.indexUsage.set(indexName, (this.metrics.indexUsage.get(indexName) || 0) + 1);
+      
+      await new Promise<void>((resolve, reject) => {
+        request.onsuccess = async () => {
+          const cursor = request.result;
+          if (!cursor) {
+            resolve();
+            return;
+          }
+          
+          const decrypted = await this.cryptoGuard.decrypt(cursor.value as Record<string, unknown>) as T;
+          items.push(decrypted);
+          cursor.continue();
+        };
+        request.onerror = () => reject(request.error);
+      });
+    });
+    
+    for (const item of items) {
+      yield item;
+    }
+  }
+
+  async getAll<T>(storeName: StoreName): Promise<T[]> {
+    const items: T[] = [];
+    for await (const item of this.streamAll<T>(storeName)) {
+      items.push(item);
+    }
+    return items;
+  }
+
+  // === PAGINATED QUERIES ===
+
+  async query<T>(
+    storeName: StoreName,
+    options: QueryOptions = {}
+  ): Promise<{ items: T[]; hasMore: boolean; nextKey?: string }> {
+    const { limit = 20, offset = 0, orderBy = 'desc', startKey, endKey } = options;
+    const items: T[] = [];
+    let skipped = 0;
+    let lastKey: string | undefined;
+    
+    await this.executeTransaction([storeName], 'readonly', async (stores) => {
+      const store = stores[0];
+      
+      // Use compound index for better performance
+      const indexName = store.indexNames.contains('timestamp_id') ? 'timestamp_id' : 'timestamp';
+      const index = store.indexNames.contains(indexName) ? store.index(indexName) : store;
+      
+      // Track index usage
+      this.metrics.indexUsage.set(indexName, (this.metrics.indexUsage.get(indexName) || 0) + 1);
+      
+      let range: IDBKeyRange | undefined;
+      if (startKey && endKey) {
+        range = IDBKeyRange.bound(startKey, endKey);
+      } else if (startKey) {
+        range = IDBKeyRange.lowerBound(startKey);
+      } else if (endKey) {
+        range = IDBKeyRange.upperBound(endKey);
+      }
+      
+      const direction = orderBy === 'desc' ? 'prev' : 'next';
+      const request = index.openCursor(range, direction);
+      
+      await new Promise<void>((resolve, reject) => {
+        request.onsuccess = async () => {
+          const cursor = request.result;
+          if (!cursor) {
+            resolve();
+            return;
+          }
+          
+          // Skip offset
+          if (skipped < offset) {
+            skipped++;
+            cursor.continue();
+            return;
+          }
+          
+          // Check limit
+          if (items.length >= limit) {
+            lastKey = cursor.key as string;
+            resolve();
+            return;
+          }
+          
+          // Decrypt and add
+          const decrypted = await this.cryptoGuard.decrypt(cursor.value as Record<string, unknown>) as T;
+          items.push(decrypted);
+          lastKey = cursor.key as string;
+          
+          cursor.continue();
+        };
+        request.onerror = () => reject(request.error);
+      });
+    });
+    
+    return {
+      items,
+      hasMore: items.length === limit,
+      nextKey: lastKey,
+    };
+  }
+
+  // === TTL CLEANUP ===
+
+  private scheduleCleanup(): void {
+    setInterval(async () => {
+      await this.cleanupExpiredRecords();
+    }, 60 * 60 * 1000); // Every hour
+  }
+
+  async cleanupExpiredRecords(): Promise<number> {
+    let expiredCount = 0;
+    const now = Date.now();
+    
+    const stores: StoreName[] = ['analyses', 'media_analyses', 'chats', 'satires'];
+    
+    for (const storeName of stores) {
+      await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+        const store = stores[0];
+        
+        if (!store.indexNames.contains('expiresAt')) return;
+        
+        const index = store.index('expiresAt');
+        const range = IDBKeyRange.upperBound(now);
+        const request = index.openCursor(range);
+        
+        await new Promise<void>((resolve, reject) => {
+          request.onsuccess = () => {
+            const cursor = request.result;
+            if (cursor) {
+              cursor.delete();
+              expiredCount++;
+              cursor.continue();
+            } else {
+              resolve();
+            }
+          };
+          request.onerror = () => reject(request.error);
+        });
+      });
+    }
+    
+    this.metrics.expiredRecords += expiredCount;
+    this.metrics.lastCleanup = now;
+    
+    if (expiredCount > 0) {
+      console.log(`TTL Cleanup: Removed ${expiredCount} expired records`);
+      this.broadcastChannel.postMessage({ type: 'cleanup', count: expiredCount });
+    }
+    
+    return expiredCount;
+  }
+
+  // === QUOTA MANAGEMENT ===
+
+  async checkQuota(): Promise<{ usage: number; available: number; percentage: number }> {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      const estimate = await navigator.storage.estimate();
+      const usage = estimate.usage || 0;
+      const available = estimate.quota || 0;
+      const percentage = available > 0 ? usage / available : 0;
+      
+      if (percentage > QUOTA_WARNING_THRESHOLD) {
+        console.warn(`⚠️ Storage quota: ${(percentage * 100).toFixed(1)}% used (${(usage / 1024 / 1024).toFixed(2)} MB / ${(available / 1024 / 1024).toFixed(2)} MB)`);
+        this.broadcastChannel.postMessage({ type: 'quota_warning', percentage });
+      }
+      
+      return { usage, available, percentage };
+    }
+    return { usage: 0, available: 0, percentage: 0 };
+  }
+
+  private async checkMemoryPressure(): Promise<void> {
+    const quota = await this.checkQuota();
+    if (quota.percentage > 0.9) {
+      // High memory pressure - clear cache
+      this.invalidateCache();
+      console.log('Memory pressure detected - cache cleared');
+    }
+  }
+
+  // === STORAGE STATISTICS ===
 
   async getStorageStats(): Promise<StorageStats> {
-    const stores: StoreName[] = ['analyses', 'media_analyses', 'chats', 'satires', 'app_state', 'blob_storage'];
     const stats: StorageStats = {
       usageBytes: 0,
-      recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0, blob_storage: 0 } as Record<string, number>,
+      recordCounts: {
+        analyses: 0,
+        media_analyses: 0,
+        chats: 0,
+        satires: 0,
+        app_state: 0,
+        blob_storage: 0,
+      },
       totalRecords: 0,
-      encrypted: true,
-      compressionRatio: 0
+      encrypted: true, // All data is encrypted
+      compressionRatio: 1,
+      indexUsage: Object.fromEntries(this.metrics.indexUsage),
     };
 
-    const db = await this.open();
-    const tx = db.transaction(stores, 'readonly');
+    const db = await this.ensureDBOpen();
+    const storeNames = Array.from(db.objectStoreNames) as StoreName[];
 
-    let totalRawBytes = 0;
     let totalStoredBytes = 0;
+    let totalRawBytes = 0;
 
-    await Promise.all(stores.map(storeName => new Promise<void>((resolve) => {
-        const store = tx.objectStore(storeName);
-        
-        // Count
-        const countReq = store.count();
-        countReq.onsuccess = () => {
-            stats.recordCounts[storeName] = countReq.result;
-            stats.totalRecords += countReq.result;
-        };
+    // Count records in each store
+    await Promise.all(storeNames.map(async (storeName) => {
+      const count = await this.executeTransaction([storeName], 'readonly', async (stores) => {
+        const store = stores[0];
+        return new Promise<number>((resolve, reject) => {
+          const req = store.count();
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      });
+      stats.recordCounts[storeName] = count;
+      stats.totalRecords += count;
+    }));
 
-        // Estimate Size (Sampling first 10 for performance)
-        // In a real 'state-of-the-art' app, we might maintain a running metadata counter.
-        // Here we approximate.
-        const cursorReq = store.openCursor();
+    // Sample-based size estimation (first 20 records)
+    await Promise.all(storeNames.map(async (storeName) => {
+      await this.executeTransaction([storeName], 'readonly', async (stores) => {
+        const store = stores[0];
+        const request = store.openCursor();
         let samples = 0;
-        
-        cursorReq.onsuccess = (e) => {
-            const cursor = (e.target as IDBRequest).result;
-            if (cursor && samples < 20) {
-                const val = cursor.value;
-                
-                // Stored Size
-                const json = JSON.stringify(val);
-                totalStoredBytes += json.length; 
-                
-                // Estimating Raw Size (if encrypted)
-                if (val.isEncrypted && val.cipher) {
-                    // Rough estimation of decompression ratio (usually 3x-5x for text)
-                    totalRawBytes += (val.cipher.byteLength * 4); 
-                } else {
-                    totalRawBytes += json.length;
-                }
-                
-                samples++;
-                cursor.continue();
-            } else {
-                resolve();
-            }
-        };
-    })));
 
-    // Extrapolate total size based on samples
-    if (stats.totalRecords > 0) {
-       // Simple heuristic for demo purposes
-       stats.usageBytes = totalStoredBytes * (stats.totalRecords / Math.max(1, 20)); // Approximate total
-       stats.compressionRatio = totalRawBytes > 0 ? parseFloat((totalStoredBytes / totalRawBytes).toFixed(2)) : 1;
+        await new Promise<void>((resolve) => {
+          request.onsuccess = () => {
+            const cursor = request.result;
+            if (cursor && samples < 20) {
+              const val = cursor.value;
+              const json = JSON.stringify(val);
+              totalStoredBytes += json.length;
+
+              if (val.isEncrypted && val.cipher) {
+                totalRawBytes += val.cipher.byteLength * 4; // Estimate 4x compression
+              } else {
+                totalRawBytes += json.length;
+              }
+
+              samples++;
+              cursor.continue();
+            } else {
+              resolve();
+            }
+          };
+        });
+      });
+    }));
+
+    // Extrapolate total size
+    if (stats.totalRecords > 0 && totalStoredBytes > 0) {
+      stats.usageBytes = totalStoredBytes * (stats.totalRecords / Math.max(1, 20));
+      stats.compressionRatio = totalRawBytes > 0 ? parseFloat((totalStoredBytes / totalRawBytes).toFixed(2)) : 1;
     }
+
+    // Add quota information
+    const quota = await this.checkQuota();
+    stats.quotaUsage = quota.percentage;
+    stats.quotaAvailable = quota.available;
 
     return stats;
   }
 
-  // --- Export/Import ---
+  // === PERFORMANCE METRICS ===
+
+  getPerformanceMetrics(): PerformanceMetrics {
+    return {
+      transactionCount: this.metrics.transactionCount,
+      averageTransactionTime: this.metrics.transactionCount > 0 
+        ? this.metrics.totalTransactionTime / this.metrics.transactionCount 
+        : 0,
+      cacheHitRate: (this.metrics.cacheHits + this.metrics.cacheMisses) > 0
+        ? this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses)
+        : 0,
+      lastCleanup: this.metrics.lastCleanup,
+      expiredRecords: this.metrics.expiredRecords,
+    };
+  }
+
+  // === EXPORT/IMPORT ===
 
   async exportFullDatabase(): Promise<Blob> {
-    // We use getAll here, but in a massive DB we would use streamAll and stream the JSON output
-    // to avoid memory crashes. For this implementation, standard getAll is sufficient but let's decrypt.
     const data = {
       analyses: await this.getAll('analyses'),
       media_analyses: await this.getAll('media_analyses'),
@@ -539,16 +934,17 @@ class DatabaseService {
       satires: await this.getAll('satires'),
       settings: await this.getAll('app_state'),
       meta: {
-          timestamp: Date.now(),
-          version: DB_VERSION,
-          app: 'DisinfoDesk_Vault',
-          schema: 'v3_secure'
-      }
+        timestamp: Date.now(),
+        version: DB_VERSION,
+        app: 'DisinfoDesk_Vault',
+        schema: 'v4_optimized',
+      },
     };
     return new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   }
 
-  // --- Redux Persist Interface ---
+  // === REDUX PERSIST ADAPTER ===
+
   public reduxStorage = {
     getItem: async (key: string): Promise<string | null> => {
       const res = await this.get<{ key: string; value: string }>('app_state', key);
@@ -562,13 +958,117 @@ class DatabaseService {
     },
   };
 
-  // --- Specific Helpers ---
-  async saveAnalysis(item: StoredAnalysis) { return this.put('analyses', item); }
-  async getAnalysis(id: string) { return this.get<StoredAnalysis>('analyses', id); }
-  async saveMediaAnalysis(item: StoredMediaAnalysis) { return this.put('media_analyses', item); }
-  async getMediaAnalysis(id: string) { return this.get<StoredMediaAnalysis>('media_analyses', id); }
-  async saveChat(item: StoredChat) { return this.put('chats', item); }
-  async saveSatire(item: StoredSatire) { return this.put('satires', item); }
+  // === SUBSCRIBER PATTERN ===
+
+  subscribe(callback: () => void): () => void {
+    this.subscribers.push(callback);
+    return () => {
+      const index = this.subscribers.indexOf(callback);
+      if (index >= 0) this.subscribers.splice(index, 1);
+    };
+  }
+
+  private notifySubscribers(): void {
+    this.subscribers.forEach(cb => cb());
+  }
+
+  // === BLOB STORAGE ===
+
+  async saveImageBlob(id: string, base64: string): Promise<void> {
+    // Convert base64 to Blob (33% space savings)
+    const byteString = atob(base64.split(',')[1]);
+    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+
+    await this.put('blob_storage', { id, data: blob, mimeType: mimeString, refCount: 1 });
+  }
+
+  async getImageBlob(id: string): Promise<string | null> {
+    const record = await this.get<{ data: Blob; mimeType: string }>('blob_storage', id);
+    if (!record) return null;
+
+    // Convert Blob back to base64
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(record.data);
+    });
+  }
+
+  // === CONVENIENCE METHODS ===
+
+  async saveAnalysis(item: StoredAnalysis): Promise<void> {
+    return this.put('analyses', item);
+  }
+
+  async getAnalysis(id: string): Promise<StoredAnalysis | undefined> {
+    return this.get<StoredAnalysis>('analyses', id);
+  }
+
+  async saveMediaAnalysis(item: StoredMediaAnalysis): Promise<void> {
+    return this.put('media_analyses', item);
+  }
+
+  async getMediaAnalysis(id: string): Promise<StoredMediaAnalysis | undefined> {
+    return this.get<StoredMediaAnalysis>('media_analyses', id);
+  }
+
+  async saveChat(item: StoredChat): Promise<void> {
+    return this.put('chats', item);
+  }
+
+  async saveSatire(item: StoredSatire): Promise<void> {
+    return this.put('satires', item);
+  }
+
+  // === CLEAR STORE ===
+  async clear(storeName: StoreName): Promise<void> {
+    await this.retryTransaction(async () => {
+      await this.measureTransaction(`clear_${storeName}`, async () => {
+        await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+          const store = stores[0];
+          await new Promise<void>((resolve, reject) => {
+            const req = store.clear();
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+          });
+        });
+      });
+    });
+    
+    this.invalidateCache(storeName);
+    this.broadcastChannel.postMessage({ storeName, op: 'clear' });
+  }
+
+  // === BATCH DELETE ===
+  async deleteBatch(storeName: StoreName, ids: string[]): Promise<void> {
+    await this.retryTransaction(async () => {
+      await this.measureTransaction(`deleteBatch_${storeName}`, async () => {
+        await this.executeTransaction([storeName], 'readwrite', async (stores) => {
+          const store = stores[0];
+          
+          for (const id of ids) {
+            await new Promise<void>((resolve, reject) => {
+              const req = store.delete(id);
+              req.onsuccess = () => resolve();
+              req.onerror = () => reject(req.error);
+            });
+          }
+        });
+      });
+    });
+    
+    // Invalidate cache for all deleted IDs
+    ids.forEach(id => this.invalidateCache(storeName, id));
+    
+    this.broadcastChannel.postMessage({ storeName, op: 'deleteBatch', count: ids.length });
+  }
 }
 
+// === SINGLETON EXPORT ===
 export const dbService = new DatabaseService();

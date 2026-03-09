@@ -46,6 +46,22 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+// Web Vitals monitoring can be enabled by installing web-vitals package
+// and uncommenting the code below:
+// if (import.meta.env.PROD) {
+//   import('./hooks/useWebVitals')
+//     .then(({ sendToAnalytics }) => {
+//       import('web-vitals')
+//         .then(({ onCLS, onFID, onLCP, onFCP, onTTFB }) => {
+//           onCLS(sendToAnalytics);
+//           onFID(sendToAnalytics);
+//           onLCP(sendToAnalytics);
+//           onFCP(sendToAnalytics);
+//           onTTFB(sendToAnalytics);
+//         });
+//     });
+// }
+
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>

@@ -255,24 +255,26 @@ class DatabaseService {
     callback: (stores: Record<StoreName, IDBObjectStore>) => Promise<T> | T
   ): Promise<T> {
     const db = await this.open();
-    return new Promise(async (resolve, reject) => {
+    
+    return new Promise<T>((resolve, reject) => {
       const tx = db.transaction(storeNames, mode);
       const stores = {} as Record<StoreName, IDBObjectStore>;
       storeNames.forEach(name => stores[name] = tx.objectStore(name));
 
-      try {
-        const result = await callback(stores);
-        
-        // Commit wrapper for readwrite
-        if (mode === 'readwrite') {
+      // Execute callback and handle result
+      Promise.resolve(callback(stores))
+        .then(result => {
+          // Commit wrapper for readwrite
+          if (mode === 'readwrite') {
             tx.oncomplete = () => resolve(result);
-        } else {
+          } else {
             resolve(result); // readonly usually doesn't need to wait for complete
-        }
-      } catch (e) {
-        tx.abort();
-        reject(e);
-      }
+          }
+        })
+        .catch(e => {
+          tx.abort();
+          reject(e);
+        });
 
       tx.onerror = () => reject(tx.error);
     });

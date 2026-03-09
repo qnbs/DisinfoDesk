@@ -42,6 +42,7 @@ const cleanJsonOutput = (text: string): string => {
 
   // 3. Remove control characters that break JSON.parse
   // Also handles potentially escaped newlines that confuse the parser
+  // eslint-disable-next-line no-control-regex -- Intentionally remove control chars for JSON safety
   cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
   
   return cleaned;
@@ -77,6 +78,7 @@ const SAFETY_SETTINGS = [
 const sanitizePromptInput = (input: string, maxLength = 500): string => {
   if (!input) return '';
   return input
+    // eslint-disable-next-line no-control-regex -- Intentionally remove control chars for security
     .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // control chars
     .substring(0, maxLength)
     .trim();

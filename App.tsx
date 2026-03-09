@@ -1,8 +1,7 @@
 
 import React, { useEffect } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
-import { ErrorFallback } from './components/ui/Common';
 import { useAppSelector, useAppDispatch } from './store/hooks';
 import { resetTransientState } from './store/slices/uiSlice';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -62,7 +61,18 @@ const router = createHashRouter([
         <ScrollRestoration />
       </GlobalEffects>
     ),
-    errorElement: <ErrorFallback error={new Error("Route Error")} resetErrorBoundary={() => window.location.reload()} />,
+    errorElement: (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-4">Route Error</h1>
+            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-accent-cyan text-white rounded-lg">
+              Reload
+            </button>
+          </div>
+        </div>
+      </ErrorBoundary>
+    ),
     children: [
       {
         index: true,
@@ -143,7 +153,7 @@ const router = createHashRouter([
 const App: React.FC = () => {
   return (
     // Redux Provider is in index.tsx
-    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+    <ErrorBoundary>
       <SettingsProvider>
         <LanguageProvider>
           <ToastProvider>

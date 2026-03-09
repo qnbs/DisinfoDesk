@@ -1,22 +1,21 @@
 
-import React, { useRef, useEffect, createContext, useContext, useCallback, useState, useMemo } from 'react';
-import { useLanguage } from '../contexts/LanguageContext'; 
-import { 
-  Settings as SettingsIcon, Globe, Info, 
-  Cpu, Layout, Terminal, 
-  Volume2, VolumeX, Eye, 
-  Trash2, Download, Smartphone, 
-  Shield, Zap, Brain, AlertOctagon,
-  HardDrive, Activity, Layers, Lock,
-  Palette, Grid, Radio, Speaker, CheckCircle2,
-  BarChart3, Wifi, Server
+import React, {
+  useRef, useEffect, createContext, useContext, useCallback, useState
+} from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import {
+  Settings as SettingsIcon, Cpu, Layout, Terminal, Volume2, VolumeX, Eye, Trash2, Download, Smartphone, Shield, Zap, Brain, AlertOctagon, HardDrive, Activity, Lock, Palette, Grid, CheckCircle2, Server
 } from 'lucide-react';
-import { Card, Button, Badge, PageHeader } from './ui/Common';
+import {
+  Card, Button, Badge, PageHeader
+} from './ui/Common';
 import { useAppDispatch } from '../store/hooks';
 import { setLanguage as setReduxLanguage } from '../store/slices/settingsSlice';
 import { AppSettings, Language, AccentColor } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 import { secureApiKeyService } from '../services/secureApiKeyService';
 
 // --- 1. Logic Hook ---

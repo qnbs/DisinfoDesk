@@ -1,7 +1,8 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 
-const LazyViralityChart: React.FC<{ history: any[], t: any }> = ({ history, t }) => (
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LazyViralityChart: React.FC<{ history: Record<string, number>[], t: Record<string, any> }> = ({ history, t }) => (
     <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={history} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>

@@ -1,20 +1,20 @@
-import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import React, {
+  useEffect, useRef, useCallback, useState
+} from 'react';
 import { SimulationParams } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { 
-  Radio, Network, RefreshCw, Undo, Redo,
-  Flame, Zap, Shield, Users, Layers, Play, Pause, 
-  Activity, Target, Lock, Wifi, AlertTriangle, 
-  Microscope, Terminal, Crosshair, BarChart3
+import {
+  Network, RefreshCw, Undo, Redo, Flame, Zap, Shield, Users, Layers, Play, Pause, Activity, Lock, AlertTriangle, Microscope, BarChart3
 } from 'lucide-react';
-const LazyViralityChart = React.lazy(() => import('./LazyViralityChart'));
+const _LazyViralityChart = React.lazy(() => import('./LazyViralityChart'));
 const LazyTelemetryChart = React.lazy(() => import('./LazyTelemetryChart'));
-import { Card, Button, PageFrame, PageHeader } from './ui/Common';
+import {
+  Card, Button, PageFrame, PageHeader
+} from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setParams, resetParams } from '../store/slices/simulationSlice';
 import { ActionCreators } from 'redux-undo';
 import { useNavigate } from 'react-router-dom';
-import ViralityWorker from '../workers/virality.worker?worker';
 
 // --- TYPES & PHYSICS CONSTANTS ---
 
@@ -261,7 +261,7 @@ const AdvancedPropagationNetwork: React.FC<{
 
             const w = canvas.width;
             const h = canvas.height;
-            const separationDist = 30;
+            const _separationDist = 30;
             const infectionRadius = 40 + (params.echoChamberDensity * 0.5);
             
             // Clear & Fade
@@ -411,6 +411,7 @@ const AdvancedPropagationNetwork: React.FC<{
             window.removeEventListener('resize', resize);
             cancelAnimationFrame(frameRef.current);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params, mode, paused, isVisible]);
 
     return (
@@ -471,7 +472,7 @@ export const ViralAnalysis: React.FC = () => {
         t, params, rValue, telemetry, setTelemetry, 
         renderMode, setRenderMode, activeTool, setActiveTool, 
         isPaused, setIsPaused, handleParamChange, applyScenario, 
-        handleReset, handleUndo, handleRedo, canUndo, canRedo, onBack 
+        handleReset, handleUndo, handleRedo, canUndo, canRedo 
     } = useViralAnalysisLogic();
 
     const updateStats = useCallback((infected: number, recovered: number) => {
@@ -480,6 +481,7 @@ export const ViralAnalysis: React.FC = () => {
             if (next.length > 50) next.shift();
             return next;
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Derived Status

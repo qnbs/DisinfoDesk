@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback } from 'react';
-import { 
-  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, 
-  GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, 
-  Film, Database, WifiOff, Download, Power, Edit3,
-  Feather, Search as SearchIcon, Cpu, FileKey, RefreshCw
+import React, {
+  useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback
+} from 'react';
+import {
+  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, RefreshCw
 } from 'lucide-react';
-import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Outlet, NavLink, useLocation, useNavigate
+} from 'react-router-dom';
 import { BeforeInstallPromptEvent, NavItem } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addLog } from '../store/slices/settingsSlice';
-import { saveScrollPosition, setSearchOpen, selectActiveFile, showUpdateModal, hideUpdateModal, dismissUpdateModal } from '../store/slices/uiSlice';
+import {
+  setSearchOpen, selectActiveFile, showUpdateModal, hideUpdateModal, dismissUpdateModal
+} from '../store/slices/uiSlice';
 import { syncStaticData } from '../store/slices/theoriesSlice';
 import { OmniSearch } from './OmniSearch';
 import { OnboardingTour } from './OnboardingTour';
@@ -318,7 +321,7 @@ export const Layout: React.FC = () => {
   const handleInstallClick = useCallback(() => {
     if (!installPrompt) return;
     installPrompt.prompt();
-    installPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
+    installPrompt.userChoice.then((_choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
       setInstallPrompt(null);
     });
   }, [installPrompt]);

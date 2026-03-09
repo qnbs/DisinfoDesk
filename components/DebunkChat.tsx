@@ -1,23 +1,27 @@
 
-import React, { useState, useRef, useEffect, useCallback, createContext, useContext, useMemo } from 'react';
-import { streamChatWithSkeptic, resetChatSession, connectLiveSession, base64ToUint8Array } from '../services/geminiService';
+import React, {
+  useState, useRef, useEffect, useCallback, createContext, useContext
+} from 'react';
+import {
+  streamChatWithSkeptic, resetChatSession, connectLiveSession, base64ToUint8Array
+} from '../services/geminiService';
 import { dbService } from '../services/dbService';
 import { THEORIES_DE_FULL, THEORIES_EN_FULL, MEDIA_ITEMS } from '../constants';
 import { AUTHORS_FULL } from '../data/enriched';
-import { 
-    Send, Bot, Trash2, Mic, Cpu, Save, Volume2, VolumeX, 
-    MicOff, ShieldCheck, AlertTriangle, XCircle, 
-    HelpCircle, StopCircle, User, Activity, Radio, Signal,
-    Terminal, Lock, Zap, Search, Fingerprint, ChevronRight,
-    Play, Pause, RefreshCw, BarChart2, FileDown
+import {
+  Send, Bot, Trash2, Cpu, Save, StopCircle, Radio, Lock, Zap, Fingerprint, RefreshCw, FileDown
 } from 'lucide-react';
 import { exportChatPDF } from '../services/pdfExportService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { Message } from '../types';
-import { PageHeader, PageFrame, Button, Card, Badge } from './ui/Common';
+import {
+  PageHeader, PageFrame, Button, Badge
+} from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat } from '../store/slices/uiSlice';
+import {
+  setChatInput, setChatThinking, addChatMessage, updateLastChatMessage, finalizeLastChatMessage, clearChat
+} from '../store/slices/uiSlice';
 import { useToast } from '../contexts/ToastContext';
 import { playSound } from '../utils/microInteractions';
 // LiveSession type is not exported in current @google/genai version; use inline type
@@ -391,7 +395,7 @@ const useDebunkChatLogic = () => {
     dispatch(setChatThinking(true));
     dispatch(addChatMessage({ role: 'model', text: '', isStreaming: true }));
 
-    const history = messages.map((m: any) => m.text);
+    const history = messages.map((m: Message) => m.text);
     let fullResponse = "";
     
     try {
@@ -405,7 +409,7 @@ const useDebunkChatLogic = () => {
             fullResponse += chunk;
             dispatch(updateLastChatMessage(fullResponse));
         }
-    } catch (e) { 
+    } catch { 
         if (!abortControllerRef.current?.signal.aborted) {
             dispatch(updateLastChatMessage(fullResponse + "\n\n[SYSTEM ERROR: Uplink interrupted]"));
         }
@@ -428,7 +432,7 @@ const useDebunkChatLogic = () => {
         }
         abortControllerRef.current = null;
     }
-    }, [input, loading, messages, language, settings.aiModelVersion, settings.aiTemperature, dispatch, activeContextId]);
+    }, [input, loading, messages, language, settings.aiModelVersion, settings.aiTemperature, settings.soundEnabled, dispatch, activeContextId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
   
@@ -442,7 +446,7 @@ const useDebunkChatLogic = () => {
     try { 
         await dbService.saveChat({ 
             id: 'chat_' + Date.now(), 
-            title: messages.find((m: any) => m.role === 'user')?.text.substring(0, 30) + '...' || 'Session', 
+            title: messages.find((m: Message) => m.role === 'user')?.text.substring(0, 30) + '...' || 'Session', 
             timestamp: Date.now(), 
             messages 
         }); 
@@ -480,7 +484,7 @@ const ChatHeader: React.FC<{ status: string, mode: string, contextId: string | n
         if (messages.length <= 1) return;
         try {
             await exportChatPDF(
-                messages.map((m: any) => ({ role: m.role, text: m.text, timestamp: m.timestamp })),
+                messages.map((m: Message) => ({ role: m.role, text: m.text, timestamp: m.timestamp })),
                 contextId ? `Debunk Session · ${contextId}` : 'Debunk Chat Session'
             );
         } catch (e) { console.error('PDF export failed:', e); }
@@ -701,7 +705,7 @@ export const DebunkChat: React.FC = () => {
                                 </div>
                             </div>
                         )}
-                        {messages.map((msg: any, index: number) => (
+                        {messages.map((msg: Message, index: number) => (
                             <TextMessageBubble key={index} msg={msg} />
                         ))}
                         {/* Skeleton while waiting for first AI token */}

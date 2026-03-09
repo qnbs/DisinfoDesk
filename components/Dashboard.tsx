@@ -1,20 +1,13 @@
 
-import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  AreaChart, Area, XAxis, YAxis, Tooltip, 
-  ResponsiveContainer, PieChart, Pie, Cell
-} from 'recharts';
-import { 
-  Globe, Activity, ShieldAlert, Zap, Radio, 
-  Terminal, Cpu, Map as MapIcon, ChevronRight, 
-  AlertTriangle, Crosshair, Signal, 
-  Lock, Share2, Wifi, BookOpen, Film, Feather, MessageSquare, 
-  Skull, Edit3, Database, Settings, HelpCircle, HardDrive, 
-  LayoutGrid, Power, Fingerprint, Eye, Server, Layers,
-  Brain, FileDown
+import React, {
+  useMemo, useState, useEffect, useRef
+} from 'react';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import {
+  Globe, Activity, ShieldAlert, Radio, Terminal, Cpu, Lock, Wifi, MessageSquare, Skull, Database, Settings, HardDrive, LayoutGrid, Server, Brain, FileDown
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Card, PageFrame, PageHeader, Badge, cn } from './ui/Common';
+import { Card, PageFrame, PageHeader } from './ui/Common';
 import { exportElementPDF } from '../services/pdfExportService';
 import { useAppSelector } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
@@ -307,7 +300,6 @@ const MetricTile: React.FC<{
 
 const CommandDeck: React.FC = () => {
     const navigate = useNavigate();
-    const { t } = useLanguage();
 
     const commands = [
         { id: 'scan', label: 'Threat Scan', sub: 'Protocol Omega', icon: ShieldAlert, path: '/dangerous', color: 'border-red-500/30 text-red-400 hover:bg-red-950/20' },
@@ -347,7 +339,7 @@ const CommandDeck: React.FC = () => {
 // --- 4. MAIN DASHBOARD ---
 
 export const Dashboard: React.FC = () => {
-    const { t } = useLanguage();
+    useLanguage();
     const theories = useAppSelector(selectAllTheories);
     
     // Derived Stats

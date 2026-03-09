@@ -26,7 +26,7 @@ export const Typewriter: React.FC<TypewriterProps> = ({
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(isStreaming);
   const indexRef = useRef(0);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(undefined);
   const prefersReducedMotion = respectReducedMotion 
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
     : false;
@@ -126,9 +126,7 @@ export const StreamingText: React.FC<StreamingTextProps> = ({
         </div>
       ))}
       {!isStreaming && chunks.length > 0 && onComplete && (
-        <script>
-          {onComplete()}
-        </script>
+        <span ref={() => { onComplete(); }} style={{ display: 'none' }} />
       )}
     </div>
   );
@@ -157,7 +155,7 @@ export const MarkdownLikeText: React.FC<MarkdownLikeTextProps> = ({
     let lastIndex = 0;
 
     const boldRegex = /\*\*(.*?)\*\*/g;
-    const italicRegex = /\*(.*?)\*/g;
+    const _italicRegex = /\*(.*?)\*/g;
     const codeRegex = /`(.*?)`/g;
 
     let match;

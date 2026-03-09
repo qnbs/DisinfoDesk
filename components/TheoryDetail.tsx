@@ -1,16 +1,18 @@
-import React, { useEffect, useState, useMemo, useCallback, createContext, useContext, useRef } from 'react';
-import { Theory, TheoryDetail as ITheoryDetail } from '../types';
+import React, {
+  useEffect, useState, useMemo, useCallback, createContext, useContext, useRef
+} from 'react';
+import { TheoryDetail as ITheoryDetail } from '../types';
 import { analyzeTheoryWithGemini, generateTheoryImage } from '../services/geminiService';
-import { 
-    ArrowLeft, ShieldCheck, History, FileText, ExternalLink, Link, 
-    Youtube, FileKey, GitBranch, Edit3, BookOpen, Quote, AlertTriangle, 
-    CheckCircle2, Clock, RefreshCw, MessageSquare, Download, Share2
+import {
+  ArrowLeft, ShieldCheck, History, FileText, ExternalLink, Link, Youtube, FileKey, GitBranch, Edit3, BookOpen, Quote, AlertTriangle, CheckCircle2, Clock, RefreshCw, MessageSquare, Download, Share2
 } from 'lucide-react';
 import { generateShareLink, copyShareLink } from '../services/shareService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
-import { Button, Card, Badge, PageFrame, PageHeader } from './ui/Common';
+import {
+  Button, Card, Badge, PageFrame, PageHeader
+} from './ui/Common';
 import { GenerationHUD } from './ui/GenerationHUD';
 import { ReferencesModal } from './ui/ReferencesModal';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,11 +23,13 @@ import { addLog } from '../store/slices/settingsSlice';
 import { downloadFactCheckReport } from '../utils/factCheckReport';
 
 // --- INTERACTIVE FORCE GRAPH (Optimized) ---
-const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick: (id: string) => void }> = ({ nodes: initialNodes, links: initialLinks, onNodeClick }) => {
+interface ForceNode { id: string; label: string; color?: string; type?: string; x: number; y: number; vx: number; vy: number; }
+interface ForceLink { source: string; target: string; }
+const InteractiveForceGraph: React.FC<{ nodes: Omit<ForceNode, 'x' | 'y' | 'vx' | 'vy'>[], links: ForceLink[], onNodeClick: (id: string) => void }> = ({ nodes: initialNodes, links: initialLinks, onNodeClick }) => {
     const { t } = useLanguage();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [draggingNode, setDraggingNode] = useState<any | null>(null);
+    const [draggingNode, setDraggingNode] = useState<ForceNode | null>(null);
     const [isInteractive, setIsInteractive] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -57,7 +61,7 @@ const InteractiveForceGraph: React.FC<{ nodes: any[], links: any[], onNodeClick:
         }
 
         const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 const { width, height } = entry.contentRect;
                 if (width && height) {
                     canvas.width = width;
@@ -458,7 +462,7 @@ const TabNavigation: React.FC = () => {
     return (
         <div className="flex gap-2 mb-8 border-b border-white/5 pb-0 overflow-x-auto scrollbar-hide">
             {['ANALYSIS', 'NETWORK', 'TIMELINE'].map((tab) => (
-                <button key={tab} onClick={() => setActiveTab(tab as any)} className={`flex items-center gap-2 px-6 py-3 rounded-t-xl text-xs md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap border-t border-x outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan ${activeTab === tab ? 'bg-[#0B0F19] border-white/10 text-accent-cyan border-b-[#0B0F19]' : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}>
+                <button key={tab} onClick={() => setActiveTab(tab as 'ANALYSIS' | 'NETWORK' | 'TIMELINE')} className={`flex items-center gap-2 px-6 py-3 rounded-t-xl text-xs md:text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap border-t border-x outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan ${activeTab === tab ? 'bg-[#0B0F19] border-white/10 text-accent-cyan border-b-[#0B0F19]' : 'border-transparent text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}>
                     {tab === 'ANALYSIS' && <FileText size={16} />}
                     {tab === 'NETWORK' && <GitBranch size={16} />}
                     {tab === 'TIMELINE' && <History size={16} />}

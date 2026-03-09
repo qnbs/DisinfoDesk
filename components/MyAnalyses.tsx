@@ -1,12 +1,14 @@
 
-import React, { useState, useEffect, useCallback, useMemo, createContext, useContext } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo, createContext, useContext
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FileText, Search, Trash2, Download, Calendar, ArrowRight,
-  Filter, SortAsc, SortDesc, AlertTriangle, ShieldCheck,
-  BarChart3, Clock, CheckCircle2, RefreshCw, ChevronRight, Eye
+  FileText, Search, Trash2, Download, SortAsc, SortDesc, ShieldCheck, BarChart3, Clock
 } from 'lucide-react';
-import { Button, Card, Badge, PageHeader, PageFrame, EmptyState } from './ui/Common';
+import {
+  Button, Card, Badge, PageHeader, PageFrame, EmptyState
+} from './ui/Common';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAppSelector } from '../store/hooks';
 import { dbService } from '../services/dbService';

@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useMemo, createContext, useContext, useRef } from 'react';
-import { Theory, Category, CategoryEn, DangerLevel, DangerLevelEn } from '../types';
+import React, {
+  useState, useEffect, useMemo, createContext, useContext
+} from 'react';
+import {
+  Theory, Category, CategoryEn, DangerLevel, DangerLevelEn
+} from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from '../contexts/ToastContext';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addTheory, updateTheory, selectAllTheories } from '../store/slices/theoriesSlice';
-import { PageFrame, PageHeader, Card, Button, Badge } from './ui/Common';
+import {
+  PageFrame, PageHeader, Card, Button, Badge
+} from './ui/Common';
 import { GenerationHUD, HUDMode } from './ui/GenerationHUD';
-import { draftTheoryContent, enhanceTheoryContent, generateTheoryImage } from '../services/geminiService';
+import { enhanceTheoryContent, generateTheoryImage } from '../services/geminiService';
 import { generateArt } from '../utils/artEngine';
 import { MEDIA_ITEMS } from '../constants';
 import { AUTHORS_FULL } from '../data/enriched';
-import { 
-    Save, X, Edit3, Tag, AlertTriangle, Image as ImageIcon, 
-    Eye, CheckCircle2, Sparkles, RefreshCw, Wand2, Hash,
-    Brain, ShieldAlert, FileText, Share2, ImagePlus, ChevronRight,
-    Play, User, Film
+import {
+  Save, X, Edit3, Tag, Eye, Sparkles, RefreshCw, Wand2, Hash, Brain, ShieldAlert, FileText, ImagePlus, Play, User, Film
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -113,6 +116,7 @@ const useTheoryEditorLogic = () => {
             const art = generateArt(formState.id, formState.category, formState.title);
             setFormState(prev => ({ ...prev, imageUrl: art }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formState.title, formState.category, formState.id]);
 
     const categories = language === 'de' ? Object.values(Category) : Object.values(CategoryEn);
@@ -160,7 +164,7 @@ const useTheoryEditorLogic = () => {
                 setRedTeamAnalysis(result);
             }
             showToast(`Neural Operation [${mode}] Complete.`, 'success');
-        } catch (e) {
+        } catch {
             showToast('Neural Uplink Failed.', 'error');
         } finally {
             setAiMode(null);
@@ -186,7 +190,7 @@ const useTheoryEditorLogic = () => {
                 setFormState(prev => ({ ...prev, imageUrl: procArt }));
                 showToast('GenAI busy. Fallback protocol engaged.', 'warning');
             }
-        } catch (e) {
+        } catch {
             showToast('Image synthesis failed.', 'error');
         } finally {
             setAiMode(null);
@@ -281,7 +285,7 @@ const TheoryEditorProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 // --- 3. Sub-Components ---
 
 const PredictiveMetrics: React.FC = () => {
-    const { formState, t } = useTheoryEditor();
+    const { formState } = useTheoryEditor();
     
     // Heuristic Calculation for Visual Feedback
     const wordCount = formState.shortDescription.split(' ').length;
@@ -562,7 +566,7 @@ const MetadataPanel: React.FC = () => {
 };
 
 const CoverArtTerminal: React.FC = () => {
-    const { formState, handleChange, handleGenerateImage, handleProceduralArt, t, imagePrompt, setImagePrompt, aiMode } = useTheoryEditor();
+    const { formState, handleGenerateImage, handleProceduralArt, imagePrompt, setImagePrompt, aiMode } = useTheoryEditor();
 
     return (
         <Card className="p-0 overflow-hidden border-slate-800 bg-black relative group">
@@ -671,7 +675,7 @@ export const TheoryEditor: React.FC = () => {
 
 // Extracted Preview Component for cleaner main file
 const TheoryEditorPreview: React.FC = () => {
-    const { formState, t } = useTheoryEditor();
+    const { formState } = useTheoryEditor();
     
     return (
         <div className="relative z-10 space-y-6">

@@ -1,19 +1,20 @@
 
-import React, { useState, useEffect, useCallback, useMemo, createContext, useContext, useRef } from 'react';
+import React, {
+  useState, useEffect, useCallback, useMemo, createContext, useContext
+} from 'react';
 import { dbService, StorageStats } from '../services/dbService';
-import { StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis, Message } from '../types';
-import { Card, Button, Badge, PageFrame, PageHeader, EmptyState } from './ui/Common';
-import { 
-  Database, Trash2, Edit3, Save, Search, Server, FileText, 
-  MessageSquare, Skull, ChevronRight, Lock, 
-  Upload, Download, Activity, CheckSquare, Square, 
-  Cpu, ShieldCheck, FileJson, AlertTriangle, Terminal, Check, HardDrive,
-  FolderOpen, Plus, Film, Zap, Eye, Brain, X, AlignLeft, Calendar,
-  Clock, Hash, Shield, BarChart3, Scan
+import {
+  StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis
+} from '../types';
+import {
+  Card, Button, Badge, PageFrame, PageHeader, EmptyState
+} from './ui/Common';
+import {
+  Database, Trash2, Edit3, Save, Search, Server, FileText, MessageSquare, Skull, Lock, Download, CheckSquare, Square, Cpu, ShieldCheck, Terminal, HardDrive, Film, Eye, X, Clock, Scan
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from '../contexts/ToastContext';
-import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 type Tab = 'ANALYSES' | 'MEDIA' | 'CHATS' | 'SATIRES';
 type DatabaseRecord = StoredAnalysis | StoredChat | StoredSatire | StoredMediaAnalysis;
@@ -139,7 +140,7 @@ const useVaultLogic = () => {
             setSelectedId(null);
             showToast(`${ids.length} records purged from Vault.`, 'success');
             refreshData();
-        } catch (e) {
+        } catch {
             showToast('Purge Protocol Failed.', 'error');
         }
     };
@@ -161,7 +162,7 @@ const useVaultLogic = () => {
             setEditMode(false);
             showToast('Record re-encrypted and saved.', 'success');
             refreshData();
-        } catch (e) {
+        } catch {
             showToast('Syntax Error: JSON integrity check failed.', 'error');
         }
     };
@@ -295,7 +296,7 @@ const DataBankSelector: React.FC = () => {
 
 // Center: Holo Grid
 const HoloGrid: React.FC = () => {
-    const { data, loading, selectedId, handleSelect, searchTerm, setSearchTerm, selectedIds, t } = useVault();
+    const { data, loading, selectedId, handleSelect, searchTerm, setSearchTerm, selectedIds } = useVault();
 
     if (loading) return (
         <div className="flex-1 flex flex-col items-center justify-center text-accent-cyan gap-4 min-h-[300px]">
@@ -383,7 +384,7 @@ const HoloGrid: React.FC = () => {
 const DeepInspector: React.FC = () => {
     const { 
         selectedRecord, isDecrypting, inspectorMode, setInspectorMode, 
-        editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit, t 
+        editMode, setEditMode, editedContent, setEditedContent, handleSaveEdit 
     } = useVault();
 
     if (!selectedRecord) {
@@ -501,7 +502,7 @@ const DeepInspector: React.FC = () => {
 
 // Top Bar: Telemetry
 const VaultTelemetry: React.FC = () => {
-    const { stats, formatBytes, handleExport, handleBatchDelete, t } = useVault();
+    const { stats, formatBytes, handleExport, handleBatchDelete } = useVault();
     const usedPercent = Math.min(100, (stats.usageBytes / (50 * 1024 * 1024)) * 100); // Assume 50MB quota
 
     return (
@@ -547,8 +548,7 @@ const VaultTelemetry: React.FC = () => {
                 <div className="h-8 w-full">
                     {/* Tiny Sparkline for activity visualization */}
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                        <AreaChart data={new Array(10).fill(0).map((_, i) => ({ val: Math.random() * 100 }))}>
-                            <Area type="monotone" dataKey="val" stroke="#334155" fill="#1e293b" strokeWidth={1} />
+                        <AreaChart data={new Array(10).fill(0).map(() => ({ val: Math.random() * 100 }))}>                            <Area type="monotone" dataKey="val" stroke="#334155" fill="#1e293b" strokeWidth={1} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>

@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useEffect, useCallback } from 'react';
+import React, {
+  createContext, useContext, useEffect, useCallback
+} from 'react';
 import { AppSettings, SystemLog } from '../types';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { updateSetting, addLog as reduxAddLog, clearLogs, setActiveTab as reduxSetActiveTab } from '../store/slices/settingsSlice';
+import { updateSetting, addLog as reduxAddLog, setActiveTab as reduxSetActiveTab } from '../store/slices/settingsSlice';
 import { dbService } from '../services/dbService';
 
 interface SettingsContextType {

@@ -127,6 +127,7 @@ const useMediaDetail = () => {
     return context;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MediaDetailProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const logic = useMediaDetailLogic();
     return <MediaDetailContext.Provider value={logic}>{children}</MediaDetailContext.Provider>;

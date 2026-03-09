@@ -1,22 +1,20 @@
 
-import React, { useState, useMemo, useCallback, createContext, useContext, useEffect } from 'react';
+import React, {
+  useState, useMemo, useCallback, createContext, useContext, useEffect
+} from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { MEDIA_ITEMS } from '../constants';
 import { MediaItem, MediaType } from '../types';
 import { AUTHORS_FULL } from '../data/enriched';
-import { 
-  Film, Book, Gamepad2, Tv, LayoutGrid, 
-  Search, ExternalLink, Zap, BarChart2,
-  PieChart, Activity, Sliders, 
-  X, Clapperboard, FilterX, Star, Trophy, Clock, ArrowDownCircle,
-    Play, Upload
+import {
+  Film, Book, Gamepad2, Tv, LayoutGrid, Search, ExternalLink, BarChart2, PieChart, Activity, Sliders, X, Clapperboard, FilterX, Star, Clock, ArrowDownCircle, Play, Upload
 } from 'lucide-react';
-import { 
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
-  Tooltip, ResponsiveContainer, Cell, 
-  BarChart, Bar, CartesianGrid
+import {
+  ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, Cell, BarChart, Bar, CartesianGrid
 } from 'recharts';
-import { Card, Button, Badge, PageFrame, PageHeader, EmptyState } from './ui/Common';
+import {
+  Card, Button, Badge, PageFrame, PageHeader, EmptyState
+} from './ui/Common';
 import { useNavigate } from 'react-router-dom';
 
 // --- 1. Logic Hook ---

@@ -1,15 +1,16 @@
 
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Layout } from './components/Layout';
-import { ErrorFallback, Skeleton } from './components/ui/Common';
-import { Loader2 } from 'lucide-react';
+import { ErrorFallback } from './components/ui/Common';
 import { useAppSelector, useAppDispatch } from './store/hooks';
 import { resetTransientState } from './store/slices/uiSlice';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ToastProvider } from './contexts/ToastContext';
-import { createHashRouter, RouterProvider, Navigate, ScrollRestoration } from 'react-router-dom';
+import {
+  createHashRouter, RouterProvider, Navigate, ScrollRestoration
+} from 'react-router-dom';
 
 // Lazy Load Components
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));

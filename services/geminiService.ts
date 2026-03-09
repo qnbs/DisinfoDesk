@@ -1,8 +1,12 @@
 
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, type LiveServerMessage, Modality } from "@google/genai";
+import {
+  GoogleGenAI, HarmCategory, HarmBlockThreshold, Schema, Type, Chat, type LiveServerMessage, Modality
+} from "@google/genai";
 // LiveSession type is not exported in current SDK; define locally
-type LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
-import { Theory, TheoryDetail, Language, SatireResponse, SourceItem, GroundingChunk, MediaItem, MediaAnalysisResponse, SatireOptions, RawTheoryAnalysisJSON } from '../types';
+type _LiveSession = { sendRealtimeInput: (data: unknown[]) => void; close: () => void };
+import {
+  Theory, TheoryDetail, Language, SatireResponse, SourceItem, GroundingChunk, MediaItem, MediaAnalysisResponse, SatireOptions, RawTheoryAnalysisJSON
+} from '../types';
 import { dbService } from './dbService';
 import { secureApiKeyService } from './secureApiKeyService';
 
@@ -67,6 +71,41 @@ const SAFETY_SETTINGS = [
 ];
 
 /**
+ * Sanitize user-controlled text before embedding in AI prompts.
+ * Prevents prompt injection by removing structural characters and truncating.
+ */
+const sanitizePromptInput = (input: string, maxLength = 500): string => {
+  if (!input) return '';
+  return input
+    .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // control chars
+    .substring(0, maxLength)
+    .trim();
+};
+
+/**
+ * Simple client-side rate limiter to prevent API abuse.
+ * Resets per window (1 hour). Limits apply per-session only.
+ */
+const rateLimiter = {
+  calls: 0,
+  windowStart: Date.now(),
+  MAX_CALLS_PER_HOUR: 60,
+  WINDOW_MS: 3600000,
+
+  check(): void {
+    const now = Date.now();
+    if (now - this.windowStart > this.WINDOW_MS) {
+      this.calls = 0;
+      this.windowStart = now;
+    }
+    if (this.calls >= this.MAX_CALLS_PER_HOUR) {
+      throw new Error('RATE_LIMIT_EXCEEDED: Too many API requests. Please wait before trying again.');
+    }
+    this.calls++;
+  }
+};
+
+/**
  * Analyzes a theory using Google Search Grounding & Thinking Models.
  */
 export const analyzeTheoryWithGemini = async (theory: Theory, language: Language, configOverride?: AIConfig): Promise<TheoryDetail> => {
@@ -74,10 +113,11 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     try {
       const cached = await dbService.getAnalysis(theory.id);
       if (cached && cached.language === language) return cached.data;
-    } catch (e) { /* ignore cache errors */ }
+    } catch { /* ignore cache errors */ }
   }
 
   try {
+    rateLimiter.check();
     const ai = await getAiClient();
     const model = configOverride?.model || 'gemini-2.5-flash'; 
     const isThinkingModel = model.includes('2.5') || model.includes('3-pro');
@@ -89,7 +129,7 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
         : {};
 
     const prompt = `
-      Analyze the conspiracy theory: "${theory.title}" (${theory.shortDescription}).
+      Analyze the conspiracy theory: "${sanitizePromptInput(theory.title, 200)}" (${sanitizePromptInput(theory.shortDescription, 500)}).
       Language: ${language === 'de' ? 'German' : 'English'}.
       
       You act as a skeptical fact-checking engine.
@@ -124,7 +164,7 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     
     try {
         rawData = JSON.parse(text) as RawTheoryAnalysisJSON;
-    } catch (e) {
+    } catch {
         console.error("JSON Parse Error on:", text);
         // Fallback structure to prevent UI crash
         rawData = {
@@ -185,6 +225,7 @@ export const enhanceTheoryContent = async (
     mode: 'EXPAND' | 'RED_TEAM' | 'TAGS', 
     language: Language
 ): Promise<string | string[]> => {
+    rateLimiter.check();
     const ai = await getAiClient();
     const langLabel = language === 'de' ? 'German' : 'English';
 
@@ -193,16 +234,16 @@ export const enhanceTheoryContent = async (
 
     if (mode === 'EXPAND') {
         prompt = `Act as a creative writer. Expand this short conspiracy theory description into a compelling 3-paragraph narrative suitable for a dossier. 
-        Title: "${currentTitle}". 
-        Draft: "${currentDesc}". 
+        Title: "${sanitizePromptInput(currentTitle, 200)}". 
+        Draft: "${sanitizePromptInput(currentDesc, 2000)}". 
         Language: ${langLabel}.`;
     } else if (mode === 'RED_TEAM') {
         prompt = `Act as a ruthless logician. critique this conspiracy theory. List 3 major logical fallacies or gaps in the narrative. 
-        Theory: "${currentTitle} - ${currentDesc}". 
+        Theory: "${sanitizePromptInput(currentTitle, 200)} - ${sanitizePromptInput(currentDesc, 2000)}". 
         Language: ${langLabel}. Bullet points only.`;
     } else if (mode === 'TAGS') {
         prompt = `Analyze this theory and generate 8 relevant metadata tags.
-        Theory: "${currentTitle} - ${currentDesc}".
+        Theory: "${sanitizePromptInput(currentTitle, 200)} - ${sanitizePromptInput(currentDesc, 2000)}".
         Language: ${langLabel}.`;
         
         schema = {
@@ -234,48 +275,16 @@ export const enhanceTheoryContent = async (
     return response.text || "";
 };
 
-export const draftTheoryContent = async (title: string, category: string, language: Language): Promise<{ description: string, tags: string[] }> => {
-    const ai = await getAiClient();
-    
-    const schema: Schema = {
-        type: Type.OBJECT,
-        properties: {
-            description: { type: Type.STRING, description: "A concise 2-3 sentence summary." },
-            tags: { type: Type.ARRAY, items: { type: Type.STRING }, description: "5 relevant tags" }
-        },
-        required: ["description", "tags"]
-    };
-
-    const prompt = `Draft a summary for a conspiracy theory titled "${title}" in category "${category}". 
-    Language: ${language === 'de' ? 'German' : 'English'}.`;
-
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: schema,
-            temperature: 0.7
-        }
-    });
-
-    try {
-        return JSON.parse(response.text!) as { description: string, tags: string[] };
-    } catch (e) {
-        console.error("Draft parsing failed", e);
-        return { description: "Draft generation failed.", tags: [] };
-    }
-};
-
 export const analyzeMediaWithGemini = async (item: MediaItem, language: Language, configOverride?: AIConfig): Promise<MediaAnalysisResponse> => {
   if (!configOverride?.forceRefresh) {
     try {
       const cached = await dbService.getMediaAnalysis(item.id);
       if (cached && cached.language === language) return cached.data;
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }
 
   try {
+    rateLimiter.check();
     const ai = await getAiClient();
     const model = configOverride?.model || 'gemini-3-pro-preview';
 
@@ -290,7 +299,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
       required: ["plotSummary", "hiddenSymbolism", "predictiveProgramming", "realWorldParallels"],
     };
 
-    const prompt = `Analyze "${item.title}" (${item.type}, ${item.year}) regarding conspiracy theories. Language: ${language === 'de' ? 'German' : 'English'}.`;
+    const prompt = `Analyze "${sanitizePromptInput(item.title, 200)}" (${sanitizePromptInput(item.type, 50)}, ${item.year}) regarding conspiracy theories. Language: ${language === 'de' ? 'German' : 'English'}.`;
 
     const response = await ai.models.generateContent({
       model: model,
@@ -324,6 +333,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
 
 export const generateSatireTheory = async (language: Language, options?: SatireOptions): Promise<SatireResponse> => {
   try {
+    rateLimiter.check();
     const ai = await getAiClient();
     const topic = options?.topic || 'Office Supplies';
     const level = options?.paranoiaLevel || 50;
@@ -338,8 +348,8 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
       required: ["title", "content"],
     };
 
-    const prompt = `Invent a satirical conspiracy theory about "${topic}".
-      Archetype: "${archetype}". Paranoia Level: ${level}/100.
+    const prompt = `Invent a satirical conspiracy theory about "${sanitizePromptInput(topic, 200)}".
+      Archetype: "${sanitizePromptInput(archetype, 100)}". Paranoia Level: ${level}/100.
       Language: ${language === 'de' ? 'German' : 'English'}.
       Format as a funny, pseudoscientific narrative.`;
 
@@ -363,11 +373,12 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
 
 export const generateTheoryImage = async (theory: Theory, language: Language, customPrompt?: string): Promise<string | null> => {
   try {
+    rateLimiter.check();
     const ai = await getAiClient();
     // Allow custom prompting for the editor, fallback to automatic for viewing
-    const prompt = customPrompt || (language === 'de'
-        ? `Düstere, cineastische Illustration für Verschwörungstheorie: "${theory.title}". Stil: Akte X, 8k, fotorealistisch.`
-        : `Dark, cinematic illustration for conspiracy theory: "${theory.title}". Style: X-Files, 8k, photorealistic.`);
+    const prompt = customPrompt ? sanitizePromptInput(customPrompt, 1000) : (language === 'de'
+        ? `Düstere, cineastische Illustration für Verschwörungstheorie: "${sanitizePromptInput(theory.title, 200)}". Stil: Akte X, 8k, fotorealistisch.`
+        : `Dark, cinematic illustration for conspiracy theory: "${sanitizePromptInput(theory.title, 200)}". Style: X-Files, 8k, photorealistic.`);
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -414,13 +425,13 @@ export const connectLiveSession = async (
     const session = await ai.live.connect({
         ...config,
         callbacks: {
-            onopen: () => console.log('[Live] Session Connected'),
+            onopen: () => console.warn('[Live] Session Connected'),
             onmessage: (msg: LiveServerMessage) => {
                 const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
                 if (audioData) onAudioData(audioData);
             },
             onclose: () => {
-                console.log('[Live] Session Closed');
+                console.warn('[Live] Session Closed');
                 onClose();
             },
             onerror: (err) => {
@@ -516,7 +527,7 @@ export const streamChatWithSkeptic = async function* (
         });
     }
 
-    const result = await chatSession.sendMessageStream({ message });
+    const result = await chatSession.sendMessageStream({ message: sanitizePromptInput(message, 4000) });
     for await (const chunk of result) {
         yield chunk.text;
     }

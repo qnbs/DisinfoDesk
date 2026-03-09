@@ -1,12 +1,13 @@
-import React, { useState, useMemo, createContext, useContext, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState, useMemo, createContext, useContext, useEffect, useRef, useCallback
+} from 'react';
 import { Author } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { PageFrame, PageHeader, Card, Badge, EmptyState, Button } from './ui/Common';
-import { 
-    Feather, Search, Users, LayoutGrid, List, 
-    Rocket, GlobeLock, Landmark, Ghost, Hash,
-    ArrowRight, Star, Zap, X, ArrowDownCircle, Network,
-    Cpu, Activity, Fingerprint
+import {
+  PageFrame, PageHeader, Card, Badge, EmptyState, Button
+} from './ui/Common';
+import {
+  Feather, Search, Users, LayoutGrid, List, Rocket, GlobeLock, Landmark, Ghost, Hash, ArrowRight, Star, Zap, X, ArrowDownCircle, Network, Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
@@ -174,8 +175,8 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let width = container.clientWidth;
-        let height = container.clientHeight;
+        const width = container.clientWidth;
+        const height = container.clientHeight;
         const dpr = window.devicePixelRatio || 1;
         
         canvas.width = width * dpr;

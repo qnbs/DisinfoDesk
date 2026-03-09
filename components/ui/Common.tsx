@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, forwardRef, useState, useCallback } from 'react';
-import { Loader2, Search, Terminal } from 'lucide-react';
+import { Loader2, Terminal } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setSearchOpen } from '../../store/slices/uiSlice';
 import { playSound, haptic } from '../../utils/microInteractions';
@@ -323,20 +323,7 @@ export const Badge: React.FC<{ label: string; color?: string; className?: string
     )}>{label}</span>
 ));
 
-export const EmptyState: React.FC<{ icon?: React.ElementType; title: string; description: string; action?: React.ReactNode; className?: string }> = React.memo(({ icon: Icon = Search, title, description, action, className = "" }) => (
-    <div className={cn("flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in", className)}>
-      <div className="relative mb-6 group">
-        <div className="absolute inset-0 bg-accent-cyan/10 blur-2xl rounded-full scale-150 opacity-0 group-hover:opacity-50 transition-opacity duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/5 to-purple-500/5 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-        <div className="relative p-5 bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-accent-cyan/20 group-hover:shadow-neon-cyan">
-          <Icon size={32} className="text-slate-500 group-hover:text-accent-cyan transition-colors duration-500" />
-        </div>
-      </div>
-      <h3 className="text-base font-bold text-white mb-2 font-display uppercase tracking-widest">{title}</h3>
-      <p className="text-slate-500 text-xs max-w-sm mb-8 leading-relaxed font-mono">{description}</p>
-      {action && <div className="animate-fade-in-up stagger-2">{action}</div>}
-    </div>
-));
+// Simple EmptyState is superseded by the variant-aware version below
 
 export const Skeleton: React.FC<{ className?: string; variant?: 'text' | 'card' | 'avatar' | 'image' }> = React.memo(({ className = '', variant = 'text' }) => {
   const variants = {

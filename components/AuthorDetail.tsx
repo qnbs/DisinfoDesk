@@ -1,13 +1,18 @@
 
-import React, { useMemo, useCallback, createContext, useContext, useState } from 'react';
+import React, {
+  useMemo, useCallback, createContext, useContext, useState
+} from 'react';
 import { MEDIA_ITEMS } from '../constants';
 import { Author } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { PageFrame, PageHeader, Card, Button, Badge } from './ui/Common';
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
-import { 
-    ArrowLeft, User, Book, Globe, Zap, Calendar, MapPin, Search, 
-    Brain, Fingerprint, History, BarChart2, Activity, Lock
+import {
+  PageFrame, PageHeader, Card, Button, Badge
+} from './ui/Common';
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip
+} from 'recharts';
+import {
+  ArrowLeft, User, Book, Globe, Zap, Search, Brain, Fingerprint, History, Activity, Lock
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GenerationHUD } from './ui/GenerationHUD';
@@ -25,7 +30,13 @@ const useAuthorDetailLogic = () => {
     // UI State
     const [activeTab, setActiveTab] = useState<'BIO' | 'PSYCH' | 'NETWORK'>('BIO');
     const [profiling, setProfiling] = useState(false);
-    const [profileData, setProfileData] = useState<any | null>(null);
+    const [profileData, setProfileData] = useState<{
+        rhetoric: number;
+        logic: number;
+        emotion: number;
+        trait: string[];
+        verdict: string;
+    } | null>(null);
 
     const author = useAppSelector((state: RootState) => selectAuthorById(state, authorId || ''));
     const relatedMedia = useMemo(() => {

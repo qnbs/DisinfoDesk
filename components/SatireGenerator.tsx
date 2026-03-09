@@ -1,22 +1,19 @@
 
-import React, { useState, useCallback, createContext, useContext, useEffect, useRef, useMemo } from 'react';
-import { SatireOptions } from '../types';
-import { 
-    Sparkles, RefreshCw, Copy, Check, Database, Zap, 
-    Cpu, Save, Activity, Lock, Skull,
-    Sliders, Dna, MessageSquare, Newspaper, FileText, ArrowDownCircle,
-    Printer, Share2, History, AlertTriangle, Fingerprint, MousePointer2,
-    Eye, X, Terminal, ShieldAlert, Globe
+import React, {
+  useState, createContext, useContext, useEffect, useRef, useMemo
+} from 'react';
+import {
+  RefreshCw, Check, Database, Cpu, Save, Activity, Skull, Dna, Newspaper, Fingerprint, MousePointer2, ShieldAlert, Globe
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SatireSubject, SatireArchetype } from '../types';
-import { Card, Button, Badge, PageFrame, PageHeader } from './ui/Common';
+import { Button, PageFrame, PageHeader } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { generateAndSaveSatire, saveSatireToVault, resetSatire } from '../store/slices/satireSlice';
 
 // --- 0. ASSETS & UTILS ---
 
-const NOISE_TEXTURE = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E";
+const _NOISE_TEXTURE = "data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E";
 const PAPER_TEXTURE = "data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E";
 
 const ScrambleText: React.FC<{ text: string, className?: string, onComplete?: () => void }> = React.memo(({ text, className, onComplete }) => {
@@ -26,7 +23,7 @@ const ScrambleText: React.FC<{ text: string, className?: string, onComplete?: ()
     useEffect(() => {
         let iterations = 0;
         const interval = setInterval(() => {
-            setDisplay(prev => {
+            setDisplay(_prev => {
                 return text.split('').map((char, index) => {
                     if (index < iterations) return char;
                     return chars[Math.floor(Math.random() * chars.length)];
@@ -154,7 +151,7 @@ const EntropyCanvas: React.FC<{ onEntropyFull: () => void, active: boolean }> = 
 const useSatireLogic = () => {
     const { t, language } = useLanguage();
     const dispatch = useAppDispatch();
-    const { data: result, status, error } = useAppSelector(state => state.satire);
+    const { data: result, error } = useAppSelector(state => state.satire);
     
     // State
     const [entropyReady, setEntropyReady] = useState(false);
@@ -210,6 +207,7 @@ const useSatireLogic = () => {
             }, 800);
             return () => clearInterval(interval);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isFabricating]);
 
     const handleGenerate = async () => {
@@ -272,7 +270,7 @@ const useSatire = () => {
 // --- 4. UI COMPONENTS ---
 
 const ModuleSelector: React.FC<{ 
-    options: { id: string, label: string, icon?: any, desc?: string }[], 
+    options: { id: string, label: string, icon?: string, desc?: string }[], 
     selected: string, 
     onChange: (id: string) => void,
     title: string,

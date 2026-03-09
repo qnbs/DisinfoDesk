@@ -1,9 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Cpu, Activity, Database, Lock, Wifi, 
-  Terminal, Layers, Zap, Image as ImageIcon, 
-  FileText, ShieldCheck, Search, Loader2
+import React, { useState, useEffect } from 'react';
+import {
+  Cpu, Activity, Wifi, Zap, Image as ImageIcon
 } from 'lucide-react';
 
 export type HUDMode = 'ANALYSIS' | 'IMAGE' | 'CREATIVE' | 'STREAM';

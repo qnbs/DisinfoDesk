@@ -1,21 +1,17 @@
 
-import React, { useState, useMemo, createContext, useContext, useEffect, useRef } from 'react';
+import React, {
+  useState, useMemo, createContext, useContext, useEffect
+} from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { 
-  HelpCircle, Book, AlertTriangle, Cpu, Search, 
-  ChevronRight, ChevronDown, Shield, Activity, 
-  Zap, Brain, Network, Eye, FileText, Info,
-  FileCode, Layers, Database, LayoutDashboard,
-  Terminal, Lock, Radio, CheckCircle2, ArrowUpRight, PlayCircle,
-  Server, Wifi, RefreshCw, BarChart3, Binary, HardDrive, 
-  MousePointer2, ExternalLink
+import {
+  HelpCircle, Book, Cpu, Search, ChevronDown, Shield, Activity, Brain, Network, Eye, FileText, FileCode, Layers, Lock, CheckCircle2, ArrowUpRight, Server, Wifi, Binary
 } from 'lucide-react';
-import { DangerLevel, DangerLevelEn } from '../types';
-import { Card, Button, Badge, PageHeader, TechIconBox } from './ui/Common';
+import {
+  Card, Button, Badge, PageHeader
+} from './ui/Common';
 import { useNavigate } from 'react-router-dom';
-import { 
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar 
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
 
 // --- Types & Data ---

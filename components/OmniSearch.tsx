@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
+import React, {
+  useState, useEffect, useMemo, useRef, useCallback, createContext, useContext
+} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, FileText, User, Film, ArrowRight, Hash, 
-  Settings, Database, HelpCircle, ShieldAlert, Activity, 
-  MessageSquare, Skull, Globe, Eye, RefreshCw, Download,
-  Terminal, Command, ChevronRight, Cpu
+import {
+  Search, FileText, User, Film, Settings, Database, ShieldAlert, Activity, MessageSquare, Globe, Eye, RefreshCw, Download, Terminal, Command, ChevronRight, Cpu
 } from 'lucide-react';
 import { THEORIES_DE_FULL, THEORIES_EN_FULL, MEDIA_ITEMS } from '../constants';
 import { AUTHORS_FULL } from '../data/enriched';
@@ -49,19 +48,19 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
   }, [isOpen]);
 
   // Actions Logic
-  const handleToggleLanguage = () => {
+  const handleToggleLanguage = useCallback(() => {
     const newLang = language === 'de' ? 'en' : 'de';
     setLanguage(newLang);
     dispatch(setReduxLanguage(newLang));
     onClose();
-  };
+  }, [language, setLanguage, dispatch, onClose]);
 
-  const handleToggleContrast = () => {
+  const handleToggleContrast = useCallback(() => {
     dispatch(updateSetting({ key: 'highContrast', value: !settings.highContrast }));
     onClose();
-  };
+  }, [dispatch, settings.highContrast, onClose]);
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const blob = await dbService.exportFullDatabase();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -70,7 +69,7 @@ const useOmniSearchLogic = (isOpen: boolean, onClose: () => void) => {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     onClose();
-  };
+  }, [onClose]);
 
   const handleReload = () => {
     window.location.reload();
@@ -445,7 +444,7 @@ const SearchFooter: React.FC = () => {
 };
 
 const OmniSearchLayout: React.FC = () => {
-    const { onClose, t } = useOmniSearch();
+    const { onClose } = useOmniSearch();
     return (
         <div 
             className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-xl flex items-start justify-center pt-safe-top md:pt-[15vh] px-2 md:px-4 animate-fade-in" 

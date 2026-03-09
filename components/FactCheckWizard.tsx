@@ -1,12 +1,14 @@
 
-import React, { useState, useCallback, useMemo, createContext, useContext, useRef, useEffect } from 'react';
+import React, {
+  useState, useCallback, useMemo, createContext, useContext, useRef, useEffect
+} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Search, ArrowRight, ArrowLeft, CheckCircle2, Download, Share2,
-  AlertTriangle, ShieldCheck, FileText, Loader2, Brain, Zap,
-  ClipboardList, BarChart3, Award, ExternalLink, ChevronRight
+import {
+  Search, ArrowRight, ArrowLeft, CheckCircle2, Download, AlertTriangle, ShieldCheck, FileText, Brain, ClipboardList, BarChart3, Award, ExternalLink, ChevronRight
 } from 'lucide-react';
-import { Button, Card, PageHeader, PageFrame, Badge } from './ui/Common';
+import {
+  Button, Card, PageHeader, PageFrame, Badge
+} from './ui/Common';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAppSelector } from '../store/hooks';
 import { THEORIES_DE_FULL, THEORIES_EN_FULL } from '../constants';
@@ -69,7 +71,7 @@ const useWizardLogic = () => {
     { skip: !state.analysisTriggered || !selectedTheory }
   );
 
-  const steps: WizardStep[] = ['INPUT', 'ANALYSIS', 'VERDICT', 'EXPORT'];
+  const steps: WizardStep[] = useMemo(() => ['INPUT', 'ANALYSIS', 'VERDICT', 'EXPORT'], []);
   const currentStepIndex = steps.indexOf(state.step);
   const progressPercent = ((currentStepIndex + 1) / steps.length) * 100;
 

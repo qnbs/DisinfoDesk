@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import App from './App';
+import './styles.css';
 
 // --- ResizeObserver Loop Error Suppression ---
 // This is a known issue with Recharts/ResizeObserver that is benign but triggers "Uncaught Error" overlays.

@@ -23,8 +23,13 @@ export const rtkQueryErrorLogger: Middleware = (api: MiddlewareAPI) => (next) =>
     const rejectedAction = action as RejectedAction;
     
     const errorCode = rejectedAction.payload?.status || rejectedAction.error?.code || 'UNKNOWN_ERR';
-    const errorMessage = rejectedAction.payload?.data?.message || rejectedAction.error?.message || 'An unexpected error occurred';
+    const rawMessage = rejectedAction.payload?.data?.message || rejectedAction.error?.message || 'An unexpected error occurred';
     const endpointName = rejectedAction.meta?.arg?.endpointName ? `[API: ${rejectedAction.meta.arg.endpointName}]` : '[Redux]';
+
+    // Sanitize error messages to prevent leaking sensitive data (API keys, tokens)
+    const errorMessage = String(rawMessage)
+      .replace(/([A-Za-z0-9_-]{39,})/g, '[REDACTED]')
+      .substring(0, 500);
 
     // Dispatch to System Terminal (Settings Slice)
     api.dispatch(addLog({
@@ -32,9 +37,13 @@ export const rtkQueryErrorLogger: Middleware = (api: MiddlewareAPI) => (next) =>
       type: 'error'
     }));
 
+    // eslint-disable-next-line no-console
     console.groupCollapsed(`%c 🚨 Redux Error: ${errorCode}`, 'color: #ef4444; font-weight: bold;');
+    // eslint-disable-next-line no-console
     console.log('Action:', action);
+    // eslint-disable-next-line no-console
     console.log('Message:', errorMessage);
+    // eslint-disable-next-line no-console
     console.groupEnd();
   }
 

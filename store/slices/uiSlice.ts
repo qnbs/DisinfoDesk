@@ -15,9 +15,6 @@ interface UIState {
       activeTab: 'ANALYSIS' | 'NETWORK' | 'TIMELINE';
     };
   };
-  scrollPositions: {
-    [path: string]: number;
-  };
   activeFileId: string | null; // Globally tracks the currently "open" investigation
   isSearchOpen: boolean;
   updateModal: {
@@ -34,7 +31,6 @@ const initialState: UIState = {
     activeContextId: null,
   },
   theoryDetails: {},
-  scrollPositions: {},
   activeFileId: null,
   isSearchOpen: false,
   updateModal: {
@@ -113,11 +109,6 @@ export const uiSlice = createSlice({
       state.theoryDetails[id].activeTab = tab;
     },
 
-    // --- Scroll Restoration ---
-    saveScrollPosition: (state, action: PayloadAction<{ path: string; position: number }>) => {
-      state.scrollPositions[action.payload.path] = action.payload.position;
-    },
-
     // --- System Repair ---
     // Resets transient states (like loading spinners) that might get stuck in Redux Persist
     resetTransientState: (state) => {
@@ -128,7 +119,7 @@ export const uiSlice = createSlice({
       state.chat.messages.forEach(msg => {
         if (msg.isStreaming) msg.isStreaming = false;
       });
-    }
+    },
     // --- Update Modal Management ---
     showUpdateModal: (state) => {
       state.updateModal.isOpen = true;
@@ -165,7 +156,7 @@ export const {
   setSearchOpen, setActiveFile,
   setChatMessages, addChatMessage, updateLastChatMessage, finalizeLastChatMessage,
   setChatInput, setChatThinking, clearChat, injectChatContext,
-  setTheoryTab, saveScrollPosition, resetTransientState,
+  setTheoryTab, resetTransientState,
   showUpdateModal, hideUpdateModal, dismissUpdateModal
 } = uiSlice.actions;
 

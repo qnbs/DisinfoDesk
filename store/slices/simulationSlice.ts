@@ -35,7 +35,7 @@ export const simulationSlice = createSlice({
       state.params = action.payload;
       state.rValue = calculateR(action.payload);
     },
-    resetParams: (state) => {
+    resetParams: (_state) => {
       // Reset logic
       return initialState;
     }

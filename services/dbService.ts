@@ -1,5 +1,7 @@
 
-import { StoredAnalysis, StoredChat, StoredSatire, VaultBackup, StoredMediaAnalysis } from '../types';
+import {
+  StoredAnalysis, StoredChat, StoredSatire, StoredMediaAnalysis
+} from '../types';
 
 const DB_NAME = 'DisinfoDesk_Vault';
 const DB_VERSION = 3; // Incremented for Schema Upgrade
@@ -39,14 +41,14 @@ export interface StorageStats {
  * UTILITY: Native Compression Streams (GZIP)
  * Compresses stringified JSON into Uint8Array
  */
-const compressData = async (data: any): Promise<ArrayBuffer> => {
+const compressData = async (data: unknown): Promise<ArrayBuffer> => {
   const jsonStr = JSON.stringify(data);
   const blob = new Blob([jsonStr]);
   const stream = blob.stream().pipeThrough(new CompressionStream('gzip'));
   return new Response(stream).arrayBuffer();
 };
 
-const decompressData = async (buffer: ArrayBuffer): Promise<any> => {
+const decompressData = async (buffer: ArrayBuffer): Promise<unknown> => {
   const stream = new Response(buffer).body?.pipeThrough(new DecompressionStream('gzip'));
   if (!stream) throw new Error("Decompression stream failed");
   const blob = await new Response(stream).blob();
@@ -127,7 +129,7 @@ class CryptoGuard {
     }
   }
 
-  async encrypt(data: any): Promise<{ iv: Uint8Array, cipher: ArrayBuffer, isEncrypted: boolean }> {
+  async encrypt(data: unknown): Promise<{ iv: Uint8Array, cipher: ArrayBuffer, isEncrypted: boolean }> {
     await this.init();
     if (!this.key) throw new Error("Crypto Init Failed");
     
@@ -144,16 +146,16 @@ class CryptoGuard {
     return { iv, cipher, isEncrypted: true };
   }
 
-  async decrypt(record: any): Promise<any> {
+  async decrypt(record: Record<string, unknown>): Promise<unknown> {
     if (!record || !record.isEncrypted) return record; // Legacy data pass-through
     await this.init();
     if (!this.key) throw new Error("Crypto Init Failed");
 
     try {
       const decrypted = await window.crypto.subtle.decrypt(
-        { name: CRYPTO_ALGO, iv: record.iv },
+        { name: CRYPTO_ALGO, iv: record.iv as BufferSource },
         this.key,
-        record.cipher
+        record.cipher as BufferSource
       );
       return await decompressData(decrypted);
     } catch (e) {
@@ -192,7 +194,7 @@ class DatabaseService {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const tx = (event.target as IDBOpenDBRequest).transaction;
+        const _tx = (event.target as IDBOpenDBRequest).transaction;
 
         // V1 -> V2 Stores
         const stores = ['analyses', 'media_analyses', 'chats', 'satires'];
@@ -307,7 +309,7 @@ class DatabaseService {
         : store.openCursor();
 
     let cursorRequestResolve: (value: IDBCursorWithValue | null) => void;
-    let cursorRequestReject: (reason?: any) => void;
+    let cursorRequestReject: (reason?: Error | null) => void;
 
     request.onsuccess = (e) => cursorRequestResolve((e.target as IDBRequest).result);
     request.onerror = (e) => cursorRequestReject((e.target as IDBRequest).error);
@@ -328,7 +330,7 @@ class DatabaseService {
         yield decrypted as T;
         
         // Prepare promise for next iteration before calling continue
-        const nextPromise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
+        const _nextPromise = new Promise<IDBCursorWithValue | null>((resolve, reject) => {
             cursorRequestResolve = resolve;
             cursorRequestReject = reject;
         });
@@ -358,21 +360,18 @@ class DatabaseService {
         ? (index as IDBIndex).openCursor(null, 'prev') 
         : store.openCursor();
       
-      const results: T[] = [];
+      const results: Record<string, unknown>[] = [];
 
       request.onsuccess = async (event) => {
         const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
-          // Decrypt on the fly (Promise.all later would be faster but uses more RAM)
-          // For massive lists, we should really use pagination.
-          // Here we push raw and decrypt in parallel at end for speed.
           results.push(cursor.value);
           cursor.continue();
         } else {
           // Bulk Decrypt
           try {
              const decrypted = await Promise.all(results.map(r => this.crypto.decrypt(r)));
-             resolve(decrypted);
+             resolve(decrypted as T[]);
           } catch (e) {
              reject(e);
           }
@@ -383,7 +382,7 @@ class DatabaseService {
   }
 
   async get<T>(storeName: StoreName, key: string): Promise<T | undefined> {
-    const raw = await this.executeTransaction<any>([storeName], 'readonly', (stores) => {
+    const raw = await this.executeTransaction<unknown>([storeName], 'readonly', (stores) => {
       return new Promise((resolve, reject) => {
           const req = stores[storeName].get(key);
           req.onsuccess = () => resolve(req.result);
@@ -392,7 +391,7 @@ class DatabaseService {
     });
     
     if (!raw) return undefined;
-    return this.crypto.decrypt(raw);
+    return this.crypto.decrypt(raw as Record<string, unknown>) as Promise<T>;
   }
 
   /**
@@ -405,15 +404,15 @@ class DatabaseService {
     if (storeName !== 'app_state') {
         payload = await this.crypto.encrypt(value) as unknown as T;
         // Restore ID for indexing (IndexedDB needs the key path visible)
-        (payload as any).id = (value as any).id;
-        if ((value as any).timestamp) (payload as any).timestamp = (value as any).timestamp;
+        (payload as Record<string, unknown>).id = (value as Record<string, unknown>).id;
+        if ((value as Record<string, unknown>).timestamp) (payload as Record<string, unknown>).timestamp = (value as Record<string, unknown>).timestamp;
     }
 
     await this.executeTransaction([storeName], 'readwrite', (stores) => {
       stores[storeName].put(payload);
     });
 
-    this.broadcast({ type: 'PUT', store: storeName, key: (value as any).id });
+    this.broadcast({ type: 'PUT', store: storeName, key: (value as Record<string, unknown>).id as string });
   }
 
   async delete(storeName: StoreName, key: string): Promise<void> {
@@ -461,7 +460,7 @@ class DatabaseService {
     const stores: StoreName[] = ['analyses', 'media_analyses', 'chats', 'satires', 'app_state', 'blob_storage'];
     const stats: StorageStats = {
       usageBytes: 0,
-      recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0, blob_storage: 0 } as any,
+      recordCounts: { analyses: 0, media_analyses: 0, chats: 0, satires: 0, app_state: 0, blob_storage: 0 } as Record<string, number>,
       totalRecords: 0,
       encrypted: true,
       compressionRatio: 0

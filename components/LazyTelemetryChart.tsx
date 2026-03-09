@@ -1,7 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-export const LazyTelemetryChart: React.FC<{ telemetry: any[] }> = ({ telemetry }) => (
+export const LazyTelemetryChart: React.FC<{ telemetry: Record<string, number>[] }> = ({ telemetry }) => (
     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <AreaChart data={telemetry}>
             <defs>

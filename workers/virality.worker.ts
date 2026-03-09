@@ -29,14 +29,14 @@ interface Particle {
 
 let canvas: OffscreenCanvas | null = null;
 let ctx: OffscreenCanvasRenderingContext2D | null = null;
-let animFrame: number = 0;
+let _animFrame: number = 0;
 let lastUpdate = 0;
 let isPaused = false;
 let isMobileMode = false;
 
 let agents: Agent[] = [];
 let particles: Particle[] = [];
-let params: any = {
+let params: Record<string, number> = {
     emotionalPayload: 50,
     novelty: 50,
     visualProof: 50,
@@ -105,7 +105,7 @@ function render(time: number) {
     if (!ctx || !canvas) return;
     
     if (isPaused) {
-        animFrame = requestAnimationFrame(render);
+        _animFrame = requestAnimationFrame(render);
         return;
     }
 
@@ -229,7 +229,7 @@ function render(time: number) {
         ctx.globalAlpha = 1.0;
     }
 
-    animFrame = requestAnimationFrame(render);
+    _animFrame = requestAnimationFrame(render);
 }
 
 self.onmessage = (e) => {
@@ -242,7 +242,7 @@ self.onmessage = (e) => {
             isMobileMode = payload.isMobileMode;
             ctx = canvas!.getContext('2d');
             initSimulation();
-            animFrame = requestAnimationFrame(render);
+            _animFrame = requestAnimationFrame(render);
             break;
         case 'UPDATE_PARAMS':
             params = { ...params, ...payload };
@@ -268,12 +268,12 @@ self.addEventListener('message', (e) => {
     if (e.data.type === 'INTERACT') {
         const { x, y, tool } = e.data.payload;
         if (tool === 'CURE') {
-            for (let a of agents) {
+            for (const a of agents) {
                 const dx = a.x - x, dy = a.y - y;
                 if (dx*dx+dy*dy < 2500) { a.state = 'RECOVERED'; a.infectionTimer = 0; }
             }
         } else if (tool === 'INFECT' || tool === 'INJECT_BOTS') {
-            for (let a of agents) {
+            for (const a of agents) {
                 const dx = a.x - x, dy = a.y - y;
                 if (dx*dx+dy*dy < 2500 && a.state === 'SUSCEPTIBLE') { 
                     a.state = 'INFECTED'; a.infectionTimer = 1000;

@@ -1,22 +1,19 @@
 
-import React, { useMemo, useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
-import { Theory, DangerLevel, DangerLevelEn, Category, CategoryEn } from '../types';
+import React, {
+  useMemo, useState, useEffect, useRef, createContext, useContext
+} from 'react';
+import { Theory, DangerLevel, DangerLevelEn } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
-import { 
-  ShieldAlert, Skull, Zap, 
-  Activity, Target, AlertOctagon, 
-  Microscope, Radar, BarChart2, ArrowLeft, Lock, AlertTriangle,
-  Siren, Terminal, Radio, Brain, Crosshair, Wifi, Globe as GlobeIcon,
-  ChevronsUp, FileDown
+import {
+  ShieldAlert, Target, AlertOctagon, Microscope, Radar, BarChart2, ArrowLeft, AlertTriangle, Siren, Terminal, Radio, Brain, Crosshair, Wifi, Globe as GlobeIcon, FileDown
 } from 'lucide-react';
 import { exportElementPDF } from '../services/pdfExportService';
-import { 
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis, 
-  Tooltip, ResponsiveContainer, Cell, ReferenceLine,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar,
-  AreaChart, Area
+import {
+  ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar
 } from 'recharts';
-import { Card, Button, Badge, PageFrame, PageHeader } from './ui/Common';
+import {
+  Card, Button, Badge, PageFrame, PageHeader
+} from './ui/Common';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { selectAllTheories } from '../store/slices/theoriesSlice';
@@ -103,9 +100,9 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
             
             // Draw Dots
             dots.forEach(dot => {
-                let x = Math.cos(dot.lat) * Math.cos(dot.lon + rotation) * radius;
-                let z = Math.cos(dot.lat) * Math.sin(dot.lon + rotation) * radius;
-                let y = Math.sin(dot.lat) * radius;
+                const x = Math.cos(dot.lat) * Math.cos(dot.lon + rotation) * radius;
+                const z = Math.cos(dot.lat) * Math.sin(dot.lon + rotation) * radius;
+                const y = Math.sin(dot.lat) * radius;
 
                 // Simple 3D projection
                 const scale = 300 / (300 + z);
@@ -179,10 +176,10 @@ const TacticalGlobe: React.FC<{ activeNodes: number }> = ({ activeNodes }) => {
 const LiveInterceptFeed: React.FC = () => {
     const { t } = useLanguage();
     const [lines, setLines] = useState<string[]>([]);
-    const codes = ["X-99", "ALPHA", "OMEGA", "ZERO", "NEMESIS"];
-    const regions = ["NORAM", "EMEA", "APAC", "LATAM"];
 
     useEffect(() => {
+        const codes = ["X-99", "ALPHA", "OMEGA", "ZERO", "NEMESIS"];
+        const regions = ["NORAM", "EMEA", "APAC", "LATAM"];
         const interval = setInterval(() => {
             const timestamp = new Date().toLocaleTimeString(undefined, {hour12: false}) + "." + Math.floor(Math.random()*999);
             const region = regions[Math.floor(Math.random() * regions.length)];

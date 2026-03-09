@@ -1,20 +1,20 @@
-import React, { useState, useMemo, useEffect, createContext, useContext, useCallback } from 'react';
-import { Theory, Category, CategoryEn, DangerLevel, DangerLevelEn, SortOption } from '../types';
-import { 
-  Search, Filter, AlertTriangle, Cloud, Heart, X, 
-  ArrowUpDown, ShieldAlert, Check, LayoutGrid, List, 
-  Table as TableIcon, SlidersHorizontal, ChevronDown, ChevronUp,
-  Hash, Eye, RefreshCw, ArrowDownCircle, Loader2,
-  Database, Activity, Zap, Terminal, FileText, ChevronRight,
-  TrendingUp, Globe, Lock, Download, Upload
+import React, {
+  useState, useMemo, useEffect, createContext, useContext
+} from 'react';
+import {
+  Theory, Category, CategoryEn, DangerLevel, DangerLevelEn, SortOption
+} from '../types';
+import {
+  Search, Cloud, Heart, ArrowUpDown, ShieldAlert, LayoutGrid, List, Table as TableIcon, SlidersHorizontal, ChevronUp, Hash, RefreshCw, ArrowDownCircle, Database, Activity, ChevronRight, Globe, Download, Upload
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from '../contexts/ToastContext';
-import { Card, Button, Badge, PageFrame, PageHeader, EmptyState, Skeleton } from './ui/Common';
+import {
+  Button, Badge, PageFrame, PageHeader, EmptyState, Skeleton
+} from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { 
-    setSearch, toggleCategory, toggleDanger, setTag, setSort, toggleFavorite, resetFilters,
-    selectFilteredTheories, selectTagStats, addTheory
+import {
+  setSearch, toggleCategory, toggleDanger, setTag, setSort, toggleFavorite, resetFilters, selectFilteredTheories, selectTagStats, addTheory
 } from '../store/slices/theoriesSlice';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -82,6 +82,7 @@ const useTheoryListLogic = () => {
       else if (filter) { dispatch(setTag(filter)); setIsFilterOpen(true); }
       if (sort) dispatch(setSort(sort as SortOption));
       setLocalSearch(reduxSearchTerm);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, dispatch]);
 
   // Debounce Search
@@ -441,8 +442,8 @@ const HeaderSection: React.FC = React.memo(() => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleExport = () => {
-        const userTheoriesDe = Object.values(theoriesDe.entities).filter((t: any) => t?.isUserCreated);
-        const userTheoriesEn = Object.values(theoriesEn.entities).filter((t: any) => t?.isUserCreated);
+        const userTheoriesDe = Object.values(theoriesDe.entities).filter((t) => (t as Theory)?.isUserCreated);
+        const userTheoriesEn = Object.values(theoriesEn.entities).filter((t) => (t as Theory)?.isUserCreated);
         const exportData = { de: userTheoriesDe, en: userTheoriesEn };
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -467,10 +468,10 @@ const HeaderSection: React.FC = React.memo(() => {
                 let importedCount = 0;
                 
                 if (data.de && Array.isArray(data.de)) {
-                    data.de.forEach((t: any) => { dispatch(addTheory({ lang: 'de', theory: t })); importedCount++; });
+                    data.de.forEach((t: Theory) => { dispatch(addTheory({ lang: 'de', theory: t })); importedCount++; });
                 }
                 if (data.en && Array.isArray(data.en)) {
-                    data.en.forEach((t: any) => { dispatch(addTheory({ lang: 'en', theory: t })); importedCount++; });
+                    data.en.forEach((t: Theory) => { dispatch(addTheory({ lang: 'en', theory: t })); importedCount++; });
                 }
                 
                 showToast(`Imported ${importedCount} user theories successfully`, "success");

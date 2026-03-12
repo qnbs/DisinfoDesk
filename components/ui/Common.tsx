@@ -5,6 +5,7 @@ import { setSearchOpen } from '../../store/slices/uiSlice';
 import { playSound, haptic } from '../../utils/microInteractions';
 
 // Utility for class merging
+// eslint-disable-next-line react-refresh/only-export-components
 export function cn(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(' ');
 }
@@ -515,6 +516,7 @@ interface Ripple {
   id: number;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRipple() {
   const [ripples, setRipples] = useState<Ripple[]>([]);
 
@@ -815,10 +817,11 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = React.memo(({
   className = '',
 }) => {
   const [displayValue, setDisplayValue] = useState(0);
+  const displayRef = useRef(0);
 
   useEffect(() => {
     const startTime = Date.now();
-    const startValue = displayValue;
+    const startValue = displayRef.current;
     const diff = value - startValue;
 
     const animate = () => {
@@ -826,8 +829,10 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = React.memo(({
       const progress = Math.min((now - startTime) / duration, 1);
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const current = startValue + diff * easeOutQuart;
+      const rounded = Math.round(current);
 
-      setDisplayValue(Math.round(current));
+      displayRef.current = rounded;
+      setDisplayValue(rounded);
 
       if (progress < 1) {
         requestAnimationFrame(animate);

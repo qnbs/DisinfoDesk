@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { isRejectedWithValue } from '@reduxjs/toolkit';
+import { isRejectedWithValue, MiddlewareAPI } from '@reduxjs/toolkit';
 import { rtkQueryErrorLogger } from '../../store/middleware/errorLogger';
 
 describe('errorLogger middleware', () => {
@@ -7,7 +7,7 @@ describe('errorLogger middleware', () => {
     const dispatch = vi.fn();
     const getState = vi.fn();
     const next = vi.fn((action) => action);
-    const api = { dispatch, getState } as any;
+    const api = { dispatch, getState } as unknown as MiddlewareAPI;
     const invoke = rtkQueryErrorLogger(api)(next);
     return { dispatch, next, invoke };
   };

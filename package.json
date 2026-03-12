@@ -1,7 +1,18 @@
 {
   "name": "disinfodesk",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "Interactive disinformation research & analysis desk — AI-powered conspiracy theory database, fact-checking, threat matrix, and media literacy tools",
+  "keywords": [
+    "disinformation",
+    "fact-checking",
+    "conspiracy-theories",
+    "media-literacy",
+    "ai-analysis",
+    "react",
+    "typescript",
+    "pwa"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",

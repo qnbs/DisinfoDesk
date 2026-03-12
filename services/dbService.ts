@@ -504,10 +504,11 @@ class DatabaseService {
 
   async put<T>(storeName: StoreName, data: T): Promise<void> {
     // Add TTL if not present
+    const record = data as Record<string, unknown>;
     const dataWithTTL = {
       ...data,
-      timestamp: (data as any).timestamp || Date.now(),
-      expiresAt: (data as any).expiresAt || (Date.now() + TTL_DEFAULT),
+      timestamp: (record.timestamp as number) || Date.now(),
+      expiresAt: (record.expiresAt as number) || (Date.now() + TTL_DEFAULT),
     };
     
     await this.retryTransaction(async () => {
@@ -526,7 +527,7 @@ class DatabaseService {
     });
     
     // Invalidate cache
-    const id = (data as any).id;
+    const id = (data as Record<string, unknown>).id as string | undefined;
     if (id) {
       this.invalidateCache(storeName, id);
     }
@@ -600,8 +601,8 @@ class DatabaseService {
               try {
                 const dataWithTTL = {
                   ...(op.data as object),
-                  timestamp: (op.data as any).timestamp || Date.now(),
-                  expiresAt: (op.data as any).expiresAt || (Date.now() + TTL_DEFAULT),
+                  timestamp: (op.data as Record<string, unknown>).timestamp as number || Date.now(),
+                  expiresAt: (op.data as Record<string, unknown>).expiresAt as number || (Date.now() + TTL_DEFAULT),
                 };
                 const encrypted = await this.cryptoGuard.encrypt(dataWithTTL);
                 
@@ -789,7 +790,7 @@ class DatabaseService {
     this.metrics.lastCleanup = now;
     
     if (expiredCount > 0) {
-      console.log(`TTL Cleanup: Removed ${expiredCount} expired records`);
+      console.warn(`TTL Cleanup: Removed ${expiredCount} expired records`);
       this.broadcastChannel.postMessage({ type: 'cleanup', count: expiredCount });
     }
     
@@ -820,7 +821,7 @@ class DatabaseService {
     if (quota.percentage > 0.9) {
       // High memory pressure - clear cache
       this.invalidateCache();
-      console.log('Memory pressure detected - cache cleared');
+      console.warn('Memory pressure detected - cache cleared');
     }
   }
 

@@ -90,7 +90,7 @@ export function isAllowedOrigin(origin: string, allowedOrigins: string[]): boole
  */
 export function createSafeDownloadLink(
   blob: Blob,
-  filename: string
+  _filename: string
 ): { url: string; cleanup: () => void } {
   const url = URL.createObjectURL(blob);
   const cleanup = () => URL.revokeObjectURL(url);

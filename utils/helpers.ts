@@ -7,7 +7,7 @@
  * Debounce function with TypeScript support
  * Delays function execution until after wait milliseconds have passed
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -28,7 +28,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * Throttle function with TypeScript support
  * Limits function execution to once per specified interval
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: never[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -139,7 +139,7 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 /**
  * Omit keys from object
  */
-export function omit<T extends Record<string, any>, K extends keyof T>(
+export function omit<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Omit<T, K> {
@@ -151,7 +151,7 @@ export function omit<T extends Record<string, any>, K extends keyof T>(
 /**
  * Pick keys from object
  */
-export function pick<T extends Record<string, any>, K extends keyof T>(
+export function pick<T extends Record<string, unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
 ): Pick<T, K> {

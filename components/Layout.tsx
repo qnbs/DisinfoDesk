@@ -263,10 +263,6 @@ export const Layout: React.FC = () => {
   // SW auto-registers, auto-updates, and auto-activates via skipWaiting + clientsClaim.
   // No manual registration needed — the plugin injects the registration script.
 
-  const handleUpdateApp = useCallback(() => {
-      window.location.reload();
-  }, []);
-
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTo(0, 0);

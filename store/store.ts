@@ -27,7 +27,7 @@ import { rtkQueryErrorLogger } from './middleware/errorLogger';
 
 const rootPersistConfig = {
   key: 'root_settings',
-  version: 1,
+  version: 2,
   storage: dbService.reduxStorage,
   whitelist: ['config', 'language', 'logs'], 
   timeout: 5000, 

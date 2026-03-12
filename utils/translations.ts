@@ -780,8 +780,8 @@ export const translations = {
         cacheInspectorDesc: 'Detaillierte Cache-Verwaltung und Analyse.'
       },
       models: {
-          flash: { title: 'Gemini 2.5 Flash', desc: 'Ausgewogen.' },
-          pro: { title: 'Gemini 3.0 Pro', desc: 'Erweitert.' }
+          flash: { title: 'Gemini 3.1 Flash', desc: 'Ausgewogen.' },
+          pro: { title: 'Gemini 3.1 Pro', desc: 'Erweitert.' }
       },
       privacyNote: 'Local-First Architektur.'
     },
@@ -1636,8 +1636,8 @@ export const translations = {
         cacheInspectorDesc: 'Detailed cache management and analysis.'
       },
       models: {
-          flash: { title: 'Gemini 2.5 Flash', desc: 'Balanced.' },
-          pro: { title: 'Gemini 3.0 Pro', desc: 'Enhanced.' }
+          flash: { title: 'Gemini 3.1 Flash', desc: 'Balanced.' },
+          pro: { title: 'Gemini 3.1 Pro', desc: 'Enhanced.' }
       },
       privacyNote: 'Local-First Architecture.'
     },

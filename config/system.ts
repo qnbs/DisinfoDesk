@@ -9,8 +9,8 @@ export const APP_CONFIG = {
     API: {
         TIMEOUT_MS: 15000,
         RETRY_ATTEMPTS: 3,
-        DEFAULT_MODEL: 'gemini-2.5-flash',
-        VISION_MODEL: 'gemini-2.5-flash-image'
+        DEFAULT_MODEL: 'gemini-3.1-flash',
+        VISION_MODEL: 'gemini-3.1-flash-image'
     },
     UI: {
         ANIMATION_DURATION: 300,
@@ -21,8 +21,10 @@ export const APP_CONFIG = {
 
 export const DEFAULT_SETTINGS: AppSettings = {
     // Core Neural Config
+    aiProvider: 'gemini',
     aiTemperature: 0.7,
-    aiModelVersion: 'gemini-2.5-flash',
+    aiModelVersion: 'gemini-3.1-flash',
+    ollamaEndpoint: 'http://localhost:11434',
     thinkingBudget: 1024,
     safetyLevel: 'standard',
     

@@ -121,8 +121,8 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
   try {
     rateLimiter.check();
     const ai = await getAiClient();
-    const model = configOverride?.model || 'gemini-2.5-flash'; 
-    const isThinkingModel = model.includes('2.5') || model.includes('3-pro');
+    const model = configOverride?.model || 'gemini-3.1-flash'; 
+    const isThinkingModel = model.includes('3.1') || model.includes('3-pro');
     
     // Dynamic thinking budget based on user settings, default to higher for deep debunking
     // IMPORTANT: thinkingBudget allows models to "reason" before answering.
@@ -264,7 +264,7 @@ export const enhanceTheoryContent = async (
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.1-flash',
         contents: prompt,
         config: {
             temperature: 0.7,
@@ -294,7 +294,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
   try {
     rateLimiter.check();
     const ai = await getAiClient();
-    const model = configOverride?.model || 'gemini-3-pro-preview';
+    const model = configOverride?.model || 'gemini-3.1-pro';
 
     const schema: Schema = {
       type: Type.OBJECT,
@@ -366,7 +366,7 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
       Format as a funny, pseudoscientific narrative.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash',
       contents: prompt,
       config: { 
           temperature: 0.8 + (level / 500), 
@@ -395,7 +395,7 @@ export const generateTheoryImage = async (theory: Theory, language: Language, cu
         : `Dark, cinematic illustration for conspiracy theory: "${sanitizePromptInput(theory.title, 200)}". Style: X-Files, 8k, photorealistic.`);
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3.1-flash-image',
       contents: prompt,
       config: { safetySettings: SAFETY_SETTINGS }
     });
@@ -426,7 +426,7 @@ export const connectLiveSession = async (
     const ai = await getAiClient();
     
     const config = {
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        model: 'gemini-3.1-flash-native-audio-preview',
         config: {
             responseModalities: [Modality.AUDIO],
             speechConfig: {
@@ -506,9 +506,9 @@ export const streamChatWithSkeptic = async function* (
 ) {
   try {
     const ai = await getAiClient();
-    const modelName = configOverride?.model || 'gemini-2.5-flash';
+    const modelName = configOverride?.model || 'gemini-3.1-flash';
     
-    const isThinkingModel = modelName.includes('2.5') || modelName.includes('3-pro');
+    const isThinkingModel = modelName.includes('3.1') || modelName.includes('3-pro');
     const thinkingConfig = isThinkingModel 
         ? { thinkingConfig: { thinkingBudget: configOverride?.thinkingBudget || 1024 } } 
         : {};

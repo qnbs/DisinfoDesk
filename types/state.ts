@@ -8,11 +8,14 @@ import { Message } from './ui';
 export type AccentColor = 'cyan' | 'purple' | 'green' | 'amber' | 'red';
 export type SafetyLevel = 'strict' | 'standard' | 'unrestricted';
 export type UIDensity = 'comfortable' | 'compact';
+export type AIProvider = 'gemini' | 'xai' | 'anthropic' | 'ollama';
 
 export interface AppSettings {
   // Neural — Advanced AI Configuration
+  aiProvider: AIProvider;
   aiTemperature: number; // 0.0 to 1.0
   aiModelVersion: string;
+  ollamaEndpoint: string; // Custom Ollama base URL
   thinkingBudget: number; // Token budget for reasoning (Gemini 2.5+)
   safetyLevel: SafetyLevel; // AI Safety Filter
   maxOutputTokens: number; // Max response length

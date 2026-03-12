@@ -11,12 +11,13 @@ import {
 } from './ui/Common';
 import { useAppDispatch } from '../store/hooks';
 import { setLanguage as setReduxLanguage } from '../store/slices/settingsSlice';
-import { AppSettings, Language, AccentColor } from '../types';
+import { AppSettings, Language, AccentColor, AIProvider } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { secureApiKeyService } from '../services/secureApiKeyService';
+import { PROVIDER_MODEL_OPTIONS, getDefaultModel, testProviderConnection } from '../services/aiProviderService';
 
 // --- 1. Logic Hook ---
 
@@ -260,42 +261,83 @@ const RangeSlider: React.FC<{ label: string; value: number; min: number; max: nu
 
 const NeuralEngineConfig: React.FC = () => {
     const { settings, handleUpdate, t } = useSettingsPage();
-    const isPro = settings.aiModelVersion.includes('pro');
+    const isPro = settings.aiModelVersion.includes('pro') || settings.aiModelVersion.includes('opus');
+
+    const providerMeta: Record<AIProvider, { icon: React.ReactNode; color: string; label: string; border: string; bg: string }> = {
+      gemini: { icon: <Zap size={18} />, color: 'text-accent-cyan', label: 'Google Gemini', border: 'border-accent-cyan/60', bg: 'bg-accent-cyan/5' },
+      xai: { icon: <Brain size={18} />, color: 'text-orange-400', label: 'xAI Grok', border: 'border-orange-400/60', bg: 'bg-orange-400/5' },
+      anthropic: { icon: <Shield size={18} />, color: 'text-amber-400', label: 'Anthropic Claude', border: 'border-amber-400/60', bg: 'bg-amber-400/5' },
+      ollama: { icon: <Server size={18} />, color: 'text-green-400', label: 'Ollama (Local)', border: 'border-green-400/60', bg: 'bg-green-400/5' },
+    };
+
+    const currentProvider = settings.aiProvider || 'gemini';
+    const models = PROVIDER_MODEL_OPTIONS[currentProvider] || [];
+    const meta = providerMeta[currentProvider];
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Model Selector Cards */}
-                <button 
-                    onClick={() => handleUpdate('aiModelVersion', 'gemini-2.5-flash')}
-                    className={`relative p-5 rounded-xl border text-left overflow-hidden transition-all group ${settings.aiModelVersion === 'gemini-2.5-flash' ? 'bg-slate-900 border-accent-cyan/60 shadow-[0_0_20px_rgba(6,182,212,0.15)]' : 'bg-slate-950/50 border-slate-800 hover:border-slate-600'}`}
-                >
-                    <div className="flex justify-between items-start mb-2 relative z-10">
-                        <Zap size={24} className={settings.aiModelVersion.includes('flash') ? 'text-accent-cyan' : 'text-slate-600'} />
-                        {settings.aiModelVersion.includes('flash') && <div className="px-2 py-0.5 bg-accent-cyan/10 border border-accent-cyan/30 rounded text-[9px] font-bold text-accent-cyan uppercase">{t.settings.labels.activeCore}</div>}
-                    </div>
-                    <div className="relative z-10">
-                        <div className="font-bold text-white text-sm mb-1">{t.settings.models.flash.title}</div>
-                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">{t.settings.models.flash.desc}</div>
-                    </div>
-                    {settings.aiModelVersion.includes('flash') && <div className="absolute inset-0 bg-accent-cyan/5 pointer-events-none animate-pulse-slow"></div>}
-                </button>
-
-                <button 
-                    onClick={() => handleUpdate('aiModelVersion', 'gemini-3-pro-preview')}
-                    className={`relative p-5 rounded-xl border text-left overflow-hidden transition-all group ${settings.aiModelVersion.includes('pro') ? 'bg-slate-900 border-accent-purple/60 shadow-[0_0_20px_rgba(139,92,246,0.15)]' : 'bg-slate-950/50 border-slate-800 hover:border-slate-600'}`}
-                >
-                    <div className="flex justify-between items-start mb-2 relative z-10">
-                        <Brain size={24} className={settings.aiModelVersion.includes('pro') ? 'text-accent-purple' : 'text-slate-600'} />
-                        {settings.aiModelVersion.includes('pro') && <div className="px-2 py-0.5 bg-accent-purple/10 border border-accent-purple/30 rounded text-[9px] font-bold text-accent-purple uppercase">{t.settings.labels.activeCore}</div>}
-                    </div>
-                    <div className="relative z-10">
-                        <div className="font-bold text-white text-sm mb-1">{t.settings.models.pro.title}</div>
-                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">{t.settings.models.pro.desc}</div>
-                    </div>
-                    {settings.aiModelVersion.includes('pro') && <div className="absolute inset-0 bg-accent-purple/5 pointer-events-none animate-pulse-slow"></div>}
-                </button>
+            {/* Provider Selector */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {(Object.keys(providerMeta) as AIProvider[]).map((p) => {
+                  const pm = providerMeta[p];
+                  const isActive = currentProvider === p;
+                  return (
+                    <button key={p}
+                      onClick={() => {
+                        handleUpdate('aiProvider', p);
+                        handleUpdate('aiModelVersion', getDefaultModel(p));
+                      }}
+                      className={`relative p-4 rounded-xl border text-left transition-all group ${isActive ? `bg-slate-900 ${pm.border} shadow-[0_0_15px_rgba(255,255,255,0.05)]` : 'bg-slate-950/50 border-slate-800 hover:border-slate-600'}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={isActive ? pm.color : 'text-slate-600'}>{pm.icon}</span>
+                        {isActive && <div className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[8px] font-bold text-white/60 uppercase">{t.settings.labels.activeCore}</div>}
+                      </div>
+                      <div className="text-xs font-bold text-white">{pm.label}</div>
+                      {isActive && <div className={`absolute inset-0 ${pm.bg} pointer-events-none animate-pulse-slow rounded-xl`}></div>}
+                    </button>
+                  );
+                })}
             </div>
+
+            {/* Model Cards for Selected Provider */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {models.map((m) => {
+                  const isActive = settings.aiModelVersion === m.id;
+                  return (
+                    <button key={m.id}
+                      onClick={() => handleUpdate('aiModelVersion', m.id)}
+                      className={`relative p-5 rounded-xl border text-left overflow-hidden transition-all group ${isActive ? `bg-slate-900 ${meta.border} shadow-[0_0_20px_rgba(255,255,255,0.05)]` : 'bg-slate-950/50 border-slate-800 hover:border-slate-600'}`}
+                    >
+                      <div className="flex justify-between items-start mb-2 relative z-10">
+                        <span className={isActive ? meta.color : 'text-slate-600'}>{meta.icon}</span>
+                        {isActive && <div className={`px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-bold uppercase ${meta.color}`}>{t.settings.labels.activeCore}</div>}
+                      </div>
+                      <div className="relative z-10">
+                        <div className="font-bold text-white text-sm mb-1">{m.label}</div>
+                        <div className="text-[10px] text-slate-400 font-mono leading-relaxed">{m.desc}</div>
+                      </div>
+                      {isActive && <div className={`absolute inset-0 ${meta.bg} pointer-events-none animate-pulse-slow`}></div>}
+                    </button>
+                  );
+                })}
+            </div>
+
+            {/* Ollama Endpoint Config */}
+            {currentProvider === 'ollama' && (
+              <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                <label className="text-xs font-bold text-green-400 uppercase tracking-widest mb-2 block flex items-center gap-2">
+                  <Server size={14} /> Ollama Endpoint
+                </label>
+                <input
+                  type="url"
+                  value={settings.ollamaEndpoint || 'http://localhost:11434'}
+                  onChange={(e) => handleUpdate('ollamaEndpoint', e.target.value)}
+                  placeholder="http://localhost:11434"
+                  className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500 font-mono focus:border-green-400 focus:ring-1 focus:ring-green-400/30 transition-colors"
+                />
+              </div>
+            )}
 
             {/* Neural Parameters */}
             <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
@@ -537,6 +579,72 @@ const InterfaceMatrix: React.FC = () => {
 const DataSovereignty: React.FC = () => {
     const { settings, handleUpdate, handleExportData, handleSystemPurge, t, language, apiKeyInput, setApiKeyInput, apiKeySaved, apiKeyStatus, apiKeyVisible, setApiKeyVisible, apiKeyTesting, apiKeyFormatHint, saveGeminiKey, clearGeminiKey } = useSettingsPage();
 
+    // Multi-provider key state
+    const [xaiKeyInput, setXaiKeyInput] = useState('');
+    const [xaiKeySaved, setXaiKeySaved] = useState(false);
+    const [anthropicKeyInput, setAnthropicKeyInput] = useState('');
+    const [anthropicKeySaved, setAnthropicKeySaved] = useState(false);
+    const [providerKeyTesting, setProviderKeyTesting] = useState<string | null>(null);
+    const [providerKeyStatus, setProviderKeyStatus] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+      secureApiKeyService.hasProviderKey('xai').then(setXaiKeySaved).catch(() => setXaiKeySaved(false));
+      secureApiKeyService.hasProviderKey('anthropic').then(setAnthropicKeySaved).catch(() => setAnthropicKeySaved(false));
+    }, []);
+
+    const saveProviderKey = useCallback(async (provider: 'xai' | 'anthropic', key: string) => {
+      const { valid } = secureApiKeyService.validateKeyFormat(key, provider);
+      if (!valid) {
+        setProviderKeyStatus(prev => ({ ...prev, [provider]: language === 'de' ? 'Ungültiges Format.' : 'Invalid format.' }));
+        return;
+      }
+      setProviderKeyTesting(provider);
+      try {
+        const testResult = await testProviderConnection(provider, key);
+        if (!testResult.ok && testResult.error === 'INVALID_KEY') {
+          setProviderKeyStatus(prev => ({ ...prev, [provider]: language === 'de' ? 'Key ungültig.' : 'Key invalid.' }));
+          setProviderKeyTesting(null);
+          return;
+        }
+        await secureApiKeyService.setProviderKey(provider, key);
+        if (provider === 'xai') { setXaiKeySaved(true); setXaiKeyInput(''); }
+        else { setAnthropicKeySaved(true); setAnthropicKeyInput(''); }
+        setProviderKeyStatus(prev => ({ ...prev, [provider]: language === 'de' ? '✓ Verschlüsselt gespeichert.' : '✓ Encrypted & saved.' }));
+      } catch {
+        setProviderKeyStatus(prev => ({ ...prev, [provider]: language === 'de' ? 'Fehler beim Speichern.' : 'Save failed.' }));
+      } finally {
+        setProviderKeyTesting(null);
+      }
+    }, [language]);
+
+    const clearProviderKey = useCallback(async (provider: 'xai' | 'anthropic') => {
+      await secureApiKeyService.clearProviderKey(provider);
+      if (provider === 'xai') setXaiKeySaved(false);
+      else setAnthropicKeySaved(false);
+      setProviderKeyStatus(prev => ({ ...prev, [provider]: language === 'de' ? 'Key entfernt.' : 'Key removed.' }));
+    }, [language]);
+
+    const ProviderKeyInput: React.FC<{ provider: 'xai' | 'anthropic'; label: string; placeholder: string; value: string; onChange: (v: string) => void; saved: boolean }> = 
+      ({ provider, label, placeholder, value, onChange, saved }) => (
+        <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+          <label className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block flex items-center gap-2">
+            <Shield size={14} className={provider === 'xai' ? 'text-orange-400' : 'text-amber-400'} /> {label}
+          </label>
+          <input type="password" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} autoComplete="off" spellCheck={false}
+            className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500 font-mono focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan/30 transition-colors" />
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <Button variant="secondary" size="sm" onClick={() => saveProviderKey(provider, value)} disabled={providerKeyTesting === provider || !value.trim()} icon={providerKeyTesting === provider ? <Wifi size={14} className="animate-pulse" /> : <Lock size={14} />}>
+              {providerKeyTesting === provider ? (language === 'de' ? 'Validiere...' : 'Validating...') : (language === 'de' ? 'Key speichern' : 'Save key')}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => clearProviderKey(provider)} disabled={!saved} icon={<Trash2 size={14} />}>
+              {language === 'de' ? 'Key löschen' : 'Delete key'}
+            </Button>
+            <Badge label={saved ? '🔐 KeyVault' : (language === 'de' ? 'Nicht konfiguriert' : 'Not configured')} className={saved ? 'bg-green-900/30 text-green-400 border-green-700/40' : 'bg-slate-900 text-slate-400 border-slate-700'} />
+          </div>
+          {providerKeyStatus[provider] && <p className={`text-[11px] mt-2 ${providerKeyStatus[provider].startsWith('✓') ? 'text-green-400' : 'text-slate-400'}`}>{providerKeyStatus[provider]}</p>}
+        </div>
+      );
+
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Usage Visualization */}
@@ -621,11 +729,17 @@ const DataSovereignty: React.FC = () => {
                     <div className="mt-3 p-2.5 bg-slate-900/50 border border-slate-800/50 rounded-lg">
                         <p className="text-[10px] text-slate-500 leading-relaxed">
                             {language === 'de'
-                                ? '💡 Empfehlung: Erstelle einen dedizierten API-Key in Google AI Studio, beschränke ihn auf deine Domain (*.github.io) und aktiviere Rate-Limits. Der Key wird beim Speichern automatisch gegen die Gemini API validiert.'
-                                : '💡 Recommendation: Create a dedicated API key in Google AI Studio, restrict it to your domain (*.github.io) and enable rate limits. The key is automatically validated against the Gemini API when saving.'}
+                                ? '💡 Empfehlung: Erstelle einen dedizierten API-Key in Google AI Studio, beschränke ihn auf deine Domain (*.github.io) und aktiviere Rate-Limits.'
+                                : '💡 Recommendation: Create a dedicated API key in Google AI Studio, restrict it to your domain (*.github.io) and enable rate limits.'}
                         </p>
                     </div>
                 </div>
+
+                {/* xAI Grok API Key */}
+                <ProviderKeyInput provider="xai" label="xAI Grok API Key" placeholder="xai-..." value={xaiKeyInput} onChange={setXaiKeyInput} saved={xaiKeySaved} />
+
+                {/* Anthropic Claude API Key */}
+                <ProviderKeyInput provider="anthropic" label="Anthropic Claude API Key" placeholder="sk-ant-..." value={anthropicKeyInput} onChange={setAnthropicKeyInput} saved={anthropicKeySaved} />
 
                 <Button onClick={handleExportData} variant="secondary" icon={<Download size={16}/>} className="w-full h-12 bg-slate-900 hover:border-accent-cyan text-sm tracking-widest">
                     {t.settings.labels.exportEncryptedShard}

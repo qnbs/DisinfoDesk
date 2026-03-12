@@ -93,9 +93,22 @@ describe('Service Worker configuration', () => {
   });
 
   it('has caching strategies defined', () => {
-    // Should have image caching, font caching, and stale-while-revalidate
     expect(swContent).toContain('CacheFirst');
     expect(swContent).toContain('StaleWhileRevalidate');
+    expect(swContent).toContain('NetworkFirst');
+  });
+
+  it('uses NetworkFirst for app JS/CSS assets', () => {
+    expect(swContent).toContain('app-assets');
+    expect(swContent).toContain('networkTimeoutSeconds');
+  });
+
+  it('notifies clients on activation', () => {
+    expect(swContent).toContain('SW_ACTIVATED');
+  });
+
+  it('supports FORCE_REFRESH message', () => {
+    expect(swContent).toContain('FORCE_REFRESH');
   });
 });
 

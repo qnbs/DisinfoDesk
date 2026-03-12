@@ -6,7 +6,7 @@ if (workbox) {
     
     // Aggressive update strategy: skip waiting and claim clients immediately
     self.addEventListener('install', (event) => {
-        console.log('[SW] v9 Installing, will skip waiting...');
+        console.log('[SW] v10 Installing, will skip waiting...');
         self.skipWaiting();
     });
     
@@ -23,7 +23,7 @@ if (workbox) {
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v9';
+    const CACHE_SUFFIX = 'v10';
 
     // --- 0. PRECACHE (App Shell) ---
     workbox.precaching.precacheAndRoute([
@@ -33,6 +33,17 @@ if (workbox) {
         { url: 'public/icons/icon-maskable.svg', revision: CACHE_SUFFIX },
         { url: 'public/icons/favicon.svg', revision: CACHE_SUFFIX },
     ]);
+
+    // Notify all clients when new SW version activates
+    self.addEventListener('activate', (event) => {
+        event.waitUntil(
+            self.clients.matchAll({ type: 'window' }).then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'SW_ACTIVATED', version: CACHE_SUFFIX });
+                });
+            })
+        );
+    });
 
     // --- 1. CACHE CLEANUP: Remove stale caches on activation ---
     self.addEventListener('activate', (event) => {
@@ -92,21 +103,40 @@ if (workbox) {
         })
     );
 
-    // JS/CSS/CDN LIBS: Stale While Revalidate — fast first paint, background refresh
+    // APP JS/CSS: Network First — always prefer fresh app code (Vite-hashed filenames)
     workbox.routing.registerRoute(
-        ({request, url}) => 
-            request.destination === 'script' || 
-            request.destination === 'style' ||
-            url.origin === 'https://cdn.tailwindcss.com' ||
-            url.origin === 'https://aistudiocdn.com',
-        new workbox.strategies.StaleWhileRevalidate({
-            cacheName: `${CACHE_PREFIX}-assets-${CACHE_SUFFIX}`,
+        ({request, url}) =>
+            (request.destination === 'script' || request.destination === 'style') &&
+            url.origin === self.location.origin,
+        new workbox.strategies.NetworkFirst({
+            cacheName: `${CACHE_PREFIX}-app-assets-${CACHE_SUFFIX}`,
+            networkTimeoutSeconds: 3,
             plugins: [
                 new workbox.cacheableResponse.CacheableResponsePlugin({
                     statuses: [0, 200],
                 }),
                 new workbox.expiration.ExpirationPlugin({
-                    maxEntries: 100,
+                    maxEntries: 80,
+                    maxAgeSeconds: 7 * 24 * 60 * 60, // 7 Days
+                    purgeOnQuotaError: true,
+                }),
+            ]
+        })
+    );
+
+    // EXTERNAL CDN LIBS: Stale While Revalidate — fast first paint, background refresh
+    workbox.routing.registerRoute(
+        ({request, url}) =>
+            (request.destination === 'script' || request.destination === 'style') &&
+            url.origin !== self.location.origin,
+        new workbox.strategies.StaleWhileRevalidate({
+            cacheName: `${CACHE_PREFIX}-cdn-assets-${CACHE_SUFFIX}`,
+            plugins: [
+                new workbox.cacheableResponse.CacheableResponsePlugin({
+                    statuses: [0, 200],
+                }),
+                new workbox.expiration.ExpirationPlugin({
+                    maxEntries: 50,
                     maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
                     purgeOnQuotaError: true,
                 }),
@@ -125,7 +155,7 @@ if (workbox) {
     // --- 3. OFFLINE FALLBACK (SPA NAVIGATION) ---
     const navigationStrategy = new workbox.strategies.NetworkFirst({
         cacheName: `${CACHE_PREFIX}-html-${CACHE_SUFFIX}`,
-        networkTimeoutSeconds: 5,
+        networkTimeoutSeconds: 3,
         plugins: [
             new workbox.cacheableResponse.CacheableResponsePlugin({ statuses: [0, 200] }),
         ],
@@ -205,5 +235,15 @@ self.addEventListener('message', (event) => {
                 event.source?.postMessage({ type: 'CACHE_CLEANED', cacheName: targetCache, deleted });
             });
         }
+    }
+    // Force-refresh: purge all caches and reload all clients
+    if (event.data && event.data.type === 'FORCE_REFRESH') {
+        caches.keys().then(keys =>
+            Promise.all(keys.map(k => caches.delete(k)))
+        ).then(() => {
+            self.clients.matchAll({ type: 'window' }).then(clients => {
+                clients.forEach(client => client.navigate(client.url));
+            });
+        });
     }
 });

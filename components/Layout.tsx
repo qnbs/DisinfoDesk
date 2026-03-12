@@ -272,7 +272,8 @@ export const Layout: React.FC = () => {
             setWbRegistration(registration);
             
             if (registration.waiting) {
-                setUpdateAvailable(true);
+                // SW already waiting — apply immediately
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             }
 
             registration.onupdatefound = () => {
@@ -280,12 +281,29 @@ export const Layout: React.FC = () => {
                 if (installingWorker) {
                 installingWorker.onstatechange = () => {
                     if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New version installed — auto-activate without user action
                     setUpdateAvailable(true);
-                    dispatch(addLog({ message: 'System Update: Protocol patch detected.', type: 'info' }));
+                    dispatch(addLog({ message: 'System Update: Protocol patch detected. Auto-applying...', type: 'info' }));
+                    if (registration.waiting) {
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
                     }
                 };
                 }
             };
+
+            // Poll for SW updates every 60 seconds
+            const updateInterval = setInterval(() => {
+                registration.update().catch(() => {});
+            }, 60 * 1000);
+
+            // Check for updates when user returns to tab
+            const onVisibilityChange = () => {
+                if (document.visibilityState === 'visible') {
+                    registration.update().catch(() => {});
+                }
+            };
+            document.addEventListener('visibilitychange', onVisibilityChange);
 
             // Register periodic background sync for content freshness
             if ('periodicSync' in registration) {
@@ -293,17 +311,30 @@ export const Layout: React.FC = () => {
                     .register('disinfodesk-content-refresh', { minInterval: 24 * 60 * 60 * 1000 })
                     .catch(() => { /* Permission not granted – graceful fallback */ });
             }
+
+            // Cleanup on unmount
+            return () => {
+                clearInterval(updateInterval);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            };
             })
             .catch(err => {
             console.error('SW Registration failed:', err);
             dispatch(addLog({ message: `SW Error: ${err.message || 'Registration failed'}`, type: 'warning' }));
             });
             
+            // Listen for new SW activation — and for version notifications
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
-                    window.location.reload();
                     refreshing = true;
+                    window.location.reload();
+                }
+            });
+
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data?.type === 'SW_ACTIVATED') {
+                    dispatch(addLog({ message: `System Update: SW ${event.data.version} activated.`, type: 'info' }));
                 }
             });
       } catch (e) {
@@ -313,8 +344,11 @@ export const Layout: React.FC = () => {
   }, [dispatch]);
 
   const handleUpdateApp = useCallback(() => {
-    if (wbRegistration && wbRegistration.waiting) {
+    if (wbRegistration?.waiting) {
         wbRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else if (navigator.serviceWorker?.controller) {
+        // No waiting worker — force purge caches and reload
+        navigator.serviceWorker.controller.postMessage({ type: 'FORCE_REFRESH' });
     } else {
         window.location.reload();
     }

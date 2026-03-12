@@ -8,7 +8,7 @@ import { Message } from './ui';
 export type AccentColor = 'cyan' | 'purple' | 'green' | 'amber' | 'red';
 export type SafetyLevel = 'strict' | 'standard' | 'unrestricted';
 export type UIDensity = 'comfortable' | 'compact';
-export type AIProvider = 'gemini' | 'xai' | 'anthropic' | 'ollama';
+export type AIProvider = 'gemini' | 'xai' | 'anthropic' | 'ollama' | 'local';
 
 export interface AppSettings {
   // Neural — Advanced AI Configuration

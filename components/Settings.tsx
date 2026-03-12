@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
-  Settings as SettingsIcon, Cpu, Layout, Terminal, Volume2, VolumeX, Eye, EyeOff, Trash2, Download, Smartphone, Shield, Zap, Brain, AlertOctagon, HardDrive, Activity, Lock, Palette, Grid, CheckCircle2, Server, Wifi
+  Settings as SettingsIcon, Cpu, Layout, Terminal, Volume2, VolumeX, Eye, EyeOff, Trash2, Download, Smartphone, Shield, Zap, Brain, AlertOctagon, HardDrive, Activity, Lock, Palette, Grid, CheckCircle2, Server, Wifi, ExternalLink, Info, Sparkles
 } from 'lucide-react';
 import {
   Card, Button, Badge, PageHeader
@@ -260,7 +260,7 @@ const RangeSlider: React.FC<{ label: string; value: number; min: number; max: nu
 // --- 3. Section Modules ---
 
 const NeuralEngineConfig: React.FC = () => {
-    const { settings, handleUpdate, t } = useSettingsPage();
+    const { settings, handleUpdate, t, language } = useSettingsPage();
     const isPro = settings.aiModelVersion.includes('pro') || settings.aiModelVersion.includes('opus');
 
     const providerMeta: Record<AIProvider, { icon: React.ReactNode; color: string; label: string; border: string; bg: string }> = {
@@ -268,6 +268,7 @@ const NeuralEngineConfig: React.FC = () => {
       xai: { icon: <Brain size={18} />, color: 'text-orange-400', label: 'xAI Grok', border: 'border-orange-400/60', bg: 'bg-orange-400/5' },
       anthropic: { icon: <Shield size={18} />, color: 'text-amber-400', label: 'Anthropic Claude', border: 'border-amber-400/60', bg: 'bg-amber-400/5' },
       ollama: { icon: <Server size={18} />, color: 'text-green-400', label: 'Ollama (Local)', border: 'border-green-400/60', bg: 'bg-green-400/5' },
+      local: { icon: <Sparkles size={18} />, color: 'text-violet-400', label: language === 'de' ? 'Lokal (Kein Key)' : 'Local (No Key)', border: 'border-violet-400/60', bg: 'bg-violet-400/5' },
     };
 
     const currentProvider = settings.aiProvider || 'gemini';
@@ -277,7 +278,7 @@ const NeuralEngineConfig: React.FC = () => {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Provider Selector */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {(Object.keys(providerMeta) as AIProvider[]).map((p) => {
                   const pm = providerMeta[p];
                   const isActive = currentProvider === p;
@@ -294,6 +295,7 @@ const NeuralEngineConfig: React.FC = () => {
                         {isActive && <div className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[8px] font-bold text-white/60 uppercase">{t.settings.labels.activeCore}</div>}
                       </div>
                       <div className="text-xs font-bold text-white">{pm.label}</div>
+                      {p === 'local' && <div className="mt-1 px-1.5 py-0.5 bg-violet-500/10 border border-violet-500/30 rounded text-[8px] font-bold text-violet-300 uppercase w-fit">{language === 'de' ? 'Kein API-Key' : 'No API Key'}</div>}
                       {isActive && <div className={`absolute inset-0 ${pm.bg} pointer-events-none animate-pulse-slow rounded-xl`}></div>}
                     </button>
                   );
@@ -336,6 +338,44 @@ const NeuralEngineConfig: React.FC = () => {
                   placeholder="http://localhost:11434"
                   className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500 font-mono focus:border-green-400 focus:ring-1 focus:ring-green-400/30 transition-colors"
                 />
+              </div>
+            )}
+
+            {/* Local AI Info */}
+            {currentProvider === 'local' && (
+              <div className="bg-gradient-to-br from-violet-950/30 to-slate-950/30 border border-violet-500/30 rounded-xl p-5">
+                <div className="flex items-start gap-3 mb-3">
+                  <Sparkles size={20} className="text-violet-400 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-bold text-violet-300 mb-1">
+                      {language === 'de' ? 'Browser-KI — Kein API-Key erforderlich' : 'Browser AI — No API Key Required'}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      {language === 'de'
+                        ? 'KI-Modelle laufen direkt im Browser via WebAssembly (Transformers.js). Keine Daten verlassen dein Gerät. Modelle werden beim ersten Aufruf heruntergeladen und im Browser gecacht.'
+                        : 'AI models run directly in your browser via WebAssembly (Transformers.js). No data leaves your device. Models are downloaded on first use and cached in the browser.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+                  <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-center">
+                    <div className="text-violet-400 text-lg font-bold">100%</div>
+                    <div className="text-[9px] text-slate-500 uppercase tracking-wider">{language === 'de' ? 'Privat' : 'Private'}</div>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-center">
+                    <div className="text-violet-400 text-lg font-bold">0€</div>
+                    <div className="text-[9px] text-slate-500 uppercase tracking-wider">{language === 'de' ? 'Kosten' : 'Cost'}</div>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-center">
+                    <div className="text-violet-400 text-lg font-bold">Offline</div>
+                    <div className="text-[9px] text-slate-500 uppercase tracking-wider">{language === 'de' ? 'Fähig' : 'Capable'}</div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-3 leading-relaxed">
+                  {language === 'de'
+                    ? '⚠️ Hinweis: Lokale Modelle sind kleiner als Cloud-KI und liefern einfachere Ergebnisse. Für beste Qualität, nutze einen Cloud-Provider mit API-Key.'
+                    : '⚠️ Note: Local models are smaller than cloud AI and produce simpler results. For best quality, use a cloud provider with an API key.'}
+                </p>
               </div>
             )}
 
@@ -625,7 +665,40 @@ const DataSovereignty: React.FC = () => {
     }, [language]);
 
     const ProviderKeyInput: React.FC<{ provider: 'xai' | 'anthropic'; label: string; placeholder: string; value: string; onChange: (v: string) => void; saved: boolean }> = 
-      ({ provider, label, placeholder, value, onChange, saved }) => (
+      ({ provider, label, placeholder, value, onChange, saved }) => {
+        const guideContent = provider === 'xai' ? {
+          title: language === 'de' ? 'Anleitung: xAI Grok API-Key erstellen' : 'Guide: Create xAI Grok API Key',
+          steps: language === 'de' ? [
+            '1. Öffne <a>https://console.x.ai</a> und melde dich an',
+            '2. Navigiere zu "API Keys" im Dashboard',
+            '3. Klicke "Create API Key"',
+            '4. Kopiere den Key (beginnt mit xai-...) und füge ihn oben ein',
+          ] : [
+            '1. Open <a>https://console.x.ai</a> and sign in',
+            '2. Navigate to "API Keys" in dashboard',
+            '3. Click "Create API Key"',
+            '4. Copy the key (starts with xai-...) and paste above',
+          ],
+          url: 'https://console.x.ai',
+          free: language === 'de' ? '⚡ $25 Free Credits für neue Accounts' : '⚡ $25 Free Credits for new accounts',
+        } : {
+          title: language === 'de' ? 'Anleitung: Anthropic Claude API-Key erstellen' : 'Guide: Create Anthropic Claude API Key',
+          steps: language === 'de' ? [
+            '1. Öffne <a>https://console.anthropic.com</a>',
+            '2. Erstelle ein Konto oder melde dich an',
+            '3. Gehe zu "API Keys" → "Create Key"',
+            '4. Kopiere den Key (beginnt mit sk-ant-...) und füge ihn oben ein',
+          ] : [
+            '1. Open <a>https://console.anthropic.com</a>',
+            '2. Create an account or sign in',
+            '3. Go to "API Keys" → "Create Key"',
+            '4. Copy the key (starts with sk-ant-...) and paste above',
+          ],
+          url: 'https://console.anthropic.com',
+          free: language === 'de' ? '⚡ $5 Free Credits für neue Accounts' : '⚡ $5 Free Credits for new accounts',
+        };
+
+        return (
         <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
           <label className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block flex items-center gap-2">
             <Shield size={14} className={provider === 'xai' ? 'text-orange-400' : 'text-amber-400'} /> {label}
@@ -642,11 +715,56 @@ const DataSovereignty: React.FC = () => {
             <Badge label={saved ? '🔐 KeyVault' : (language === 'de' ? 'Nicht konfiguriert' : 'Not configured')} className={saved ? 'bg-green-900/30 text-green-400 border-green-700/40' : 'bg-slate-900 text-slate-400 border-slate-700'} />
           </div>
           {providerKeyStatus[provider] && <p className={`text-[11px] mt-2 ${providerKeyStatus[provider].startsWith('✓') ? 'text-green-400' : 'text-slate-400'}`}>{providerKeyStatus[provider]}</p>}
+          <details className="mt-3 group">
+            <summary className="flex items-center gap-2 cursor-pointer text-[11px] text-accent-cyan hover:text-white transition-colors select-none">
+              <Info size={12} />
+              {guideContent.title}
+            </summary>
+            <div className="mt-2 p-3 bg-slate-900/60 border border-slate-800 rounded-lg text-[10px] text-slate-400 space-y-1.5 leading-relaxed">
+              {guideContent.steps.map((step, i) => (
+                <p key={i}>
+                  {step.includes('<a>') ? (
+                    <>
+                      {step.split('<a>')[0]}
+                      <a href={guideContent.url} target="_blank" rel="noopener noreferrer" className="text-accent-cyan hover:underline inline-flex items-center gap-1">
+                        {step.split('<a>')[1].split('</a>')[0]} <ExternalLink size={9} />
+                      </a>
+                      {step.split('</a>')[1] || ''}
+                    </>
+                  ) : step}
+                </p>
+              ))}
+              <p className="text-yellow-400/70">{guideContent.free}</p>
+            </div>
+          </details>
         </div>
       );
+    };
 
     return (
         <div className="space-y-8 animate-fade-in">
+            {/* Local AI Hint Banner */}
+            {!apiKeySaved && !xaiKeySaved && !anthropicKeySaved && settings.aiProvider !== 'local' && (
+              <div className="bg-gradient-to-r from-violet-950/40 to-slate-950/40 border border-violet-500/30 rounded-xl p-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Sparkles size={20} className="text-violet-400 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-violet-300">
+                      {language === 'de' ? 'Kein API-Key? Kein Problem!' : 'No API Key? No Problem!'}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      {language === 'de'
+                        ? 'Nutze die Browser-KI kostenlos und ohne Registrierung — direkt lokal auf deinem Gerät.'
+                        : 'Use Browser AI for free, no registration — runs locally on your device.'}
+                    </p>
+                  </div>
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => { handleUpdate('aiProvider', 'local'); handleUpdate('aiModelVersion', 'local-phi3'); }} icon={<Sparkles size={14} />} className="shrink-0 border-violet-500/50 text-violet-300 hover:bg-violet-500/10">
+                  {language === 'de' ? 'Aktivieren' : 'Activate'}
+                </Button>
+              </div>
+            )}
+
             {/* Usage Visualization */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-6 flex flex-col justify-center items-center relative overflow-hidden">
@@ -733,6 +851,19 @@ const DataSovereignty: React.FC = () => {
                                 : '💡 Recommendation: Create a dedicated API key in Google AI Studio, restrict it to your domain (*.github.io) and enable rate limits.'}
                         </p>
                     </div>
+                    <details className="mt-3 group">
+                      <summary className="flex items-center gap-2 cursor-pointer text-[11px] text-accent-cyan hover:text-white transition-colors select-none">
+                        <Info size={12} />
+                        {language === 'de' ? 'Anleitung: Gemini API-Key erstellen' : 'Guide: Create Gemini API Key'}
+                      </summary>
+                      <div className="mt-2 p-3 bg-slate-900/60 border border-slate-800 rounded-lg text-[10px] text-slate-400 space-y-1.5 leading-relaxed">
+                        <p>{language === 'de' ? '1. Öffne' : '1. Open'} <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-accent-cyan hover:underline inline-flex items-center gap-1">Google AI Studio <ExternalLink size={9} /></a></p>
+                        <p>{language === 'de' ? '2. Melde dich mit deinem Google-Konto an' : '2. Sign in with your Google account'}</p>
+                        <p>{language === 'de' ? '3. Klicke "Create API Key" und wähle ein Projekt' : '3. Click "Create API Key" and select a project'}</p>
+                        <p>{language === 'de' ? '4. Kopiere den Key (beginnt mit AIza...) und füge ihn oben ein' : '4. Copy the key (starts with AIza...) and paste it above'}</p>
+                        <p className="text-yellow-400/70">{language === 'de' ? '⚡ Kostenlos: 15 Anfragen/Minute, 1.500/Tag im Free-Tier' : '⚡ Free: 15 requests/min, 1,500/day on free tier'}</p>
+                      </div>
+                    </details>
                 </div>
 
                 {/* xAI Grok API Key */}

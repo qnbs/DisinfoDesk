@@ -8,6 +8,7 @@ import { secureApiKeyService } from './secureApiKeyService';
 import { guardPromptInput, sanitizeAIOutput } from './aiGuardService';
 import { checkRateLimit, trackCost } from './aiCostService';
 import { validateProviderResponse } from './aiValidationSchemas';
+import { generateTextLocally, getLocalFallbackStatus } from './localFallbackService';
 
 export interface ProviderChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -30,7 +31,7 @@ export interface ProviderResponse {
 
 // --- Provider Endpoint Configs ---
 
-const PROVIDER_ENDPOINTS: Record<Exclude<AIProvider, 'gemini'>, string> = {
+const PROVIDER_ENDPOINTS: Record<Exclude<AIProvider, 'gemini' | 'local'>, string> = {
   xai: 'https://api.x.ai/v1/chat/completions',
   anthropic: 'https://api.anthropic.com/v1/messages',
   ollama: '' // Set dynamically from settings
@@ -40,7 +41,8 @@ const DEFAULT_MODELS: Record<AIProvider, string> = {
   gemini: 'gemini-3.1-flash',
   xai: 'grok-3-mini',
   anthropic: 'claude-sonnet-4-20250514',
-  ollama: 'llama3.2'
+  ollama: 'llama3.2',
+  local: 'local-phi3'
 };
 
 export const PROVIDER_MODEL_OPTIONS: Record<AIProvider, { id: string; label: string; desc: string }[]> = {
@@ -61,6 +63,10 @@ export const PROVIDER_MODEL_OPTIONS: Record<AIProvider, { id: string; label: str
     { id: 'mistral', label: 'Mistral', desc: 'European open-source' },
     { id: 'gemma2', label: 'Gemma 2', desc: 'Google open-source' },
     { id: 'phi3', label: 'Phi-3', desc: 'Microsoft compact' },
+  ],
+  local: [
+    { id: 'local-phi3', label: 'Phi-3 Mini (Browser)', desc: 'No API key needed — runs in browser via WebAssembly' },
+    { id: 'local-distilbart', label: 'DistilBART (Browser)', desc: 'Optimized for summaries — no API key needed' },
   ]
 };
 
@@ -183,6 +189,18 @@ export async function callProvider(
     throw new Error('GEMINI_USE_NATIVE_SDK: Use geminiService.ts for Gemini calls.');
   }
 
+  if (provider === 'local') {
+    const result = await generateTextLocally(
+      guardedMessages.map(m => `${m.role}: ${m.content}`).join('\n'),
+      config.maxTokens ?? 512
+    );
+    return {
+      text: sanitizeAIOutput(result.text),
+      provider: 'local',
+      model: result.model,
+    };
+  }
+
   let text: string;
 
   if (provider === 'ollama') {
@@ -272,6 +290,11 @@ export async function testProviderConnection(
       if (resp.ok || resp.status === 200) return { ok: true };
       if (resp.status === 401) return { ok: false, error: 'INVALID_KEY' };
       return { ok: false, error: `HTTP_${resp.status}` };
+    }
+
+    if (provider === 'local') {
+      const status = getLocalFallbackStatus();
+      return status.available ? { ok: true } : { ok: false, error: 'WEBASSEMBLY_NOT_SUPPORTED' };
     }
 
     return { ok: false, error: 'UNKNOWN_PROVIDER' };

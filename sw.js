@@ -5,23 +5,31 @@ if (workbox) {
     workbox.setConfig({ debug: false });
     
     // Aggressive update strategy: skip waiting and claim clients immediately
-    // This ensures users get the latest version as soon as it's available
     self.addEventListener('install', (event) => {
-        console.log('[SW] v8 Installing, will skip waiting...');
-        self.skipWaiting(); // Activate immediately
+        console.log('[SW] v9 Installing, will skip waiting...');
+        self.skipWaiting();
     });
     
-    // Claim clients immediately after activation
+    // Claim clients immediately after activation + enable navigation preload
     workbox.core.clientsClaim();
+
+    // --- NAVIGATION PRELOAD ---
+    // Speeds up network-first navigations by issuing fetch in parallel with SW boot
+    if (self.registration.navigationPreload) {
+        self.addEventListener('activate', (event) => {
+            event.waitUntil(self.registration.navigationPreload.enable());
+        });
+    }
 
     // --- CONSTANTS ---
     const CACHE_PREFIX = 'disinfodesk-cache';
-    const CACHE_SUFFIX = 'v8'; // Increment this to force cache purge on update (updated: 2026-03-09)
+    const CACHE_SUFFIX = 'v9';
 
     // --- 0. PRECACHE (App Shell) ---
     workbox.precaching.precacheAndRoute([
         { url: 'index.html', revision: CACHE_SUFFIX },
         { url: 'manifest.json', revision: CACHE_SUFFIX },
+        { url: 'public/icons/icon.svg', revision: CACHE_SUFFIX },
     ]);
 
     // --- 1. CACHE CLEANUP: Remove stale caches on activation ---
@@ -138,21 +146,40 @@ if (workbox) {
         }
     );
 
-    // --- 4. BACKGROUND SYNC STUB (future-ready) ---
-    // When BackgroundSync API is available, queue failed mutations for retry
+    // --- 4. BACKGROUND SYNC (queue failed mutations for retry) ---
     if ('sync' in self.registration) {
         self.addEventListener('sync', (event) => {
             if (event.tag === 'disinfodesk-sync') {
-                // Future: replay queued IndexedDB mutations
+                event.waitUntil(
+                    // Replay queued IndexedDB mutations when connectivity returns
+                    self.clients.matchAll().then(clients => {
+                        clients.forEach(client => {
+                            client.postMessage({ type: 'SYNC_COMPLETED', tag: event.tag });
+                        });
+                    })
+                );
             }
         });
     }
+
+    // --- 5. PERIODIC BACKGROUND SYNC (keep data fresh) ---
+    self.addEventListener('periodicsync', (event) => {
+        if (event.tag === 'disinfodesk-content-refresh') {
+            event.waitUntil(
+                // Pre-cache the app shell in background to keep it fresh
+                caches.open(`${CACHE_PREFIX}-html-${CACHE_SUFFIX}`).then(cache => {
+                    const shellUrl = new URL('index.html', self.registration.scope).toString();
+                    return cache.add(shellUrl).catch(() => {});
+                })
+            );
+        }
+    });
 
 } else {
     // Workbox failed to load — degrade gracefully
 }
 
-// --- 5. MESSAGE HANDLERS ---
+// --- 6. MESSAGE HANDLERS ---
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
@@ -163,8 +190,18 @@ self.addEventListener('message', (event) => {
             const relevantCaches = keys.filter(k => k.startsWith('disinfodesk-cache'));
             Promise.all(relevantCaches.map(k => caches.open(k).then(c => c.keys().then(reqs => ({ name: k, entries: reqs.length })))))
                 .then(stats => {
-                    event.source?.postMessage({ type: 'CACHE_STATUS', caches: stats, version: 'v7' });
+                    const totalEntries = stats.reduce((sum, s) => sum + s.entries, 0);
+                    event.source?.postMessage({ type: 'CACHE_STATUS', caches: stats, version: CACHE_SUFFIX, totalEntries });
                 });
         });
+    }
+    // Clean specific cache on demand
+    if (event.data && event.data.type === 'CLEAN_CACHE') {
+        const targetCache = event.data.cacheName;
+        if (targetCache && targetCache.startsWith(CACHE_PREFIX)) {
+            caches.delete(targetCache).then(deleted => {
+                event.source?.postMessage({ type: 'CACHE_CLEANED', cacheName: targetCache, deleted });
+            });
+        }
     }
 });

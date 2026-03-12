@@ -44,14 +44,17 @@ function copyServiceWorkerPlugin(): Plugin {
         { src: 'manifest.json', dest: 'manifest.json' },
         { src: '404.html', dest: '404.html' },
         { src: 'robots.txt', dest: 'robots.txt' },
-        { src: 'sitemap.xml', dest: 'sitemap.xml' }
+        { src: 'sitemap.xml', dest: 'sitemap.xml' },
+        { src: 'public/icons/icon.svg', dest: 'public/icons/icon.svg' }
       ];
       
       filesToCopy.forEach(({ src, dest }) => {
         const srcPath = path.resolve(__dirname, src);
         const destPath = path.resolve(__dirname, 'dist', dest);
+        const destDir = path.dirname(destPath);
         
         if (fs.existsSync(srcPath)) {
+          if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
           fs.copyFileSync(srcPath, destPath);
           console.log(`✓ ${src} copied to dist/`);
         }

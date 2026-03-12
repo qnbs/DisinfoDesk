@@ -409,9 +409,18 @@ const useDebunkChatLogic = () => {
             fullResponse += chunk;
             dispatch(updateLastChatMessage(fullResponse));
         }
-    } catch { 
+    } catch (err) { 
         if (!abortControllerRef.current?.signal.aborted) {
-            dispatch(updateLastChatMessage(fullResponse + "\n\n[SYSTEM ERROR: Uplink interrupted]"));
+            const errMsg = err instanceof Error ? err.message : '';
+            if (errMsg.includes('MISSING_GEMINI_API_KEY')) {
+                dispatch(updateLastChatMessage(
+                    language === 'de'
+                        ? '⚠️ **Kein API-Key konfiguriert.** Bitte unter *Einstellungen → Datenschutz → BYOK* deinen Gemini API-Key hinterlegen.'
+                        : '⚠️ **No API key configured.** Please add your Gemini API key in *Settings → Privacy → BYOK*.'
+                ));
+            } else {
+                dispatch(updateLastChatMessage(fullResponse + "\n\n[SYSTEM ERROR: Uplink interrupted]"));
+            }
         }
     } finally {
         if (!abortControllerRef.current?.signal.aborted) {

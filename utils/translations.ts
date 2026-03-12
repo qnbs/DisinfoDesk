@@ -62,6 +62,8 @@ export const translations = {
         primary: 'Primäre Module',
         core: 'System Kern',
         install: 'APP INSTALLIEREN',
+        installSub: 'Chrome App · Android · Desktop',
+        installed: 'APP INSTALLIERT',
         local: 'Lokales Protokoll',
         online: 'System Online'
       },
@@ -916,6 +918,8 @@ export const translations = {
         primary: 'Primary Modules',
         core: 'System Core',
         install: 'INSTALL APP',
+        installSub: 'Chrome App · Android · Desktop',
+        installed: 'APP INSTALLED',
         local: 'Local Protocol',
         online: 'System Online'
       },

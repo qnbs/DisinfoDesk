@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback
 } from 'react';
 import {
-  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, RefreshCw
+  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, RefreshCw, KeyRound, Smartphone, Monitor
 } from 'lucide-react';
 import {
   Outlet, NavLink, useLocation, useNavigate
@@ -12,6 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addLog } from '../store/slices/settingsSlice';
+import { secureApiKeyService } from '../services/secureApiKeyService';
 import {
   setSearchOpen, selectActiveFile, showUpdateModal, hideUpdateModal, dismissUpdateModal
 } from '../store/slices/uiSlice';
@@ -38,15 +39,15 @@ const BackgroundGrid = React.memo(() => (
 ));
 
 // --- Sidebar Footer (Memoized) ---
-const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isOnline }) => {
+const SystemIntegrityFooter: React.FC<{ isOnline: boolean; hasApiKey: boolean; isStandalone: boolean }> = React.memo(({ isOnline, hasApiKey, isStandalone }) => {
     const [latency, setLatency] = useState(24);
     const { t } = useLanguage();
-    const APP_VERSION = '1.0.0'; // Sync with package.json
+    const navigate = useNavigate();
+    const APP_VERSION = '1.0.0';
 
     useEffect(() => {
         const interval = setInterval(() => {
             setLatency(prev => {
-                // Simulate jitter
                 const noise = Math.floor(Math.random() * 6) - 3;
                 return Math.max(12, Math.min(60, prev + noise));
             });
@@ -60,6 +61,27 @@ const SystemIntegrityFooter: React.FC<{ isOnline: boolean }> = React.memo(({ isO
         <div className="p-4 border-t border-slate-800/50 bg-[#020617] relative z-10 pb-safe-bottom">
             <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
             <div className="flex flex-col gap-3">
+                {/* API Key + Standalone Status Row */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => navigate('/settings')}
+                        className={cn(
+                            'inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-[8px] font-mono uppercase tracking-wider transition-all hover:border-accent-cyan/50 focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none',
+                            hasApiKey
+                                ? 'bg-green-950/30 border-green-800/40 text-green-500'
+                                : 'bg-amber-950/30 border-amber-800/40 text-amber-500 animate-pulse'
+                        )}
+                        title={hasApiKey ? 'API Key: Configured' : 'API Key: Not set – click to configure'}
+                    >
+                        <KeyRound size={9} />
+                        {hasApiKey ? 'BYOK_OK' : 'NO_KEY'}
+                    </button>
+                    {isStandalone && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-950/30 border border-purple-800/40 text-[8px] font-mono text-purple-400 uppercase tracking-wider">
+                            <Smartphone size={9} /> PWA
+                        </span>
+                    )}
+                </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="relative">
@@ -200,6 +222,13 @@ export const Layout: React.FC = () => {
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const isStandalone = useMemo(() =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    (navigator as unknown as { standalone?: boolean }).standalone === true,
+  []);
   
   // Update State
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -207,6 +236,15 @@ export const Layout: React.FC = () => {
   const updateModalState = useAppSelector(state => state.ui.updateModal);
   const hasSeenOnboarding = useAppSelector(state => state.settings.config.hasSeenOnboarding);
   const APP_VERSION = '1.0.0';
+
+  // Check API key status on mount and when returning to app
+  useEffect(() => {
+    const checkKey = () => { secureApiKeyService.hasApiKey().then(setHasApiKey).catch(() => setHasApiKey(false)); };
+    checkKey();
+    const onFocus = () => checkKey();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   // Check version and show update modal on mount (only if onboarding is complete)
   useEffect(() => {
@@ -248,6 +286,13 @@ export const Layout: React.FC = () => {
                 };
                 }
             };
+
+            // Register periodic background sync for content freshness
+            if ('periodicSync' in registration) {
+                (registration as unknown as { periodicSync: { register: (tag: string, opts: { minInterval: number }) => Promise<void> } }).periodicSync
+                    .register('disinfodesk-content-refresh', { minInterval: 24 * 60 * 60 * 1000 })
+                    .catch(() => { /* Permission not granted – graceful fallback */ });
+            }
             })
             .catch(err => {
             console.error('SW Registration failed:', err);
@@ -313,12 +358,19 @@ export const Layout: React.FC = () => {
       e.preventDefault();
       setInstallPrompt(e as BeforeInstallPromptEvent);
     };
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+      dispatch(addLog({ message: 'PWA installed successfully.', type: 'success' }));
+    };
     window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, [dispatch]);
 
@@ -493,24 +545,34 @@ export const Layout: React.FC = () => {
             ))}
           </div>
 
-          {installPrompt && (
+          {installPrompt && !isInstalled && (
             <div className="px-4 mt-4">
                <button 
                  onClick={handleInstallClick}
-                 className="w-full flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-lg hover:border-accent-cyan/50 transition-colors group text-left active:scale-95 shadow-md focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+                 className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-accent-cyan/10 to-purple-500/10 border border-accent-cyan/30 rounded-lg hover:border-accent-cyan/60 transition-all group text-left active:scale-95 shadow-md focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none hover:shadow-[0_0_20px_rgba(6,182,212,0.1)]"
                  aria-label={t.layout.installAppAria}
                >
-                 <Download size={16} className="text-accent-cyan" />
-                 <div>
+                 <div className="w-8 h-8 rounded-lg bg-accent-cyan/10 flex items-center justify-center shrink-0">
+                   <Download size={16} className="text-accent-cyan group-hover:animate-bounce" />
+                 </div>
+                 <div className="min-w-0">
                     <div className="text-[10px] font-bold text-white uppercase tracking-wider">{t.layout.sidebar.install}</div>
-                    <div className="text-[9px] text-slate-500 font-mono">{t.layout.nativeApp}</div>
+                    <div className="text-[9px] text-slate-500 font-mono">{t.layout.sidebar.installSub || 'Chrome App · Android · Desktop'}</div>
                  </div>
                </button>
             </div>
           )}
+          {isInstalled && (
+            <div className="px-4 mt-4">
+              <div className="w-full flex items-center gap-3 p-3 bg-green-950/20 border border-green-800/30 rounded-lg">
+                <Monitor size={16} className="text-green-500" />
+                <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider">{t.layout.sidebar.installed || 'APP INSTALLIERT'}</div>
+              </div>
+            </div>
+          )}
         </nav>
 
-        <SystemIntegrityFooter isOnline={isOnline} />
+        <SystemIntegrityFooter isOnline={isOnline} hasApiKey={hasApiKey} isStandalone={isStandalone} />
       </aside>
 
       {/* Main Content Area */}

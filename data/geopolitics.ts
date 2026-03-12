@@ -22,7 +22,6 @@ export const GEOPOLITICS_THEORIES_DE: Theory[] = [
     popularity: 72,
     originYear: '2017',
     tags: ['Deep State', 'USA', 'Internetkultur', 'Radikalisierung', 'Capitol Riot', 'Chan-Boards', 'Trumpismus', 'Great Awakening'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4', // Generic Deep State ref
     relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65', 't7', 't20', 't75']
   },
   {
@@ -193,7 +192,6 @@ export const GEOPOLITICS_THEORIES_EN: Theory[] = [
     popularity: 72,
     originYear: '2017',
     tags: ['Deep State', 'USA', 'Internet Culture', 'Radicalization', 'Capitol Riot', 'Chan Boards', 'Trumpism', 'Great Awakening'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
     relatedIds: ['t5', 't9', 't16', 't30', 't48', 't65', 't7', 't20', 't75']
   },
   {

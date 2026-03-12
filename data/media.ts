@@ -1,4 +1,3 @@
-
 import { MediaItem } from '../types';
 import { generateArt } from '../utils/artEngine';
 
@@ -9,12 +8,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1999,
     creator: 'Wachowskis',
-    descriptionDe: 'Ein Hacker entdeckt, dass die Welt eine Simulation ist, die von Maschinen geschaffen wurde, um die Menschheit zu versklaven. Ein Paradebeispiel für die Simulations-Theorie und gnostische Motive.',
-    descriptionEn: 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers. A prime example of simulation theory.',
-    tags: ['Simulation', 'AI', 'Control', 'Gnosticism'],
+    descriptionDe: 'Ein Hacker entdeckt, dass die Realität eine Maschinen-Simulation ist — und wird zum Erlöser der freien Menschheit. Wachowskis verschmolzen Baudrillards Simulacra-Philosophie, gnostische Erlösungsmythen und Hongkong-Martial-Arts zu einem kulturellen Wendepunkt. „Red Pill“ wurde Universalmetapher für Erwachungserlebnisse jeder Art.',
+    descriptionEn: 'A hacker discovers reality is a machine simulation — and becomes humanity\'s savior. The Wachowskis fused Baudrillard\'s simulacra philosophy, Gnostic salvation myths, and Hong Kong martial arts into a cultural turning point. "Red Pill" became a universal metaphor for awakening experiences of every kind.',
+    tags: ['Simulation', 'AI', 'Control', 'Gnosticism', 'Red Pill', 'Cyberpunk', 'Baudrillard', 'Martial Arts'],
     realityScore: 40,
     complexity: 'MINDBENDING',
-    relatedTheoryTags: ['Simulation Theory', 'AI', 'Control']
+    relatedTheoryTags: ['Simulation Theory', 'AI', 'Control', 'Prison Planet', 'Archons']
   },
   {
     id: 'm2',
@@ -22,12 +21,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'SERIES',
     year: 1993,
     creator: 'Chris Carter',
-    descriptionDe: 'Zwei FBI-Agenten untersuchen das Paranormale. Die Serie etablierte das moderne Bild der Regierungsverschwörung zur Vertuschung extraterrestrischen Lebens (Syndikat).',
-    descriptionEn: 'Two FBI agents investigate the paranormal. The series established the modern trope of a government conspiracy covering up extraterrestrial life.',
-    tags: ['UFO', 'Government', 'Aliens', 'Deep State'],
+    descriptionDe: 'Mulders „I want to believe“-Poster wurde Ikone einer Generation. 11 Staffeln lang definierten FBI-Agenten Mulder & Scully den Goldstandard für Regierungs-Cover-up-Narrative: Syndikat, schwarzes Öl, Hybridisierung. Etablierte den „Trust no one“-Zeitgeist der 1990er.',
+    descriptionEn: 'Mulder\'s "I want to believe" poster became a generational icon. Across 11 seasons, FBI agents Mulder & Scully defined the gold standard for government cover-up narratives: the Syndicate, black oil, hybridization. Established the "Trust no one" zeitgeist of the 1990s.',
+    tags: ['UFO', 'Government', 'Aliens', 'Deep State', 'FBI', 'Syndicate', 'Black Oil', 'Monster of the Week'],
     realityScore: 60,
     complexity: 'HIGH',
-    relatedTheoryTags: ['UFO', 'Area 51', 'Men in Black']
+    relatedTheoryTags: ['UFO', 'Area 51', 'Men in Black', 'Majestic 12', 'Greys']
   },
   {
     id: 'm3',
@@ -35,12 +34,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'GAME',
     year: 2000,
     creator: 'Ion Storm',
-    descriptionDe: 'Ein Cyberpunk-Spiel, das fast jede moderne Verschwörungstheorie (Illuminaten, FEMA, Area 51, Graue Aliens) in eine kohärente Handlung webt. Legendär für seine Vorhersage des Falls der Twin Towers.',
-    descriptionEn: 'A cyberpunk game that weaves almost every modern conspiracy theory (Illuminati, FEMA, Area 51, Grey Aliens) into a coherent plot. Legendary for predicting the fall of the Twin Towers.',
-    tags: ['Cyberpunk', 'Illuminati', 'AI', 'NWO'],
+    descriptionDe: 'Warren Spectors Cyberpunk-Meisterwerk webt Illuminaten, MJ-12, FEMA-Lager, Area 51 und Graue Aliens in eine kohärente Handlung um Nano-Augmentierung und globale Verschwörung. Legendaer: Die Twin Towers fehlen in der NYC-Skyline — ein Jahr vor 9/11. Spielerisches Entscheidungssystem erlaubt drei ideologische Enden.',
+    descriptionEn: 'Warren Spector\'s cyberpunk masterpiece weaves Illuminati, MJ-12, FEMA camps, Area 51, and Grey Aliens into a coherent narrative about nano-augmentation and global conspiracy. Legendary: the Twin Towers are missing from the NYC skyline — one year before 9/11. Player choice system allows three ideological endings.',
+    tags: ['Cyberpunk', 'Illuminati', 'AI', 'NWO', 'FEMA', 'Nano-Augmentation', 'Warren Spector', 'Immersive Sim'],
     realityScore: 75,
     complexity: 'HIGH',
-    relatedTheoryTags: ['NWO', 'Illuminati', 'AI']
+    relatedTheoryTags: ['NWO', 'Illuminati', 'AI', 'Majestic 12', 'Transhumanism']
   },
   {
     id: 'm4',
@@ -48,12 +47,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1988,
     creator: 'John Carpenter',
-    descriptionDe: 'Ein Bauarbeiter findet eine Sonnenbrille, die enthüllt, dass die herrschende Klasse in Wirklichkeit Aliens sind, die uns durch subliminale Botschaften kontrollieren.',
-    descriptionEn: 'A construction worker discovers sunglasses that reveal the ruling class are actually aliens controlling us through subliminal messages.',
-    tags: ['Aliens', 'Control', 'Media', 'Subliminal'],
+    descriptionDe: 'John Carpenters Reagan-Ära-Satire: Ein Bauarbeiter (Roddy Piper) findet eine Sonnenbrille, die Aliens als Oberschicht und Werbung als subliminale Befehle („OBEY“, „CONSUME“) entlarvt. Berühmte 6-minütige Kampfszene. Shepard Faireys OBEY-Streetart stammt direkt hierher. Konsumkritik als Sci-Fi-Horror.',
+    descriptionEn: 'John Carpenter\'s Reagan-era satire: a construction worker (Roddy Piper) finds sunglasses revealing aliens as the upper class and ads as subliminal commands ("OBEY," "CONSUME"). Famous 6-minute fight scene. Shepard Fairey\'s OBEY street art originates directly from this. Consumer critique as sci-fi horror.',
+    tags: ['Aliens', 'Control', 'Media', 'Subliminal', 'Reagan Era', 'OBEY', 'Roddy Piper', 'Kapitalismuskritik'],
     realityScore: 50,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['Reptilians', 'NWO', 'Mind Control']
+    relatedTheoryTags: ['Reptilians', 'NWO', 'Mind Control', 'Subliminal Messages']
   },
   {
     id: 'm5',
@@ -61,12 +60,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 1975,
     creator: 'Robert Shea & Robert Anton Wilson',
-    descriptionDe: 'Ein satirischer, postmoderner Roman, der den Diskordianismus und die Illuminaten-Verschwörung popularisierte. Ein psychedelischer Trip durch die Gegenkultur.',
-    descriptionEn: 'A satirical, postmodern novel that popularized Discordianism and the Illuminati conspiracy. A psychedelic trip through counterculture.',
-    tags: ['Illuminati', 'Satire', 'Discordianism', 'Fnord'],
+    descriptionDe: 'Playboy-Leserbriefredakteure Shea & Wilson destillierten jeden Irren-Brief in einen 800-Seiten-Trip: Diskordianismus, goldene Unterbote, sprechende Delphine, die Illuminaten von Weishaupt. Erfand „Fnord“ und „Operation Mindfuck“. Kein anderes Buch vermischte Satire und Paranoia so untrennbar — Leser wissen nie, was ernst gemeint ist.',
+    descriptionEn: 'Playboy letter-column editors Shea & Wilson distilled every crank letter into an 800-page trip: Discordianism, golden submarines, talking dolphins, Weishaupt\'s Illuminati. Invented "Fnord" and "Operation Mindfuck." No other book merged satire and paranoia so inseparably — readers never know what\'s serious.',
+    tags: ['Illuminati', 'Satire', 'Discordianism', 'Fnord', 'Robert Anton Wilson', 'Counterculture', 'Operation Mindfuck', 'Postmodern'],
     realityScore: 30,
     complexity: 'MINDBENDING',
-    relatedTheoryTags: ['Illuminati', 'Atlantis', 'JFK']
+    relatedTheoryTags: ['Illuminati', 'Atlantis', 'JFK', 'Freemasons']
   },
   {
     id: 'm25',
@@ -74,26 +73,26 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'SERIES',
     year: 2021,
     creator: 'Shion Takeuchi',
-    descriptionDe: 'Für die Mitarbeiter von Cognito Inc. sind Verschwörungstheorien keine Fiktion, sondern Fakten. Eine brillante Satire über den "Deep State", die Echsenmenschen, Chemtrails und den Mandela-Effekt als bürokratischen Albtraum darstellt.',
-    descriptionEn: 'For the employees of Cognito Inc., conspiracy theories aren\'t fiction, they\'re facts. A brilliant satire on the "Deep State", portraying lizard people, chemtrails, and the Mandela Effect as a bureaucratic nightmare.',
-    tags: ['Deep State', 'Animation', 'Satire', 'Workplace'],
+    descriptionDe: 'Für die Mitarbeiter von Cognito Inc. sind Verschwörungstheorien Tagesgeschäft: Reptilien-Präsident, Mondlandungs-Fälschung, Chemtrails-Logistik, Hohle-Erde-Management. Brillante Netflix-Satire, die jede Theorie als bürokratischen Albtraum darstellt. Reagan als Roboter. Flache-Erde-Abteilung als Strafversetzung.',
+    descriptionEn: 'For Cognito Inc. employees, conspiracy theories are daily business: reptilian president, moon landing staging, chemtrails logistics, Hollow Earth management. Brilliant Netflix satire portraying every theory as bureaucratic nightmare. Reagan as robot. Flat Earth department as disciplinary transfer.',
+    tags: ['Deep State', 'Animation', 'Satire', 'Workplace', 'Netflix', 'Cognito Inc', 'Reptilians', 'Bureaucracy'],
     realityScore: 90,
     complexity: 'HIGH',
-    relatedTheoryTags: ['Deep State', 'Reptiloide', 'Hohle Erde', 'Mondlandung']
+    relatedTheoryTags: ['Deep State', 'Reptilians', 'Hollow Earth', 'Moon Landing', 'Chemtrails']
   },
-  // --- NEW MOVIES ---
+  // --- MOVIES ---
   {
     id: 'm6',
     title: 'JFK',
     type: 'MOVIE',
     year: 1991,
     creator: 'Oliver Stone',
-    descriptionDe: 'Oliver Stones Meisterwerk über die Ermittlungen von Jim Garrison. Der Film verwebt Fakten und Spekulationen zu einer massiven Verschwörung des militärisch-industriellen Komplexes zur Ermordung Kennedys.',
-    descriptionEn: 'Oliver Stone\'s masterpiece about Jim Garrison\'s investigation. The film weaves fact and speculation into a massive conspiracy by the military-industrial complex to assassinate Kennedy.',
-    tags: ['Assassination', 'CIA', 'Politics', 'Cold War'],
+    descriptionDe: 'Oliver Stones 3-Stunden-Epos über Jim Garrisons Ermittlungen (einzige Anklage im JFK-Fall). Verwebt Zapruder-Film, Magic-Bullet-Theorie, CIA-Kuba-Operationen und militaerisch-industriellen Komplex zu einem paranoiden Meisterwerk. Änderte US-Recht: JFK Records Act (1992) erzwang Aktenfreigabe.',
+    descriptionEn: 'Oliver Stone\'s 3-hour epic about Jim Garrison\'s investigation (only prosecution in the JFK case). Weaves Zapruder Film, Magic Bullet theory, CIA Cuba operations, and military-industrial complex into a paranoid masterpiece. Changed US law: JFK Records Act (1992) forced document release.',
+    tags: ['Assassination', 'CIA', 'Politics', 'Cold War', 'Jim Garrison', 'Zapruder', 'Military-Industrial Complex', 'PNAC'],
     realityScore: 85,
     complexity: 'HIGH',
-    relatedTheoryTags: ['JFK Assassination', 'Deep State', 'CIA']
+    relatedTheoryTags: ['JFK Assassination', 'Deep State', 'CIA', 'False Flag']
   },
   {
     id: 'm7',
@@ -101,12 +100,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1977,
     creator: 'Peter Hyams',
-    descriptionDe: 'Ein Film über eine gefälschte Marslandung, die in einem TV-Studio inszeniert wird, weil die NASA einen Fehlschlag fürchtet. Dieser Film befeuerte massiv die "Mondlandung war Fake"-Theorien.',
-    descriptionEn: 'A movie about a faked Mars landing staged in a TV studio because NASA fears failure. This film massively fueled the "Moon Landing Hoax" theories.',
-    tags: ['Space', 'Hoax', 'NASA', 'Government'],
+    descriptionDe: 'NASA fälscht eine Marslandung im TV-Studio, weil das Lebenserhaltungssystem versagt. Die drei Astronauten müssen fliehen, als sie realisieren, dass sie als Zeugen beseitigt werden sollen. Kam 8 Jahre nach Apollo 11 — perfektes Timing, um Moon-Hoax-Theorien zu befeuern. O.J. Simpson als Astronaut.',
+    descriptionEn: 'NASA fakes a Mars landing in a TV studio because the life support system failed. The three astronauts must flee when they realize they\'ll be eliminated as witnesses. Released 8 years after Apollo 11 — perfect timing to fuel Moon Hoax theories. O.J. Simpson as astronaut.',
+    tags: ['Space', 'Hoax', 'NASA', 'Government', 'Mars', 'Studio', 'Peter Hyams', 'Whistleblower'],
     realityScore: 60,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['Moon Landing Fake', 'NASA', 'Cover-up']
+    relatedTheoryTags: ['Moon Landing Fake', 'NASA', 'Cover-up', 'False Flag']
   },
   {
     id: 'm8',
@@ -114,12 +113,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1999,
     creator: 'Stanley Kubrick',
-    descriptionDe: 'Kubricks letzter Film über geheime, maskierte Elite-Rituale in New York. Oft zitiert als Enthüllung echter okkulter Praktiken der Oberschicht (Illuminaten/Epstein-Parallelen).',
-    descriptionEn: 'Kubrick\'s final film about secret, masked elite rituals in New York. Often cited as an exposure of real occult practices of the upper class (Illuminati/Epstein parallels).',
-    tags: ['Occult', 'Elite', 'Secret Society', 'Rituals'],
+    descriptionDe: 'Kubricks letzter Film: Dr. Bill Harford (Tom Cruise) gerät in ein maskiertes Elite-Ritual in einem Landhaus — und wird gewarnt, zu vergessen, was er sah. Oft als Enthüllung realer okkulter Praktiken der Oberschicht gelesen (Parallelen zu Epstein/Bohemian Grove). Kubricks Tod 6 Tage nach Schnittabnahme nährt „Er wusste zu viel“-Narrativ.',
+    descriptionEn: 'Kubrick\'s final film: Dr. Bill Harford (Tom Cruise) stumbles into a masked elite ritual at a country mansion — and is warned to forget what he saw. Often read as exposure of real occult upper-class practices (Epstein/Bohemian Grove parallels). Kubrick\'s death 6 days after final cut feeds "he knew too much" narrative.',
+    tags: ['Occult', 'Elite', 'Secret Society', 'Rituals', 'Kubrick', 'Masquerade', 'Epstein', 'Bohemian Grove'],
     realityScore: 70,
     complexity: 'HIGH',
-    relatedTheoryTags: ['Illuminati', 'Bohemian Grove', 'Elite']
+    relatedTheoryTags: ['Illuminati', 'Bohemian Grove', 'Elite', 'Adrenochrome']
   },
   {
     id: 'm9',
@@ -127,12 +126,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1998,
     creator: 'Peter Weir',
-    descriptionDe: 'Ein Mann entdeckt, dass sein gesamtes Leben eine Reality-TV-Show ist. Eine Metapher für die "Simulierte Realität" und totale Überwachung (Gang Stalking).',
-    descriptionEn: 'A man discovers his entire life is a reality TV show. A metaphor for "Simulated Reality" and total surveillance (Gang Stalking).',
-    tags: ['Simulation', 'Media', 'Surveillance', 'Control'],
+    descriptionDe: 'Truman Burbank (Jim Carrey) lebt sein gesamtes Leben in einer gigantischen Studiokuppel, beobachtet von Milliarden — ohne es zu wissen. Peter Weirs prophetischer Film präfigurierte Reality-TV, Überwachungskapitalismus und das „Truman-Syndrom“ (klinisch dokumentierte Wahnstörung). Flache-Erde-Bewegung adoptierte die Kuppel-Ästhetik.',
+    descriptionEn: 'Truman Burbank (Jim Carrey) lives his entire life in a giant studio dome, watched by billions — without knowing. Peter Weir\'s prophetic film prefigured reality TV, surveillance capitalism, and the "Truman Syndrome" (clinically documented delusion). Flat Earth movement adopted the dome aesthetic.',
+    tags: ['Simulation', 'Media', 'Surveillance', 'Control', 'Jim Carrey', 'Reality TV', 'Truman Syndrome', 'Dome'],
     realityScore: 45,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['Simulation Theory', 'Gang Stalking', 'Flat Earth']
+    relatedTheoryTags: ['Simulation Theory', 'Flat Earth', 'Surveillance', 'Dead Internet']
   },
   {
     id: 'm10',
@@ -140,27 +139,27 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'MOVIE',
     year: 1983,
     creator: 'David Cronenberg',
-    descriptionDe: 'Ein piratensender strahlt ein Signal aus, das Halluzinationen und physische Mutationen verursacht. Ein Klassiker über Gedankenkontrolle durch Medien.',
-    descriptionEn: 'A pirate signal broadcasts a transmission that causes hallucinations and physical mutations. A classic about mind control through media.',
-    tags: ['Body Horror', 'Media', 'Mind Control', 'Signal'],
+    descriptionDe: 'Max Renn (James Woods) entdeckt einen Piratensender, dessen Signal Halluzinationen und physische Mutationen erzeugt: Der Fernseher wird zum lebenden Organ, der Bauch zum Videokassetten-Schlitz. Cronenbergs „New Flesh“-Philosophie prophezeite die Verschmelzung von Mensch und Medium. McLuhans „The medium is the message“ als Body-Horror.',
+    descriptionEn: 'Max Renn (James Woods) discovers a pirate broadcast whose signal produces hallucinations and physical mutations: the TV becomes a living organ, the abdomen a videocassette slot. Cronenberg\'s "New Flesh" philosophy prophesied the fusion of human and medium. McLuhan\'s "the medium is the message" as body horror.',
+    tags: ['Body Horror', 'Media', 'Mind Control', 'Signal', 'Cronenberg', 'New Flesh', 'McLuhan', 'VHS'],
     realityScore: 20,
     complexity: 'MINDBENDING',
-    relatedTheoryTags: ['Mind Control', 'Subliminal', 'Transhumanism']
+    relatedTheoryTags: ['Mind Control', 'Subliminal Messages', 'Transhumanism', 'MK-Ultra']
   },
   
-  // --- NEW SERIES ---
+  // --- SERIES ---
   {
     id: 'm11',
     title: 'Mr. Robot',
     type: 'SERIES',
     year: 2015,
     creator: 'Sam Esmail',
-    descriptionDe: 'Eine Hackergruppe (fsociety) plant den Sturz des globalen Finanzkonglomerats "E Corp". Behandelt Themen wie Schuldenversklavung, Cyber-Warfare und die Elite (Deus Group).',
-    descriptionEn: 'A hacker group (fsociety) plots to take down the global financial conglomerate "E Corp". Covers themes of debt slavery, cyber warfare, and the elite (Deus Group).',
-    tags: ['Hacking', 'Economy', 'Elite', 'Anarchy'],
+    descriptionDe: 'Elliot Alderson (Rami Malek), paranoid-schizophrener Hacker, plant mit fsociety den Sturz von E Corp („Evil Corp“). Sam Esmails technisch präzises Hacking, DID-Darstellung und die „Deus Group“-Oligarchie machten die Serie zum Goldstandard realistischer Cyber-Verschwörung. 5/9-Hack als fiktiver 9/11 der Finanzwelt.',
+    descriptionEn: 'Elliot Alderson (Rami Malek), a paranoid schizophrenic hacker, plots with fsociety to topple E Corp ("Evil Corp"). Sam Esmail\'s technically precise hacking, DID portrayal, and the "Deus Group" oligarchy made the series the gold standard of realistic cyber-conspiracy. The 5/9 hack as fictional 9/11 of finance.',
+    tags: ['Hacking', 'Economy', 'Elite', 'Anarchy', 'Rami Malek', 'fsociety', 'Deus Group', 'Cybersecurity'],
     realityScore: 88,
     complexity: 'HIGH',
-    relatedTheoryTags: ['The Great Reset', 'NWO', 'Banking']
+    relatedTheoryTags: ['The Great Reset', 'NWO', 'Banking', 'Deep State']
   },
   {
     id: 'm12',
@@ -168,12 +167,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'SERIES',
     year: 2013,
     creator: 'Dennis Kelly',
-    descriptionDe: 'Fans eines Graphic Novels entdecken eine Verschwörung ("The Network"), die eine globale Pandemie plant, um die Weltbevölkerung durch Impfstoffe zu sterilisieren. Unheimlich prophetisch.',
-    descriptionEn: 'Fans of a graphic novel discover a conspiracy ("The Network") planning a global pandemic to sterilize the world population via vaccines. Eerily prophetic.',
-    tags: ['Pandemic', 'Depopulation', 'Deep State', 'Comics'],
+    descriptionDe: 'Fans eines Graphic Novels („The Utopia Experiments“) entdecken „The Network“ — eine Kabale, die eine globale Pandemie plant, um via Impfstoff die Weltbevölkerung zu sterilisieren. 7 Jahre vor COVID-19 ausgestrahlt. Dennis Kellys neonfarbone Ästhetik und amoralische Protagonisten schufen ein ungewöhnlich brutales Fernseherlebnis.',
+    descriptionEn: 'Fans of a graphic novel ("The Utopia Experiments") discover "The Network" — a cabal planning a global pandemic to sterilize the world population via vaccine. Aired 7 years before COVID-19. Dennis Kelly\'s neon-colored aesthetics and amoral protagonists created an unusually brutal TV experience.',
+    tags: ['Pandemic', 'Depopulation', 'Deep State', 'Comics', 'Dennis Kelly', 'The Network', 'Vaccine', 'Channel 4'],
     realityScore: 65,
     complexity: 'HIGH',
-    relatedTheoryTags: ['Corona Plandemic', 'The Great Reset', 'Big Pharma']
+    relatedTheoryTags: ['Corona Plandemic', 'The Great Reset', 'Depopulation', 'Vaccine']
   },
   {
     id: 'm13',
@@ -181,12 +180,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'SERIES',
     year: 2011,
     creator: 'Charlie Brooker',
-    descriptionDe: 'Eine Anthologie-Serie über die dunklen Seiten der Technologie. Episoden wie "Nosedive" (Social Credit) oder "Playtest" (AR-Horror) greifen reale technokratische Ängste auf.',
-    descriptionEn: 'An anthology series about the dark side of technology. Episodes like "Nosedive" (Social Credit) or "Playtest" (AR Horror) tap into real technocratic fears.',
-    tags: ['Technology', 'Dystopia', 'AI', 'Surveillance'],
+    descriptionDe: 'Charlie Brookers Anthologie-Serie über Technologie-Dystopien: „Nosedive“ (Social Credit), „White Bear“ (Bestrafungs-Entertainment), „15 Million Merits“ (Gamifizierte Ausbeutung), „Playtest“ (AR-Horror). Jede Episode ist ein eigenständiges Gedankenexperiment über technokratische Kontrollsysteme, die teilweise bereits Realität sind.',
+    descriptionEn: 'Charlie Brooker\'s anthology series on technology dystopias: "Nosedive" (social credit), "White Bear" (punishment entertainment), "15 Million Merits" (gamified exploitation), "Playtest" (AR horror). Each episode is a standalone thought experiment on technocratic control systems, some already reality.',
+    tags: ['Technology', 'Dystopia', 'AI', 'Surveillance', 'Charlie Brooker', 'Social Credit', 'Anthology', 'Netflix'],
     realityScore: 80,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['Transhumanism', '5G Mind Control', 'Simulation Theory']
+    relatedTheoryTags: ['Transhumanism', '5G Mind Control', 'Simulation Theory', 'Social Credit']
   },
   {
     id: 'm14',
@@ -194,27 +193,27 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'SERIES',
     year: 2022,
     creator: 'Dan Erickson',
-    descriptionDe: 'Mitarbeiter unterziehen sich einer Gehirn-OP, um ihre Arbeits-Erinnerungen vom Privatleben zu trennen. Eine Parabel auf Konzern-Kulte, Gedankenkontrolle und MK-Ultra.',
-    descriptionEn: 'Employees undergo brain surgery to separate their work memories from their personal lives. A parable on corporate cults, mind control, and MK-Ultra.',
-    tags: ['Corporate', 'Mind Control', 'Mystery', 'Psychology'],
+    descriptionDe: 'Lumon-Industries-Mitarbeiter unterziehen sich einer Gehirn-OP („Severance“), die Arbeits- und Privat-Erinnerungen trennt. Dan Ericksons Apple-TV-Serie ist eine kafkaeske Parabel auf Corporate Cults, MK-Ultra-Gedankenkontrolle und die Kompartimentalisierung moderner Arbeit. Kier Egan als L. Ron Hubbard des Büroalltags.',
+    descriptionEn: 'Lumon Industries employees undergo brain surgery ("severance") separating work and personal memories. Dan Erickson\'s Apple TV series is a Kafkaesque parable on corporate cults, MK-Ultra mind control, and the compartmentalization of modern work. Kier Egan as L. Ron Hubbard of office life.',
+    tags: ['Corporate', 'Mind Control', 'Mystery', 'Psychology', 'Apple TV', 'Lumon', 'MK-Ultra', 'Kafkaesque'],
     realityScore: 55,
     complexity: 'HIGH',
-    relatedTheoryTags: ['MK-Ultra', 'Mind Control', 'Corporate Control']
+    relatedTheoryTags: ['MK-Ultra', 'Mind Control', 'Corporate Control', 'Transhumanism']
   },
 
-  // --- NEW BOOKS ---
+  // --- BOOKS ---
   {
     id: 'm15',
     title: '1984',
     type: 'BOOK',
     year: 1949,
     creator: 'George Orwell',
-    descriptionDe: 'Der ultimative dystopische Roman. "Big Brother", "Neusprech" und das "Wahrheitsministerium" sind heute die Standardbegriffe jeder Verschwörungsdiskussion über Überwachung.',
-    descriptionEn: 'The ultimate dystopian novel. "Big Brother", "Newspeak", and the "Ministry of Truth" are now standard terms in any conspiracy discussion about surveillance.',
-    tags: ['Dystopia', 'Surveillance', 'Totalitarianism', 'Propaganda'],
+    descriptionDe: 'Die Mutter aller Dystopien: Ozeanien unter Big Brothers Teleskreens, Gedankenpolizei, Doppeldenk und Neusprech. Orwells „Wahrheitsministerium“, „Krieg ist Frieden“ und „2+2=5“ sind heute die Standardreferenzen jeder Überwachungs- und Propagandadebatte. Meistverkauftes Buch nach Trumps Amtsantritt 2017.',
+    descriptionEn: 'The mother of all dystopias: Oceania under Big Brother\'s telescreens, Thought Police, doublethink, and Newspeak. Orwell\'s "Ministry of Truth," "War is Peace," and "2+2=5" are now standard references in every surveillance and propaganda debate. Bestselling book after Trump\'s inauguration 2017.',
+    tags: ['Dystopia', 'Surveillance', 'Totalitarianism', 'Propaganda', 'Big Brother', 'Newspeak', 'Thought Police', 'Doublethink'],
     realityScore: 95,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['NWO', 'Surveillance', 'Police State']
+    relatedTheoryTags: ['NWO', 'Surveillance', 'Police State', 'Agenda 2030']
   },
   {
     id: 'm16',
@@ -222,12 +221,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 1932,
     creator: 'Aldous Huxley',
-    descriptionDe: 'Eine Gesellschaft, die durch Drogen (Soma), Gentechnik und Konditionierung kontrolliert wird – nicht durch Schmerz (wie bei Orwell), sondern durch Vergnügen.',
-    descriptionEn: 'A society controlled by drugs (Soma), genetic engineering, and conditioning – not through pain (like Orwell), but through pleasure.',
-    tags: ['Eugenics', 'Control', 'Drugs', 'Engineering'],
+    descriptionDe: 'Huxleys Gegenentwurf zu Orwell: Kontrolle nicht durch Schmerz, sondern durch Vergnügen. Soma-Droge, Bokanovsky-Eizellen-Klonierung, Konditionierung durch Schlaf-Hypnopädie, Promiskuität als Pflicht. Neil Postmans „Wir amüsieren uns zu Tode“ (1985) argumentierte: Huxley, nicht Orwell, hatte recht. Social-Media-Dopamin-Ökonomie bestätigt.',
+    descriptionEn: 'Huxley\'s counterpart to Orwell: control not through pain but pleasure. Soma drug, Bokanovsky egg cloning, conditioning via sleep-hypnopaedia, promiscuity as duty. Neil Postman\'s "Amusing Ourselves to Death" (1985) argued: Huxley, not Orwell, was right. Social media dopamine economy confirms.',
+    tags: ['Eugenics', 'Control', 'Drugs', 'Engineering', 'Soma', 'Conditioning', 'Neil Postman', 'Hedonism'],
     realityScore: 92,
     complexity: 'MEDIUM',
-    relatedTheoryTags: ['Transhumanism', 'Fluoride', 'Social Engineering']
+    relatedTheoryTags: ['Transhumanism', 'Fluoride', 'Social Engineering', 'Depopulation']
   },
   {
     id: 'm17',
@@ -235,12 +234,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 1988,
     creator: 'Umberto Eco',
-    descriptionDe: 'Drei Verlagsmitarbeiter erfinden zum Spaß einen "Plan" der Tempelritter zur Weltherrschaft – bis Geheimbünde anfangen, den Plan ernst zu nehmen. Die Dekonstruktion des Verschwörungsdenkens.',
-    descriptionEn: 'Three editors invent a "Plan" of the Knights Templar for world domination as a joke – untill secret societies start taking the plan seriously. The deconstruction of conspiracy thinking.',
-    tags: ['History', 'Occult', 'Templars', 'Satire'],
+    descriptionDe: 'Drei Verlagsmitarbeiter (Casaubon, Belbo, Diotallevi) erfinden zum Spaß den „Plan“: Tempelritter kontrollierten Erdenergie-Ströme seit dem 12. Jahrhundert. Die Fiktion wird zur Besessenheit, Geheimlogen nehmen den Plan ernst. Ecos intellektuelles Antidot gegen Verschwörungsdenken — und gleichzeitig dessen brillanteste Darstellung.',
+    descriptionEn: 'Three editors (Casaubon, Belbo, Diotallevi) invent "the Plan" for fun: Templars controlled Earth energy currents since the 12th century. Fiction becomes obsession, secret lodges take the Plan seriously. Eco\'s intellectual antidote to conspiracy thinking — and simultaneously its most brilliant portrayal.',
+    tags: ['History', 'Occult', 'Templars', 'Satire', 'Umberto Eco', 'Kabbalah', 'Rosicrucians', 'Semiotics'],
     realityScore: 80,
     complexity: 'MINDBENDING',
-    relatedTheoryTags: ['Knights Templar', 'Illuminati', 'Rosicrucians']
+    relatedTheoryTags: ['Knights Templar', 'Illuminati', 'Rosicrucians', 'Ley Lines']
   },
   {
     id: 'm18',
@@ -248,12 +247,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 2003,
     creator: 'Dan Brown',
-    descriptionDe: 'Ein Thriller, der behauptet, die katholische Kirche vertusche die wahre Blutlinie Jesu (Merowinger). Machte die Prieuré de Sion und den Heiligen Gral zum Mainstream-Thema.',
-    descriptionEn: 'A thriller claiming the Catholic Church is covering up the true bloodline of Jesus (Merovingians). Mainstreamed the Priory of Sion and the Holy Grail.',
-    tags: ['Religion', 'History', 'Vatican', 'Symbols'],
+    descriptionDe: 'Robert Langdon jagt durch Louvre, Westminster Abbey und Rosslyn Chapel: Jesus heiratete Maria Magdalena, die Merowinger sind deren Nachkommen, die Prieuré de Sion schützt das Geheimnis. 80M+ verkaufte Exemplare. Vatikan bezeichnete es als „voller Fehler“. Machte Symbologie-Paranoia zum Massenphänomen.',
+    descriptionEn: 'Robert Langdon races through the Louvre, Westminster Abbey, and Rosslyn Chapel: Jesus married Mary Magdalene, the Merovingians are their descendants, the Priory of Sion guards the secret. 80M+ copies sold. Vatican called it "full of errors." Made symbology paranoia a mass phenomenon.',
+    tags: ['Religion', 'History', 'Vatican', 'Symbols', 'Dan Brown', 'Priory of Sion', 'Merovingians', 'Holy Grail'],
     realityScore: 40,
     complexity: 'LOW',
-    relatedTheoryTags: ['Jesuits', 'Knights Templar', 'Vatican']
+    relatedTheoryTags: ['Jesuits', 'Knights Templar', 'Vatican', 'Freemasons']
   },
   {
     id: 'm19',
@@ -261,12 +260,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 1977,
     creator: 'Philip K. Dick',
-    descriptionDe: 'Ein Undercover-Drogenfahnder wird süchtig nach der Substanz D und muss sich schließlich selbst überwachen. Eine paranoide Vision über Identitätsverlust und Überwachungsstaat.',
-    descriptionEn: 'An undercover narcotics agent becomes addicted to Substance D and is eventually ordered to spy on himself. A paranoid vision of identity loss and the surveillance state.',
-    tags: ['Drugs', 'Paranoia', 'Surveillance', 'Identity'],
+    descriptionDe: 'Undercover-Agent Bob Arctor wird süchtig nach Substanz D und muss sich schließlich selbst überwachen — ohne sich zu erkennen (Split-Brain-Anzug). Dicks autobiografische Drogenparanoia, gewidmet seinen „verlorenen Freunden“. Linklaters Rotoskopie-Verfilmung (2006) verstärkte die Identitätsauflösungs-Ästhetik.',
+    descriptionEn: 'Undercover agent Bob Arctor becomes addicted to Substance D and must eventually surveil himself — without recognizing himself (scramble suit). Dick\'s autobiographical drug paranoia, dedicated to his "lost friends." Linklater\'s rotoscope film (2006) amplified the identity dissolution aesthetic.',
+    tags: ['Drugs', 'Paranoia', 'Surveillance', 'Identity', 'Philip K. Dick', 'Rotoscope', 'Linklater', 'Split Brain'],
     realityScore: 60,
     complexity: 'HIGH',
-    relatedTheoryTags: ['Gang Stalking', 'CIA', 'Mind Control']
+    relatedTheoryTags: ['Surveillance', 'CIA', 'Mind Control', 'MK-Ultra']
   },
   {
     id: 'm20',
@@ -274,12 +273,12 @@ const RAW_MEDIA_ITEMS: MediaItem[] = [
     type: 'BOOK',
     year: 1973,
     creator: 'Thomas Pynchon',
-    descriptionDe: 'Ein komplexes Epos über das Ende des 2. Weltkriegs, V2-Raketen, okkulte Nazis, Kartelle (IG Farben) und Paranoia. Gilt als eines der schwierigsten Werke der Postmoderne.',
-    descriptionEn: 'A complex epic set at the end of WWII involving V2 rockets, occult Nazis, cartels (IG Farben), and paranoia. Considered one of the most difficult works of postmodernism.',
-    tags: ['WWII', 'Military', 'Occult', 'Paranoia'],
+    descriptionDe: 'Tyrone Slotherops Erektionen sagen V2-Einschläge in London voraus — Auftakt für Pynchons 800-Seiten-Epos über IG Farben, okkulte Nazis (SS-Ahnenerbe), Pavlov-Konditionierung, Raketentechnik und die Paranoia industrieller Systeme. Pulitzer-Jury nominierte es, Kuratorium lehnte als „obszön“ ab. Unlesbar und unverzichtbar.',
+    descriptionEn: 'Tyrone Slothrop\'s erections predict V2 impacts in London — opener for Pynchon\'s 800-page epic about IG Farben, occult Nazis (SS Ahnenerbe), Pavlovian conditioning, rocketry, and the paranoia of industrial systems. Pulitzer jury nominated it, board rejected as "obscene." Unreadable and indispensable.',
+    tags: ['WWII', 'Military', 'Occult', 'Paranoia', 'Thomas Pynchon', 'IG Farben', 'V2 Rocket', 'Pavlov'],
     realityScore: 70,
     complexity: 'MINDBENDING',
-    relatedTheoryTags: ['Nazi Occultism', 'Vril', 'Paperclip']
+    relatedTheoryTags: ['Nazi Occultism', 'Vril', 'Operation Paperclip', 'IG Farben']
   }
 ];
 

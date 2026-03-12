@@ -23,7 +23,6 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     popularity: 77,
     originYear: '1996',
     tags: ['Geo-Engineering', 'Regierung', 'Gift', 'Aluminium', 'Barium', 'Contrails', 'Wetterkontrolle', 'Operation Cloverleaf'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
     relatedIds: ['t5', 't6', 't14', 't21', 't29', 't64']
   },
   {
@@ -82,7 +81,6 @@ export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
     popularity: 68,
     originYear: '1990er',
     tags: ['Wetter', 'Militär', 'Erdbeben', 'Frequenz', 'Ionosphäre', 'ELF', 'Tesla', 'Nick Begich', 'Geo-Engineering'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
     relatedIds: ['t2', 't6', 't14', 't22', 't47']
   },
   {
@@ -176,7 +174,6 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     popularity: 77,
     originYear: '1996',
     tags: ['Geo-Engineering', 'Government', 'Poison', 'Aluminum', 'Barium', 'Contrails', 'Weather Control', 'Operation Cloverleaf'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
     relatedIds: ['t5', 't6', 't14', 't21', 't29', 't64']
   },
   {
@@ -235,7 +232,6 @@ export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
     popularity: 68,
     originYear: '1990s',
     tags: ['Weather', 'Military', 'Earthquake', 'Frequency', 'Ionosphere', 'ELF', 'Tesla', 'Nick Begich', 'Geo-Engineering'],
-    videoUrl: 'https://www.youtube.com/watch?v=3qJvK8_8_V4',
     relatedIds: ['t2', 't6', 't14', 't22', 't47']
   },
   {

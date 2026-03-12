@@ -21,8 +21,8 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    updateSetting: <K extends keyof AppSettings>(state: SettingsState, action: PayloadAction<{ key: K; value: AppSettings[K] }>) => {
-      state.config[action.payload.key] = action.payload.value;
+    updateSetting: (state, action: PayloadAction<{ key: keyof AppSettings; value: AppSettings[keyof AppSettings] }>) => {
+      (state.config as Record<string, unknown>)[action.payload.key] = action.payload.value;
     },
     setLanguage: (state, action: PayloadAction<Language>) => {
       state.language = action.payload;

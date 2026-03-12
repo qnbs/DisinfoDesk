@@ -187,8 +187,6 @@ export default defineConfig(() => {
             file_handlers: [{
               action: './#/editor',
               accept: { 'application/json': ['.json', '.theory'] },
-              icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }],
-              launch_type: 'single-client',
             }],
             related_applications: [],
             scope_extensions: [{ origin: 'https://qnbs.github.io' }],

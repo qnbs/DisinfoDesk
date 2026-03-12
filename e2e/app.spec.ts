@@ -3,9 +3,11 @@ import { test, expect, Page } from '@playwright/test';
 /**
  * Helper: Dismiss the onboarding tour by clicking through all steps.
  * The app shows a boot sequence + tour on first visit (no persisted state).
+ * Steps 0 (language), 1 (age-gate), 2 (privacy) are mandatory.
+ * Steps 1-2 require checking a checkbox before the Next button is enabled.
  */
 async function dismissOnboarding(page: Page) {
-  // Wait for boot sequence to finish (z-[10000] overlay disappears)
+  // Wait for boot sequence to finish (cursor-wait overlay disappears)
   const bootOverlay = page.locator('.cursor-wait');
   await bootOverlay.waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {});
 
@@ -15,15 +17,29 @@ async function dismissOnboarding(page: Page) {
   
   if (!(await dialog.isVisible())) return;
 
-  // Click through steps until the tour is completed
+  // Click through all steps
   for (let i = 0; i < 10; i++) {
     if (!(await dialog.isVisible())) break;
 
-    // Prefer the skip/next button with known text
+    // Check any unchecked checkbox in the dialog (age-gate / privacy steps)
+    const checkbox = dialog.locator('input[type="checkbox"]').first();
+    if (await checkbox.isVisible().catch(() => false)) {
+      if (!(await checkbox.isChecked())) {
+        await checkbox.check();
+        await page.waitForTimeout(200);
+      }
+    }
+
+    // Click the next/skip/init button
     const actionBtn = dialog.locator('button').filter({ hasText: /weiter|next|start|los|begin|überspringen|skip|init/i }).first();
     if (await actionBtn.isVisible().catch(() => false)) {
-      await actionBtn.click();
-      await page.waitForTimeout(600);
+      // Wait for button to be enabled (checkbox required on mandatory steps)
+      await actionBtn.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {});
+      const isDisabled = await actionBtn.isDisabled().catch(() => false);
+      if (!isDisabled) {
+        await actionBtn.click();
+        await page.waitForTimeout(600);
+      }
     } else {
       // Fallback: click any visible button in dialog
       const anyBtn = dialog.locator('button').first();
@@ -371,8 +387,12 @@ test.describe('PWA', () => {
     await expect(manifestLink).toBeAttached();
   });
 
-  test('manifest.json is fetchable', async ({ page, baseURL }) => {
-    const response = await page.goto(`${baseURL}manifest.json`);
+  test('manifest is fetchable', async ({ page }) => {
+    await page.goto('/');
+    // Read the actual manifest href from the HTML to avoid hardcoding the filename
+    const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href');
+    expect(manifestHref).toBeTruthy();
+    const response = await page.goto(manifestHref!);
     if (response) {
       expect(response.status()).toBe(200);
       const data = await response.json();

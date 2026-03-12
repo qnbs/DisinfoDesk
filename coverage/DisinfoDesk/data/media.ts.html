@@ -1,0 +1,952 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for DisinfoDesk/data/media.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">DisinfoDesk/data</a> media.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>284/284</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>1/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>284/284</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">105x</span>
+<span class="cline-any cline-yes">105x</span>
+<span class="cline-any cline-yes">105x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { MediaItem } from '../types';
+import { generateArt } from '../utils/artEngine';
+&nbsp;
+const RAW_MEDIA_ITEMS: MediaItem[] = [
+  {
+    id: 'm1',
+    title: 'The Matrix',
+    type: 'MOVIE',
+    year: 1999,
+    creator: 'Wachowskis',
+    descriptionDe: 'Ein Hacker entdeckt, dass die Realität eine Maschinen-Simulation ist — und wird zum Erlöser der freien Menschheit. Wachowskis verschmolzen Baudrillards Simulacra-Philosophie, gnostische Erlösungsmythen und Hongkong-Martial-Arts zu einem kulturellen Wendepunkt. „Red Pill“ wurde Universalmetapher für Erwachungserlebnisse jeder Art.',
+    descriptionEn: 'A hacker discovers reality is a machine simulation — and becomes humanity\'s savior. The Wachowskis fused Baudrillard\'s simulacra philosophy, Gnostic salvation myths, and Hong Kong martial arts into a cultural turning point. "Red Pill" became a universal metaphor for awakening experiences of every kind.',
+    tags: ['Simulation', 'AI', 'Control', 'Gnosticism', 'Red Pill', 'Cyberpunk', 'Baudrillard', 'Martial Arts'],
+    realityScore: 40,
+    complexity: 'MINDBENDING',
+    relatedTheoryTags: ['Simulation Theory', 'AI', 'Control', 'Prison Planet', 'Archons']
+  },
+  {
+    id: 'm2',
+    title: 'The X-Files',
+    type: 'SERIES',
+    year: 1993,
+    creator: 'Chris Carter',
+    descriptionDe: 'Mulders „I want to believe“-Poster wurde Ikone einer Generation. 11 Staffeln lang definierten FBI-Agenten Mulder &amp; Scully den Goldstandard für Regierungs-Cover-up-Narrative: Syndikat, schwarzes Öl, Hybridisierung. Etablierte den „Trust no one“-Zeitgeist der 1990er.',
+    descriptionEn: 'Mulder\'s "I want to believe" poster became a generational icon. Across 11 seasons, FBI agents Mulder &amp; Scully defined the gold standard for government cover-up narratives: the Syndicate, black oil, hybridization. Established the "Trust no one" zeitgeist of the 1990s.',
+    tags: ['UFO', 'Government', 'Aliens', 'Deep State', 'FBI', 'Syndicate', 'Black Oil', 'Monster of the Week'],
+    realityScore: 60,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['UFO', 'Area 51', 'Men in Black', 'Majestic 12', 'Greys']
+  },
+  {
+    id: 'm3',
+    title: 'Deus Ex',
+    type: 'GAME',
+    year: 2000,
+    creator: 'Ion Storm',
+    descriptionDe: 'Warren Spectors Cyberpunk-Meisterwerk webt Illuminaten, MJ-12, FEMA-Lager, Area 51 und Graue Aliens in eine kohärente Handlung um Nano-Augmentierung und globale Verschwörung. Legendaer: Die Twin Towers fehlen in der NYC-Skyline — ein Jahr vor 9/11. Spielerisches Entscheidungssystem erlaubt drei ideologische Enden.',
+    descriptionEn: 'Warren Spector\'s cyberpunk masterpiece weaves Illuminati, MJ-12, FEMA camps, Area 51, and Grey Aliens into a coherent narrative about nano-augmentation and global conspiracy. Legendary: the Twin Towers are missing from the NYC skyline — one year before 9/11. Player choice system allows three ideological endings.',
+    tags: ['Cyberpunk', 'Illuminati', 'AI', 'NWO', 'FEMA', 'Nano-Augmentation', 'Warren Spector', 'Immersive Sim'],
+    realityScore: 75,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['NWO', 'Illuminati', 'AI', 'Majestic 12', 'Transhumanism']
+  },
+  {
+    id: 'm4',
+    title: 'They Live',
+    type: 'MOVIE',
+    year: 1988,
+    creator: 'John Carpenter',
+    descriptionDe: 'John Carpenters Reagan-Ära-Satire: Ein Bauarbeiter (Roddy Piper) findet eine Sonnenbrille, die Aliens als Oberschicht und Werbung als subliminale Befehle („OBEY“, „CONSUME“) entlarvt. Berühmte 6-minütige Kampfszene. Shepard Faireys OBEY-Streetart stammt direkt hierher. Konsumkritik als Sci-Fi-Horror.',
+    descriptionEn: 'John Carpenter\'s Reagan-era satire: a construction worker (Roddy Piper) finds sunglasses revealing aliens as the upper class and ads as subliminal commands ("OBEY," "CONSUME"). Famous 6-minute fight scene. Shepard Fairey\'s OBEY street art originates directly from this. Consumer critique as sci-fi horror.',
+    tags: ['Aliens', 'Control', 'Media', 'Subliminal', 'Reagan Era', 'OBEY', 'Roddy Piper', 'Kapitalismuskritik'],
+    realityScore: 50,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['Reptilians', 'NWO', 'Mind Control', 'Subliminal Messages']
+  },
+  {
+    id: 'm5',
+    title: 'Illuminatus! Trilogy',
+    type: 'BOOK',
+    year: 1975,
+    creator: 'Robert Shea &amp; Robert Anton Wilson',
+    descriptionDe: 'Playboy-Leserbriefredakteure Shea &amp; Wilson destillierten jeden Irren-Brief in einen 800-Seiten-Trip: Diskordianismus, goldene Unterbote, sprechende Delphine, die Illuminaten von Weishaupt. Erfand „Fnord“ und „Operation Mindfuck“. Kein anderes Buch vermischte Satire und Paranoia so untrennbar — Leser wissen nie, was ernst gemeint ist.',
+    descriptionEn: 'Playboy letter-column editors Shea &amp; Wilson distilled every crank letter into an 800-page trip: Discordianism, golden submarines, talking dolphins, Weishaupt\'s Illuminati. Invented "Fnord" and "Operation Mindfuck." No other book merged satire and paranoia so inseparably — readers never know what\'s serious.',
+    tags: ['Illuminati', 'Satire', 'Discordianism', 'Fnord', 'Robert Anton Wilson', 'Counterculture', 'Operation Mindfuck', 'Postmodern'],
+    realityScore: 30,
+    complexity: 'MINDBENDING',
+    relatedTheoryTags: ['Illuminati', 'Atlantis', 'JFK', 'Freemasons']
+  },
+  {
+    id: 'm25',
+    title: 'Inside Job',
+    type: 'SERIES',
+    year: 2021,
+    creator: 'Shion Takeuchi',
+    descriptionDe: 'Für die Mitarbeiter von Cognito Inc. sind Verschwörungstheorien Tagesgeschäft: Reptilien-Präsident, Mondlandungs-Fälschung, Chemtrails-Logistik, Hohle-Erde-Management. Brillante Netflix-Satire, die jede Theorie als bürokratischen Albtraum darstellt. Reagan als Roboter. Flache-Erde-Abteilung als Strafversetzung.',
+    descriptionEn: 'For Cognito Inc. employees, conspiracy theories are daily business: reptilian president, moon landing staging, chemtrails logistics, Hollow Earth management. Brilliant Netflix satire portraying every theory as bureaucratic nightmare. Reagan as robot. Flat Earth department as disciplinary transfer.',
+    tags: ['Deep State', 'Animation', 'Satire', 'Workplace', 'Netflix', 'Cognito Inc', 'Reptilians', 'Bureaucracy'],
+    realityScore: 90,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['Deep State', 'Reptilians', 'Hollow Earth', 'Moon Landing', 'Chemtrails']
+  },
+  // --- MOVIES ---
+  {
+    id: 'm6',
+    title: 'JFK',
+    type: 'MOVIE',
+    year: 1991,
+    creator: 'Oliver Stone',
+    descriptionDe: 'Oliver Stones 3-Stunden-Epos über Jim Garrisons Ermittlungen (einzige Anklage im JFK-Fall). Verwebt Zapruder-Film, Magic-Bullet-Theorie, CIA-Kuba-Operationen und militaerisch-industriellen Komplex zu einem paranoiden Meisterwerk. Änderte US-Recht: JFK Records Act (1992) erzwang Aktenfreigabe.',
+    descriptionEn: 'Oliver Stone\'s 3-hour epic about Jim Garrison\'s investigation (only prosecution in the JFK case). Weaves Zapruder Film, Magic Bullet theory, CIA Cuba operations, and military-industrial complex into a paranoid masterpiece. Changed US law: JFK Records Act (1992) forced document release.',
+    tags: ['Assassination', 'CIA', 'Politics', 'Cold War', 'Jim Garrison', 'Zapruder', 'Military-Industrial Complex', 'PNAC'],
+    realityScore: 85,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['JFK Assassination', 'Deep State', 'CIA', 'False Flag']
+  },
+  {
+    id: 'm7',
+    title: 'Capricorn One',
+    type: 'MOVIE',
+    year: 1977,
+    creator: 'Peter Hyams',
+    descriptionDe: 'NASA fälscht eine Marslandung im TV-Studio, weil das Lebenserhaltungssystem versagt. Die drei Astronauten müssen fliehen, als sie realisieren, dass sie als Zeugen beseitigt werden sollen. Kam 8 Jahre nach Apollo 11 — perfektes Timing, um Moon-Hoax-Theorien zu befeuern. O.J. Simpson als Astronaut.',
+    descriptionEn: 'NASA fakes a Mars landing in a TV studio because the life support system failed. The three astronauts must flee when they realize they\'ll be eliminated as witnesses. Released 8 years after Apollo 11 — perfect timing to fuel Moon Hoax theories. O.J. Simpson as astronaut.',
+    tags: ['Space', 'Hoax', 'NASA', 'Government', 'Mars', 'Studio', 'Peter Hyams', 'Whistleblower'],
+    realityScore: 60,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['Moon Landing Fake', 'NASA', 'Cover-up', 'False Flag']
+  },
+  {
+    id: 'm8',
+    title: 'Eyes Wide Shut',
+    type: 'MOVIE',
+    year: 1999,
+    creator: 'Stanley Kubrick',
+    descriptionDe: 'Kubricks letzter Film: Dr. Bill Harford (Tom Cruise) gerät in ein maskiertes Elite-Ritual in einem Landhaus — und wird gewarnt, zu vergessen, was er sah. Oft als Enthüllung realer okkulter Praktiken der Oberschicht gelesen (Parallelen zu Epstein/Bohemian Grove). Kubricks Tod 6 Tage nach Schnittabnahme nährt „Er wusste zu viel“-Narrativ.',
+    descriptionEn: 'Kubrick\'s final film: Dr. Bill Harford (Tom Cruise) stumbles into a masked elite ritual at a country mansion — and is warned to forget what he saw. Often read as exposure of real occult upper-class practices (Epstein/Bohemian Grove parallels). Kubrick\'s death 6 days after final cut feeds "he knew too much" narrative.',
+    tags: ['Occult', 'Elite', 'Secret Society', 'Rituals', 'Kubrick', 'Masquerade', 'Epstein', 'Bohemian Grove'],
+    realityScore: 70,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['Illuminati', 'Bohemian Grove', 'Elite', 'Adrenochrome']
+  },
+  {
+    id: 'm9',
+    title: 'The Truman Show',
+    type: 'MOVIE',
+    year: 1998,
+    creator: 'Peter Weir',
+    descriptionDe: 'Truman Burbank (Jim Carrey) lebt sein gesamtes Leben in einer gigantischen Studiokuppel, beobachtet von Milliarden — ohne es zu wissen. Peter Weirs prophetischer Film präfigurierte Reality-TV, Überwachungskapitalismus und das „Truman-Syndrom“ (klinisch dokumentierte Wahnstörung). Flache-Erde-Bewegung adoptierte die Kuppel-Ästhetik.',
+    descriptionEn: 'Truman Burbank (Jim Carrey) lives his entire life in a giant studio dome, watched by billions — without knowing. Peter Weir\'s prophetic film prefigured reality TV, surveillance capitalism, and the "Truman Syndrome" (clinically documented delusion). Flat Earth movement adopted the dome aesthetic.',
+    tags: ['Simulation', 'Media', 'Surveillance', 'Control', 'Jim Carrey', 'Reality TV', 'Truman Syndrome', 'Dome'],
+    realityScore: 45,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['Simulation Theory', 'Flat Earth', 'Surveillance', 'Dead Internet']
+  },
+  {
+    id: 'm10',
+    title: 'Videodrome',
+    type: 'MOVIE',
+    year: 1983,
+    creator: 'David Cronenberg',
+    descriptionDe: 'Max Renn (James Woods) entdeckt einen Piratensender, dessen Signal Halluzinationen und physische Mutationen erzeugt: Der Fernseher wird zum lebenden Organ, der Bauch zum Videokassetten-Schlitz. Cronenbergs „New Flesh“-Philosophie prophezeite die Verschmelzung von Mensch und Medium. McLuhans „The medium is the message“ als Body-Horror.',
+    descriptionEn: 'Max Renn (James Woods) discovers a pirate broadcast whose signal produces hallucinations and physical mutations: the TV becomes a living organ, the abdomen a videocassette slot. Cronenberg\'s "New Flesh" philosophy prophesied the fusion of human and medium. McLuhan\'s "the medium is the message" as body horror.',
+    tags: ['Body Horror', 'Media', 'Mind Control', 'Signal', 'Cronenberg', 'New Flesh', 'McLuhan', 'VHS'],
+    realityScore: 20,
+    complexity: 'MINDBENDING',
+    relatedTheoryTags: ['Mind Control', 'Subliminal Messages', 'Transhumanism', 'MK-Ultra']
+  },
+  
+  // --- SERIES ---
+  {
+    id: 'm11',
+    title: 'Mr. Robot',
+    type: 'SERIES',
+    year: 2015,
+    creator: 'Sam Esmail',
+    descriptionDe: 'Elliot Alderson (Rami Malek), paranoid-schizophrener Hacker, plant mit fsociety den Sturz von E Corp („Evil Corp“). Sam Esmails technisch präzises Hacking, DID-Darstellung und die „Deus Group“-Oligarchie machten die Serie zum Goldstandard realistischer Cyber-Verschwörung. 5/9-Hack als fiktiver 9/11 der Finanzwelt.',
+    descriptionEn: 'Elliot Alderson (Rami Malek), a paranoid schizophrenic hacker, plots with fsociety to topple E Corp ("Evil Corp"). Sam Esmail\'s technically precise hacking, DID portrayal, and the "Deus Group" oligarchy made the series the gold standard of realistic cyber-conspiracy. The 5/9 hack as fictional 9/11 of finance.',
+    tags: ['Hacking', 'Economy', 'Elite', 'Anarchy', 'Rami Malek', 'fsociety', 'Deus Group', 'Cybersecurity'],
+    realityScore: 88,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['The Great Reset', 'NWO', 'Banking', 'Deep State']
+  },
+  {
+    id: 'm12',
+    title: 'Utopia (UK)',
+    type: 'SERIES',
+    year: 2013,
+    creator: 'Dennis Kelly',
+    descriptionDe: 'Fans eines Graphic Novels („The Utopia Experiments“) entdecken „The Network“ — eine Kabale, die eine globale Pandemie plant, um via Impfstoff die Weltbevölkerung zu sterilisieren. 7 Jahre vor COVID-19 ausgestrahlt. Dennis Kellys neonfarbone Ästhetik und amoralische Protagonisten schufen ein ungewöhnlich brutales Fernseherlebnis.',
+    descriptionEn: 'Fans of a graphic novel ("The Utopia Experiments") discover "The Network" — a cabal planning a global pandemic to sterilize the world population via vaccine. Aired 7 years before COVID-19. Dennis Kelly\'s neon-colored aesthetics and amoral protagonists created an unusually brutal TV experience.',
+    tags: ['Pandemic', 'Depopulation', 'Deep State', 'Comics', 'Dennis Kelly', 'The Network', 'Vaccine', 'Channel 4'],
+    realityScore: 65,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['Corona Plandemic', 'The Great Reset', 'Depopulation', 'Vaccine']
+  },
+  {
+    id: 'm13',
+    title: 'Black Mirror',
+    type: 'SERIES',
+    year: 2011,
+    creator: 'Charlie Brooker',
+    descriptionDe: 'Charlie Brookers Anthologie-Serie über Technologie-Dystopien: „Nosedive“ (Social Credit), „White Bear“ (Bestrafungs-Entertainment), „15 Million Merits“ (Gamifizierte Ausbeutung), „Playtest“ (AR-Horror). Jede Episode ist ein eigenständiges Gedankenexperiment über technokratische Kontrollsysteme, die teilweise bereits Realität sind.',
+    descriptionEn: 'Charlie Brooker\'s anthology series on technology dystopias: "Nosedive" (social credit), "White Bear" (punishment entertainment), "15 Million Merits" (gamified exploitation), "Playtest" (AR horror). Each episode is a standalone thought experiment on technocratic control systems, some already reality.',
+    tags: ['Technology', 'Dystopia', 'AI', 'Surveillance', 'Charlie Brooker', 'Social Credit', 'Anthology', 'Netflix'],
+    realityScore: 80,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['Transhumanism', '5G Mind Control', 'Simulation Theory', 'Social Credit']
+  },
+  {
+    id: 'm14',
+    title: 'Severance',
+    type: 'SERIES',
+    year: 2022,
+    creator: 'Dan Erickson',
+    descriptionDe: 'Lumon-Industries-Mitarbeiter unterziehen sich einer Gehirn-OP („Severance“), die Arbeits- und Privat-Erinnerungen trennt. Dan Ericksons Apple-TV-Serie ist eine kafkaeske Parabel auf Corporate Cults, MK-Ultra-Gedankenkontrolle und die Kompartimentalisierung moderner Arbeit. Kier Egan als L. Ron Hubbard des Büroalltags.',
+    descriptionEn: 'Lumon Industries employees undergo brain surgery ("severance") separating work and personal memories. Dan Erickson\'s Apple TV series is a Kafkaesque parable on corporate cults, MK-Ultra mind control, and the compartmentalization of modern work. Kier Egan as L. Ron Hubbard of office life.',
+    tags: ['Corporate', 'Mind Control', 'Mystery', 'Psychology', 'Apple TV', 'Lumon', 'MK-Ultra', 'Kafkaesque'],
+    realityScore: 55,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['MK-Ultra', 'Mind Control', 'Corporate Control', 'Transhumanism']
+  },
+&nbsp;
+  // --- BOOKS ---
+  {
+    id: 'm15',
+    title: '1984',
+    type: 'BOOK',
+    year: 1949,
+    creator: 'George Orwell',
+    descriptionDe: 'Die Mutter aller Dystopien: Ozeanien unter Big Brothers Teleskreens, Gedankenpolizei, Doppeldenk und Neusprech. Orwells „Wahrheitsministerium“, „Krieg ist Frieden“ und „2+2=5“ sind heute die Standardreferenzen jeder Überwachungs- und Propagandadebatte. Meistverkauftes Buch nach Trumps Amtsantritt 2017.',
+    descriptionEn: 'The mother of all dystopias: Oceania under Big Brother\'s telescreens, Thought Police, doublethink, and Newspeak. Orwell\'s "Ministry of Truth," "War is Peace," and "2+2=5" are now standard references in every surveillance and propaganda debate. Bestselling book after Trump\'s inauguration 2017.',
+    tags: ['Dystopia', 'Surveillance', 'Totalitarianism', 'Propaganda', 'Big Brother', 'Newspeak', 'Thought Police', 'Doublethink'],
+    realityScore: 95,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['NWO', 'Surveillance', 'Police State', 'Agenda 2030']
+  },
+  {
+    id: 'm16',
+    title: 'Brave New World',
+    type: 'BOOK',
+    year: 1932,
+    creator: 'Aldous Huxley',
+    descriptionDe: 'Huxleys Gegenentwurf zu Orwell: Kontrolle nicht durch Schmerz, sondern durch Vergnügen. Soma-Droge, Bokanovsky-Eizellen-Klonierung, Konditionierung durch Schlaf-Hypnopädie, Promiskuität als Pflicht. Neil Postmans „Wir amüsieren uns zu Tode“ (1985) argumentierte: Huxley, nicht Orwell, hatte recht. Social-Media-Dopamin-Ökonomie bestätigt.',
+    descriptionEn: 'Huxley\'s counterpart to Orwell: control not through pain but pleasure. Soma drug, Bokanovsky egg cloning, conditioning via sleep-hypnopaedia, promiscuity as duty. Neil Postman\'s "Amusing Ourselves to Death" (1985) argued: Huxley, not Orwell, was right. Social media dopamine economy confirms.',
+    tags: ['Eugenics', 'Control', 'Drugs', 'Engineering', 'Soma', 'Conditioning', 'Neil Postman', 'Hedonism'],
+    realityScore: 92,
+    complexity: 'MEDIUM',
+    relatedTheoryTags: ['Transhumanism', 'Fluoride', 'Social Engineering', 'Depopulation']
+  },
+  {
+    id: 'm17',
+    title: 'Foucault\'s Pendulum',
+    type: 'BOOK',
+    year: 1988,
+    creator: 'Umberto Eco',
+    descriptionDe: 'Drei Verlagsmitarbeiter (Casaubon, Belbo, Diotallevi) erfinden zum Spaß den „Plan“: Tempelritter kontrollierten Erdenergie-Ströme seit dem 12. Jahrhundert. Die Fiktion wird zur Besessenheit, Geheimlogen nehmen den Plan ernst. Ecos intellektuelles Antidot gegen Verschwörungsdenken — und gleichzeitig dessen brillanteste Darstellung.',
+    descriptionEn: 'Three editors (Casaubon, Belbo, Diotallevi) invent "the Plan" for fun: Templars controlled Earth energy currents since the 12th century. Fiction becomes obsession, secret lodges take the Plan seriously. Eco\'s intellectual antidote to conspiracy thinking — and simultaneously its most brilliant portrayal.',
+    tags: ['History', 'Occult', 'Templars', 'Satire', 'Umberto Eco', 'Kabbalah', 'Rosicrucians', 'Semiotics'],
+    realityScore: 80,
+    complexity: 'MINDBENDING',
+    relatedTheoryTags: ['Knights Templar', 'Illuminati', 'Rosicrucians', 'Ley Lines']
+  },
+  {
+    id: 'm18',
+    title: 'The Da Vinci Code',
+    type: 'BOOK',
+    year: 2003,
+    creator: 'Dan Brown',
+    descriptionDe: 'Robert Langdon jagt durch Louvre, Westminster Abbey und Rosslyn Chapel: Jesus heiratete Maria Magdalena, die Merowinger sind deren Nachkommen, die Prieuré de Sion schützt das Geheimnis. 80M+ verkaufte Exemplare. Vatikan bezeichnete es als „voller Fehler“. Machte Symbologie-Paranoia zum Massenphänomen.',
+    descriptionEn: 'Robert Langdon races through the Louvre, Westminster Abbey, and Rosslyn Chapel: Jesus married Mary Magdalene, the Merovingians are their descendants, the Priory of Sion guards the secret. 80M+ copies sold. Vatican called it "full of errors." Made symbology paranoia a mass phenomenon.',
+    tags: ['Religion', 'History', 'Vatican', 'Symbols', 'Dan Brown', 'Priory of Sion', 'Merovingians', 'Holy Grail'],
+    realityScore: 40,
+    complexity: 'LOW',
+    relatedTheoryTags: ['Jesuits', 'Knights Templar', 'Vatican', 'Freemasons']
+  },
+  {
+    id: 'm19',
+    title: 'A Scanner Darkly',
+    type: 'BOOK',
+    year: 1977,
+    creator: 'Philip K. Dick',
+    descriptionDe: 'Undercover-Agent Bob Arctor wird süchtig nach Substanz D und muss sich schließlich selbst überwachen — ohne sich zu erkennen (Split-Brain-Anzug). Dicks autobiografische Drogenparanoia, gewidmet seinen „verlorenen Freunden“. Linklaters Rotoskopie-Verfilmung (2006) verstärkte die Identitätsauflösungs-Ästhetik.',
+    descriptionEn: 'Undercover agent Bob Arctor becomes addicted to Substance D and must eventually surveil himself — without recognizing himself (scramble suit). Dick\'s autobiographical drug paranoia, dedicated to his "lost friends." Linklater\'s rotoscope film (2006) amplified the identity dissolution aesthetic.',
+    tags: ['Drugs', 'Paranoia', 'Surveillance', 'Identity', 'Philip K. Dick', 'Rotoscope', 'Linklater', 'Split Brain'],
+    realityScore: 60,
+    complexity: 'HIGH',
+    relatedTheoryTags: ['Surveillance', 'CIA', 'Mind Control', 'MK-Ultra']
+  },
+  {
+    id: 'm20',
+    title: 'Gravity\'s Rainbow',
+    type: 'BOOK',
+    year: 1973,
+    creator: 'Thomas Pynchon',
+    descriptionDe: 'Tyrone Slotherops Erektionen sagen V2-Einschläge in London voraus — Auftakt für Pynchons 800-Seiten-Epos über IG Farben, okkulte Nazis (SS-Ahnenerbe), Pavlov-Konditionierung, Raketentechnik und die Paranoia industrieller Systeme. Pulitzer-Jury nominierte es, Kuratorium lehnte als „obszön“ ab. Unlesbar und unverzichtbar.',
+    descriptionEn: 'Tyrone Slothrop\'s erections predict V2 impacts in London — opener for Pynchon\'s 800-page epic about IG Farben, occult Nazis (SS Ahnenerbe), Pavlovian conditioning, rocketry, and the paranoia of industrial systems. Pulitzer jury nominated it, board rejected as "obscene." Unreadable and indispensable.',
+    tags: ['WWII', 'Military', 'Occult', 'Paranoia', 'Thomas Pynchon', 'IG Farben', 'V2 Rocket', 'Pavlov'],
+    realityScore: 70,
+    complexity: 'MINDBENDING',
+    relatedTheoryTags: ['Nazi Occultism', 'Vril', 'Operation Paperclip', 'IG Farben']
+  }
+];
+&nbsp;
+// Enrich with generated art
+export const MEDIA_ITEMS: MediaItem[] = RAW_MEDIA_ITEMS.map(item =&gt; ({
+    ...item,
+    imageUrl: generateArt(item.id, item.type, item.title)
+}));
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-03-12T22:10:54.915Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

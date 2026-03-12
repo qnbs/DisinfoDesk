@@ -88,7 +88,7 @@ export function guardPromptInput(input: string, maxLength = 4000): PromptGuardRe
 // --- Output Sanitization (DOMPurify) ---
 
 /** DOMPurify config: allow markdown-safe HTML only */
-const PURIFY_CONFIG: DOMPurify.Config = {
+const PURIFY_CONFIG = {
   ALLOWED_TAGS: [
     'b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -109,7 +109,7 @@ const PURIFY_CONFIG: DOMPurify.Config = {
  */
 export function sanitizeAIOutput(text: string): string {
   if (!text || typeof text !== 'string') return '';
-  return DOMPurify.sanitize(text, PURIFY_CONFIG);
+  return DOMPurify.sanitize(text, PURIFY_CONFIG) as string;
 }
 
 /**

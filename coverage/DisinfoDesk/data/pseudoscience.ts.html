@@ -1,0 +1,994 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for DisinfoDesk/data/pseudoscience.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">DisinfoDesk/data</a> pseudoscience.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>301/301</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>301/301</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a>
+<a name='L247'></a><a href='#L247'>247</a>
+<a name='L248'></a><a href='#L248'>248</a>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a>
+<a name='L293'></a><a href='#L293'>293</a>
+<a name='L294'></a><a href='#L294'>294</a>
+<a name='L295'></a><a href='#L295'>295</a>
+<a name='L296'></a><a href='#L296'>296</a>
+<a name='L297'></a><a href='#L297'>297</a>
+<a name='L298'></a><a href='#L298'>298</a>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
+import { Theory, Category, CategoryEn, DangerLevel, DangerLevelEn } from '../types';
+&nbsp;
+export const PSEUDOSCIENCE_THEORIES_DE: Theory[] = [
+  {
+    id: 't1',
+    title: 'Die flache Erde',
+    shortDescription: 'Revival eines mittelalterlichen Missverständnisses: Erde als flache Scheibe mit Antarktis-Eiswand-„Rand". Trotz überwältigender Evidenz (Satellitendaten, Physik, Navigation) kulturell virulent durch YouTube-Algorithmen. Klassischer Dunning-Kruger-Fall mit naiver Empirismus-Ideologie.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 58,
+    originYear: '19. Jh (Wiederaufleben)',
+    tags: ['NASA', 'Eiswand', 'Schwerkraft-Lüge', 'Perspektive', 'Bedford Level', 'Eratosthenes', 'CGI', 'Firmament'],
+    videoUrl: 'https://www.youtube.com/watch?v=VNqNnUJVcVs',
+    relatedIds: ['t4', 't10', 't56', 't21', 't14', 't19']
+  },
+  {
+    id: 't2',
+    title: 'Chemtrails',
+    shortDescription: 'Kondensstreifen als vermeintliches Geo-Engineering-Programm zur Bevölkerungsreduktion oder Gedankenkontrolle. Verwechselt Kondensation mit chemischer Dispersion. Trotz meteorologischer Aufklärung persistent durch visuelle Plausibilität („Himmel sieht komisch aus"). Mäßige Radikalisierung (Anti-Flugzeug-Aktivismus).',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 77,
+    originYear: '1996',
+    tags: ['Geo-Engineering', 'Regierung', 'Gift', 'Aluminium', 'Barium', 'Contrails', 'Wetterkontrolle', 'Operation Cloverleaf'],
+    relatedIds: ['t5', 't6', 't14', 't21', 't29', 't64']
+  },
+  {
+    id: 't6',
+    title: '5G Gedankenkontrolle',
+    shortDescription: '5G-Mobilfunk als Gedankenkontrolle-Vektor oder COVID-Auslöser. Technisch absurd (Mikrowellen ≠ Gedankenübertragung), aber kulturell mächtig (200+ UK-Sendemasten 2020 angezündet). Peaked 2019-2020, seit 2024 rückläufig durch normalisierte 5G-Allgegenwart. Verbindet Technophobie mit NWO-Ängsten.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 52,
+    originYear: '2019',
+    tags: ['Technologie', 'Strahlung', 'Überwachung', 'COVID-19', 'Mikrowellen', 'Frequenz', 'Wuhan', 'Sendemasten'],
+    relatedIds: ['t2', 't14', 't22', 't47', 't20']
+  },
+  {
+    id: 't11',
+    title: 'Younger Dryas Impakt',
+    shortDescription: 'Graham Hancocks Hypothese einer Komet-zerstörten Hochzivilisation (12.800 BP) zur Erklärung megalithischer Architektur. Enthält legitime Debatte (YD-Boundary-Layer), aber spekuliert weit über Datenlage (keine Zivilisations-Fossilien). Netflix-Mainstream via „Ancient Apocalypse". Wissenschaftlich dubios, kulturell einflussreich.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 79,
+    originYear: '2000er (Hancock)',
+    tags: ['Archäologie', 'Graham Hancock', 'Atlantis', 'Komet', 'Göbekli Tepe', 'Younger Dryas', 'Randall Carlson', 'Black Mat'],
+    videoUrl: 'https://www.youtube.com/watch?v=l78s2s7xDwU',
+    relatedIds: ['t10', 't12', 't19', 't51', 't56', 't50', 't39']
+  },
+  {
+    id: 't12',
+    title: 'Elektrisches Universum',
+    shortDescription: 'Velikovsky-inspirierte Kosmologie: Elektromagnetismus statt Gravitation als dominierende kosmische Kraft, erklärt Mythen als Plasma-Ereignisse. Widerspricht fundamentaler Physik (keine Peer-Review-Akzeptanz seit 50 Jahren). Faszination durch alternative Erklärungen für Sonnenprozesse. Nischenpublikum, wissenschaftlich irrelevant.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 38,
+    originYear: '1970er',
+    tags: ['Physik', 'Velikovsky', 'Plasma', 'Kosmologie', 'Immanuel Velikovsky', 'Thunderbolts Project', 'Z-Pinch'],
+    videoUrl: 'https://www.youtube.com/watch?v=2g3Yc7g7gEw',
+    relatedIds: ['t11', 't50', 't56']
+  },
+  {
+    id: 't19',
+    title: 'Prä-Astronautik (Ancient Aliens)',
+    shortDescription: 'Erich von Dänikens postkoloniale Denkfaulheit: Nicht-europäische Megalithen (Pyramiden, Nazca, Moai) „müssen" von Aliens stammen, da indigene Völker „zu primitiv" waren. Ignoriert archäologische Arbeitsnachweise. Netflix-Serie fixierte Pop-Kultur-Ikonografie („Aliens-Guy"-Meme). Intellektuell harmlos, kulturell herablassend.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 88,
+    originYear: '1968 (Däniken)',
+    tags: ['Aliens', 'Pyramiden', 'Erich von Däniken', 'Geschichte', 'Nazca', 'Moai', 'Baalbek', 'Göbekli Tepe', 'Giorgio Tsoukalos'],
+    videoUrl: 'https://www.youtube.com/watch?v=k3t1q6Z7w7o',
+    relatedIds: ['t3', 't11', 't17', 't51', 't39', 't50', 't66']
+  },
+  {
+    id: 't21',
+    title: 'HAARP',
+    shortDescription: 'Ionosphären-Forschungsanlage in Alaska als Superwaffe umgedeutet: angeblich Wetter-/Erdbebenkontrolle, Gedankenmanipulation. Technisch übertrieben (3,6 MW Leistung ≈ Radiosender), symbolisch mächtig (sichtbare Antennen-Arrays). Prototyp der Geo-Engineering-Angst, Vorbild für 5G/Chemtrails-Narrative.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 68,
+    originYear: '1990er',
+    tags: ['Wetter', 'Militär', 'Erdbeben', 'Frequenz', 'Ionosphäre', 'ELF', 'Tesla', 'Nick Begich', 'Geo-Engineering'],
+    relatedIds: ['t2', 't6', 't14', 't22', 't47']
+  },
+  {
+    id: 't50',
+    title: 'Der Gizeh-Todesstern',
+    shortDescription: 'Joseph P. Farrells techno-mystische These: Große Pyramide als „phasenkonjugierte Haubitze" – antike Plasmawaffe für kosmische Kriege. Mischt Festkörperphysik-Jargon mit Däniken-Spekulation. Null archäologische Evidenz für Waffensysteme. Prototyp für „Antike Hochtechnologie"-Genre. Nischenpublikum, Fringe-Physik.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 52,
+    originYear: '2001 (Buch)',
+    tags: ['Physik', 'Waffe', 'Antike Technologie', 'Plasma', 'Farrell', 'Tesla', 'Pyramide', 'Phase-Conjugation'],
+    videoUrl: '', 
+    relatedIds: ['t19', 't12', 't21', 't11', 't39', 't55', 't69']
+  },
+  {
+    id: 't51',
+    title: 'Atlantis',
+    shortDescription: 'Platons politische Allegorie (Timaios/Kritias 360 v.Chr.) über Hybris, als reale Zivilisation fehlinterpretiert. Pseudoarchäologen lokalisieren es beliebig (Santorini, Antarktis, Bahamas), ignorieren null archäologische Evidenz. Theosophie (Blavatsky) mystifizierte Atlantis als „Wurzelrasse". #1 Gateway-Theorie: harmlos, populär, romantisch.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 95,
+    originYear: '360 v. Chr.',
+    tags: ['Archäologie', 'Platon', 'Zivilisation', 'Meer', 'Santorini', 'Bimini Road', 'Helena Blavatsky', 'Ignatius Donnelly', 'Edgar Cayce'],
+    relatedIds: ['t11', 't19', 't21', 't10', 't52', 't56', 't39', 't69']
+  },
+  {
+    id: 't56',
+    title: 'Polsprung (Erdkrustenverschiebung)',
+    shortDescription: 'Charles Hapgoods Hypothese (1958, Einstein-endorsed) einer rapiden Lithosphären-Rotation über Asthenosphäre. Erklärt angeblich Mammut-Funde in Permafrost und Polwanderung. Geologisch widerlegt (Plattentektonik erklärt langsame Drift). 2012-Weltuntergangswelle reaktivierte Interesse. Apokalyptisches Potenzial, wissenschaftlich obsolet.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 63,
+    originYear: '1958 (Hapgood)',
+    tags: ['Katastrophe', 'Geologie', 'Klima', 'Weltuntergang', 'Charles Hapgood', 'Albert Einstein', 'Plattentektonik', '2012'],
+    relatedIds: ['t1', 't11', 't28', 't51', 't12']
+  },
+  {
+    id: 't66',
+    title: 'Black Knight Satellit',
+    shortDescription: 'NASA-Weltraumschrott-Foto (1998, STS-88-Hitzeschild-Decke) als  alien-Überwachungssatellit (13.000 Jahre alt!) umgedeutet. Vereint Tesla-Radiowellen-Beobachtungen (1899), unidentifizierte Orbit-Objekte (1950er) und Paranoia. Visuelle Fehlinterpretation + mythologische Rückprojektion. Harmlose Sci-Fi-Ästhetik.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 59,
+    originYear: '1950er',
+    tags: ['Aliens', 'Weltraum', 'Tesla', 'NASA', 'STS-88', 'Polar Orbit', 'Thermal Blanket', 'Nikola Tesla'],
+    relatedIds: ['t17', 't19', 't13', 't51']
+  },
+  {
+    id: 't69',
+    title: 'Ley-Linien',
+    shortDescription: 'Alfred Watkins\' (1921) Beobachtung gerader Landschafts-Alignments von Menhiren, Kirchen, Hügeln. Archäologisch Zufall + Bestätigungsfehler (unendlich viele Linien durch beliebige Punkte ziehbar). New-Age-Bewegung deutete Linien als „Erdenergie-Kanäle". Harmlose Geomantie, nährt „Sacred Geometry"-Ästhetik.',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.LOW,
+    popularity: 55,
+    originYear: '1921',
+    tags: ['Energie', 'Erde', 'Geografie', 'Esoterik', 'Alfred Watkins', 'Geomantie', 'Sacred Geometry', 'Dragon Lines'],
+    relatedIds: ['t10', 't51', 't76', 't50']
+  },
+  {
+    id: 't76',
+    title: 'Wassergedächtnis',
+    shortDescription: 'Jacques Benvenistes diskreditierte Nature-Studie (1988): Wasser speichere Molekül-„Informationen" trotz Verdünnung unter Avogadro-Konstante. Immunologe Basis für Homöopathie-Apologetik. Von James Randi/Nature investigativ widerlegt. Kulturelle Resilienz durch esoterische Wellness-Industrie. Finanziell schädlich (verzögerte Medizin).',
+    category: Category.PSEUDOSCIENCE,
+    dangerLevel: DangerLevel.MEDIUM,
+    popularity: 69,
+    originYear: '1988 (Benveniste)',
+    tags: ['Chemie', 'Gesundheit', 'Homöopathie', 'Wasser', 'Jacques Benveniste', 'Avogadro', 'James Randi', 'Masaru Emoto'],
+    relatedIds: ['t29', 't69']
+  }
+];
+&nbsp;
+export const PSEUDOSCIENCE_THEORIES_EN: Theory[] = [
+  {
+    id: 't1',
+    title: 'Flat Earth',
+    shortDescription: 'Revival of a medieval misunderstanding: Earth as flat disk with Antarctic ice wall "edge". Despite overwhelming evidence (satellite data, physics, navigation), culturally virulent through YouTube algorithms. Classic Dunning-Kruger case with naive empiricism ideology.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 58,
+    originYear: '19th C (Revival)',
+    tags: ['NASA', 'Ice Wall', 'Gravity Lie', 'Perspective', 'Bedford Level', 'Eratosthenes', 'CGI', 'Firmament'],
+    videoUrl: 'https://www.youtube.com/watch?v=VNqNnUJVcVs',
+    relatedIds: ['t4', 't10', 't56', 't21', 't14', 't19']
+  },
+  {
+    id: 't2',
+    title: 'Chemtrails',
+    shortDescription: 'Contrails as alleged geoengineering program for population reduction or mind control. Confuses condensation with chemical dispersion. Despite meteorological clarification, persistent through visual plausibility ("sky looks weird"). Moderate radicalization (anti-aircraft activism).',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 77,
+    originYear: '1996',
+    tags: ['Geo-Engineering', 'Government', 'Poison', 'Aluminum', 'Barium', 'Contrails', 'Weather Control', 'Operation Cloverleaf'],
+    relatedIds: ['t5', 't6', 't14', 't21', 't29', 't64']
+  },
+  {
+    id: 't6',
+    title: '5G Mind Control',
+    shortDescription: '5G mobile network as mind control vector or COVID trigger. Technically absurd (microwaves ≠ thought transmission), but culturally powerful (200+ UK cell towers torched 2020). Peaked 2019-2020, declining since 2024 through normalized 5G ubiquity. Combines technophobia with NWO fears.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 52,
+    originYear: '2019',
+    tags: ['Technology', 'Radiation', 'Surveillance', 'COVID-19', 'Microwaves', 'Frequency', 'Wuhan', 'Cell Towers'],
+    relatedIds: ['t2', 't14', 't22', 't47', 't20']
+  },
+  {
+    id: 't11',
+    title: 'Younger Dryas Impact',
+    shortDescription: 'Graham Hancock\'s hypothesis of a comet-destroyed advanced civilization (12,800 BP) explaining megalithic architecture. Contains legitimate debate (YD Boundary Layer) but speculates far beyond data (no civilization fossils). Netflix mainstream via "Ancient Apocalypse". Scientifically dubious, culturally influential.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 79,
+    originYear: '2000s (Hancock)',
+    tags: ['Archaeology', 'Graham Hancock', 'Atlantis', 'Comet', 'Göbekli Tepe', 'Younger Dryas', 'Randall Carlson', 'Black Mat'],
+    videoUrl: 'https://www.youtube.com/watch?v=l78s2s7xDwU',
+    relatedIds: ['t10', 't12', 't19', 't51', 't56', 't50', 't39']
+  },
+  {
+    id: 't12',
+    title: 'Electric Universe',
+    shortDescription: 'Velikovsky-inspired cosmology: electromagnetism instead of gravity as dominant cosmic force, explains myths as plasma events. Contradicts fundamental physics (no peer-review acceptance for 50 years). Fascination through alternative solar process explanations. Niche audience, scientifically irrelevant.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 38,
+    originYear: '1970s',
+    tags: ['Physics', 'Velikovsky', 'Plasma', 'Cosmology', 'Immanuel Velikovsky', 'Thunderbolts Project', 'Z-Pinch'],
+    videoUrl: 'https://www.youtube.com/watch?v=2g3Yc7g7gEw',
+    relatedIds: ['t11', 't50', 't56']
+  },
+  {
+    id: 't19',
+    title: 'Ancient Astronauts',
+    shortDescription: 'Erich von Däniken\'s postcolonial intellectual laziness: non-European megaliths (pyramids, Nazca, Moai) "must" be alien-made because indigenous peoples were "too primitive". Ignores archaeological labor evidence. Netflix series solidified pop-culture iconography ("Aliens Guy" meme). Intellectually harmless, culturally condescending.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 88,
+    originYear: '1968 (Däniken)',
+    tags: ['Aliens', 'Pyramids', 'Erich von Däniken', ' History', 'Nazca', 'Moai', 'Baalbek', 'Göbekli Tepe', 'Giorgio Tsoukalos'],
+    videoUrl: 'https://www.youtube.com/watch?v=k3t1q6Z7w7o',
+    relatedIds: ['t3', 't11', 't17', 't51', 't39', 't50', 't66']
+  },
+  {
+    id: 't21',
+    title: 'HAARP',
+    shortDescription: 'Ionosphere research facility in Alaska reinterpreted as superweapon: allegedly weather/earthquake control, mind manipulation. Technically exaggerated (3.6 MW power ≈ radio station), symbolically powerful (visible antenna arrays). Prototype of geoengineering fear, template for 5G/chemtrails narratives.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 68,
+    originYear: '1990s',
+    tags: ['Weather', 'Military', 'Earthquake', 'Frequency', 'Ionosphere', 'ELF', 'Tesla', 'Nick Begich', 'Geo-Engineering'],
+    relatedIds: ['t2', 't6', 't14', 't22', 't47']
+  },
+  {
+    id: 't50',
+    title: 'Giza Death Star',
+    shortDescription: 'Joseph P. Farrell\'s techno-mystical thesis: Great Pyramid as "phase-conjugate howitzer" – ancient plasma weapon for cosmic wars. Mixes solid-state physics jargon with Däniken speculation. Zero archaeological evidence for weapon systems. Prototype for "Ancient High-Tech" genre. Niche audience, fringe physics.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 52,
+    originYear: '2001 (Book)',
+    tags: ['Physics', 'Weapon', 'Ancient Tech', 'Plasma', 'Farrell', 'Tesla', 'Pyramid', 'Phase-Conjugation'],
+    videoUrl: '', 
+    relatedIds: ['t19', 't12', 't21', 't11', 't39', 't55', 't69']
+  },
+  {
+    id: 't51',
+    title: 'Atlantis',
+    shortDescription: 'Plato\'s political allegory (Timaeus/Critias 360 BCE) about hubris, misinterpreted as real civilization. Pseudo-archaeologists localize it arbitrarily (Santorini, Antarctica, Bahamas), ignore zero archaeological evidence. Theosophy (Blavatsky) mystified Atlantis as "Root Race". #1 gateway theory: harmless, popular, romantic.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 95,
+    originYear: '360 BC',
+    tags: ['Archaeology', 'Plato', 'Civilization', 'Ocean', 'Santorini', 'Bimini Road', 'Helena Blavatsky', 'Ignatius Donnelly', 'Edgar Cayce'],
+    relatedIds: ['t11', 't19', 't21', 't10', 't52', 't56', 't39', 't69']
+  },
+  {
+    id: 't56',
+    title: 'Pole Shift (Crustal Displacement)',
+    shortDescription: 'Charles Hapgood\'s hypothesis (1958, Einstein-endorsed) of rapid lithosphere rotation over asthenosphere. Allegedly explains mammoth permafrost finds and polar wandering. Geologically refuted (plate tectonics explains slow drift). 2012 doomsday wave reactivated interest. Apocalyptic potential, scientifically obsolete.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 63,
+    originYear: '1958 (Hapgood)',
+    tags: ['Cataclysm', 'Geology', 'Climate', 'Doomsday', 'Charles Hapgood', 'Albert Einstein', 'Plate Tectonics', '2012'],
+    relatedIds: ['t1', 't11', 't28', 't51', 't12']
+  },
+  {
+    id: 't66',
+    title: 'Black Knight Satellite',
+    shortDescription: 'NASA space debris photo (1998, STS-88 heat shield blanket) reinterpreted as alien surveillance satellite (13,000 years old!). Combines Tesla radio wave observations (1899), unidentified orbit objects (1950s), and paranoia. Visual misinterpretation + mythological back-projection. Harmless sci-fi aesthetics.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 59,
+    originYear: '1950s',
+    tags: ['Aliens', 'Space', 'Tesla', 'NASA', 'STS-88', 'Polar Orbit', 'Thermal Blanket', 'Nikola Tesla'],
+    relatedIds: ['t17', 't19', 't13', 't51']
+  },
+  {
+    id: 't69',
+    title: 'Ley Lines',
+    shortDescription: 'Alfred Watkins\' (1921) observation of straight landscape alignments of menhirs, churches, hills. Archaeologically coincidence + confirmation bias (infinitely many lines drawable through arbitrary points). New Age movement interpreted lines as "earth energy channels". Harmless geomancy, nourishes "Sacred Geometry" aesthetics.',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.LOW,
+    popularity: 55,
+    originYear: '1921',
+    tags: ['Energy', 'Earth', 'Geography', 'Esoteric', 'Alfred Watkins', 'Geomancy', 'Sacred Geometry', 'Dragon Lines'],
+    relatedIds: ['t10', 't51', 't76', 't50']
+  },
+  {
+    id: 't76',
+    title: 'Water Memory',
+    shortDescription: 'Jacques Benveniste\'s discredited Nature study (1988): water stores molecular "information" despite dilution below Avogadro constant. Immunologist basis for homeopathy apologetics. Investigatively refuted by James Randi/Nature. Cultural resilience through esoteric wellness industry. Financially harmful (delayed medicine).',
+    category: CategoryEn.PSEUDOSCIENCE,
+    dangerLevel: DangerLevelEn.MEDIUM,
+    popularity: 69,
+    originYear: '1988 (Benveniste)',
+    tags: ['Chemistry', 'Health', 'Homeopathy', 'Water', 'Jacques Benveniste', 'Avogadro', 'James Randi', 'Masaru Emoto'],
+    relatedIds: ['t29', 't69']
+  }
+];</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-03-12T22:10:54.915Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { completeOnboarding, setLanguage as setReduxLanguage, setAgeConsent, setPrivacyAccepted } from '../store/slices/settingsSlice';
+import { completeOnboarding, setLanguage as setReduxLanguage, updateSetting } from '../store/slices/settingsSlice';
 import { Button, Card } from './ui/Common';
 import { Terminal, ArrowRight, ShieldCheck, Search, MessageSquare, LayoutDashboard, Globe, Check, AlertTriangle, FileText } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -117,8 +117,8 @@ const useOnboardingLogic = () => {
     // Step 2 = privacy — must accept before proceeding
     if (stepIndex === 2 && !privacyAccepted) return;
 
-    if (stepIndex === 1) dispatch(setAgeConsent());
-    if (stepIndex === 2) dispatch(setPrivacyAccepted());
+    if (stepIndex === 1) dispatch(updateSetting({ key: 'hasAgeConsent', value: true }));
+    if (stepIndex === 2) dispatch(updateSetting({ key: 'hasAcceptedPrivacy', value: true }));
 
     if (stepIndex < TOUR_STEPS.length - 1) {
       setStepIndex(prev => prev + 1);

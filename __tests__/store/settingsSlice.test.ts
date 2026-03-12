@@ -6,6 +6,8 @@ import settingsReducer, {
   setActiveTab,
   clearLogs,
   completeOnboarding,
+  setAgeConsent,
+  setPrivacyAccepted,
 } from '../../store/slices/settingsSlice';
 
 const getInitialState = () => settingsReducer(undefined, { type: '@@INIT' });
@@ -120,6 +122,46 @@ describe('settingsSlice', () => {
       const state = getInitialState();
       const next = settingsReducer(state, completeOnboarding());
       expect(next.config.hasSeenOnboarding).toBe(true);
+    });
+  });
+
+  describe('setAgeConsent', () => {
+    it('defaults to false', () => {
+      const state = getInitialState();
+      expect(state.config.hasAgeConsent).toBe(false);
+    });
+
+    it('sets hasAgeConsent to true', () => {
+      const state = getInitialState();
+      const next = settingsReducer(state, setAgeConsent());
+      expect(next.config.hasAgeConsent).toBe(true);
+    });
+  });
+
+  describe('setPrivacyAccepted', () => {
+    it('defaults to false', () => {
+      const state = getInitialState();
+      expect(state.config.hasAcceptedPrivacy).toBe(false);
+    });
+
+    it('sets hasAcceptedPrivacy to true', () => {
+      const state = getInitialState();
+      const next = settingsReducer(state, setPrivacyAccepted());
+      expect(next.config.hasAcceptedPrivacy).toBe(true);
+    });
+  });
+
+  describe('updateSetting for consent fields', () => {
+    it('can set hasAgeConsent via updateSetting', () => {
+      const state = getInitialState();
+      const next = settingsReducer(state, updateSetting({ key: 'hasAgeConsent', value: true }));
+      expect(next.config.hasAgeConsent).toBe(true);
+    });
+
+    it('can set hasAcceptedPrivacy via updateSetting', () => {
+      const state = getInitialState();
+      const next = settingsReducer(state, updateSetting({ key: 'hasAcceptedPrivacy', value: true }));
+      expect(next.config.hasAcceptedPrivacy).toBe(true);
     });
   });
 });

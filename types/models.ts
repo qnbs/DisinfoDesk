@@ -160,5 +160,5 @@ export interface SourceItem {
   title: string;
   url?: string;
   snippet?: string;
-  sourceType?: 'WEB' | 'ACADEMIC' | 'NEWS' | 'UNKNOWN';
+  sourceType?: 'WEB' | 'ACADEMIC' | 'NEWS' | 'UNKNOWN' | 'LOCAL';
 }

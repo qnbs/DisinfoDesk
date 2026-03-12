@@ -233,6 +233,8 @@ function render(time: number) {
 }
 
 self.onmessage = (e) => {
+    // Verify origin: only accept messages from trusted sources
+    if (e.origin && e.origin !== self.location.origin) return;
     const { type, payload } = e.data;
     switch(type) {
         case 'INIT':
@@ -262,9 +264,11 @@ self.onmessage = (e) => {
             }
             break;
     }
-}
+};
 
 self.addEventListener('message', (e) => {
+    // Verify origin for interaction messages
+    if (e.origin && e.origin !== self.location.origin) return;
     if (e.data.type === 'INTERACT') {
         const { x, y, tool } = e.data.payload;
         if (tool === 'CURE') {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Sparkles, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
+import { X, Sparkles, CheckCircle2, AlertCircle, Zap, Terminal } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ChangelogEntry {
@@ -96,7 +96,7 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998] transition-opacity duration-300 ${
           animate ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
@@ -111,36 +111,43 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
         }`}
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden glass-panel-elevated">
+        <div className="relative bg-[#020617] border border-slate-700/50 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden ring-1 ring-white/5">
+          {/* Cyber Background Effects */}
+          <div className="absolute inset-0 bg-cyber-grid bg-[length:40px_40px] opacity-[0.03] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.15)_50%)] bg-[length:100%_4px] pointer-events-none opacity-20 z-[1]" />
+
           {/* Header */}
-          <div className="relative px-6 py-5 border-b border-slate-800/50 bg-gradient-to-r from-slate-900/50 to-transparent">
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-accent-cyan/40 to-transparent" />
+          <div className="relative z-[2] px-6 py-4 border-b border-slate-800/80 bg-slate-900/50">
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-accent-cyan/50 via-accent-purple/30 to-transparent" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-accent-cyan/10 rounded-lg border border-accent-cyan/20">
-                  <Sparkles size={20} className="text-accent-cyan" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-accent-cyan/20 blur-lg rounded-full" />
+                  <div className="relative p-2 bg-slate-950 rounded-lg border border-slate-700/50">
+                    <Terminal size={18} className="text-accent-cyan drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
+                  </div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">
+                  <h2 className="text-base font-black text-white uppercase tracking-wider">
                     {isDe ? "Was ist neu" : "What's New"}
                   </h2>
-                  <p className="text-xs text-slate-400 font-mono mt-0.5">
-                    {isDe ? "Neue Features & Verbesserungen" : "New Features & Improvements"}
+                  <p className="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em] mt-0.5">
+                    {isDe ? "System-Changelog" : "System Changelog"}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+                className="p-2 hover:bg-slate-800/80 rounded-lg transition-colors text-slate-500 hover:text-white focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none border border-transparent hover:border-slate-700/50"
                 aria-label={isDe ? "Schließen" : "Close"}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto custom-scrollbar max-h-[calc(80vh-180px)]">
+          <div className="relative z-[2] overflow-y-auto custom-scrollbar max-h-[calc(80vh-180px)]">
             <div className="px-6 py-5">
               {/* Version Selector */}
               {CHANGELOG.length > 1 && (
@@ -149,10 +156,10 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
                     <button
                       key={idx}
                       onClick={() => setSelectedVersion(idx)}
-                      className={`px-3 py-1.5 rounded-lg font-mono text-sm whitespace-nowrap transition-all ${
+                      className={`px-3 py-1.5 rounded-lg font-mono text-xs whitespace-nowrap transition-all border ${
                         selectedVersion === idx
-                          ? 'bg-accent-cyan text-black font-bold'
-                          : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                          ? 'bg-accent-cyan/10 text-accent-cyan font-bold border-accent-cyan/40'
+                          : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 border-slate-700/50 hover:text-white'
                       }`}
                     >
                       v{entry.version}
@@ -162,11 +169,11 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
               )}
 
               {/* Version Header */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold text-white">{title}</h3>
+              <div className="mb-5">
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight">{title}</h3>
                   {changelog.badge && (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeStyles(changelog.badge)}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getBadgeStyles(changelog.badge)}`}>
                       {getBadgeIcon(changelog.badge)}
                       {changelog.badge === 'new' && (isDe ? 'NEU' : 'NEW')}
                       {changelog.badge === 'improved' && (isDe ? 'VERBESSERT' : 'IMPROVED')}
@@ -175,8 +182,8 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 font-mono">
-                  {isDe ? "Veröffentlicht am" : "Released on"} {new Date(changelog.date).toLocaleDateString(isDe ? 'de-DE' : 'en-US', {
+                <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+                  {isDe ? "Veröffentlicht" : "Released"} {new Date(changelog.date).toLocaleDateString(isDe ? 'de-DE' : 'en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -185,20 +192,20 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
               </div>
 
               {/* Changelog Items */}
-              <ul className="space-y-3">
+              <ul className="space-y-2.5">
                 {items.map((item, idx) => (
-                  <li key={idx} className="flex gap-3 text-sm">
-                    <span className="text-accent-cyan mt-1 flex-shrink-0">▸</span>
-                    <span className="text-slate-300 flex-1">{item}</span>
+                  <li key={idx} className="flex gap-3 text-sm group">
+                    <span className="text-accent-cyan mt-0.5 flex-shrink-0 font-mono text-xs opacity-70 group-hover:opacity-100 transition-opacity">▹</span>
+                    <span className="text-slate-300 flex-1 leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
 
               {/* Divider */}
-              <div className="my-5 h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
+              <div className="my-5 h-px bg-gradient-to-r from-transparent via-slate-700/30 to-transparent" />
 
               {/* Release Notes Section */}
-              <div className="bg-slate-900/30 border border-slate-800/50 rounded-lg p-4 text-xs text-slate-400">
+              <div className="bg-slate-950/50 border border-slate-800/40 rounded-lg p-4 text-[11px] text-slate-500 font-mono">
                 <p className="leading-relaxed">
                   {isDe
                     ? "Diese Version enthält Stabilität, Leistungs- und Sicherheitsverbesserungen. Weitere Details findest du auf GitHub."
@@ -209,16 +216,16 @@ export const WhatsNewModal: React.FC<WhatsNewModalProps> = ({ isOpen, onClose, o
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-800/50 bg-gradient-to-t from-slate-900/30 to-transparent flex gap-3 justify-end">
+          <div className="relative z-[2] px-6 py-4 border-t border-slate-800/80 bg-slate-900/50 flex gap-3 justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors font-medium text-sm focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+              className="px-4 py-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-all font-bold text-xs uppercase tracking-wider border border-slate-700/50 hover:border-slate-600 focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
             >
               {isDe ? "Schließen" : "Close"}
             </button>
             <button
               onClick={onDismiss}
-              className="px-4 py-2 rounded-lg bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 hover:border-accent-cyan/50 transition-all font-medium text-sm focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
+              className="px-4 py-2 rounded-lg bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 hover:border-accent-cyan/50 transition-all font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] focus-visible:ring-2 focus-visible:ring-accent-cyan outline-none"
             >
               {isDe ? "Verstanden" : "Got It"}
             </button>

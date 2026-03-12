@@ -260,6 +260,7 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
                 // Glow
                 ctx.shadowColor = node.color;
                 ctx.shadowBlur = 10;
+                ctx.fill();
                 ctx.shadowBlur = 0;
 
                 // Label (if high influence or hovered - simple distance check for mouse could be added)

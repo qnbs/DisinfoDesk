@@ -530,7 +530,7 @@ const TimelineView: React.FC = () => {
             </div>
         </div>
     );
-}
+};
 
 const StatsCard: React.FC = () => {
   const { theory, t, handleInterrogate } = useTheoryDetail();

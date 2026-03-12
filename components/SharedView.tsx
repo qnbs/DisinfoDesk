@@ -104,7 +104,7 @@ export const SharedView: React.FC = () => {
                   <ExternalLink size={12} className="text-slate-500 mt-1 shrink-0" />
                   <div>
                     <span>{ref.title}</span>
-                    {ref.url && (
+                    {ref.url && /^https?:\/\//i.test(ref.url) && (
                       <a href={ref.url} target="_blank" rel="noopener noreferrer" className="block text-xs text-accent-cyan hover:underline mt-0.5">
                         {ref.url}
                       </a>

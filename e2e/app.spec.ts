@@ -11,41 +11,44 @@ async function dismissOnboarding(page: Page) {
 
   // Wait for the onboarding dialog to appear
   const dialog = page.locator('[role="dialog"]');
-  const isVisible = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
+  await dialog.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
   
-  if (!isVisible) return;
+  if (!(await dialog.isVisible())) return;
 
   // Click through steps until the tour is completed
   for (let i = 0; i < 10; i++) {
-    const nextBtn = dialog.locator('button').filter({ hasText: /weiter|next|start|los|begin|überspringen|skip/i }).first();
-    if (await nextBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await nextBtn.click();
-      await page.waitForTimeout(500);
+    if (!(await dialog.isVisible())) break;
+
+    // Prefer the skip/next button with known text
+    const actionBtn = dialog.locator('button').filter({ hasText: /weiter|next|start|los|begin|überspringen|skip|init/i }).first();
+    if (await actionBtn.isVisible().catch(() => false)) {
+      await actionBtn.click();
+      await page.waitForTimeout(600);
     } else {
-      const skipBtn = dialog.locator('button').first();
-      if (await skipBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-        await skipBtn.click();
-        await page.waitForTimeout(500);
+      // Fallback: click any visible button in dialog
+      const anyBtn = dialog.locator('button').first();
+      if (await anyBtn.isVisible().catch(() => false)) {
+        await anyBtn.click();
+        await page.waitForTimeout(600);
       } else {
         break;
       }
     }
-    if (!(await dialog.isVisible().catch(() => false))) break;
   }
 
   await page.waitForTimeout(500);
 
   // Dismiss the WhatsNew modal if it appears after onboarding
   const whatsNewDialog = page.locator('dialog[open]');
-  const whatsNewVisible = await whatsNewDialog.isVisible({ timeout: 3000 }).catch(() => false);
-  if (whatsNewVisible) {
+  await whatsNewDialog.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
+  if (await whatsNewDialog.isVisible()) {
     const gotItBtn = whatsNewDialog.locator('button').filter({ hasText: /verstanden|got it/i }).first();
-    if (await gotItBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await gotItBtn.isVisible().catch(() => false)) {
       await gotItBtn.click();
       await page.waitForTimeout(500);
     } else {
       const closeBtn = whatsNewDialog.locator('button').first();
-      if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      if (await closeBtn.isVisible().catch(() => false)) {
         await closeBtn.click();
         await page.waitForTimeout(500);
       }
@@ -328,7 +331,7 @@ test.describe('Accessibility', () => {
   test('skip-to-content link exists and works', async ({ page }) => {
     await page.goto('/');
     await dismissOnboarding(page);
-    const skipLink = page.locator('a[href="#main-content"]');
+    const skipLink = page.locator('a[href="#main-content"]').first();
     await expect(skipLink).toBeAttached();
   });
 
@@ -368,8 +371,8 @@ test.describe('PWA', () => {
     await expect(manifestLink).toBeAttached();
   });
 
-  test('manifest.json is fetchable', async ({ page }) => {
-    const response = await page.goto('/manifest.json');
+  test('manifest.json is fetchable', async ({ page, baseURL }) => {
+    const response = await page.goto(`${baseURL}manifest.json`);
     if (response) {
       expect(response.status()).toBe(200);
       const data = await response.json();
@@ -385,8 +388,8 @@ test.describe('PWA', () => {
     expect(swAvailable).toBe(true);
   });
 
-  test('icons are accessible', async ({ page }) => {
-    const iconResponse = await page.goto('/public/icons/icon.svg');
+  test('icons are accessible', async ({ page, baseURL }) => {
+    const iconResponse = await page.goto(`${baseURL}icons/icon.svg`);
     if (iconResponse) {
       expect(iconResponse.status()).toBe(200);
       const contentType = iconResponse.headers()['content-type'];

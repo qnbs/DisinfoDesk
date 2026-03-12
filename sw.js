@@ -146,7 +146,7 @@ if (workbox) {
 
     // API REQUESTS: Network Only — do NOT cache AI responses (security)
     workbox.routing.registerRoute(
-        ({url}) => url.href.includes('generativelanguage.googleapis.com'),
+        ({url}) => url.hostname === 'generativelanguage.googleapis.com',
         new workbox.strategies.NetworkOnly({
             networkTimeoutSeconds: 30,
         })
@@ -213,6 +213,8 @@ if (workbox) {
 
 // --- 6. MESSAGE HANDLERS ---
 self.addEventListener('message', (event) => {
+    // Verify origin: only accept messages from our own clients
+    if (event.origin && event.origin !== self.location.origin) return;
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }

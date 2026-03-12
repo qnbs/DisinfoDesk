@@ -439,7 +439,7 @@ export const LoadingContainer: React.FC<LoadingContainerProps> = React.memo(({
 }) => (
   <div className="relative">
     {isLoading ? (
-      <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="transition-opacity duration-300 opacity-100">
         {fallback || skeleton || <Skeleton variant="card" className="h-40" />}
       </div>
     ) : (

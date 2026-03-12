@@ -373,9 +373,10 @@ const FilterHUD: React.FC = React.memo(() => {
                 <div className="flex flex-col gap-2">
                     {dangerLevels.map(lvl => {
                         const isSelected = selectedDanger.includes(lvl);
-                        let colorClass = 'hover:border-slate-600 text-slate-400';
-                        if(lvl.includes('High') || lvl.includes('Extrem')) colorClass = isSelected ? 'text-red-400 border-red-500 bg-red-950/30' : 'text-slate-500 hover:text-red-400';
-                        else colorClass = isSelected ? 'text-green-400 border-green-500 bg-green-950/30' : 'text-slate-500 hover:text-green-400';
+                        const isHighThreat = lvl.includes('High') || lvl.includes('Extrem');
+                        const colorClass = isHighThreat
+                            ? (isSelected ? 'text-red-400 border-red-500 bg-red-950/30' : 'text-slate-500 hover:text-red-400')
+                            : (isSelected ? 'text-green-400 border-green-500 bg-green-950/30' : 'text-slate-500 hover:text-green-400');
 
                         return (
                             <button
@@ -388,7 +389,7 @@ const FilterHUD: React.FC = React.memo(() => {
                                 `}
                             >
                                 <span className="uppercase font-bold">{lvl}</span>
-                                {isSelected && <div className={`w-2 h-2 rounded-full ${lvl.includes('High') ? 'bg-red-500' : 'bg-green-500'} shadow-[0_0_5px_currentColor]`}></div>}
+                                {isSelected && <div className={`w-2 h-2 rounded-full ${isHighThreat ? 'bg-red-500' : 'bg-green-500'} shadow-[0_0_5px_currentColor]`}></div>}
                             </button>
                         )
                     })}

@@ -383,7 +383,7 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
     }
     throw e;
   }
-}
+};
 
 export const generateTheoryImage = async (theory: Theory, language: Language, customPrompt?: string): Promise<string | null> => {
   try {

@@ -5,7 +5,6 @@ import { MODERN_MYTHS_THEORIES_DE, MODERN_MYTHS_THEORIES_EN } from './modern_myt
 import { PSEUDOSCIENCE_THEORIES_DE, PSEUDOSCIENCE_THEORIES_EN } from './pseudoscience';
 import { GEOPOLITICS_THEORIES_DE, GEOPOLITICS_THEORIES_EN } from './geopolitics';
 import { ESOTERIC_THEORIES_DE, ESOTERIC_THEORIES_EN } from './esoteric';
-import { EXPANSION_THEORIES_DE, EXPANSION_THEORIES_EN } from './expansion';
 
 export const THEORIES_DE: Theory[] = [
     ...HISTORICAL_THEORIES_DE,
@@ -13,7 +12,6 @@ export const THEORIES_DE: Theory[] = [
     ...PSEUDOSCIENCE_THEORIES_DE,
     ...GEOPOLITICS_THEORIES_DE,
     ...ESOTERIC_THEORIES_DE,
-    ...EXPANSION_THEORIES_DE
 ];
 
 export const THEORIES_EN: Theory[] = [
@@ -22,5 +20,4 @@ export const THEORIES_EN: Theory[] = [
     ...PSEUDOSCIENCE_THEORIES_EN,
     ...GEOPOLITICS_THEORIES_EN,
     ...ESOTERIC_THEORIES_EN,
-    ...EXPANSION_THEORIES_EN
 ];

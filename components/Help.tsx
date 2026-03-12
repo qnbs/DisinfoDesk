@@ -329,13 +329,13 @@ const HelpNavigation: React.FC = () => {
   ];
 
   return (
-    <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide border-b border-slate-800/50">
+    <div className="flex gap-1 md:gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide border-b border-slate-800/50">
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`
-            flex items-center gap-2 px-5 py-3 rounded-t-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative group shrink-0 min-w-max
+            flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-t-lg text-[10px] md:text-xs font-bold uppercase tracking-wide md:tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative group shrink-0
             ${activeTab === tab.id 
               ? 'bg-slate-900/80 text-accent-cyan border-b-2 border-accent-cyan' 
               : 'text-slate-500 hover:text-white hover:bg-slate-800/30'}
@@ -429,7 +429,7 @@ const DiagnosticsView: React.FC = () => {
             </div>
         </div>
     );
-}
+};
 
 // --- DOCS VIEW ---
 

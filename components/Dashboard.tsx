@@ -256,7 +256,7 @@ const MetricTile: React.FC<{
             {/* Header */}
             <div className="flex justify-between items-start z-10">
                 <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded bg-slate-950 border border-slate-800 ${color.replace('text-', 'text-')}`}>
+                    <div className={`p-1.5 rounded bg-slate-950 border border-slate-800 ${color}`}>
                         <Icon size={14} />
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{title}</span>

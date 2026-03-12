@@ -1,10 +1,13 @@
 /**
  * AI Provider Abstraction Layer
  * Routes AI calls to the correct backend: Gemini SDK, xAI, Anthropic Claude, or local Ollama.
- * xAI, Claude, and Ollama all support OpenAI-compatible chat completions API.
+ * Hardened with prompt injection guard, rate limiting, cost tracking, Zod validation, and DOMPurify.
  */
 import { AIProvider } from '../types';
 import { secureApiKeyService } from './secureApiKeyService';
+import { guardPromptInput, sanitizeAIOutput } from './aiGuardService';
+import { checkRateLimit, trackCost } from './aiCostService';
+import { validateProviderResponse } from './aiValidationSchemas';
 
 export interface ProviderChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -161,36 +164,58 @@ export async function callProvider(
   messages: ProviderChatMessage[],
   config: ProviderConfig & { ollamaEndpoint?: string } = {}
 ): Promise<ProviderResponse> {
+  // Rate limit check
+  checkRateLimit(provider);
+
+  // Guard all user messages against prompt injection
+  const guardedMessages = messages.map(m => {
+    if (m.role === 'user') {
+      const guarded = guardPromptInput(m.content, 8000);
+      return { ...m, content: guarded.sanitized };
+    }
+    return m;
+  });
+
   const model = config.model || DEFAULT_MODELS[provider];
+  const inputText = guardedMessages.map(m => m.content).join('\n');
 
   if (provider === 'gemini') {
-    // Gemini calls remain in geminiService.ts via the Google SDK
     throw new Error('GEMINI_USE_NATIVE_SDK: Use geminiService.ts for Gemini calls.');
   }
+
+  let text: string;
 
   if (provider === 'ollama') {
     const baseUrl = config.ollamaEndpoint || 'http://localhost:11434';
     const endpoint = `${baseUrl}/v1/chat/completions`;
-    const text = await callOpenAICompatible(endpoint, null, messages, config, model);
-    return { text, provider, model };
+    text = await callOpenAICompatible(endpoint, null, guardedMessages, config, model);
+  } else {
+    // xAI and Anthropic need API keys
+    const keyId = provider === 'xai' ? 'xai' : 'anthropic';
+    const apiKey = await secureApiKeyService.getProviderKey(keyId);
+    if (!apiKey) {
+      const name = provider === 'xai' ? 'xAI' : 'Anthropic';
+      throw new Error(`MISSING_${provider.toUpperCase()}_API_KEY: Please add your ${name} API key in Settings.`);
+    }
+
+    if (provider === 'anthropic') {
+      text = await callAnthropic(apiKey, guardedMessages, config, model);
+    } else {
+      text = await callOpenAICompatible(PROVIDER_ENDPOINTS.xai, apiKey, guardedMessages, config, model);
+    }
   }
 
-  // xAI and Anthropic need API keys
-  const keyId = provider === 'xai' ? 'xai' : 'anthropic';
-  const apiKey = await secureApiKeyService.getProviderKey(keyId);
-  if (!apiKey) {
-    const name = provider === 'xai' ? 'xAI' : 'Anthropic';
-    throw new Error(`MISSING_${provider.toUpperCase()}_API_KEY: Please add your ${name} API key in Settings.`);
-  }
+  // Track cost
+  trackCost(provider, model, inputText, text, 'callProvider');
 
-  if (provider === 'anthropic') {
-    const text = await callAnthropic(apiKey, messages, config, model);
-    return { text, provider, model };
-  }
+  // Sanitize output with DOMPurify
+  const sanitizedText = sanitizeAIOutput(text);
 
-  // xAI (OpenAI-compatible)
-  const text = await callOpenAICompatible(PROVIDER_ENDPOINTS.xai, apiKey, messages, config, model);
-  return { text, provider, model };
+  // Validate response structure with Zod
+  const response: ProviderResponse = { text: sanitizedText, provider, model };
+  const validated = validateProviderResponse(response);
+
+  return validated || response;
 }
 
 // --- Provider Test Endpoints ---

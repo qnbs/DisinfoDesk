@@ -21,7 +21,7 @@ function cspPlugin(): Plugin {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https://*.githubusercontent.com",
-        "connect-src 'self' https://generativelanguage.googleapis.com https://api.x.ai https://api.anthropic.com",
+        "connect-src 'self' https://generativelanguage.googleapis.com https://api.x.ai https://api.anthropic.com https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co",
         "worker-src 'self' blob:",
         "frame-ancestors 'none'",
         "base-uri 'self'",
@@ -125,6 +125,17 @@ export default defineConfig(() => {
                 handler: 'NetworkOnly',
                 options: { cacheName: 'ai-api' },
               },
+              // Hugging Face model files for Transformers.js local fallback — cache for offline use
+              {
+                urlPattern: /^https:\/\/(huggingface\.co|cdn-lfs\.huggingface\.co|cdn-lfs-us-1\.huggingface\.co)\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'transformers-models',
+                  expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                  cacheableResponse: { statuses: [0, 200] },
+                  matchOptions: { ignoreSearch: true },
+                },
+              },
             ],
           },
           manifest: {
@@ -205,7 +216,7 @@ export default defineConfig(() => {
                 return 'vendor-react';
               }
 
-              if (id.includes('@google/genai')) {
+              if (id.includes('@google/genai') || id.includes('dompurify') || id.includes('zod')) {
                 return 'vendor-ai';
               }
 
@@ -213,8 +224,12 @@ export default defineConfig(() => {
                 return 'vendor-charts';
               }
 
-              if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('fflate') || id.includes('canvg') || id.includes('css-line-break') || id.includes('dompurify')) {
+              if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('fflate') || id.includes('canvg') || id.includes('css-line-break')) {
                 return 'vendor-pdf';
+              }
+
+              if (id.includes('@xenova/transformers') || id.includes('onnxruntime')) {
+                return 'vendor-transformers';
               }
 
               // Let Rollup optimally co-locate remaining deps with their importers

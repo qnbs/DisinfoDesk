@@ -9,6 +9,10 @@ import {
 } from '../types';
 import { dbService } from './dbService';
 import { secureApiKeyService } from './secureApiKeyService';
+import { guardPromptInput, sanitizeAIOutput, wrapUserContent } from './aiGuardService';
+import { checkRateLimit, trackCost } from './aiCostService';
+import { validateTheoryAnalysis, validateMediaAnalysis, validateSatireResponse, validateEnhanceTags, validateEnhanceText, validateChatResponse } from './aiValidationSchemas';
+import { analyzeTheoryLocally, generateSatireLocally, chatLocally } from './localFallbackService';
 
 interface AIConfig {
     model?: string;
@@ -73,42 +77,30 @@ const SAFETY_SETTINGS = [
 
 /**
  * Sanitize user-controlled text before embedding in AI prompts.
- * Prevents prompt injection by removing structural characters and truncating.
+ * Delegates to aiGuardService for prompt injection detection + neutralization.
  */
 const sanitizePromptInput = (input: string, maxLength = 500): string => {
   if (!input) return '';
-  return input
-    // eslint-disable-next-line no-control-regex -- Intentionally remove control chars for security
-    .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // control chars
-    .substring(0, maxLength)
-    .trim();
+  const guarded = guardPromptInput(input, maxLength);
+  if (!guarded.safe && import.meta.env.DEV) {
+    console.warn('[AI Guard] Prompt injection detected:', guarded.threats);
+  }
+  return guarded.sanitized;
 };
 
 /**
- * Simple client-side rate limiter to prevent API abuse.
- * Resets per window (1 hour). Limits apply per-session only.
+ * Check rate limits via the centralized cost service.
+ * Replaces the old inline rate limiter.
  */
 const rateLimiter = {
-  calls: 0,
-  windowStart: Date.now(),
-  MAX_CALLS_PER_HOUR: 60,
-  WINDOW_MS: 3600000,
-
   check(): void {
-    const now = Date.now();
-    if (now - this.windowStart > this.WINDOW_MS) {
-      this.calls = 0;
-      this.windowStart = now;
-    }
-    if (this.calls >= this.MAX_CALLS_PER_HOUR) {
-      throw new Error('RATE_LIMIT_EXCEEDED: Too many API requests. Please wait before trying again.');
-    }
-    this.calls++;
+    checkRateLimit('gemini');
   }
 };
 
 /**
  * Analyzes a theory using Google Search Grounding & Thinking Models.
+ * Falls back to local Transformers.js if API is unavailable.
  */
 export const analyzeTheoryWithGemini = async (theory: Theory, language: Language, configOverride?: AIConfig): Promise<TheoryDetail> => {
   if (!configOverride?.forceRefresh) {
@@ -124,14 +116,12 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     const model = configOverride?.model || 'gemini-3.1-flash'; 
     const isThinkingModel = model.includes('3.1') || model.includes('3-pro');
     
-    // Dynamic thinking budget based on user settings, default to higher for deep debunking
-    // IMPORTANT: thinkingBudget allows models to "reason" before answering.
     const thinkingConfig = isThinkingModel 
         ? { thinkingConfig: { thinkingBudget: configOverride?.thinkingBudget || 1024 } }
         : {};
 
     const prompt = `
-      Analyze the conspiracy theory: "${sanitizePromptInput(theory.title, 200)}" (${sanitizePromptInput(theory.shortDescription, 500)}).
+      Analyze the conspiracy theory: ${wrapUserContent('TITLE', theory.title, 200)} (${wrapUserContent('DESC', theory.shortDescription, 500)}).
       Language: ${language === 'de' ? 'German' : 'English'}.
       
       You act as a skeptical fact-checking engine.
@@ -161,18 +151,25 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
       }
     });
 
-    const text = cleanJsonOutput(response.text || "{}");
+    const responseText = response.text || "{}";
+
+    // Track cost
+    trackCost('gemini', model, prompt, responseText, 'analyzeTheory');
+
+    const text = cleanJsonOutput(responseText);
     let rawData: RawTheoryAnalysisJSON;
     
     try {
-        rawData = JSON.parse(text) as RawTheoryAnalysisJSON;
+        const parsed = JSON.parse(text);
+        // Validate with Zod + sanitize with DOMPurify
+        const validated = validateTheoryAnalysis(parsed);
+        rawData = validated;
     } catch {
         if (import.meta.env.DEV) {
             console.error("JSON Parse Error on:", text);
         }
-        // Fallback structure to prevent UI crash
         rawData = {
-            fullDescription: response.text || "Analysis format error. Raw output received.",
+            fullDescription: sanitizeAIOutput(responseText) || "Analysis format error. Raw output received.",
             originStory: "Data parsing failed.",
             debunking: "Check source logs.",
             scientificConsensus: "Unknown",
@@ -220,10 +217,31 @@ export const analyzeTheoryWithGemini = async (theory: Theory, language: Language
     return result;
 
   } catch (error) {
-    if (import.meta.env.DEV) {
-        console.error("Gemini Analysis Error:", error);
+    // Local fallback when API fails
+    const err = error as Error;
+    if (err.message?.includes('MISSING_GEMINI_API_KEY') || err.message?.includes('RATE_LIMIT')) {
+      throw error; // Don't fallback for config errors
     }
-    throw error;
+    
+    if (import.meta.env.DEV) {
+        console.error("Gemini Analysis Error, trying local fallback:", error);
+    }
+    
+    try {
+      const localResult = await analyzeTheoryLocally(theory.title, theory.shortDescription, language);
+      trackCost('local', 'local-fallback', theory.title, localResult.fullDescription, 'analyzeTheory-fallback');
+      return {
+        ...theory,
+        fullDescription: sanitizeAIOutput(localResult.fullDescription),
+        originStory: sanitizeAIOutput(localResult.originStory),
+        debunking: sanitizeAIOutput(localResult.debunking),
+        scientificConsensus: sanitizeAIOutput(localResult.scientificConsensus),
+        sources: localResult.sources.map(s => ({ title: s, sourceType: 'LOCAL' as const })),
+      };
+    } catch {
+      // If even local fallback fails, throw original error
+      throw error;
+    }
   }
 };
 
@@ -242,16 +260,16 @@ export const enhanceTheoryContent = async (
 
     if (mode === 'EXPAND') {
         prompt = `Act as a creative writer. Expand this short conspiracy theory description into a compelling 3-paragraph narrative suitable for a dossier. 
-        Title: "${sanitizePromptInput(currentTitle, 200)}". 
-        Draft: "${sanitizePromptInput(currentDesc, 2000)}". 
+        Title: ${wrapUserContent('TITLE', currentTitle, 200)}. 
+        Draft: ${wrapUserContent('DRAFT', currentDesc, 2000)}. 
         Language: ${langLabel}.`;
     } else if (mode === 'RED_TEAM') {
         prompt = `Act as a ruthless logician. critique this conspiracy theory. List 3 major logical fallacies or gaps in the narrative. 
-        Theory: "${sanitizePromptInput(currentTitle, 200)} - ${sanitizePromptInput(currentDesc, 2000)}". 
+        Theory: ${wrapUserContent('THEORY', `${currentTitle} - ${currentDesc}`, 2200)}. 
         Language: ${langLabel}. Bullet points only.`;
     } else if (mode === 'TAGS') {
         prompt = `Analyze this theory and generate 8 relevant metadata tags.
-        Theory: "${sanitizePromptInput(currentTitle, 200)} - ${sanitizePromptInput(currentDesc, 2000)}".
+        Theory: ${wrapUserContent('THEORY', `${currentTitle} - ${currentDesc}`, 2200)}.
         Language: ${langLabel}.`;
         
         schema = {
@@ -273,14 +291,17 @@ export const enhanceTheoryContent = async (
         }
     });
 
+    const responseText = response.text || "";
+    trackCost('gemini', 'gemini-3.1-flash', prompt, responseText, `enhance-${mode}`);
+
     if (mode === 'TAGS') {
         try {
-            const json = JSON.parse(response.text!);
-            return json.tags as string[];
+            const json = JSON.parse(responseText);
+            return validateEnhanceTags(json);
         } catch { return []; }
     }
 
-    return response.text || "";
+    return validateEnhanceText(responseText);
 };
 
 export const analyzeMediaWithGemini = async (item: MediaItem, language: Language, configOverride?: AIConfig): Promise<MediaAnalysisResponse> => {
@@ -307,7 +328,7 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
       required: ["plotSummary", "hiddenSymbolism", "predictiveProgramming", "realWorldParallels"],
     };
 
-    const prompt = `Analyze "${sanitizePromptInput(item.title, 200)}" (${sanitizePromptInput(item.type, 50)}, ${item.year}) regarding conspiracy theories. Language: ${language === 'de' ? 'German' : 'English'}.`;
+    const prompt = `Analyze ${wrapUserContent('MEDIA', item.title, 200)} (${sanitizePromptInput(item.type, 50)}, ${item.year}) regarding conspiracy theories. Language: ${language === 'de' ? 'German' : 'English'}.`;
 
     const response = await ai.models.generateContent({
       model: model,
@@ -320,7 +341,11 @@ export const analyzeMediaWithGemini = async (item: MediaItem, language: Language
       }
     });
 
-    const rawData = JSON.parse(response.text!) as MediaAnalysisResponse;
+    const responseText = response.text || '{}';
+    trackCost('gemini', model, prompt, responseText, 'analyzeMedia');
+
+    // Validate with Zod + sanitize with DOMPurify
+    const rawData = validateMediaAnalysis(JSON.parse(responseText));
 
     dbService.saveMediaAnalysis({
         id: item.id,
@@ -360,7 +385,7 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
       required: ["title", "content"],
     };
 
-    const prompt = `Invent a satirical conspiracy theory about "${sanitizePromptInput(topic, 200)}".
+    const prompt = `Invent a satirical conspiracy theory about ${wrapUserContent('TOPIC', topic, 200)}.
       Archetype: "${sanitizePromptInput(archetype, 100)}". Paranoia Level: ${level}/100.
       Language: ${language === 'de' ? 'German' : 'English'}.
       Format as a funny, pseudoscientific narrative.`;
@@ -376,12 +401,25 @@ export const generateSatireTheory = async (language: Language, options?: SatireO
       }
     });
     
-    return JSON.parse(response.text!) as SatireResponse;
-  } catch (e) {
-    if (import.meta.env.DEV) {
-        console.error("Satire Gen Error:", e);
+    const responseText = response.text || '{}';
+    trackCost('gemini', 'gemini-3.1-flash', prompt, responseText, 'generateSatire');
+    return validateSatireResponse(JSON.parse(responseText));
+  } catch (error) {
+    const err = error as Error;
+    if (err.message?.includes('MISSING_GEMINI_API_KEY') || err.message?.includes('RATE_LIMIT')) {
+      throw error;
     }
-    throw e;
+    if (import.meta.env.DEV) {
+        console.error("Satire Gen Error, trying local fallback:", error);
+    }
+    // Local fallback for satire
+    try {
+      const local = await generateSatireLocally(options?.topic || 'Office Supplies', language);
+      trackCost('local', 'local-fallback', options?.topic || '', local.content, 'generateSatire-fallback');
+      return { title: local.title, content: local.content };
+    } catch {
+      throw error;
+    }
   }
 };
 
@@ -389,7 +427,6 @@ export const generateTheoryImage = async (theory: Theory, language: Language, cu
   try {
     rateLimiter.check();
     const ai = await getAiClient();
-    // Allow custom prompting for the editor, fallback to automatic for viewing
     const prompt = customPrompt ? sanitizePromptInput(customPrompt, 1000) : (language === 'de'
         ? `Düstere, cineastische Illustration für Verschwörungstheorie: "${sanitizePromptInput(theory.title, 200)}". Stil: Akte X, 8k, fotorealistisch.`
         : `Dark, cinematic illustration for conspiracy theory: "${sanitizePromptInput(theory.title, 200)}". Style: X-Files, 8k, photorealistic.`);
@@ -399,6 +436,8 @@ export const generateTheoryImage = async (theory: Theory, language: Language, cu
       contents: prompt,
       config: { safetySettings: SAFETY_SETTINGS }
     });
+
+    trackCost('gemini', 'gemini-3.1-flash-image', prompt, '(image)', 'generateImage');
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
       if (part.inlineData) {
@@ -496,6 +535,7 @@ let currentChatContext: string | null = null;
 
 /**
  * Streams chat response. Handles session reset if model changes.
+ * Falls back to local Transformers.js if API is unavailable.
  */
 export const streamChatWithSkeptic = async function* (
   history: string[],
@@ -504,6 +544,12 @@ export const streamChatWithSkeptic = async function* (
   configOverride?: AIConfig,
   contextBrief?: string
 ) {
+  // Guard the user message against prompt injection
+  const guardedMessage = guardPromptInput(message, 4000);
+  if (!guardedMessage.safe && import.meta.env.DEV) {
+    console.warn('[AI Guard] Chat injection attempt:', guardedMessage.threats);
+  }
+
   try {
     const ai = await getAiClient();
     const modelName = configOverride?.model || 'gemini-3.1-flash';
@@ -517,7 +563,6 @@ export const streamChatWithSkeptic = async function* (
       ? `Du bist 'Dr. Veritas', eine skeptische KI. Bewerte Behauptungen mit [VERDICT: WAHR/FALSCH/UNBELEGT] am Anfang.${contextBrief ? `\n\nKontextpaket:\n${contextBrief}` : ''}`
       : `You are 'Dr. Veritas', a skeptical AI. Rate claims with [VERDICT: TRUE/FALSE/UNVERIFIED] at the start.${contextBrief ? `\n\nContext package:\n${contextBrief}` : ''}`;
 
-    // IMPORTANT: If model changes, we MUST recreate the chat to apply new config/model
     if (chatSession && currentChatModel !== modelName) {
         chatSession = null;
     }
@@ -529,7 +574,6 @@ export const streamChatWithSkeptic = async function* (
     if (!chatSession) {
         currentChatModel = modelName;
       currentChatContext = contextBrief || null;
-        // Map simplified string history back to Content objects
         const historyContent = history.map((msg, i) => ({
             role: i % 2 === 0 ? 'user' : 'model',
             parts: [{ text: msg }],
@@ -547,15 +591,30 @@ export const streamChatWithSkeptic = async function* (
         });
     }
 
-    const result = await chatSession.sendMessageStream({ message: sanitizePromptInput(message, 4000) });
+    const result = await chatSession.sendMessageStream({ message: guardedMessage.sanitized });
+    let fullResponse = '';
     for await (const chunk of result) {
-        yield chunk.text;
+        const sanitizedChunk = validateChatResponse(chunk.text);
+        fullResponse += chunk.text || '';
+        yield sanitizedChunk;
     }
+    trackCost('gemini', configOverride?.model || 'gemini-3.1-flash', message, fullResponse, 'chat');
   } catch (error) {
-    if (import.meta.env.DEV) {
-        console.error("Stream Error:", error);
+    const err = error as Error;
+    if (err.message?.includes('MISSING_GEMINI_API_KEY') || err.message?.includes('RATE_LIMIT')) {
+      throw error;
     }
-    throw error;
+    if (import.meta.env.DEV) {
+        console.error("Stream Error, trying local fallback:", error);
+    }
+    // Local fallback for chat
+    try {
+      const local = await chatLocally(guardedMessage.sanitized, language);
+      trackCost('local', 'local-fallback', message, local.text, 'chat-fallback');
+      yield validateChatResponse(local.text);
+    } catch {
+      throw error;
+    }
   }
 };
 

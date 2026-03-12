@@ -1,6 +1,7 @@
 import { createApi, fakeBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { Theory, Language, AppError, SatireOptions } from '../../types';
 import { analyzeTheoryWithGemini, generateSatireTheory, generateTheoryImage } from '../../services/geminiService';
+import { sanitizeAIOutput } from '../../services/aiGuardService';
 
 // Retry wrapper with exponential backoff (max 3 attempts)
 const retryingBaseQuery = retry(fakeBaseQuery<AppError>(), { maxRetries: 2 });
@@ -24,9 +25,17 @@ export const aiApi = createApi({
     analyzeTheory: builder.query({
       queryFn: async ({ theory, language, model, temp, budget }: { theory: Theory; language: Language; model: string; temp: number, budget?: number }) => {
         try {
-          // Pass budget to service
           const data = await analyzeTheoryWithGemini(theory, language, { model, temperature: temp, thinkingBudget: budget });
-          return { data };
+          // Sanitize all text fields with DOMPurify before returning to store
+          return { 
+            data: {
+              ...data,
+              fullDescription: sanitizeAIOutput(data.fullDescription || ''),
+              originStory: sanitizeAIOutput(data.originStory || ''),
+              debunking: sanitizeAIOutput(data.debunking || ''),
+              scientificConsensus: sanitizeAIOutput(data.scientificConsensus || ''),
+            }
+          };
         } catch (error) {
           const err = error as Error;
           // Don't retry on auth/config errors
@@ -69,7 +78,13 @@ export const aiApi = createApi({
       queryFn: async ({ language, options }: { language: Language; options: SatireOptions }) => {
         try {
           const data = await generateSatireTheory(language, options);
-          return { data };
+          return { 
+            data: {
+              ...data,
+              title: sanitizeAIOutput(data.title),
+              content: sanitizeAIOutput(data.content),
+            }
+          };
         } catch (error) {
           const err = error as Error;
           if (err.message?.includes('API key') || err.message?.includes('permission')) {

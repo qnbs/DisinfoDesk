@@ -351,7 +351,7 @@ const ClassifiedArtifact: React.FC<{ title: string, content: string }> = ({ titl
     const { t } = useLanguage();
 
     return (
-    <div className="relative bg-[#e5e5e5] text-black p-8 md:p-12 font-mono shadow-2xl transform rotate-1 rounded-sm border border-slate-400 min-h-[600px] overflow-hidden">
+    <div className="relative bg-[#e5e5e5] text-black p-4 sm:p-8 md:p-12 font-mono shadow-2xl transform rotate-1 rounded-sm border border-slate-400 min-h-[400px] sm:min-h-[600px] overflow-hidden">
         {/* Paper Texture */}
         <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: `url("${PAPER_TEXTURE}")` }}></div>
         
@@ -444,7 +444,7 @@ const TabloidArtifact: React.FC<{ title: string, content: string }> = ({ title, 
             <ScrambleText text={title} />
         </h2>
 
-        <div className="columns-2 gap-4 text-xs text-justify font-sans relative z-10 leading-tight">
+        <div className="columns-1 sm:columns-2 gap-4 text-xs text-justify font-sans relative z-10 leading-tight">
             <p className="first-letter:text-4xl first-letter:font-black first-letter:float-left first-letter:mr-1">
                 <ScrambleText text={content} />
             </p>

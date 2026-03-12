@@ -69,7 +69,7 @@ const HolographicCard: React.FC<{ author: Author, onClick: () => void }> = React
             onClick={onClick}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="group relative h-[420px] rounded-xl bg-slate-900 border border-slate-800 cursor-pointer overflow-hidden transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:border-accent-cyan/50 select-none transform-gpu will-change-transform"
+            className="group relative h-auto min-h-[380px] md:h-[420px] rounded-xl bg-slate-900 border border-slate-800 cursor-pointer overflow-hidden transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:border-accent-cyan/50 select-none transform-gpu will-change-transform"
             style={{ transformStyle: 'preserve-3d' }}
             role="button"
             tabIndex={0}
@@ -299,7 +299,7 @@ const NetworkGraph: React.FC<{ authors: Author[], onSelect: (id: string) => void
     }, [authors, onSelect, isVisible]);
 
     return (
-        <div ref={containerRef} className="w-full h-[600px] bg-slate-950 rounded-xl border border-slate-800 relative overflow-hidden shadow-inner group">
+        <div ref={containerRef} className="w-full h-[350px] md:h-[600px] bg-slate-950 rounded-xl border border-slate-800 relative overflow-hidden shadow-inner group">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
             <canvas ref={canvasRef} className="block w-full h-full cursor-crosshair relative z-10" role="img" aria-label="Network graph showing connections between conspiracy theory authors" />
             <div className="absolute bottom-4 left-4 p-3 bg-slate-900/80 backdrop-blur rounded border border-slate-700 text-[10px] font-mono text-slate-400 pointer-events-none z-20">
@@ -430,13 +430,15 @@ const LibraryHeader: React.FC = React.memo(() => {
                     {searchTerm && <button onClick={() => setSearchTerm('')} aria-label={t.authors.clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white rounded-full hover:bg-slate-800"><X size={14} /></button>}
                 </div>
                 
+                <div className="relative">
+                <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none md:hidden z-10" />
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     {(Object.entries(categoryConfig) as [CategoryKey, typeof categoryConfig[CategoryKey]][]).map(([key, config]) => (
                         <button
                             key={key}
                             onClick={() => setActiveCategory(key)}
                             className={`
-                                flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border whitespace-nowrap outline-none
+                                flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all border whitespace-nowrap outline-none
                                 ${activeCategory === key 
                                     ? `bg-slate-800 text-white border-slate-600 shadow-[0_0_15px_rgba(255,255,255,0.05)]` 
                                     : 'bg-slate-900/50 text-slate-500 border-slate-800 hover:border-slate-700 hover:text-slate-300'}
@@ -446,6 +448,7 @@ const LibraryHeader: React.FC = React.memo(() => {
                             {config.label}
                         </button>
                     ))}
+                </div>
                 </div>
             </div>
         </PageHeader>

@@ -300,10 +300,10 @@ const ArchiveTerminalRow: React.FC<{ theory: Theory, index: number }> = React.me
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect(theory)}
     >
-       <div className="col-span-2 md:col-span-1 text-slate-600">#{theory.id.substring(0,6).toUpperCase()}</div>
-       <div className="col-span-6 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase py-1 leading-normal">{theory.title}</div>
-       <div className="col-span-4 md:col-span-2 text-slate-500 truncate">{theory.category.split(' ')[0]}</div>
-       <div className="col-span-3 md:col-span-2 text-right md:text-left">
+       <div className="hidden md:block md:col-span-1 text-slate-600">#{theory.id.substring(0,6).toUpperCase()}</div>
+       <div className="col-span-8 md:col-span-5 font-bold text-slate-300 truncate group-hover:text-accent-cyan transition-colors uppercase py-1 leading-normal">{theory.title}</div>
+       <div className="hidden md:block md:col-span-2 text-slate-500 truncate">{theory.category.split(' ')[0]}</div>
+       <div className="col-span-4 md:col-span-2 text-right md:text-left">
            <span className={`${isDanger ? 'text-red-500' : 'text-green-500'}`}>{isDanger ? t.list.status.critical : t.list.status.stable}</span>
        </div>
        <div className="hidden md:block col-span-2 text-right text-slate-500">

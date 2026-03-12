@@ -297,7 +297,7 @@ const PredictiveMetrics: React.FC = () => {
                        formState.dangerLevel.includes('Medium') ? 50 : 20;
 
     return (
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div className="bg-slate-900/50 border border-slate-800 p-3 rounded-lg flex items-center gap-3">
                 <div className="relative w-10 h-10 flex items-center justify-center">
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -381,17 +381,17 @@ const MainInfoForm: React.FC = () => {
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                         <Brain size={14} className="text-accent-purple"/> {t.editor.labels.desc}
                     </label>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap">
                         <button 
                             onClick={() => handleAiEnhance('EXPAND')}
-                            className="px-2 py-1 bg-accent-purple/10 hover:bg-accent-purple/20 text-accent-purple text-[10px] font-bold uppercase rounded border border-accent-purple/30 flex items-center gap-1 transition-all"
+                            className="px-2.5 py-2 sm:px-2 sm:py-1 bg-accent-purple/10 hover:bg-accent-purple/20 text-accent-purple text-[10px] font-bold uppercase rounded border border-accent-purple/30 flex items-center gap-1 transition-all min-h-[44px] sm:min-h-0"
                             title="Expand short text into full narrative"
                         >
                             <Wand2 size={10} /> Expand
                         </button>
                         <button 
                             onClick={() => handleAiEnhance('TAGS')}
-                            className="px-2 py-1 bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan text-[10px] font-bold uppercase rounded border border-accent-cyan/30 flex items-center gap-1 transition-all"
+                            className="px-2.5 py-2 sm:px-2 sm:py-1 bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan text-[10px] font-bold uppercase rounded border border-accent-cyan/30 flex items-center gap-1 transition-all min-h-[44px] sm:min-h-0"
                             title="Auto-extract tags"
                         >
                             <Hash size={10} /> Tags
@@ -492,7 +492,7 @@ const MetadataPanel: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Classifiers */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">{t.editor.labels.category}</label>
                     <select 
@@ -631,7 +631,7 @@ export const TheoryEditor: React.FC = () => {
             <PageFrame>
                 <EditorHeader />
                 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)] min-h-[600px] items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[calc(100vh-220px)] lg:min-h-[600px] items-stretch">
                     
                     {/* LEFT COLUMN: Data Entry (5 cols) */}
                     <div className="lg:col-span-5 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar pr-2 pb-10">

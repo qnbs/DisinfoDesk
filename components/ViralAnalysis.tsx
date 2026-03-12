@@ -507,7 +507,7 @@ const TacticalPanel: React.FC<{
 }> = ({ params, onChange }) => {
     const { t } = useLanguage();
     return (
-        <div className="grid grid-cols-2 gap-4 p-4 text-[10px] font-mono">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 text-[10px] font-mono">
             {[
                 { key: 'emotionalPayload', label: t.viralPage.sim.params.emotional, color: 'accent-red' },
                 { key: 'novelty', label: t.viralPage.sim.params.novelty, color: 'accent-purple' },

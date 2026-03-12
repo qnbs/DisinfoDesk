@@ -370,7 +370,7 @@ const StatsBar: React.FC = () => {
   if (items.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-3 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
       <Card variant="glass" className="p-3 text-center">
         <div className="text-lg font-black text-white">{stats.total}</div>
         <div className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">

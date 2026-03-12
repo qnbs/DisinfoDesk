@@ -277,7 +277,7 @@ const NeuralEngineConfig: React.FC = () => {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Provider Selector */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {(Object.keys(providerMeta) as AIProvider[]).map((p) => {
                   const pm = providerMeta[p];
                   const isActive = currentProvider === p;
@@ -373,7 +373,7 @@ const NeuralEngineConfig: React.FC = () => {
                                 key={level}
                                 onClick={() => handleUpdate('safetyLevel', level)}
                                 className={`
-                                    py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
+                                    py-2.5 px-2 sm:px-3 rounded-lg border text-[10px] font-bold uppercase tracking-wider transition-all
                                     ${settings.safetyLevel === level 
                                         ? level === 'strict' ? 'bg-green-500/20 border-green-500 text-green-400' 
                                         : level === 'standard' ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400' 

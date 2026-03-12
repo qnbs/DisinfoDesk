@@ -189,8 +189,8 @@ const InfluenceRadar: React.FC<{ author: Author }> = ({ author }) => {
     return (
         <Card className="p-6 border-slate-800 bg-slate-900/50">
             <h4 className="text-[10px] font-bold text-slate-500 uppercase mb-3">{t.authors.detail.influenceRadar}</h4>
-            <div className="flex items-center gap-6">
-                <div className="w-44 h-44 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="w-full sm:w-44 h-44 shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <RadarChart data={radarData}>
                             <PolarGrid stroke="#334155" />
@@ -308,9 +308,9 @@ const DetailContent: React.FC = () => {
 
             {/* Right Column: Tabs & Content */}
             <div className="lg:col-span-8">
-                <div className="flex gap-1 mb-6 border-b border-slate-800">
-                    <button onClick={() => setActiveTab('BIO')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'BIO' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabBiography}</button>
-                    <button onClick={() => setActiveTab('PSYCH')} className={`px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all outline-none focus-visible:ring-2 focus-visible:ring-accent-purple focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'PSYCH' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabPsych}</button>
+                <div className="flex gap-1 mb-6 border-b border-slate-800 overflow-x-auto">
+                    <button onClick={() => setActiveTab('BIO')} className={`px-4 sm:px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'BIO' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabBiography}</button>
+                    <button onClick={() => setActiveTab('PSYCH')} className={`px-4 sm:px-6 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-purple focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${activeTab === 'PSYCH' ? 'border-accent-purple text-accent-purple' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>{t.authors.detail.tabPsych}</button>
                 </div>
 
                 {activeTab === 'BIO' && (

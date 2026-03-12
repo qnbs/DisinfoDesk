@@ -639,7 +639,7 @@ export const DebunkChat: React.FC = () => {
         <PageFrame>
             <ChatHeader status={liveStatus} mode={mode} contextId={activeContextId} />
             
-            <div className="h-[calc(100dvh-200px)] min-h-[600px] flex flex-col bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl relative">
+            <div className="h-[calc(100dvh-200px)] min-h-[400px] md:min-h-[600px] flex flex-col bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl relative">
                 
                 {/* --- LIVE MODE UI --- */}
                 {mode === 'LIVE' && (
@@ -730,7 +730,7 @@ export const DebunkChat: React.FC = () => {
                                 <button 
                                     key={i} 
                                     onClick={() => triggerQuickAction(action.prompt)}
-                                    className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold uppercase text-slate-400 hover:text-accent-cyan hover:border-accent-cyan/50 transition-all whitespace-nowrap flex items-center gap-1 hover:bg-slate-800 hover:shadow-[0_0_10px_rgba(6,182,212,0.1)] animate-fade-in opacity-0"
+                                    className="px-3 py-2.5 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] font-bold uppercase text-slate-400 hover:text-accent-cyan hover:border-accent-cyan/50 transition-all whitespace-nowrap flex items-center gap-1 hover:bg-slate-800 hover:shadow-[0_0_10px_rgba(6,182,212,0.1)] animate-fade-in opacity-0 min-h-[44px]"
                                     style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'forwards' }}
                                 >
                                     <Zap size={10} /> {action.label}

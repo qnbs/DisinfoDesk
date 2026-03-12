@@ -374,7 +374,7 @@ export const Dashboard: React.FC = () => {
                     </button>
                 }
             >
-                <div className="flex gap-4 text-[10px] font-mono text-slate-500 mt-2">
+                <div className="flex flex-wrap gap-4 text-[10px] font-mono text-slate-500 mt-2">
                     <span className="flex items-center gap-1"><Wifi size={10} className="text-green-500"/> UPLINK: STABLE</span>
                     <span className="flex items-center gap-1"><Lock size={10} className="text-accent-cyan"/> ENCRYPTION: AES-256</span>
                     <span className="flex items-center gap-1"><Server size={10} className="text-accent-purple"/> NODE: GEMINI-PRO</span>

@@ -329,23 +329,26 @@ const HelpNavigation: React.FC = () => {
   ];
 
   return (
+    <div className="relative">
+    <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none md:hidden z-10" />
     <div className="flex gap-1 md:gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide border-b border-slate-800/50">
       {tabs.map(tab => (
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`
-            flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 rounded-t-lg text-[10px] md:text-xs font-bold uppercase tracking-wide md:tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative group shrink-0
+            flex items-center gap-1.5 md:gap-2 px-2.5 sm:px-3 md:px-5 py-2.5 md:py-3 rounded-t-lg text-[10px] md:text-xs font-bold uppercase tracking-wide md:tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative group shrink-0
             ${activeTab === tab.id 
               ? 'bg-slate-900/80 text-accent-cyan border-b-2 border-accent-cyan' 
               : 'text-slate-500 hover:text-white hover:bg-slate-800/30'}
           `}
         >
           <span className={`relative z-10 ${activeTab === tab.id ? 'scale-110' : ''} transition-transform`}>{tab.icon}</span>
-          <span className="relative z-10">{data.tabs[tab.id]}</span>
+          <span className="relative z-10 hidden sm:inline">{data.tabs[tab.id]}</span>
           {activeTab === tab.id && <div className="absolute inset-0 bg-accent-cyan/5 animate-pulse-slow"></div>}
         </button>
       ))}
+    </div>
     </div>
   );
 };
@@ -441,7 +444,7 @@ const DocumentationView: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row gap-8 animate-fade-in min-h-[600px]">
       {/* Sidebar / TOC */}
-      <div className="md:w-64 shrink-0 space-y-2">
+      <div className="w-full md:w-64 shrink-0 space-y-2">
         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 pl-2 flex items-center gap-2">
           <Layers size={12} /> {t.help.moduleIndex}
         </div>

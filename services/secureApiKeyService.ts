@@ -83,6 +83,28 @@ const getOrCreateWrappingKey = async (): Promise<CryptoKey> => {
 };
 
 export const secureApiKeyService = {
+  validateKeyFormat(apiKey: string): { valid: boolean; error?: string } {
+    const trimmed = apiKey.trim();
+    if (!trimmed) return { valid: false, error: 'EMPTY_API_KEY' };
+    if (trimmed.length < 30) return { valid: false, error: 'KEY_TOO_SHORT' };
+    if (!/^AIza[A-Za-z0-9_-]{30,}$/.test(trimmed)) return { valid: false, error: 'INVALID_KEY_FORMAT' };
+    return { valid: true };
+  },
+
+  async testApiKey(apiKey: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey.trim())}`,
+        { method: 'GET', signal: AbortSignal.timeout(10000) }
+      );
+      if (resp.ok) return { ok: true };
+      if (resp.status === 400 || resp.status === 403) return { ok: false, error: 'INVALID_KEY' };
+      return { ok: false, error: `HTTP_${resp.status}` };
+    } catch {
+      return { ok: false, error: 'NETWORK_ERROR' };
+    }
+  },
+
   async setApiKey(apiKey: string): Promise<void> {
     const trimmed = apiKey.trim();
     if (!trimmed) {

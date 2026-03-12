@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
-  Settings as SettingsIcon, Cpu, Layout, Terminal, Volume2, VolumeX, Eye, Trash2, Download, Smartphone, Shield, Zap, Brain, AlertOctagon, HardDrive, Activity, Lock, Palette, Grid, CheckCircle2, Server
+  Settings as SettingsIcon, Cpu, Layout, Terminal, Volume2, VolumeX, Eye, EyeOff, Trash2, Download, Smartphone, Shield, Zap, Brain, AlertOctagon, HardDrive, Activity, Lock, Palette, Grid, CheckCircle2, Server, Wifi
 } from 'lucide-react';
 import {
   Card, Button, Badge, PageHeader
@@ -30,6 +30,9 @@ const useSettingsPageLogic = () => {
     const [apiKeyInput, setApiKeyInput] = useState('');
     const [apiKeySaved, setApiKeySaved] = useState(false);
     const [apiKeyStatus, setApiKeyStatus] = useState('');
+    const [apiKeyVisible, setApiKeyVisible] = useState(false);
+    const [apiKeyTesting, setApiKeyTesting] = useState(false);
+    const [apiKeyFormatHint, setApiKeyFormatHint] = useState('');
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -66,21 +69,62 @@ const useSettingsPageLogic = () => {
         dispatch({ type: 'settings/systemPurge' });
     }, [dispatch, clearData]);
 
+    const handleApiKeyInputChange = useCallback((value: string) => {
+        setApiKeyInput(value);
+        if (value.trim()) {
+            const { valid, error } = secureApiKeyService.validateKeyFormat(value);
+            if (!valid) {
+                const hints: Record<string, [string, string]> = {
+                    KEY_TOO_SHORT: ['Key zu kurz (min. 30 Zeichen)', 'Key too short (min. 30 characters)'],
+                    INVALID_KEY_FORMAT: ['Ungültiges Format – erwartet: AIza...', 'Invalid format – expected: AIza...'],
+                };
+                const [de, en] = hints[error ?? ''] ?? ['', ''];
+                setApiKeyFormatHint(language === 'de' ? de : en);
+            } else {
+                setApiKeyFormatHint('');
+            }
+        } else {
+            setApiKeyFormatHint('');
+        }
+    }, [language]);
+
     const saveGeminiKey = useCallback(async () => {
+        const { valid } = secureApiKeyService.validateKeyFormat(apiKeyInput);
+        if (!valid) {
+            setApiKeyStatus(language === 'de' ? 'Ungültiges Key-Format. Bitte prüfen.' : 'Invalid key format. Please check.');
+            return;
+        }
+        setApiKeyTesting(true);
         try {
+            const testResult = await secureApiKeyService.testApiKey(apiKeyInput);
+            if (!testResult.ok) {
+                const msg = testResult.error === 'INVALID_KEY'
+                    ? (language === 'de' ? 'API-Key ungültig – Zugriff verweigert.' : 'API key invalid – access denied.')
+                    : (language === 'de' ? 'Verbindungstest fehlgeschlagen. Key wird trotzdem gespeichert.' : 'Connection test failed. Key saved anyway.');
+                if (testResult.error === 'INVALID_KEY') {
+                    setApiKeyStatus(msg);
+                    setApiKeyTesting(false);
+                    return;
+                }
+                setApiKeyStatus(msg);
+            }
             await secureApiKeyService.setApiKey(apiKeyInput);
             setApiKeySaved(true);
             setApiKeyInput('');
-            setApiKeyStatus(language === 'de' ? 'API-Key verschlüsselt gespeichert.' : 'API key stored encrypted.');
+            setApiKeyFormatHint('');
+            setApiKeyVisible(false);
+            setApiKeyStatus(language === 'de' ? '✓ API-Key validiert & verschlüsselt gespeichert (AES-256-GCM).' : '✓ API key validated & stored encrypted (AES-256-GCM).');
         } catch {
             setApiKeyStatus(language === 'de' ? 'Speichern fehlgeschlagen. Bitte API-Key prüfen.' : 'Save failed. Please verify API key.');
+        } finally {
+            setApiKeyTesting(false);
         }
     }, [apiKeyInput, language]);
 
     const clearGeminiKey = useCallback(async () => {
         await secureApiKeyService.clearApiKey();
         setApiKeySaved(false);
-        setApiKeyStatus(language === 'de' ? 'API-Key entfernt.' : 'API key removed.');
+        setApiKeyStatus(language === 'de' ? 'API-Key aus KeyVault entfernt.' : 'API key removed from KeyVault.');
     }, [language]);
 
     return {
@@ -96,9 +140,13 @@ const useSettingsPageLogic = () => {
         handleSetActiveTab: contextSetActiveTab,
         handleSystemPurge,
         apiKeyInput,
-        setApiKeyInput,
+        setApiKeyInput: handleApiKeyInputChange,
         apiKeySaved,
         apiKeyStatus,
+        apiKeyVisible,
+        setApiKeyVisible,
+        apiKeyTesting,
+        apiKeyFormatHint,
         saveGeminiKey,
         clearGeminiKey
     };
@@ -487,7 +535,7 @@ const InterfaceMatrix: React.FC = () => {
 };
 
 const DataSovereignty: React.FC = () => {
-    const { settings, handleUpdate, handleExportData, handleSystemPurge, t, language, apiKeyInput, setApiKeyInput, apiKeySaved, apiKeyStatus, saveGeminiKey, clearGeminiKey } = useSettingsPage();
+    const { settings, handleUpdate, handleExportData, handleSystemPurge, t, language, apiKeyInput, setApiKeyInput, apiKeySaved, apiKeyStatus, apiKeyVisible, setApiKeyVisible, apiKeyTesting, apiKeyFormatHint, saveGeminiKey, clearGeminiKey } = useSettingsPage();
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -527,37 +575,56 @@ const DataSovereignty: React.FC = () => {
             {/* Actions */}
             <div className="space-y-4 pt-4 border-t border-slate-800">
                 <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block">
-                        Gemini API Key
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-2 block flex items-center gap-2">
+                        <Shield size={14} className="text-accent-cyan" /> Gemini API Key (BYOK)
                     </label>
                     <p className="text-[11px] text-yellow-300 mb-3 leading-relaxed">
                         {language === 'de'
-                            ? 'Sicherheitshinweis: API-Key wird nur lokal und verschlüsselt in IndexedDB gespeichert. Niemals im Quellcode, in .env oder in localStorage ablegen.'
-                            : 'Security notice: The API key is stored only locally and encrypted in IndexedDB. Never place it in source code, .env, or localStorage.'}
+                            ? '🔒 Sicherheitshinweis: Der API-Key wird ausschließlich lokal in einem dedizierten IndexedDB-KeyVault gespeichert und mit AES-256-GCM verschlüsselt. Niemals im Quellcode, in .env oder in localStorage.'
+                            : '🔒 Security notice: The API key is stored exclusively in a dedicated IndexedDB KeyVault, encrypted with AES-256-GCM. Never in source code, .env, or localStorage.'}
                     </p>
-                    <input
-                        type="password"
-                        value={apiKeyInput}
-                        onChange={(e) => setApiKeyInput(e.target.value)}
-                        placeholder={language === 'de' ? 'AIza...' : 'AIza...'}
-                        aria-label="Gemini API Key"
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white placeholder:text-slate-500"
-                    />
+                    <div className="relative">
+                        <input
+                            type={apiKeyVisible ? 'text' : 'password'}
+                            value={apiKeyInput}
+                            onChange={(e) => setApiKeyInput(e.target.value)}
+                            placeholder="AIza..."
+                            aria-label="Gemini API Key"
+                            autoComplete="off"
+                            spellCheck={false}
+                            className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 pr-10 text-sm text-white placeholder:text-slate-500 font-mono focus:border-accent-cyan focus:ring-1 focus:ring-accent-cyan/30 transition-colors"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setApiKeyVisible(!apiKeyVisible)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1"
+                            aria-label={apiKeyVisible ? 'Hide API key' : 'Show API key'}
+                        >
+                            {apiKeyVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                    </div>
+                    {apiKeyFormatHint && (
+                        <p className="text-[11px] text-amber-400 mt-1.5 font-mono">{apiKeyFormatHint}</p>
+                    )}
                     <div className="flex flex-wrap items-center gap-2 mt-3">
-                        <Button variant="secondary" size="sm" onClick={saveGeminiKey} icon={<Lock size={14} />}>
-                            {language === 'de' ? 'Key speichern' : 'Save key'}
+                        <Button variant="secondary" size="sm" onClick={saveGeminiKey} disabled={apiKeyTesting || !apiKeyInput.trim()} icon={apiKeyTesting ? <Wifi size={14} className="animate-pulse" /> : <Lock size={14} />}>
+                            {apiKeyTesting
+                                ? (language === 'de' ? 'Validiere...' : 'Validating...')
+                                : (language === 'de' ? 'Key speichern' : 'Save key')}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={clearGeminiKey} icon={<Trash2 size={14} />}>
+                        <Button variant="ghost" size="sm" onClick={clearGeminiKey} disabled={!apiKeySaved} icon={<Trash2 size={14} />}>
                             {language === 'de' ? 'Key löschen' : 'Delete key'}
                         </Button>
-                        <Badge label={apiKeySaved ? (language === 'de' ? 'Verschlüsselt gespeichert' : 'Stored encrypted') : (language === 'de' ? 'Nicht gesetzt' : 'Not configured')} className={apiKeySaved ? 'bg-green-900/30 text-green-400 border-green-700/40' : 'bg-slate-900 text-slate-400 border-slate-700'} />
+                        <Badge label={apiKeySaved ? (language === 'de' ? '🔐 Verschlüsselt im KeyVault' : '🔐 Encrypted in KeyVault') : (language === 'de' ? 'Nicht konfiguriert' : 'Not configured')} className={apiKeySaved ? 'bg-green-900/30 text-green-400 border-green-700/40' : 'bg-slate-900 text-slate-400 border-slate-700'} />
                     </div>
-                    {apiKeyStatus && <p className="text-[11px] text-slate-400 mt-2">{apiKeyStatus}</p>}
-                    <p className="text-[10px] text-slate-500 mt-2">
-                        {language === 'de'
-                            ? 'Empfehlung: Beschränke den Key in Google AI Studio auf deine Domain (*.github.io) und aktiviere Rate-Limits.'
-                            : 'Recommendation: Restrict the key in Google AI Studio to your domain (*.github.io) and enable rate limits.'}
-                    </p>
+                    {apiKeyStatus && <p className={`text-[11px] mt-2 ${apiKeyStatus.startsWith('✓') ? 'text-green-400' : 'text-slate-400'}`}>{apiKeyStatus}</p>}
+                    <div className="mt-3 p-2.5 bg-slate-900/50 border border-slate-800/50 rounded-lg">
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                            {language === 'de'
+                                ? '💡 Empfehlung: Erstelle einen dedizierten API-Key in Google AI Studio, beschränke ihn auf deine Domain (*.github.io) und aktiviere Rate-Limits. Der Key wird beim Speichern automatisch gegen die Gemini API validiert.'
+                                : '💡 Recommendation: Create a dedicated API key in Google AI Studio, restrict it to your domain (*.github.io) and enable rate limits. The key is automatically validated against the Gemini API when saving.'}
+                        </p>
+                    </div>
                 </div>
 
                 <Button onClick={handleExportData} variant="secondary" icon={<Download size={16}/>} className="w-full h-12 bg-slate-900 hover:border-accent-cyan text-sm tracking-widest">

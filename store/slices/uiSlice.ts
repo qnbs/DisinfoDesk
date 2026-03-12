@@ -103,8 +103,9 @@ export const uiSlice = createSlice({
     // --- Tab Persistence ---
     setTheoryTab: (state, action: PayloadAction<{ id: string; tab: 'ANALYSIS' | 'NETWORK' | 'TIMELINE' }>) => {
       const { id, tab } = action.payload;
-      // Guard against prototype pollution: reject dangerous property names
-      if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
+      // Guard against prototype pollution and property injection:
+      // Only allow safe ID formats (alphanumeric, hyphens, underscores)
+      if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(id)) return;
       if (!Object.prototype.hasOwnProperty.call(state.theoryDetails, id)) {
         state.theoryDetails[id] = { activeTab: 'ANALYSIS' };
       }

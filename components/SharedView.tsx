@@ -99,19 +99,30 @@ export const SharedView: React.FC = () => {
           <Card>
             <h3 className="text-xs font-bold text-accent-cyan uppercase tracking-wider mb-3">References</h3>
             <ul className="space-y-2">
-              {payload.references.map((ref, i) => (
-                <li key={i} className="text-sm text-slate-300 flex items-start gap-2">
-                  <ExternalLink size={12} className="text-slate-500 mt-1 shrink-0" />
-                  <div>
-                    <span>{ref.title}</span>
-                    {ref.url && /^https?:\/\//i.test(ref.url) && (
-                      <a href={ref.url} target="_blank" rel="noopener noreferrer" className="block text-xs text-accent-cyan hover:underline mt-0.5">
-                        {ref.url}
-                      </a>
-                    )}
-                  </div>
-                </li>
-              ))}
+              {payload.references.map((ref, i) => {
+                let safeUrl: string | null = null;
+                if (ref.url) {
+                  try {
+                    const parsed = new URL(ref.url);
+                    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+                      safeUrl = parsed.href;
+                    }
+                  } catch { /* invalid URL, ignore */ }
+                }
+                return (
+                  <li key={i} className="text-sm text-slate-300 flex items-start gap-2">
+                    <ExternalLink size={12} className="text-slate-500 mt-1 shrink-0" />
+                    <div>
+                      <span>{ref.title}</span>
+                      {safeUrl && (
+                        <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block text-xs text-accent-cyan hover:underline mt-0.5">
+                          {safeUrl}
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </Card>
         )}

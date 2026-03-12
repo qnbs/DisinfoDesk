@@ -4,11 +4,23 @@
  * Generates professional PDF reports for fact-check analyses,
  * chat sessions, and threat matrix screenshots using jsPDF + html2canvas.
  * Fully client-side — no server dependencies.
+ * 
+ * jsPDF and html2canvas are dynamically imported to avoid loading ~320KB
+ * on pages that don't use PDF export.
  */
 
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import type jsPDF from 'jspdf';
 import { FactCheckReport } from '../utils/factCheckReport';
+
+async function loadJsPDF() {
+  const { default: jsPDF } = await import('jspdf');
+  return jsPDF;
+}
+
+async function loadHtml2Canvas() {
+  const { default: html2canvas } = await import('html2canvas');
+  return html2canvas;
+}
 
 // ── Shared Constants ──
 const COLORS = {
@@ -72,7 +84,8 @@ function wrapText(doc: jsPDF, text: string, maxWidth: number): string[] {
 
 // ── 1. Fact-Check Report PDF ──
 export async function exportFactCheckPDF(report: FactCheckReport): Promise<void> {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const JsPDF = await loadJsPDF();
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' });
   const pageNum = { value: 1 };
 
   // Header
@@ -194,7 +207,8 @@ export async function exportChatPDF(
   messages: ChatMessage[],
   sessionTitle?: string
 ): Promise<void> {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const JsPDF = await loadJsPDF();
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' });
   const pageNum = { value: 1 };
   const title = sessionTitle || 'Chat Session';
 
@@ -250,6 +264,7 @@ export async function exportElementPDF(
   element: HTMLElement,
   title: string = 'Threat Matrix Screenshot'
 ): Promise<void> {
+  const [JsPDF, html2canvas] = await Promise.all([loadJsPDF(), loadHtml2Canvas()]);
   const canvas = await html2canvas(element, {
     backgroundColor: COLORS.bg,
     scale: 2,
@@ -261,7 +276,7 @@ export async function exportElementPDF(
   const imgWidth = CONTENT_WIDTH;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  const doc = new jsPDF({
+  const doc = new JsPDF({
     unit: 'mm',
     format: 'a4',
     orientation: imgHeight > PAGE.height - 80 ? 'landscape' : 'portrait',

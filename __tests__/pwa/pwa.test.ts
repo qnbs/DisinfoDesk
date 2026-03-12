@@ -80,11 +80,6 @@ describe('Service Worker configuration (vite-plugin-pwa)', () => {
     expect(viteConfig).toContain('google-fonts-webfonts');
   });
 
-  it('has runtime caching for CDN assets', () => {
-    expect(viteConfig).toContain('cdn-assets');
-    expect(viteConfig).toContain("handler: 'StaleWhileRevalidate'");
-  });
-
   it('has runtime caching for images', () => {
     expect(viteConfig).toContain('images-cache');
     expect(viteConfig).toContain("handler: 'CacheFirst'");

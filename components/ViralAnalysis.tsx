@@ -6,7 +6,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import {
   Network, RefreshCw, Undo, Redo, Flame, Zap, Shield, Users, Layers, Play, Pause, Activity, Lock, AlertTriangle, Microscope, BarChart3
 } from 'lucide-react';
-const _LazyViralityChart = React.lazy(() => import('./LazyViralityChart'));
 const LazyTelemetryChart = React.lazy(() => import('./LazyTelemetryChart'));
 import {
   Card, Button, PageFrame, PageHeader
@@ -121,8 +120,10 @@ const AdvancedPropagationNetwork: React.FC<{
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const workerRef = useRef<Worker | null>(null);
+    const useOffscreen = useRef(typeof OffscreenCanvas !== 'undefined');
     
-    // Mutable Simulation State (Ref-based for performance)
+    // Mutable Simulation State (Ref-based for performance — main-thread fallback only)
     const agentsRef = useRef<Agent[]>([]);
     const particlesRef = useRef<Particle[]>([]);
     const frameRef = useRef<number>(0);
@@ -186,6 +187,13 @@ const AdvancedPropagationNetwork: React.FC<{
         const rect = canvasRef.current.getBoundingClientRect();
         const x = (e.clientX - rect.left) * (canvasRef.current.width / rect.width);
         const y = (e.clientY - rect.top) * (canvasRef.current.height / rect.height);
+
+        // Forward to worker if active
+        if (workerRef.current) {
+            workerRef.current.postMessage({ type: 'INTERACT', payload: { x, y, tool } });
+            return;
+        }
+
         const range = 100; // Interaction radius
 
         if (tool === 'CURE') {
@@ -216,6 +224,15 @@ const AdvancedPropagationNetwork: React.FC<{
         }
     };
 
+    // Forward params/pause to worker
+    useEffect(() => {
+        workerRef.current?.postMessage({ type: 'UPDATE_PARAMS', payload: params });
+    }, [params]);
+
+    useEffect(() => {
+        workerRef.current?.postMessage({ type: 'PAUSE', payload: paused });
+    }, [paused]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
@@ -224,6 +241,61 @@ const AdvancedPropagationNetwork: React.FC<{
             return;
         }
 
+        // ── OffscreenCanvas Worker Path ──
+        if (useOffscreen.current && !workerRef.current) {
+            try {
+                const offscreen = canvas.transferControlToOffscreen();
+                const worker = new Worker(
+                    new URL('../workers/virality.worker.ts', import.meta.url),
+                    { type: 'module' }
+                );
+                workerRef.current = worker;
+
+                const parent = canvas.parentElement;
+                const w = Math.max(parent?.clientWidth ?? 300, 100);
+                const h = Math.max(parent?.clientHeight ?? 300, 100);
+
+                worker.postMessage({
+                    type: 'INIT',
+                    payload: {
+                        canvas: offscreen,
+                        width: w * devicePixelRatio,
+                        height: h * devicePixelRatio,
+                        isMobileMode: window.innerWidth < 768
+                    }
+                }, [offscreen]);
+
+                worker.postMessage({ type: 'UPDATE_PARAMS', payload: params });
+                worker.postMessage({ type: 'PAUSE', payload: paused });
+
+                worker.onmessage = (e) => {
+                    if (e.data.type === 'STATS') {
+                        onStatsUpdate(e.data.infected, e.data.recovered);
+                    }
+                };
+
+                const handleResize = () => {
+                    const pw = Math.max(container.clientWidth, 100);
+                    const ph = Math.max(container.clientHeight, 100);
+                    worker.postMessage({
+                        type: 'RESIZE',
+                        payload: { width: pw * devicePixelRatio, height: ph * devicePixelRatio }
+                    });
+                };
+                window.addEventListener('resize', handleResize);
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    worker.terminate();
+                    workerRef.current = null;
+                };
+            } catch {
+                // transferControlToOffscreen may fail if canvas was already transferred
+                useOffscreen.current = false;
+            }
+        }
+
+        // ── Main-Thread Fallback ──
         const resize = () => {
             const parent = canvas.parentElement;
             if (parent) {

@@ -29,27 +29,9 @@
       "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
-      "type": "image/png",
-      "sizes": "512x512",
+      "src": "public/icons/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
       "purpose": "maskable"
     }
   ],
@@ -75,28 +57,28 @@
       "short_name": "Archiv",
       "description": "Öffne die Theorien-Datenbank",
       "url": "/DisinfoDesk/#/archive",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "KI Chat — Dr. Veritas",
       "short_name": "Dr. Veritas",
       "description": "Skeptischer KI-Debunk-Chat",
       "url": "/DisinfoDesk/#/chat",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Satire Generator",
       "short_name": "Satire",
       "description": "Didaktischer Kontrastmodus",
       "url": "/DisinfoDesk/#/satire",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "Tactical Command Overview",
       "url": "/DisinfoDesk/#/",
-      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "protocol_handlers": [
@@ -123,8 +105,9 @@
       },
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/512/2040/2040504.png",
-          "sizes": "192x192"
+          "src": "public/icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ],
       "launch_type": "single-client"

@@ -30,6 +30,8 @@ if (workbox) {
         { url: 'index.html', revision: CACHE_SUFFIX },
         { url: 'manifest.json', revision: CACHE_SUFFIX },
         { url: 'public/icons/icon.svg', revision: CACHE_SUFFIX },
+        { url: 'public/icons/icon-maskable.svg', revision: CACHE_SUFFIX },
+        { url: 'public/icons/favicon.svg', revision: CACHE_SUFFIX },
     ]);
 
     // --- 1. CACHE CLEANUP: Remove stale caches on activation ---

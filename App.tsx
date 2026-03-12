@@ -28,6 +28,8 @@ const DatabaseManager = React.lazy(() => import('./components/DatabaseManager').
 const AuthorLibrary = React.lazy(() => import('./components/AuthorLibrary').then(module => ({ default: module.AuthorLibrary })));
 const AuthorDetail = React.lazy(() => import('./components/AuthorDetail').then(module => ({ default: module.AuthorDetail })));
 const SharedView = React.lazy(() => import('./components/SharedView'));
+const MyAnalyses = React.lazy(() => import('./components/MyAnalyses').then(module => ({ default: module.MyAnalyses })));
+const FactCheckWizard = React.lazy(() => import('./components/FactCheckWizard').then(module => ({ default: module.FactCheckWizard })));
 
 // Global Effect Handler Wrapper
 const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -141,6 +143,14 @@ const router = createHashRouter([
       {
         path: "shared",
         element: <SharedView />,
+      },
+      {
+        path: "analyses",
+        element: <MyAnalyses />,
+      },
+      {
+        path: "factcheck",
+        element: <FactCheckWizard />,
       },
       {
         path: "*",

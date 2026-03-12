@@ -18,7 +18,7 @@ function cspPlugin(): Plugin {
         "script-src 'self' https://aistudiocdn.com https://storage.googleapis.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https://cdn-icons-png.flaticon.com https://*.githubusercontent.com",
+        "img-src 'self' data: blob: https://*.githubusercontent.com",
         "connect-src 'self' https://generativelanguage.googleapis.com https://aistudiocdn.com",
         "worker-src 'self' blob:",
         "frame-ancestors 'none'",
@@ -45,7 +45,9 @@ function copyServiceWorkerPlugin(): Plugin {
         { src: '404.html', dest: '404.html' },
         { src: 'robots.txt', dest: 'robots.txt' },
         { src: 'sitemap.xml', dest: 'sitemap.xml' },
-        { src: 'public/icons/icon.svg', dest: 'public/icons/icon.svg' }
+        { src: 'public/icons/icon.svg', dest: 'public/icons/icon.svg' },
+        { src: 'public/icons/icon-maskable.svg', dest: 'public/icons/icon-maskable.svg' },
+        { src: 'public/icons/favicon.svg', dest: 'public/icons/favicon.svg' }
       ];
       
       filesToCopy.forEach(({ src, dest }) => {

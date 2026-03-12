@@ -27,10 +27,11 @@ function cspPlugin(): Plugin {
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
+        "upgrade-insecure-requests",
       ].join('; ');
       return html.replace(
         '<!-- Security Headers -->',
-        `<!-- Content Security Policy -->\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />\n\n    <!-- Security Headers -->`
+        `<!-- Content Security Policy -->\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />\n    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />\n    <meta http-equiv="X-Permitted-Cross-Domain-Policies" content="none" />\n\n    <!-- Security Headers -->`
       );
     },
   };

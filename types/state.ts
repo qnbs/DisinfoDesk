@@ -48,6 +48,8 @@ export interface AppSettings {
   incognitoMode: boolean;
   developerMode: boolean;
   hasSeenOnboarding: boolean;
+  hasAgeConsent: boolean; // User confirmed 16+ age
+  hasAcceptedPrivacy: boolean; // User accepted privacy policy
   autoArchive: boolean; // Chat automation
   telemetryEnabled: boolean; // Anonymous usage stats
   experimentalFeatures: boolean; // Beta features

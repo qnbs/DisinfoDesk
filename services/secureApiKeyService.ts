@@ -3,6 +3,7 @@ const KEY_DB_VERSION = 1;
 const KEY_STORE = 'secure_secrets';
 const API_KEY_RECORD = 'gemini_api_key';
 const WRAP_KEY_RECORD = 'gemini_wrap_key_jwk';
+const INTEGRITY_RECORD = 'keyvault_integrity_hash';
 
 // Multi-provider key record IDs
 const PROVIDER_KEY_RECORDS: Record<string, string> = {
@@ -86,8 +87,28 @@ const getOrCreateWrappingKey = async (): Promise<CryptoKey> => {
 
   const exported = await crypto.subtle.exportKey('jwk', key);
   await setSecret(WRAP_KEY_RECORD, JSON.stringify(exported));
+
+  // Store integrity hash to detect tampering
+  const hash = await computeIntegrityHash(JSON.stringify(exported));
+  await setSecret(INTEGRITY_RECORD, hash);
+
   return key;
 };
+
+/** Compute SHA-256 integrity hash for tamper detection */
+async function computeIntegrityHash(data: string): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Verify wrapping key integrity — returns false if tampered */
+async function verifyKeyIntegrity(): Promise<boolean> {
+  const storedJwk = await getSecret(WRAP_KEY_RECORD);
+  const storedHash = await getSecret(INTEGRITY_RECORD);
+  if (!storedJwk || !storedHash) return true; // No key yet = OK
+  const currentHash = await computeIntegrityHash(storedJwk);
+  return currentHash === storedHash;
+}
 
 export const secureApiKeyService = {
   validateKeyFormat(apiKey: string, provider: string = 'gemini'): { valid: boolean; error?: string } {
@@ -146,6 +167,13 @@ export const secureApiKeyService = {
   async getApiKey(): Promise<string | null> {
     const payload = await getSecret(API_KEY_RECORD);
     if (!payload) return null;
+
+    // Integrity check — detect wrapping key tampering
+    const integrityOk = await verifyKeyIntegrity();
+    if (!integrityOk) {
+      console.error('[KeyVault] Integrity check failed — wrapping key may have been tampered with');
+      return null;
+    }
 
     try {
       const parsed = JSON.parse(payload) as { iv: number[]; data: number[] };

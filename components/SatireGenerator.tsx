@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SatireSubject, SatireArchetype } from '../types';
-import { Button, PageFrame, PageHeader } from './ui/Common';
+import { Button, PageFrame, PageHeader, AIDisclaimer } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { generateAndSaveSatire, saveSatireToVault, resetSatire } from '../store/slices/satireSlice';
 
@@ -568,7 +568,7 @@ const ConfigDeck: React.FC = () => {
 };
 
 const ResultViewer: React.FC = () => {
-    const { result, format, handleReset, handleSave, t } = useSatire();
+    const { result, format, handleReset, handleSave, t, language } = useSatire();
 
     if (!result) return null;
 
@@ -589,6 +589,7 @@ const ResultViewer: React.FC = () => {
                 {format === 'FORUM' && <DarkNetArtifact title={result.title} content={result.content} />}
                 {format === 'ARTICLE' && <TabloidArtifact title={result.title} content={result.content} />}
             </div>
+            <AIDisclaimer language={language} />
         </div>
     );
 };

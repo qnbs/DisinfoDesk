@@ -79,7 +79,8 @@ export const translations = {
         creator: 'EDITOR',
         storage: 'SPEICHER',
         config: 'KONFIG',
-        manual: 'HANDBUCH'
+        manual: 'HANDBUCH',
+        privacy: 'RECHTLICHES'
       }
     },
     nav: {
@@ -94,7 +95,8 @@ export const translations = {
       media: 'Medien & Kultur',
       database: 'Der Tresor',
       authors: 'Autoren-Bibliothek',
-      editor: 'Theorie-Labor'
+      editor: 'Theorie-Labor',
+      privacy: 'Datenschutz'
     },
     authors: {
         title: 'Autoren-Bibliothek',
@@ -935,7 +937,8 @@ export const translations = {
         creator: 'CREATOR',
         storage: 'STORAGE',
         config: 'CONFIG',
-        manual: 'MANUAL'
+        manual: 'MANUAL',
+        privacy: 'LEGAL'
       }
     },
     nav: {
@@ -950,7 +953,8 @@ export const translations = {
       media: 'Media & Culture',
       database: 'The Vault',
       authors: 'Author Library',
-      editor: 'Theory Lab'
+      editor: 'Theory Lab',
+      privacy: 'Privacy'
     },
     authors: {
         title: 'Author Library',

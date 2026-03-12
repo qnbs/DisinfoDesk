@@ -45,9 +45,15 @@ export const settingsSlice = createSlice({
     },
     completeOnboarding: (state) => {
       state.config.hasSeenOnboarding = true;
+    },
+    setAgeConsent: (state) => {
+      state.config.hasAgeConsent = true;
+    },
+    setPrivacyAccepted: (state) => {
+      state.config.hasAcceptedPrivacy = true;
     }
   },
 });
 
-export const { updateSetting, setLanguage, addLog, setActiveTab, clearLogs, completeOnboarding } = settingsSlice.actions;
+export const { updateSetting, setLanguage, addLog, setActiveTab, clearLogs, completeOnboarding, setAgeConsent, setPrivacyAccepted } = settingsSlice.actions;
 export default settingsSlice.reducer;

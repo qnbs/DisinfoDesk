@@ -3,7 +3,7 @@ import React from 'react';
 
 // --- Navigation & Views ---
 
-export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'MEDIA' | 'MEDIA_DETAIL' | 'AUTHORS' | 'AUTHOR_DETAIL' | 'CHAT' | 'SATIRE' | 'SETTINGS' | 'HELP' | 'DANGEROUS' | 'VIRALITY' | 'DATABASE' | 'EDITOR';
+export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'MEDIA' | 'MEDIA_DETAIL' | 'AUTHORS' | 'AUTHOR_DETAIL' | 'CHAT' | 'SATIRE' | 'SETTINGS' | 'HELP' | 'DANGEROUS' | 'VIRALITY' | 'DATABASE' | 'EDITOR' | 'PRIVACY';
 
 export interface NavItem {
   id: ViewState;

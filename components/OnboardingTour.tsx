@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { completeOnboarding, setLanguage as setReduxLanguage } from '../store/slices/settingsSlice';
+import { completeOnboarding, setLanguage as setReduxLanguage, setAgeConsent, setPrivacyAccepted } from '../store/slices/settingsSlice';
 import { Button, Card } from './ui/Common';
-import { Terminal, ArrowRight, ShieldCheck, Search, MessageSquare, LayoutDashboard, Globe, Check } from 'lucide-react';
+import { Terminal, ArrowRight, ShieldCheck, Search, MessageSquare, LayoutDashboard, Globe, Check, AlertTriangle, FileText } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface Step {
@@ -23,6 +23,8 @@ const useOnboardingLogic = () => {
   const [stepIndex, setStepIndex] = useState(0);
   const [isBooting, setIsBooting] = useState(true);
   const [coords, setCoords] = useState<{top: number, left: number, width: number, height: number} | null>(null);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   // Skip boot if already seen
   useEffect(() => {
@@ -38,32 +40,48 @@ const useOnboardingLogic = () => {
     },
     {
       id: 1,
+      title: language === 'de' ? 'ALTERSVERIFIKATION' : 'AGE VERIFICATION',
+      message: language === 'de'
+        ? 'Diese App enthält Inhalte über Verschwörungstheorien und Desinformation zu Bildungszwecken. Du musst mindestens 16 Jahre alt sein, um fortzufahren.'
+        : 'This app contains content about conspiracy theories and disinformation for educational purposes. You must be at least 16 years old to continue.',
+      icon: <AlertTriangle size={32} className="text-amber-400" />,
+    },
+    {
+      id: 2,
+      title: language === 'de' ? 'DATENSCHUTZ' : 'PRIVACY',
+      message: language === 'de'
+        ? 'Deine Daten bleiben auf deinem Gerät. API-Keys werden mit AES-256-GCM verschlüsselt. KI-Antworten sind maschinell generiert und keine Fakten. Bitte lies unsere Datenschutzerklärung.'
+        : 'Your data stays on your device. API keys are AES-256-GCM encrypted. AI responses are machine-generated and not factual. Please read our Privacy Policy.',
+      icon: <FileText size={32} className="text-green-400" />,
+    },
+    {
+      id: 3,
       title: t.onboarding.step1.title,
       message: t.onboarding.step1.msg,
       icon: <Terminal size={32} className="text-accent-cyan" />,
     },
     {
-      id: 2,
+      id: 4,
       title: t.onboarding.step2.title,
       message: t.onboarding.step2.msg,
       icon: <LayoutDashboard size={32} className="text-accent-purple" />,
       highlightId: "nav-sidebar"
     },
     {
-      id: 3,
+      id: 5,
       title: t.onboarding.step3.title,
       message: t.onboarding.step3.msg,
       icon: <Search size={32} className="text-accent-cyan" />,
       highlightId: "nav-search"
     },
     {
-      id: 4,
+      id: 6,
       title: t.onboarding.step4.title,
       message: t.onboarding.step4.msg,
       icon: <MessageSquare size={32} className="text-green-400" />,
       highlightId: "nav-chat"
     }
-  ], [t]);
+  ], [t, language]);
 
   const currentStep = TOUR_STEPS[stepIndex];
 
@@ -94,6 +112,14 @@ const useOnboardingLogic = () => {
   }, [stepIndex, currentStep.highlightId, hasSeenOnboarding, isBooting, currentStep]);
 
   const handleNext = () => {
+    // Step 1 = age gate — must confirm before proceeding
+    if (stepIndex === 1 && !ageConfirmed) return;
+    // Step 2 = privacy — must accept before proceeding
+    if (stepIndex === 2 && !privacyAccepted) return;
+
+    if (stepIndex === 1) dispatch(setAgeConsent());
+    if (stepIndex === 2) dispatch(setPrivacyAccepted());
+
     if (stepIndex < TOUR_STEPS.length - 1) {
       setStepIndex(prev => prev + 1);
     } else {
@@ -102,6 +128,8 @@ const useOnboardingLogic = () => {
   };
 
   const handleSkip = () => {
+    // Cannot skip age gate and privacy steps
+    if (stepIndex <= 2) return;
     dispatch(completeOnboarding());
   };
 
@@ -123,6 +151,10 @@ const useOnboardingLogic = () => {
     handleNext,
     handleSkip,
     handleLanguageSelect,
+    ageConfirmed,
+    setAgeConfirmed,
+    privacyAccepted,
+    setPrivacyAccepted,
     t,
     language
   };
@@ -318,7 +350,10 @@ const HighlightReticle: React.FC = () => {
 };
 
 const TourCard: React.FC = () => {
-    const { currentStep, stepIndex, TOUR_STEPS, handleLanguageSelect, handleNext, handleSkip, t, language } = useOnboarding();
+    const { currentStep, stepIndex, TOUR_STEPS, handleLanguageSelect, handleNext, handleSkip, t, language, ageConfirmed, setAgeConfirmed, privacyAccepted, setPrivacyAccepted } = useOnboarding();
+
+    const canProceed = stepIndex === 1 ? ageConfirmed : stepIndex === 2 ? privacyAccepted : true;
+    const canSkip = stepIndex > 2;
 
     return (
         <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none z-30">
@@ -395,11 +430,61 @@ const TourCard: React.FC = () => {
                         </div>
                         )}
 
+                        {/* Step 1: Age Verification */}
+                        {stepIndex === 1 && (
+                          <div className="w-full py-2 space-y-4">
+                            <div className="bg-amber-950/30 border border-amber-500/30 rounded-xl p-4">
+                              <div className="flex items-center gap-3 text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">
+                                <AlertTriangle size={14} />
+                                {language === 'de' ? 'Altersfreigabe: 16+' : 'Age Rating: 16+'}
+                              </div>
+                              <p className="text-[11px] text-slate-400 leading-relaxed">
+                                {language === 'de'
+                                  ? 'Inhalte über Verschwörungstheorien, Desinformation und gefährliche Narrative dienen ausschließlich der Medienkompetenz und kritischen Analyse.'
+                                  : 'Content about conspiracy theories, disinformation, and dangerous narratives serves media literacy and critical analysis purposes only.'}
+                              </p>
+                            </div>
+                            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-lg border border-slate-700 hover:border-amber-500/50 transition-colors">
+                              <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)}
+                                className="w-5 h-5 rounded border-2 border-slate-600 bg-slate-900 checked:bg-amber-500 checked:border-amber-500 accent-amber-500 cursor-pointer" />
+                              <span className="text-xs text-slate-300 font-medium">
+                                {language === 'de' ? 'Ich bestätige, dass ich mindestens 16 Jahre alt bin.' : 'I confirm that I am at least 16 years old.'}
+                              </span>
+                            </label>
+                          </div>
+                        )}
+
+                        {/* Step 2: Privacy Policy Acceptance */}
+                        {stepIndex === 2 && (
+                          <div className="w-full py-2 space-y-4">
+                            <div className="bg-green-950/30 border border-green-500/30 rounded-xl p-4 space-y-2">
+                              <div className="flex items-center gap-2 text-[10px] text-green-400 font-mono">
+                                <ShieldCheck size={12} /> {language === 'de' ? 'Datenverarbeitung:' : 'Data Processing:'}
+                              </div>
+                              <ul className="text-[10px] text-slate-400 space-y-1.5 list-none">
+                                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5">✓</span> {language === 'de' ? '100% lokal — keine Daten auf Servern gespeichert' : '100% local — no data stored on servers'}</li>
+                                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5">✓</span> {language === 'de' ? 'API-Keys mit AES-256-GCM verschlüsselt' : 'API keys encrypted with AES-256-GCM'}</li>
+                                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5">✓</span> {language === 'de' ? 'KI-Anfragen gehen direkt an den gewählten Anbieter' : 'AI requests go directly to the chosen provider'}</li>
+                                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">⚠</span> {language === 'de' ? 'KI-Antworten sind maschinell generiert — keine Fakten' : 'AI responses are machine-generated — not facts'}</li>
+                              </ul>
+                            </div>
+                            <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-lg border border-slate-700 hover:border-green-500/50 transition-colors">
+                              <input type="checkbox" checked={privacyAccepted} onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                                className="w-5 h-5 rounded border-2 border-slate-600 bg-slate-900 checked:bg-green-500 checked:border-green-500 accent-green-500 cursor-pointer" />
+                              <span className="text-xs text-slate-300 font-medium">
+                                {language === 'de' ? 'Ich akzeptiere die Datenschutzerklärung und Nutzungsbedingungen.' : 'I accept the Privacy Policy and Terms of Use.'}
+                              </span>
+                            </label>
+                          </div>
+                        )}
+
                         <div className="flex gap-3 w-full mt-2">
+                            {canSkip && (
                             <Button variant="ghost" onClick={handleSkip} className="flex-1 text-xs text-slate-500 hover:text-white uppercase tracking-wider">
                                 {t.onboarding.skip}
                             </Button>
-                            <Button variant="primary" onClick={handleNext} className="flex-[2] shadow-neon-cyan" icon={stepIndex === TOUR_STEPS.length - 1 ? <ShieldCheck size={16}/> : <ArrowRight size={16}/>}>
+                            )}
+                            <Button variant="primary" onClick={handleNext} disabled={!canProceed} className={`${canSkip ? 'flex-[2]' : 'flex-1'} shadow-neon-cyan ${!canProceed ? 'opacity-40 cursor-not-allowed' : ''}`} icon={stepIndex === TOUR_STEPS.length - 1 ? <ShieldCheck size={16}/> : <ArrowRight size={16}/>}>
                                 {stepIndex === TOUR_STEPS.length - 1 ? t.onboarding.init : t.onboarding.next}
                             </Button>
                         </div>

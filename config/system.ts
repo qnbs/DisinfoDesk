@@ -59,6 +59,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     incognitoMode: false,
     developerMode: false,
     hasSeenOnboarding: false,
+    hasAgeConsent: false,
+    hasAcceptedPrivacy: false,
     autoArchive: true,
     telemetryEnabled: false,
     experimentalFeatures: false,

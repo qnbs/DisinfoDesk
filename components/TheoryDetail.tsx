@@ -11,7 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
 import {
-  Button, Card, Badge, PageFrame, PageHeader
+  Button, Card, Badge, PageFrame, PageHeader, AIDisclaimer
 } from './ui/Common';
 import { GenerationHUD } from './ui/GenerationHUD';
 import { ReferencesModal } from './ui/ReferencesModal';
@@ -474,7 +474,7 @@ const TabNavigation: React.FC = () => {
 };
 
 const AnalysisContent: React.FC = () => {
-    const { details, t, loading } = useTheoryDetail();
+    const { details, t, loading, language } = useTheoryDetail();
     if (loading) return <div className="lg:col-span-2 min-h-[600px] flex items-center justify-center"><GenerationHUD mode="ANALYSIS" isVisible={true} className="w-full h-96" /></div>;
     if (!details) return null;
     return (
@@ -502,6 +502,7 @@ const AnalysisContent: React.FC = () => {
                     <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{details.debunking}</p>
                 </Card>
             </div>
+            <AIDisclaimer language={language} />
         </div>
     );
 };

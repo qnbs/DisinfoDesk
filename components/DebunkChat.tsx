@@ -16,7 +16,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { Message } from '../types';
 import {
-  PageHeader, PageFrame, Button, Badge
+  PageHeader, PageFrame, Button, Badge, AIDisclaimer
 } from './ui/Common';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -576,6 +576,7 @@ const TypewriterText: React.FC<{ text: string; isStreaming: boolean }> = React.m
 const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
     const isUser = msg.role === 'user';
     const isSystem = !isUser;
+    const { language } = useLanguage();
 
     return (
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in-up`}>
@@ -621,6 +622,7 @@ const TextMessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
                         />
                     </div>
                 )}
+                {isSystem && <AIDisclaimer language={language} compact />}
             </div>
         </div>
     );

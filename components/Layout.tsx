@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback
 } from 'react';
 import {
-  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, KeyRound, Smartphone, Monitor
+  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, KeyRound, Smartphone, Monitor, Shield
 } from 'lucide-react';
 import {
   Outlet, NavLink, useLocation, useNavigate
@@ -345,6 +345,7 @@ export const Layout: React.FC = () => {
     { id: 'DATABASE', label: t.nav.database, icon: <Database size={20} />, sub: t.layout.sub.storage, path: '/database' },
     { id: 'SETTINGS', label: t.nav.settings, icon: <Settings size={20} />, sub: t.layout.sub.config, path: '/settings' },
     { id: 'HELP', label: t.nav.help, icon: <HelpCircle size={20} />, sub: t.layout.sub.manual, path: '/help' },
+    { id: 'PRIVACY', label: t.nav.privacy, icon: <Shield size={20} />, sub: t.layout.sub.privacy, path: '/privacy' },
   ], [t]);
 
   const mobileNavItems = useMemo(() => [

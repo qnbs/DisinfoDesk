@@ -30,6 +30,7 @@ const AuthorDetail = React.lazy(() => import('./components/AuthorDetail').then(m
 const SharedView = React.lazy(() => import('./components/SharedView'));
 const MyAnalyses = React.lazy(() => import('./components/MyAnalyses').then(module => ({ default: module.MyAnalyses })));
 const FactCheckWizard = React.lazy(() => import('./components/FactCheckWizard').then(module => ({ default: module.FactCheckWizard })));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 
 // Global Effect Handler Wrapper
 const GlobalEffects: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -151,6 +152,10 @@ const router = createHashRouter([
       {
         path: "factcheck",
         element: <FactCheckWizard />,
+      },
+      {
+        path: "privacy",
+        element: <PrivacyPolicy />,
       },
       {
         path: "*",

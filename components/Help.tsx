@@ -335,7 +335,7 @@ const HelpNavigation: React.FC = () => {
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`
-            flex items-center gap-2 px-5 py-3 rounded-t-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative overflow-hidden group
+            flex items-center gap-2 px-5 py-3 rounded-t-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan relative group shrink-0 min-w-max
             ${activeTab === tab.id 
               ? 'bg-slate-900/80 text-accent-cyan border-b-2 border-accent-cyan' 
               : 'text-slate-500 hover:text-white hover:bg-slate-800/30'}

@@ -132,16 +132,20 @@ export const secureApiKeyService = {
     const payload = await getSecret(API_KEY_RECORD);
     if (!payload) return null;
 
-    const parsed = JSON.parse(payload) as { iv: number[]; data: number[] };
-    const wrappingKey = await getOrCreateWrappingKey();
+    try {
+      const parsed = JSON.parse(payload) as { iv: number[]; data: number[] };
+      const wrappingKey = await getOrCreateWrappingKey();
 
-    const decrypted = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: new Uint8Array(parsed.iv) },
-      wrappingKey,
-      new Uint8Array(parsed.data)
-    );
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: new Uint8Array(parsed.iv) },
+        wrappingKey,
+        new Uint8Array(parsed.data)
+      );
 
-    return decoder.decode(decrypted);
+      return decoder.decode(decrypted);
+    } catch {
+      return null;
+    }
   },
 
   async hasApiKey(): Promise<boolean> {

@@ -50,7 +50,7 @@ const useMediaCultureLogic = () => {
 
     const allTheoryTags = useMemo(() => {
         const tagSet = new Set<string>();
-        allMedia.forEach((item) => item.relatedTheoryTags.forEach((tag) => tagSet.add(tag)));
+        allMedia.forEach((item) => (item.relatedTheoryTags || []).forEach((tag) => tagSet.add(tag)));
         return Array.from(tagSet).sort((a, b) => a.localeCompare(b)).slice(0, 80);
     }, [allMedia]);
 
@@ -68,7 +68,7 @@ const useMediaCultureLogic = () => {
             const matchesType = filter === 'ALL' || item.type === filter;
             const matchesVerdict = verdictFilter === 'ALL' || item.factCheckVerdict === verdictFilter;
             const matchesAuthor = authorFilter === 'ALL' || (item.linkedAuthorIds || []).includes(authorFilter);
-            const matchesTheoryTag = theoryTagFilter === 'ALL' || item.relatedTheoryTags.includes(theoryTagFilter);
+            const matchesTheoryTag = theoryTagFilter === 'ALL' || (item.relatedTheoryTags || []).includes(theoryTagFilter);
             const matchesSearch = item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
                                   (language === 'de' ? item.descriptionDe : item.descriptionEn).toLowerCase().includes(debouncedSearch.toLowerCase());
             return matchesType && matchesVerdict && matchesAuthor && matchesTheoryTag && matchesSearch;
@@ -321,7 +321,7 @@ const MediaGridCard: React.FC<{ item: MediaItem, onTagClick: (tag: string) => vo
                     </p>
                 )}
                 <div className="flex flex-wrap gap-1.5 mt-auto">
-                    {item.relatedTheoryTags.slice(0, 2).map(tag => (
+                    {(item.relatedTheoryTags || []).slice(0, 2).map(tag => (
                         <button
                             key={tag}
                             onClick={(e) => { e.stopPropagation(); onTagClick(tag); }}

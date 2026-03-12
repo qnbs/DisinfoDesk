@@ -63,10 +63,19 @@ jobs:
         run: npm run typecheck
         continue-on-error: true
 
-      # ── Unit Tests ──
+      # ── Unit Tests with Coverage ──
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:ci -- --coverage
         continue-on-error: false
+
+      # ── Upload coverage report ──
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: ./coverage/
+          retention-days: 7
 
       # ── Production Build ──
       - name: Build production bundle

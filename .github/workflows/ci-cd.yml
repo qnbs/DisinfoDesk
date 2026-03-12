@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  DisinfoDesk CI/CD Pipeline                                                   ║
-# ║  Full lint → test → build → Lighthouse → deploy workflow (2026 best practices)║
+# ║  DisinfoDesk CI/CD Pipeline                                                ║
+# ║  Lint → Test → Build → Lighthouse → Docker → Deploy (2026 best practices)  ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 
 name: CI/CD Pipeline
@@ -12,25 +12,24 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permissions required for GitHub Pages deployment
 permissions:
   contents: read
   pages: write
   id-token: write
   security-events: write
+  packages: write
 
-# Prevent concurrent deployments to pages, but allow concurrent CI runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
-  NODE_VERSION: 'lts/*'
+  NODE_VERSION: '22'
   CI: true
 
 jobs:
   # ════════════════════════════════════════════════════════════════════════════
-  # CI JOB: Lint, Test, Build, Lighthouse Audit
+  # CI JOB: Lint, Test, Build, Lighthouse
   # ════════════════════════════════════════════════════════════════════════════
   ci:
     name: CI (Lint, Test, Build, Lighthouse)
@@ -38,37 +37,28 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # ── Checkout ──
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      # ── Node.js Setup with npm cache ──
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      # ── Install dependencies (clean install) ──
       - name: Install dependencies
         run: npm ci
 
-      # ── Lint (fail-fast) ──
       - name: Lint codebase
         run: npm run lint
-        continue-on-error: false
 
-      # ── Type Check (warn on existing issues) ──
       - name: TypeScript type check
         run: npm run typecheck
         continue-on-error: true
 
-      # ── Unit Tests with Coverage ──
-      - name: Run tests
+      - name: Run unit tests with coverage
         run: npm run test:ci -- --coverage
-        continue-on-error: false
 
-      # ── Upload coverage report ──
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
@@ -77,19 +67,16 @@ jobs:
           path: ./coverage/
           retention-days: 7
 
-      # ── Production Build ──
       - name: Build production bundle
         run: npm run build
 
-      # ── Upload build artifact for deploy job ──
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: ./dist
-          retention-days: 1
+          retention-days: 3
 
-      # ── Lighthouse CI Audit ──
       - name: Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
@@ -99,7 +86,51 @@ jobs:
           temporaryPublicStorage: true
 
   # ════════════════════════════════════════════════════════════════════════════
-  # DEPLOY JOB: GitHub Pages (only on main branch, after CI passes)
+  # DOCKER JOB: Build & Push container image
+  # ════════════════════════════════════════════════════════════════════════════
+  docker:
+    name: Docker Build & Push
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # DEPLOY JOB: GitHub Pages (main only)
   # ════════════════════════════════════════════════════════════════════════════
   deploy:
     name: Deploy to GitHub Pages
@@ -111,24 +142,20 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # ── Download build artifact from CI job ──
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: ./dist
 
-      # ── Configure GitHub Pages ──
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      # ── Upload to Pages ──
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
-      # ── Deploy to Pages ──
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

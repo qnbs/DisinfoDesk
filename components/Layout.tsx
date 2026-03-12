@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useRef, useLayoutEffect, Suspense, useMemo, useCallback
 } from 'react';
 import {
-  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, RefreshCw, KeyRound, Smartphone, Monitor
+  LayoutDashboard, BookOpen, MessageSquare, Skull, Menu, X, GlobeLock, Settings, HelpCircle, ShieldAlert, Activity, Film, Database, WifiOff, Download, Power, Edit3, Feather, Search as SearchIcon, FileKey, KeyRound, Smartphone, Monitor
 } from 'lucide-react';
 import {
   Outlet, NavLink, useLocation, useNavigate
@@ -231,8 +231,6 @@ export const Layout: React.FC = () => {
   []);
   
   // Update State
-  const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [wbRegistration, setWbRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const updateModalState = useAppSelector(state => state.ui.updateModal);
   const hasSeenOnboarding = useAppSelector(state => state.settings.config.hasSeenOnboarding);
   const APP_VERSION = '1.0.0';
@@ -261,98 +259,13 @@ export const Layout: React.FC = () => {
       dispatch(syncStaticData());
   }, [dispatch]);
 
-  // Service Worker Registration & Update Handling
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      try {
-      const swUrl = `${(import.meta as unknown as { env: Record<string, string> }).env.BASE_URL}sw.js`;
-
-      navigator.serviceWorker.register(swUrl, { scope: (import.meta as unknown as { env: Record<string, string> }).env.BASE_URL })
-            .then(registration => {
-            setWbRegistration(registration);
-            
-            if (registration.waiting) {
-                // SW already waiting — apply immediately
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                if (installingWorker) {
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New version installed — auto-activate without user action
-                    setUpdateAvailable(true);
-                    dispatch(addLog({ message: 'System Update: Protocol patch detected. Auto-applying...', type: 'info' }));
-                    if (registration.waiting) {
-                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                    }
-                    }
-                };
-                }
-            };
-
-            // Poll for SW updates every 60 seconds
-            const updateInterval = setInterval(() => {
-                registration.update().catch(() => {});
-            }, 60 * 1000);
-
-            // Check for updates when user returns to tab
-            const onVisibilityChange = () => {
-                if (document.visibilityState === 'visible') {
-                    registration.update().catch(() => {});
-                }
-            };
-            document.addEventListener('visibilitychange', onVisibilityChange);
-
-            // Register periodic background sync for content freshness
-            if ('periodicSync' in registration) {
-                (registration as unknown as { periodicSync: { register: (tag: string, opts: { minInterval: number }) => Promise<void> } }).periodicSync
-                    .register('disinfodesk-content-refresh', { minInterval: 24 * 60 * 60 * 1000 })
-                    .catch(() => { /* Permission not granted – graceful fallback */ });
-            }
-
-            // Cleanup on unmount
-            return () => {
-                clearInterval(updateInterval);
-                document.removeEventListener('visibilitychange', onVisibilityChange);
-            };
-            })
-            .catch(err => {
-            console.error('SW Registration failed:', err);
-            dispatch(addLog({ message: `SW Error: ${err.message || 'Registration failed'}`, type: 'warning' }));
-            });
-            
-            // Listen for new SW activation — and for version notifications
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    refreshing = true;
-                    window.location.reload();
-                }
-            });
-
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data?.type === 'SW_ACTIVATED') {
-                    dispatch(addLog({ message: `System Update: SW ${event.data.version} activated.`, type: 'info' }));
-                }
-            });
-      } catch (e) {
-          console.error("Critical SW Error", e);
-      }
-    }
-  }, [dispatch]);
+  // Service Worker handled by vite-plugin-pwa (autoUpdate mode)
+  // SW auto-registers, auto-updates, and auto-activates via skipWaiting + clientsClaim.
+  // No manual registration needed — the plugin injects the registration script.
 
   const handleUpdateApp = useCallback(() => {
-    if (wbRegistration?.waiting) {
-        wbRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
-    } else if (navigator.serviceWorker?.controller) {
-        // No waiting worker — force purge caches and reload
-        navigator.serviceWorker.controller.postMessage({ type: 'FORCE_REFRESH' });
-    } else {
-        window.location.reload();
-    }
-  }, [wbRegistration]);
+      window.location.reload();
+  }, []);
 
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
@@ -471,22 +384,8 @@ export const Layout: React.FC = () => {
         </div>
       )}
 
-      {/* Update Available Banner */}
-      {updateAvailable && (
-        <div className="fixed top-safe left-0 right-0 bg-gradient-to-r from-accent-cyan/90 to-cyan-400/90 backdrop-blur-xl border-b border-accent-cyan/50 text-slate-900 text-[10px] font-bold font-mono text-center py-1.5 z-[100] flex items-center justify-center gap-3 animate-fade-in-down shadow-[0_2px_20px_rgba(6,182,212,0.2)]">
-          <RefreshCw size={12} className="animate-spin" /> 
-          <span>{t.layout.updateAvailable}</span>
-          <button 
-            onClick={handleUpdateApp}
-            className="px-2.5 py-0.5 bg-slate-900 text-accent-cyan rounded-md hover:bg-slate-800 transition-all uppercase border border-slate-700 hover:border-accent-cyan hover:shadow-neon-cyan text-[10px]"
-          >
-            {t.layout.reload}
-          </button>
-        </div>
-      )}
-
       {/* Mobile Header */}
-      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-2xl border-b border-white/[0.06] flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-elevation-1 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')}>
+      <header className={cn("md:hidden bg-[#020617]/80 backdrop-blur-2xl border-b border-white/[0.06] flex justify-between items-center px-4 fixed top-0 left-0 right-0 z-50 h-[56px] pt-safe shadow-elevation-1 transition-all duration-300", !isOnline ? 'mt-8' : '')}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-center backdrop-blur-sm">
              <GlobeLock size={16} className="text-accent-cyan" />
@@ -531,7 +430,7 @@ export const Layout: React.FC = () => {
           "fixed inset-y-0 left-0 z-50 w-[280px] bg-[#020617]/95 backdrop-blur-2xl border-r border-slate-800/50 transform transition-transform duration-300 ease-out shadow-2xl md:shadow-none",
           "md:relative md:translate-x-0 md:w-64 md:z-0 flex flex-col pt-safe pb-safe",
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          !isOnline || updateAvailable ? 'mt-8 md:mt-0' : ''
+          !isOnline ? 'mt-8 md:mt-0' : ''
         )}
       >
         {/* Sidebar right edge glow */}
@@ -610,7 +509,7 @@ export const Layout: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main id="main-content" className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0 transition-all duration-300", !isOnline || updateAvailable ? 'mt-8' : '')} role="main" aria-label="Hauptinhalt">
+      <main id="main-content" className={cn("flex-1 w-full h-full relative overflow-hidden bg-transparent flex flex-col pt-[56px] md:pt-0 transition-all duration-300", !isOnline ? 'mt-8' : '')} role="main" aria-label="Hauptinhalt">
         <div 
             ref={scrollContainerRef}
             className="flex-1 w-full overflow-y-auto relative z-10 custom-scrollbar overscroll-contain pb-[80px] md:pb-0"

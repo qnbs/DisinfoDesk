@@ -1,0 +1,16 @@
+# Docker
+dist/
+node_modules/
+.git/
+.github/
+.devcontainer/
+src-tauri/target/
+*.md
+*.log
+.env*
+coverage/
+playwright-report/
+test-results/
+__tests__/
+e2e/
+docs/

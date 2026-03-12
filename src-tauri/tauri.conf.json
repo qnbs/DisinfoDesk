@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicehash/tauri/dev/tooling/cli/schema.json",
+  "productName": "DisinfoDesk",
+  "version": "1.0.0",
+  "identifier": "io.github.qnbs.disinfodesk",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:3000/DisinfoDesk/",
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev"
+  },
+  "app": {
+    "title": "DisinfoDesk: Das Lexikon",
+    "windows": [
+      {
+        "title": "DisinfoDesk",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.githubusercontent.com; connect-src 'self' https://generativelanguage.googleapis.com https://aistudiocdn.com https://api.x.ai https://api.anthropic.com"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Education",
+    "shortDescription": "Interaktives Kompendium moderner Mythen und Verschwörungstheorien",
+    "longDescription": "DisinfoDesk ist ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse und Faktencheck.",
+    "linux": {
+      "deb": { "depends": [] },
+      "appimage": { "bundleMediaFramework": false }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "windows": {
+      "wix": null,
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

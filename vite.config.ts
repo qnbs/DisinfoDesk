@@ -3,6 +3,7 @@ import fs from 'fs';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const repoName = path.basename(process.cwd());
 const ghPagesBase = `/${repoName}/`;
@@ -19,7 +20,7 @@ function cspPlugin(): Plugin {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "img-src 'self' data: blob: https://*.githubusercontent.com",
-        "connect-src 'self' https://generativelanguage.googleapis.com https://aistudiocdn.com",
+        "connect-src 'self' https://generativelanguage.googleapis.com https://aistudiocdn.com https://api.x.ai https://api.anthropic.com",
         "worker-src 'self' blob:",
         "frame-ancestors 'none'",
         "base-uri 'self'",
@@ -34,27 +35,20 @@ function cspPlugin(): Plugin {
   };
 }
 
-/** Copy Service Worker and PWA assets to dist/ */
-function copyServiceWorkerPlugin(): Plugin {
+/** Copy extra static assets to dist/ */
+function copyStaticAssetsPlugin(): Plugin {
   return {
-    name: 'copy-sw',
+    name: 'copy-static-assets',
     closeBundle() {
       const filesToCopy = [
-        { src: 'sw.js', dest: 'sw.js' },
-        { src: 'manifest.json', dest: 'manifest.json' },
         { src: '404.html', dest: '404.html' },
         { src: 'robots.txt', dest: 'robots.txt' },
         { src: 'sitemap.xml', dest: 'sitemap.xml' },
-        { src: 'public/icons/icon.svg', dest: 'public/icons/icon.svg' },
-        { src: 'public/icons/icon-maskable.svg', dest: 'public/icons/icon-maskable.svg' },
-        { src: 'public/icons/favicon.svg', dest: 'public/icons/favicon.svg' }
       ];
-      
       filesToCopy.forEach(({ src, dest }) => {
         const srcPath = path.resolve(__dirname, src);
         const destPath = path.resolve(__dirname, 'dist', dest);
         const destDir = path.dirname(destPath);
-        
         if (fs.existsSync(srcPath)) {
           if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
           fs.copyFileSync(srcPath, destPath);
@@ -74,7 +68,7 @@ export default defineConfig(() => {
       },
       plugins: [
         cspPlugin(),
-        copyServiceWorkerPlugin(),
+        copyStaticAssetsPlugin(),
         tailwindcss(),
         react({
           babel: {
@@ -82,7 +76,125 @@ export default defineConfig(() => {
               ['babel-plugin-react-compiler', { target: '19' }]
             ]
           }
-        })
+        }),
+        VitePWA({
+          registerType: 'autoUpdate',
+          injectRegister: 'auto',
+          workbox: {
+            globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+            navigateFallback: 'index.html',
+            navigateFallbackDenylist: [/^\/api\//],
+            cleanupOutdatedCaches: true,
+            clientsClaim: true,
+            skipWaiting: true,
+            runtimeCaching: [
+              // Google Fonts stylesheets
+              {
+                urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'google-fonts-stylesheets',
+                  expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+              // Google Fonts webfont files
+              {
+                urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'google-fonts-webfonts',
+                  expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+              // External CDN scripts (aistudiocdn, storage.googleapis.com)
+              {
+                urlPattern: /^https:\/\/(aistudiocdn\.com|storage\.googleapis\.com)\/.*/i,
+                handler: 'StaleWhileRevalidate',
+                options: {
+                  cacheName: 'cdn-assets',
+                  expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+              // Images
+              {
+                urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i,
+                handler: 'CacheFirst',
+                options: {
+                  cacheName: 'images-cache',
+                  expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 60 },
+                  cacheableResponse: { statuses: [0, 200] },
+                },
+              },
+              // AI API calls — never cache
+              {
+                urlPattern: /^https:\/\/(generativelanguage\.googleapis\.com|api\.x\.ai|api\.anthropic\.com)\/.*/i,
+                handler: 'NetworkOnly',
+                options: { cacheName: 'ai-api' },
+              },
+            ],
+          },
+          manifest: {
+            short_name: 'DisinfoDesk',
+            name: 'DisinfoDesk: Das Lexikon',
+            description: 'Ein interaktives Kompendium moderner Mythen, Verschwörungstheorien und urbaner Legenden mit KI-gestützter Analyse.',
+            start_url: './',
+            scope: './',
+            display: 'standalone',
+            display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+            theme_color: '#020617',
+            background_color: '#020617',
+            orientation: 'any',
+            id: 'disinfodesk-v3',
+            dir: 'ltr',
+            lang: 'de',
+            categories: ['education', 'reference', 'news'],
+            handle_links: 'preferred',
+            prefer_related_applications: false,
+            launch_handler: { client_mode: 'navigate-existing' },
+            icons: [
+              { src: 'public/icons/icon.svg', type: 'image/svg+xml', sizes: 'any', purpose: 'any' },
+              { src: 'public/icons/icon-maskable.svg', type: 'image/svg+xml', sizes: 'any', purpose: 'maskable' },
+            ],
+            screenshots: [
+              {
+                src: 'https://images.unsplash.com/photo-1614064641938-3e8401107d65?q=80&w=1280&auto=format&fit=crop',
+                sizes: '1280x720', type: 'image/jpeg', form_factor: 'wide',
+                label: 'Desktop Dashboard — Tactical Command Overview',
+              },
+              {
+                src: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=720&auto=format&fit=crop',
+                sizes: '720x1280', type: 'image/jpeg', form_factor: 'narrow',
+                label: 'Mobile Feed — On-the-Go Research',
+              },
+            ],
+            shortcuts: [
+              { name: 'Das Archiv', short_name: 'Archiv', description: 'Öffne die Theorien-Datenbank', url: './#/archive', icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }] },
+              { name: 'KI Chat — Dr. Veritas', short_name: 'Dr. Veritas', description: 'Skeptischer KI-Debunk-Chat', url: './#/chat', icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }] },
+              { name: 'Satire Generator', short_name: 'Satire', description: 'Didaktischer Kontrastmodus', url: './#/satire', icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }] },
+              { name: 'Dashboard', short_name: 'Dashboard', description: 'Tactical Command Overview', url: './', icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }] },
+            ],
+            protocol_handlers: [{ protocol: 'web+disinfo', url: './#/archive/%s' }],
+            share_target: {
+              action: './#/editor', method: 'POST', enctype: 'multipart/form-data',
+              params: { title: 'title', text: 'text', url: 'url' },
+            },
+            file_handlers: [{
+              action: './#/editor',
+              accept: { 'application/json': ['.json', '.theory'] },
+              icons: [{ src: 'public/icons/icon.svg', sizes: 'any', type: 'image/svg+xml' }],
+              launch_type: 'single-client',
+            }],
+            related_applications: [],
+            scope_extensions: [{ origin: 'https://qnbs.github.io' }],
+          },
+          devOptions: {
+            enabled: true,
+            type: 'module',
+          },
+        }),
       ],
       build: {
         target: 'esnext',
